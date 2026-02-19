@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\Notification;
+use Illuminate\Support\Facades\Route as RouteFacade;
 
 class AuthService
 {
@@ -117,9 +118,13 @@ class AuthService
     public function createWelcomeNotification(User $user)
     {
         try {
-            $url = $user->role === 'teacher'
-                ? route('teacher.dashboard')
-                : route('student.dashboard');
+            $routeName = match ($user->role) {
+                'admin' => 'admin.dashboard',
+                'teacher' => 'teacher.dashboard',
+                default => 'student.dashboard',
+            };
+
+            $url = RouteFacade::has($routeName) ? route($routeName) : null;
         } catch (\Throwable $e) {
             report($e);
             $url = null;

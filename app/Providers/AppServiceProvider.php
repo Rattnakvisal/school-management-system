@@ -18,7 +18,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer('layout.admin.navbar', function ($view) {
+        View::composer([
+            'layout.admin.navbar.navbar',
+            'layout.teacher.navbar',
+        ], function ($view) {
             $notifs = Notification::latest()->take(10)->get();
             $unreadCount = Notification::where('is_read', false)->count();
 

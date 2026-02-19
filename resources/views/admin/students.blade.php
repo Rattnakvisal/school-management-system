@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    @include('layout.admin.navbar')
+    @include('layout.admin.navbar.navbar')
 </body>
 
 </html>

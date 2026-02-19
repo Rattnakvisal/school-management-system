@@ -1,8 +1,15 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\PasswordOtpController;
+
+/*
+|--------------------------------------------------------------------------
+| Home
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', function () {
     if (!auth()->check()) {
@@ -23,27 +30,54 @@ Route::get('/', function () {
 */
 Route::middleware('guest')->group(function () {
 
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+    /*
+    |--------------------------------------------------------------------------
+    | Auth (Email/Password)
+    |--------------------------------------------------------------------------
+    */
+    Route::controller(AuthController::class)->group(function () {
+        Route::get('/login', 'showLogin')->name('login');
+        Route::post('/login', 'login')->name('login.submit');
 
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+        Route::get('/register', 'showRegister')->name('register');
+        Route::post('/register', 'register')->name('register.submit');
+    });
 
-    // Google
-    Route::prefix('auth')->controller(GoogleController::class)->group(function () {
-        Route::get('/google', 'authProviderRedirect')->name('google.redirect');
-        Route::get('/google/callback', 'socialAuthentication')->name('google.callback');
+    /*
+    |--------------------------------------------------------------------------
+    | Forgot Password (OTP)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('forgot-password')->name('password.')->controller(PasswordOtpController::class)->group(function () {
+        Route::get('/', 'requestForm')->name('request');          // GET /forgot-password
+        Route::post('/', 'sendOtp')->name('email');               // POST /forgot-password
+
+        Route::get('/verify', 'verifyForm')->name('verify');      // GET /forgot-password/verify
+        Route::post('/verify', 'verifyOtp')->name('verify.post'); // POST /forgot-password/verify
+
+        Route::get('/reset/{token}', 'resetForm')->name('reset'); // GET /forgot-password/reset/{token}
+        Route::post('/reset', 'updatePassword')->name('update');  // POST /forgot-password/reset
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Google Auth
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('auth')->name('google.')->controller(GoogleController::class)->group(function () {
+        Route::get('/google', 'authProviderRedirect')->name('redirect');
+        Route::get('/google/callback', 'socialAuthentication')->name('callback');
     });
 });
 
 /*
 |--------------------------------------------------------------------------
-| Auth Routes
+| Authenticated Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
     require __DIR__ . '/admin.php';
     require __DIR__ . '/teacher.php';
     require __DIR__ . '/student.php';
