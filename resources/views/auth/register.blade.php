@@ -3,135 +3,207 @@
 @section('title', 'Register')
 
 @section('content')
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-10">
-        <div class="w-full max-w-md">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-                <div class="p-6 sm:p-8">
-                    <h1 class="text-2xl font-bold text-slate-900">Create account</h1>
-                    <p class="mt-1 text-sm text-slate-600">Register as a student or teacher.</p>
+    <div class="min-h-screen flex items-center justify-center bg-slate-100 px-4 py-10">
+        <div class="w-full max-w-4xl">
+            <div class="grid overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200 lg:grid-cols-2">
 
-                    {{-- Errors (all) --}}
-                    @if ($errors->any())
-                        <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                            <ul class="list-disc pl-5 space-y-1">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                {{-- LEFT SIDE (Illustration) --}}
+                <div class="relative hidden lg:block">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-950 via-indigo-900 to-indigo-800"></div>
 
-                    <form method="POST" action="{{ route('register.submit') }}" class="mt-6 space-y-4">
-                        @csrf
-
-                        {{-- Name --}}
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-slate-700">Name</label>
-                            <input id="name" type="text" name="name" value="{{ old('name') }}" required
-                                autocomplete="name"
-                                class="mt-1 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
-                                placeholder="Your full name">
-                            @error('name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Email --}}
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
-                            <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                                autocomplete="email"
-                                class="mt-1 w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
-                                placeholder="you@example.com">
-                            @error('email')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Role --}}
-                        <div>
-                            <label for="role" class="block text-sm font-medium text-slate-700">Role</label>
-                            <select id="role" name="role" required
-                                class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400">
-                                <option value="student" {{ old('role', 'student') === 'student' ? 'selected' : '' }}>Student
-                                </option>
-                                <option value="teacher" {{ old('role') === 'teacher' ? 'selected' : '' }}>Teacher</option>
-                            </select>
-                            @error('role')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Password --}}
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
-                            <div class="relative mt-1">
-                                <input id="password" type="password" name="password" required autocomplete="new-password"
-                                    class="w-full rounded-xl border border-slate-300 px-4 py-2.5 pr-12 text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
-                                    placeholder="Create a strong password">
-                                <button type="button" onclick="togglePass('password', this)"
-                                    class="absolute inset-y-0 right-0 px-3 text-sm text-slate-600 hover:text-slate-900"
-                                    aria-label="Toggle password visibility">
-                                    Show
-                                </button>
-                            </div>
-                            @error('password')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                            <p class="mt-1 text-xs text-slate-500">Use at least 8 characters (recommended).</p>
-                        </div>
-
-                        {{-- Confirm Password --}}
-                        <div>
-                            <label for="password_confirmation" class="block text-sm font-medium text-slate-700">Confirm
-                                Password</label>
-                            <div class="relative mt-1">
-                                <input id="password_confirmation" type="password" name="password_confirmation" required
-                                    autocomplete="new-password"
-                                    class="w-full rounded-xl border border-slate-300 px-4 py-2.5 pr-12 text-slate-900 outline-none focus:ring-2 focus:ring-slate-900/20 focus:border-slate-400"
-                                    placeholder="Re-type your password">
-                                <button type="button" onclick="togglePass('password_confirmation', this)"
-                                    class="absolute inset-y-0 right-0 px-3 text-sm text-slate-600 hover:text-slate-900"
-                                    aria-label="Toggle password visibility">
-                                    Show
-                                </button>
-                            </div>
-                            @error('password_confirmation')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Submit --}}
-                        <button type="submit"
-                            class="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-white font-semibold shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/30">
-                            Register
-                        </button>
-                    </form>
-
-                    {{-- Divider --}}
-                    <div class="my-6 flex items-center gap-3">
-                        <div class="h-px w-full bg-slate-200"></div>
-                        <span class="text-xs text-slate-500">OR</span>
-                        <div class="h-px w-full bg-slate-200"></div>
+                    {{-- dotted decoration --}}
+                    <div class="absolute left-10 top-10 h-20 w-20 opacity-30"
+                        style="background-image: radial-gradient(rgba(255,255,255,.5) 1.2px, transparent 1.2px);
+                            background-size: 10px 10px;">
                     </div>
 
-                    <p class="mt-6 text-center text-sm text-slate-600">
-                        Already have an account?
-                        <a href="{{ route('login') }}" class="font-semibold text-slate-900 hover:underline">
-                            Login
-                        </a>
-                    </p>
+                    <div class="relative flex h-full items-center justify-center p-10">
+                        <img src="{{ asset('images/login-illustration.png') }}" alt="Register Illustration"
+                            class="w-full max-w-md drop-shadow-2xl" />
+                    </div>
                 </div>
+
+                {{-- RIGHT SIDE (Form) --}}
+                <div class="p-7 sm:p-10">
+                    <div class="mx-auto w-full max-w-md">
+
+                        <div class="text-center">
+                            <div class="text-xl font-extrabold tracking-wide text-slate-900">
+                                EDU-<span class="text-red-500">X</span>
+                            </div>
+                            <h1 class="mt-2 text-2xl font-bold text-slate-900">Create Account</h1>
+                            <p class="mt-1 text-sm text-slate-500">
+                                Register as a student or teacher.
+                            </p>
+                        </div>
+
+                        {{-- Errors --}}
+                        @if ($errors->any())
+                            <div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('register.submit') }}" class="mt-7 space-y-5">
+                            @csrf
+
+                            {{-- Name --}}
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Full Name
+                                </label>
+                                <input type="text" name="name" value="{{ old('name') }}" required
+                                    class="mt-2 w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-3
+                                          focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                                    placeholder="Your full name">
+                                @error('name')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Email --}}
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Email Address
+                                </label>
+                                <input type="email" name="email" value="{{ old('email') }}" required
+                                    class="mt-2 w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-3
+                                          focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                                    placeholder="you@example.com">
+                                @error('email')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Role --}}
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Select Role
+                                </label>
+                                <select name="role" required
+                                    class="mt-2 w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-3
+                                       focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100">
+                                    <option value="student" {{ old('role', 'student') == 'student' ? 'selected' : '' }}>
+                                        Student
+                                    </option>
+                                    <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>Teacher
+                                    </option>
+                                </select>
+                                @error('role')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Password --}}
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Password
+                                </label>
+                                <div class="relative mt-2">
+                                    <input id="password" type="password" name="password" required
+                                        class="w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-3 pr-20
+                                              focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                                        placeholder="Create strong password">
+                                    <button type="button" onclick="togglePass('password', this)"
+                                        class="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-900">
+
+                                        <!-- Eye Icon (default visible) -->
+                                        <svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7
+                                                           -1.274 4.057-5.065 7-9.542 7
+                                                           -4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+
+                                        <!-- Eye Off Icon (hidden by default) -->
+                                        <svg class="w-5 h-5 eye-off-icon hidden" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7
+                                                           a9.956 9.956 0 012.042-3.368M6.223 6.223A9.953 9.953 0 0112 5
+                                                           c4.477 0 8.268 2.943 9.542 7
+                                                           a9.965 9.965 0 01-4.132 5.411M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3v6m-9 4l18-18" />
+                                        </svg>
+                                    </button>
+
+                                </div>
+                            </div>
+
+                            {{-- Confirm Password --}}
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Confirm Password
+                                </label>
+                                <div class="relative mt-2">
+                                    <input id="password_confirmation" type="password" name="password_confirmation" required
+                                        class="w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-3 pr-20
+                                              focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                                        placeholder="Re-type password">
+                                    <button type="button" onclick="togglePass('password', this)"
+                                        class="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-900">
+
+                                        <!-- Eye Icon (default visible) -->
+                                        <svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7
+                               -1.274 4.057-5.065 7-9.542 7
+                               -4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+
+                                        <!-- Eye Off Icon (hidden by default) -->
+                                        <svg class="w-5 h-5 eye-off-icon hidden" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7
+                               a9.956 9.956 0 012.042-3.368M6.223 6.223A9.953 9.953 0 0112 5
+                               c4.477 0 8.268 2.943 9.542 7
+                               a9.965 9.965 0 01-4.132 5.411M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3v6m-9 4l18-18" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Submit --}}
+                            <button type="submit"
+                                class="w-full rounded-full bg-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-200
+                                   hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200">
+                                Register
+                            </button>
+                        </form>
+
+                        <p class="mt-7 text-center text-sm text-slate-600">
+                            Already have an account?
+                            <a href="{{ route('login') }}" class="font-semibold text-slate-900 hover:underline">
+                                Login
+                            </a>
+                        </p>
+
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <script>
-        function togglePass(inputId, btn) {
-            const input = document.getElementById(inputId);
-            const isPass = input.type === 'password';
-            input.type = isPass ? 'text' : 'password';
-            btn.textContent = isPass ? 'Hide' : 'Show';
+        function togglePass(id, btn) {
+            const input = document.getElementById(id);
+            const eye = btn.querySelector('.eye-icon');
+            const eyeOff = btn.querySelector('.eye-off-icon');
+
+            const isPassword = input.type === 'password';
+
+            input.type = isPassword ? 'text' : 'password';
+
+            eye.classList.toggle('hidden');
+            eyeOff.classList.toggle('hidden');
         }
     </script>
 @endsection

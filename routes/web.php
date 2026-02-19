@@ -4,14 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Home
-|--------------------------------------------------------------------------
-*/
-
 Route::get('/', function () {
-
     if (!auth()->check()) {
         return redirect()->route('login');
     }
@@ -23,58 +16,35 @@ Route::get('/', function () {
     };
 })->name('home');
 
-
 /*
 |--------------------------------------------------------------------------
-| Guest Routes (Login / Register / Google)
+| Guest Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
 
-    // Login / Register
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 
-    // Google Login (Student Only)
+    // Google
     Route::prefix('auth')->controller(GoogleController::class)->group(function () {
         Route::get('/google', 'authProviderRedirect')->name('google.redirect');
+        Route::get('/google/callback', 'socialAuthentication')->name('google.callback');
     });
 });
 
-// Keep callback public so it can complete OAuth flow reliably.
-Route::prefix('auth')->controller(GoogleController::class)->group(function () {
-    Route::get('/google/callback', 'socialAuthentication')->name('google.callback');
-});
-
-
 /*
 |--------------------------------------------------------------------------
-| Auth Routes (Logout + Dashboards)
+| Auth Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
 
-    // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-    // Admin Dashboard
-    Route::get('/admin/dashboard', function () {
-        abort_unless(auth()->user()->role === 'admin', 403);
-        return view('admin.dashboard', ['title' => 'Admin Dashboard']);
-    })->name('admin.dashboard');
-
-    // Teacher Dashboard
-    Route::get('/teacher/dashboard', function () {
-        abort_unless(auth()->user()->role === 'teacher', 403);
-        return view('teacher.dashboard', ['title' => 'Teacher Dashboard']);
-    })->name('teacher.dashboard');
-
-    // Student Dashboard
-    Route::get('/student/dashboard', function () {
-        abort_unless(auth()->user()->role === 'student', 403);
-        return view('student.dashboard', ['title' => 'Student Dashboard']);
-    })->name('student.dashboard');
+    require __DIR__ . '/admin.php';
+    require __DIR__ . '/teacher.php';
+    require __DIR__ . '/student.php';
 });

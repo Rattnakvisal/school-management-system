@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\Notification;
 
 class AuthService
 {
@@ -19,7 +20,7 @@ class AuthService
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => Hash::make($data['password']),
-            'role'     => $data['role'] ?? 'student', // keep controlled in controller (recommended)
+            'role'     => $data['role'] ?? 'student',
         ]);
     }
 
@@ -53,23 +54,31 @@ class AuthService
         }
 
         return DB::transaction(function () use ($gId, $gEmail, $gName, $gAvatar) {
-            // Find by google_id OR email
             $user = User::where('google_id', $gId)
                 ->orWhere('email', $gEmail)
                 ->lockForUpdate()
                 ->first();
+
+            // Determine role for new accounts. Do NOT overwrite an existing user's role.
+            $defaultRole = config('auth.google_default_role', 'student');
+            $role = match (true) {
+                str_ends_with($gEmail, '@admin.school.com')   => 'admin',
+                str_ends_with($gEmail, '@teacher.school.com') => 'teacher',
+                default => $defaultRole,
+            };
 
             if (!$user) {
                 $user = User::create([
                     'name'      => $gName ?: $gEmail,
                     'email'     => $gEmail,
                     'password'  => Hash::make(Str::random(32)), // random unusable password
-                    'role'      => 'student',                   // IMPORTANT: default student
+                    'role'      => $role,
                     'google_id' => $gId,
                     'provider'  => 'google',
                     'avatar'    => $gAvatar,
                 ]);
             } else {
+                // Preserve existing role - only update other profile fields
                 $user->forceFill([
                     'google_id' => $user->google_id ?: $gId,
                     'provider'  => 'google',
@@ -77,10 +86,6 @@ class AuthService
                     'name'      => $user->name ?: ($gName ?: $gEmail),
                 ])->save();
             }
-
-            Auth::login($user, true);
-            request()->session()->regenerate();
-
             return $user;
         });
     }
@@ -107,5 +112,49 @@ class AuthService
         // Best practice on logout
         request()->session()->invalidate();
         request()->session()->regenerateToken();
+    }
+
+    public function createWelcomeNotification(User $user)
+    {
+        try {
+            $url = $user->role === 'teacher'
+                ? route('teacher.dashboard')
+                : route('student.dashboard');
+        } catch (\Throwable $e) {
+            report($e);
+            $url = null;
+        }
+
+        $data = [
+            'type'    => 'info',
+            'title'   => 'New User Registered',
+            'message' => $user->name . ' (' . $user->role . ') has registered successfully.',
+            'url'     => $url,
+            'is_read' => false,
+        ];
+
+        try {
+            $created = Notification::create($data);
+            if (!$created || !$created->id || (empty($created->title) && empty($created->message))) {
+                // ensure timestamps
+                $now = now();
+                $insert = array_merge($data, ['created_at' => $now, 'updated_at' => $now]);
+                DB::table('notifications')->insert($insert);
+                return DB::table('notifications')->where('created_at', $now)->first();
+            }
+
+            return $created;
+        } catch (\Throwable $e) {
+            report($e);
+            try {
+                $now = now();
+                $insert = array_merge($data, ['created_at' => $now, 'updated_at' => $now]);
+                DB::table('notifications')->insert($insert);
+                return DB::table('notifications')->where('created_at', $now)->first();
+            } catch (\Throwable $e) {
+                report($e);
+                return null;
+            }
+        }
     }
 }

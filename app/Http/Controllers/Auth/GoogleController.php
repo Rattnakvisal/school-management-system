@@ -49,13 +49,6 @@ class GoogleController extends Controller
 
             // Delegate creation/lookup to AuthService (keeps logic centralized)
             $user = $this->authService->handleGoogleUser($socialUser);
-
-            // Ensure any Google-authenticated account is treated as a student
-            if ($user->role !== 'student') {
-                $user->update(['role' => 'student']);
-            }
-
-            // Make sure the provider fields are up-to-date
             $user->forceFill([
                 'google_id' => $socialUser->getId(),
                 'provider'  => 'google',
@@ -66,8 +59,8 @@ class GoogleController extends Controller
             Auth::guard('web')->login($user, true);
             $request->session()->regenerate();
 
-            // Force post-Google destination to student dashboard.
-            return redirect()->route('student.dashboard');
+            // Redirect based on stored role (admin, teacher, student)
+            return $this->authService->redirectByRole($user->role);
         } catch (\Throwable $e) {
             Log::error('Google login failed: ' . $e->getMessage(), ['exception' => $e]);
 

@@ -55,6 +55,14 @@ class AuthController extends Controller
 
         $user = $this->authService->register($validated);
 
+        // Notify admins that a new user has registered
+        try {
+            $this->authService->createWelcomeNotification($user);
+        } catch (\Throwable $e) {
+            // Do not interrupt registration on notification failures; log if needed
+            report($e);
+        }
+
         return redirect()
             ->route('login')
             ->with('success', 'Registration successful. Please log in.');
