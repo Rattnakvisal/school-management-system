@@ -10,8 +10,10 @@ class AuthController extends Controller
 {
     public function __construct(protected AuthService $authService) {}
 
-    public function showLogin()
+    public function showLogin(Request $request)
     {
+        // Ensure fresh CSRF token whenever auth page is loaded.
+        $request->session()->regenerateToken();
         return view('auth.login');
     }
 
@@ -39,8 +41,10 @@ class AuthController extends Controller
         return $this->authService->redirectByRole($user->role);
     }
 
-    public function showRegister()
+    public function showRegister(Request $request)
     {
+        // Ensure fresh CSRF token whenever auth page is loaded.
+        $request->session()->regenerateToken();
         return view('auth.register');
     }
 
@@ -50,16 +54,14 @@ class AuthController extends Controller
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:8'],
-            'role'     => ['required', 'in:teacher,student'], // no admin here
         ]);
 
-        $user = $this->authService->register($validated);
+        $validated['role'] = 'student';
 
-        // Notify admins that a new user has registered
+        $user = $this->authService->register($validated);
         try {
             $this->authService->createWelcomeNotification($user);
         } catch (\Throwable $e) {
-            // Do not interrupt registration on notification failures; log if needed
             report($e);
         }
 

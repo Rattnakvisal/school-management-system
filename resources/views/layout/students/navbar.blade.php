@@ -159,7 +159,9 @@
                     <div class="relative" @click.outside="profileOpen=false">
                         <button class="flex items-center gap-2 group" @click="profileOpen=!profileOpen">
                             <img class="h-9 w-9 rounded-full border-2 border-indigo-100 group-hover:border-indigo-400 transition"
-                                src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}">
+                                src="{{ auth()->user()->avatar_url }}"
+                                onerror="this.onerror=null;this.src='{{ auth()->user()->fallback_avatar_url }}';"
+                                alt="avatar">
 
                             {{-- Arrow --}}
                             <svg class="h-4 w-4 text-slate-500 transition-transform duration-200"
@@ -210,7 +212,6 @@
                                                 d="M16 13v-2H7V8l-5 4 5 4v-3zM20 3h-8v2h8v14h-8v2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
                                         </svg>
                                     </span>
-
                                     Logout
                                 </button>
                             </form>

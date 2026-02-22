@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\PasswordOtpController;
+use App\Http\Controllers\Website\ContactMessageController as WebsiteContactMessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,16 +14,26 @@ use App\Http\Controllers\Auth\PasswordOtpController;
 */
 
 Route::get('/', function () {
-    if (!auth()->check()) {
-        return redirect()->route('login');
+    $studentsTotal = User::where('role', 'student')->count();
+    $teachersTotal = User::where('role', 'teacher')->count();
+    $dashboardRoute = null;
+
+    if (auth()->check()) {
+        $dashboardRoute = match (auth()->user()->role) {
+            'admin' => 'admin.dashboard',
+            'teacher' => 'teacher.dashboard',
+            default => 'student.dashboard',
+        };
     }
 
-    return match (auth()->user()->role) {
-        'admin'   => redirect()->route('admin.dashboard'),
-        'teacher' => redirect()->route('teacher.dashboard'),
-        default   => redirect()->route('student.dashboard'),
-    };
+    return view('website.home', [
+        'studentsTotal' => $studentsTotal,
+        'teachersTotal' => $teachersTotal,
+        'dashboardRoute' => $dashboardRoute,
+    ]);
 })->name('home');
+
+Route::post('/contact', [WebsiteContactMessageController::class, 'store'])->name('contact.store');
 
 /*
 |--------------------------------------------------------------------------

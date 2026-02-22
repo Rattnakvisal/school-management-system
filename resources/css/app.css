@@ -11,3 +11,233 @@
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
 }
+
+@keyframes dash-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes dash-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.86) rotate(-10deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes dash-grow-y {
+    from {
+        transform: scaleY(0);
+    }
+
+    to {
+        transform: scaleY(1);
+    }
+}
+
+@keyframes dash-draw {
+    from {
+        stroke-dashoffset: 1200;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes student-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.35);
+        opacity: 0.5;
+    }
+}
+
+@keyframes site-rise {
+    from {
+        opacity: 0;
+        transform: translateY(22px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes site-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@layer utilities {
+    .dashboard-stage .dash-reveal {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+        animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--d, 0) * 90ms);
+        will-change: transform, opacity;
+    }
+
+    .dashboard-stage .dash-hover {
+        transition: transform 220ms ease, box-shadow 220ms ease;
+    }
+
+    .dashboard-stage .dash-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    .dashboard-stage .dash-ring {
+        opacity: 0;
+        animation: dash-pop 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--d, 0) * 90ms);
+        will-change: transform, opacity;
+    }
+
+    .dashboard-stage .dash-bar {
+        height: var(--h, 0%);
+        transform: scaleY(0);
+        transform-origin: bottom;
+        animation: dash-grow-y 900ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        animation-delay: calc(var(--d, 0) * 70ms);
+    }
+
+    .dashboard-stage .dash-line-path {
+        stroke-dasharray: 1200;
+        stroke-dashoffset: 1200;
+        animation: dash-draw 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--d, 0) * 100ms);
+    }
+
+    .student-stage .student-reveal,
+    .teacher-stage .teacher-reveal {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+        animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--sd, 0) * 100ms);
+        will-change: transform, opacity;
+    }
+
+    .student-stage .student-float,
+    .teacher-stage .teacher-float {
+        transition: transform 220ms ease, box-shadow 220ms ease;
+    }
+
+    .student-stage .student-float:hover,
+    .teacher-stage .teacher-float:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    .student-stage .status-dot,
+    .teacher-stage .status-dot {
+        animation: student-pulse 2s ease-in-out infinite;
+    }
+
+    .contact-stage .contact-reveal {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+        animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--sd, 0) * 100ms);
+        will-change: transform, opacity;
+    }
+
+    .contact-stage .contact-float {
+        transition: transform 220ms ease, box-shadow 220ms ease;
+    }
+
+    .contact-stage .contact-float:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    .contact-stage .status-dot {
+        animation: student-pulse 2s ease-in-out infinite;
+    }
+
+    .site-stage .site-reveal {
+        opacity: 0;
+        transform: translateY(22px);
+        animation: site-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--sd, 0) * 100ms);
+        will-change: transform, opacity;
+    }
+
+    .site-stage .site-float {
+        animation: site-float 6s ease-in-out infinite;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-stage .dash-reveal,
+    .dashboard-stage .dash-ring,
+    .dashboard-stage .dash-bar,
+    .dashboard-stage .dash-line-path {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .dashboard-stage .dash-hover {
+        transition: none !important;
+    }
+
+    .student-stage .student-reveal,
+    .student-stage .status-dot,
+    .teacher-stage .teacher-reveal,
+    .teacher-stage .status-dot {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .student-stage .student-float,
+    .teacher-stage .teacher-float {
+        transition: none !important;
+    }
+
+    .contact-stage .contact-reveal,
+    .contact-stage .status-dot {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .contact-stage .contact-float {
+        transition: none !important;
+    }
+
+    .site-stage .site-reveal,
+    .site-stage .site-float {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+[x-cloak] {
+    display: none !important;
+}

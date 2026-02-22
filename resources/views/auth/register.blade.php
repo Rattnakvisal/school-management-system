@@ -33,7 +33,7 @@
                             </div>
                             <h1 class="mt-2 text-2xl font-bold text-slate-900">Create Account</h1>
                             <p class="mt-1 text-sm text-slate-500">
-                                Register as a student or teacher.
+                                New registrations are created as student accounts.
                             </p>
                         </div>
 
@@ -75,25 +75,6 @@
                                           focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
                                     placeholder="you@example.com">
                                 @error('email')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            {{-- Role --}}
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                    Select Role
-                                </label>
-                                <select name="role" required
-                                    class="mt-2 w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-3
-                                       focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100">
-                                    <option value="student" {{ old('role', 'student') == 'student' ? 'selected' : '' }}>
-                                        Student
-                                    </option>
-                                    <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>Teacher
-                                    </option>
-                                </select>
-                                @error('role')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

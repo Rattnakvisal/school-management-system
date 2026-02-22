@@ -15,9 +15,11 @@
     <div x-data="{
         mobile: false,
         notifOpen: false,
+        messageOpen: false,
         profileOpen: false,
         closeAll() {
             this.notifOpen = false;
+            this.messageOpen = false;
             this.profileOpen = false;
         }
     }" @keydown.escape.window="closeAll()" class="min-h-screen">
@@ -54,10 +56,11 @@
             {{-- Nav (scroll area) --}}
             <nav class="px-3 py-4 space-y-1 flex-1 overflow-y-auto">
                 @php
-                    $item = fn($route, $label, $icon) => [
+                    $item = fn($route, $label, $icon, $badge = 0) => [
                         'route' => $route,
                         'label' => $label,
                         'icon' => $icon,
+                        'badge' => max((int) $badge, 0),
                         'active' => request()->routeIs($route),
                     ];
                     $links = [
@@ -69,6 +72,7 @@
                         $item('admin.attendance.index', 'Attendance', 'check'),
                         $item('admin.exams.index', 'Exams', 'clipboard'),
                         $item('admin.notices.index', 'Notices', 'bell'),
+                        $item('admin.contacts.index', 'Contacts', 'mail', $contactUnread ?? 0),
                         $item('admin.settings', 'Settings', 'cog'),
                     ];
                 @endphp
@@ -80,7 +84,7 @@
 
                         <span
                             class="h-9 w-9 rounded-xl flex items-center justify-center
-                             {{ $l['active'] ? 'bg-white/15' : 'bg-slate-100 group-hover:bg-white' }}">
+                             {{ $l['active'] ? 'bg-white/15' : 'bg-slate-100 group-hover:bg-white' }} relative">
                             @switch($l['icon'])
                                 @case('home')
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -133,17 +137,33 @@
                                     </svg>
                                 @break
 
+                                @case('mail')
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 3-8 5L4 7V6l8 5 8-5v1Z" />
+                                    </svg>
+                                @break
+
                                 @default
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                         <path
                                             d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
                                     </svg>
                             @endswitch
+
+                            @if ($l['icon'] === 'mail' && ($l['badge'] ?? 0) > 0)
+                                <span
+                                    class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 {{ $l['active'] ? 'ring-indigo-600' : 'ring-white' }}"></span>
+                            @endif
                         </span>
 
                         <span class="flex-1">{{ $l['label'] }}</span>
 
-                        @if ($l['active'])
+                        @if (($l['badge'] ?? 0) > 0)
+                            <span
+                                class="inline-grid min-w-[22px] place-items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold {{ $l['active'] ? 'bg-white text-indigo-700' : 'bg-red-100 text-red-700' }}">
+                                {{ $l['badge'] > 99 ? '99+' : $l['badge'] }}
+                            </span>
+                        @elseif ($l['active'])
                             <span class="h-2 w-2 rounded-full bg-white"></span>
                         @endif
                     </a>
@@ -198,7 +218,7 @@
                         {{-- Notifications dropdown --}}
                         <div class="relative" @click.outside="notifOpen=false">
                             <button class="relative p-2 rounded-xl bg-white border border-slate-200 hover:shadow-sm"
-                                @click="profileOpen=false; notifOpen=!notifOpen" aria-label="Notifications">
+                                @click="profileOpen=false; messageOpen=false; notifOpen=!notifOpen" aria-label="Notifications">
 
                                 <svg class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
                                     <path
@@ -264,21 +284,92 @@
                             </div>
                         </div>
 
-                        {{-- Messages (optional) --}}
-                        <button class="p-2 rounded-xl bg-white border border-slate-200 hover:shadow-sm"
-                            aria-label="Messages">
-                            <svg class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M4 4h16v12H6l-2 2V4Zm2 2v8h12V6H6Z" />
-                            </svg>
-                        </button>
+                        {{-- Messages --}}
+                        <div class="relative" @click.outside="messageOpen=false">
+                            <button class="relative p-2 rounded-xl bg-white border border-slate-200 hover:shadow-sm"
+                                @click="notifOpen=false; profileOpen=false; messageOpen=!messageOpen"
+                                aria-label="Messages">
+                                <svg class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M4 4h16v12H6l-2 2V4Zm2 2v8h12V6H6Z" />
+                                </svg>
+
+                                @if (($contactUnread ?? 0) > 0)
+                                    <span
+                                        class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1
+                                        rounded-full bg-red-500 text-white text-[10px] font-bold
+                                        grid place-items-center ring-2 ring-white">
+                                        {{ $contactUnread > 99 ? '99+' : $contactUnread }}
+                                    </span>
+                                @endif
+                            </button>
+
+                            <div x-show="messageOpen" x-transition.origin.top.right
+                                class="absolute right-0 mt-2 w-96 overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-xl">
+                                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                                    <div class="text-sm font-bold text-slate-900">Contact Messages</div>
+                                    @if (($contactUnread ?? 0) > 0)
+                                        <span class="text-xs font-semibold text-amber-600">{{ $contactUnread }} unread</span>
+                                    @endif
+                                </div>
+
+                                <div class="max-h-80 overflow-auto">
+                                    @forelse(($navContacts ?? []) as $contact)
+                                        <a href="{{ route('admin.contacts.index') }}"
+                                            class="block px-4 py-3 hover:bg-slate-50">
+                                            <div class="flex items-start gap-3">
+                                                <span
+                                                    class="mt-2 h-2 w-2 rounded-full {{ $contact->is_read ? 'bg-slate-300' : 'bg-amber-500' }}"></span>
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="flex items-center justify-between gap-2">
+                                                        <div class="truncate text-sm font-semibold text-slate-800">
+                                                            {{ $contact->name }}
+                                                        </div>
+                                                        <div class="text-[11px] text-slate-400">
+                                                            {{ $contact->created_at->diffForHumans() }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="truncate text-xs font-semibold text-slate-600">
+                                                        {{ $contact->subject }}
+                                                    </div>
+                                                    <div class="truncate text-xs text-slate-500">
+                                                        {{ $contact->message }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @empty
+                                        <div class="px-4 py-8 text-center text-sm text-slate-500">
+                                            No contact messages yet.
+                                        </div>
+                                    @endforelse
+                                </div>
+
+                                <div class="grid gap-2 px-4 py-3 border-t border-slate-100">
+                                    <a href="{{ route('admin.contacts.index') }}"
+                                        class="w-full rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-slate-800">
+                                        Open Contact Inbox
+                                    </a>
+                                    @if (($contactUnread ?? 0) > 0)
+                                        <form method="POST" action="{{ route('admin.contacts.readAll') }}">
+                                            @csrf
+                                            <button
+                                                class="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                                Mark all contact messages as read
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
 
                         {{-- Profile dropdown --}}
                         <div class="relative" @click.outside="profileOpen=false">
                             <button
                                 class="ml-2 flex items-center gap-3 rounded-full bg-white border border-slate-200 px-3 py-2 hover:shadow-sm"
-                                @click="notifOpen=false; profileOpen=!profileOpen" aria-label="Open profile menu">
+                                @click="notifOpen=false; messageOpen=false; profileOpen=!profileOpen" aria-label="Open profile menu">
                                 <img class="h-8 w-8 rounded-full object-cover"
-                                    src="{{ auth()->user()->avatar ? asset(auth()->user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}"
+                                    src="{{ auth()->user()->avatar_url }}"
+                                    onerror="this.onerror=null;this.src='{{ auth()->user()->fallback_avatar_url }}';"
                                     alt="avatar">
 
                                 <div class="leading-tight hidden sm:block text-left">

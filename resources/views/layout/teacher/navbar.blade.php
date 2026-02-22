@@ -261,7 +261,8 @@
                                 class="ml-2 flex items-center gap-3 rounded-full bg-white border border-slate-200 px-3 py-2 hover:shadow-sm"
                                 @click="notifOpen=false; profileOpen=!profileOpen" aria-label="Open profile menu">
                                 <img class="h-8 w-8 rounded-full object-cover"
-                                    src="{{ auth()->user()->avatar ? asset(auth()->user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}"
+                                    src="{{ auth()->user()->avatar_url }}"
+                                    onerror="this.onerror=null;this.src='{{ auth()->user()->fallback_avatar_url }}';"
                                     alt="avatar">
 
                                 <div class="leading-tight hidden sm:block text-left">
