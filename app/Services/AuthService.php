@@ -20,8 +20,10 @@ class AuthService
         return User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
+            'email_verified_at' => $data['email_verified_at'] ?? null,
             'password' => Hash::make($data['password']),
             'role'     => $data['role'] ?? 'student',
+            'is_active' => $data['is_active'] ?? true,
         ]);
     }
 

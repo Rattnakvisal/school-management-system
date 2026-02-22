@@ -17,6 +17,10 @@
                         {{ $stats['active'] }}</span>
                     <span class="rounded-full bg-rose-400/20 px-3 py-1.5 text-rose-100">Inactive:
                         {{ $stats['inactive'] }}</span>
+                    @if ($hasClassColumn)
+                        <span class="rounded-full bg-sky-400/20 px-3 py-1.5 text-sky-100">Assigned:
+                            {{ $stats['assigned'] }}</span>
+                    @endif
                 </div>
             </div>
         </section>
@@ -80,6 +84,54 @@
                         @enderror
                     </div>
 
+                    @if ($hasClassColumn)
+                        <div>
+                            <label for="school_class_id" class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
+                            <select id="school_class_id" name="school_class_id"
+                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                <option value="">Unassigned</option>
+                                @foreach ($classes as $classOption)
+                                    <option value="{{ $classOption->id }}" {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
+                                        {{ $classOption->display_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('school_class_id')
+                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        @if ($hasMajorSubjectColumn)
+                            <div>
+                                <label for="major_subject_id" class="mb-1 block text-xs font-semibold text-slate-600">Major
+                                    Subject</label>
+                                <select id="major_subject_id" name="major_subject_id"
+                                    data-selected="{{ old('major_subject_id') }}"
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    <option value="">Select class first</option>
+                                </select>
+                                @error('major_subject_id')
+                                    <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endif
+
+                        @if ($hasClassStudyTimeColumn)
+                            <div>
+                                <label for="class_study_time_id" class="mb-1 block text-xs font-semibold text-slate-600">Study
+                                    Time</label>
+                                <select id="class_study_time_id" name="class_study_time_id"
+                                    data-selected="{{ old('class_study_time_id') }}"
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    <option value="">Select class first</option>
+                                </select>
+                                @error('class_study_time_id')
+                                    <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endif
+                    @endif
+
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label for="password" class="mb-1 block text-xs font-semibold text-slate-600">Password</label>
@@ -134,9 +186,22 @@
                     <h2 class="text-lg font-black text-slate-900">Student List</h2>
 
                     <form method="GET" action="{{ route('admin.students.index') }}"
-                        class="grid w-full max-w-xl gap-2 sm:grid-cols-[1fr_auto_auto]">
-                        <input id="q" name="q" type="text" value="{{ $search }}" placeholder="Search by name or email"
+                        class="grid w-full max-w-3xl gap-2 {{ $hasClassColumn ? 'sm:grid-cols-[1fr_auto_auto_auto]' : 'sm:grid-cols-[1fr_auto_auto]' }}">
+                        <input id="q" name="q" type="text" value="{{ $search }}" placeholder="Search by name, email, or class"
                             class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                        @if ($hasClassColumn)
+                            <select name="class_id"
+                                class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes</option>
+                                @foreach ($classes as $classOption)
+                                    <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                        {{ $classOption->display_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @else
+                            <input type="hidden" name="class_id" value="all">
+                        @endif
                         @if ($hasStatusColumn)
                             <select name="status"
                                 class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
@@ -158,6 +223,13 @@
                             <tr>
                                 <th class="px-3 py-3 font-semibold">Student</th>
                                 <th class="px-3 py-3 font-semibold">Email</th>
+                                <th class="px-3 py-3 font-semibold">Class</th>
+                                @if ($hasMajorSubjectColumn)
+                                    <th class="px-3 py-3 font-semibold">Major Subject</th>
+                                @endif
+                                @if ($hasClassStudyTimeColumn)
+                                    <th class="px-3 py-3 font-semibold">Study Time</th>
+                                @endif
                                 <th class="px-3 py-3 font-semibold">Status</th>
                                 <th class="px-3 py-3 font-semibold">Created</th>
                                 <th class="px-3 py-3 font-semibold text-right">Actions</th>
@@ -177,6 +249,36 @@
                                         </div>
                                     </td>
                                     <td class="px-3 py-3 text-slate-600">{{ $student->email }}</td>
+                                    <td class="px-3 py-3 text-slate-600">
+                                        {{ $hasClassColumn ? ($student->schoolClass?->display_name ?? 'Unassigned') : '-' }}
+                                    </td>
+                                    @if ($hasMajorSubjectColumn)
+                                        <td class="px-3 py-3 text-slate-600">
+                                            @if ($student->majorSubject)
+                                                {{ $student->majorSubject->name }}
+                                                <span class="text-xs text-slate-400">({{ $student->majorSubject->code }})</span>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                    @endif
+                                    @if ($hasClassStudyTimeColumn)
+                                        <td class="px-3 py-3 text-slate-600">
+                                            @if ($student->classStudyTime)
+                                                @php
+                                                    $slot = $student->classStudyTime;
+                                                    $periodKey = strtolower((string) $slot->period);
+                                                    $periodLabel = $periodLabels[$periodKey] ?? ucfirst($periodKey);
+                                                @endphp
+                                                <span
+                                                    class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">{{ $periodLabel }}</span>
+                                                <span class="ml-1">{{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
+                                                    -> {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}</span>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                    @endif
                                     <td class="px-3 py-3">
                                         @if ($hasStatusColumn && $student->is_active)
                                             <span
@@ -264,6 +366,51 @@
                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                     </div>
 
+                                                    @if ($hasClassColumn)
+                                                        <div>
+                                                            <label for="edit_school_class_id_{{ $student->id }}"
+                                                                class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
+                                                            <select id="edit_school_class_id_{{ $student->id }}"
+                                                                name="school_class_id"
+                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                <option value="">Unassigned</option>
+                                                                @foreach ($classes as $classOption)
+                                                                    <option value="{{ $classOption->id }}" {{ (string) $student->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
+                                                                        {{ $classOption->display_name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        @if ($hasMajorSubjectColumn)
+                                                            <div>
+                                                                <label for="edit_major_subject_id_{{ $student->id }}"
+                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Major
+                                                                    Subject</label>
+                                                                <select id="edit_major_subject_id_{{ $student->id }}"
+                                                                    name="major_subject_id"
+                                                                    data-selected="{{ (string) $student->major_subject_id }}"
+                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                    <option value="">Select class first</option>
+                                                                </select>
+                                                            </div>
+                                                        @endif
+
+                                                        @if ($hasClassStudyTimeColumn)
+                                                            <div>
+                                                                <label for="edit_class_study_time_id_{{ $student->id }}"
+                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Study
+                                                                    Time</label>
+                                                                <select id="edit_class_study_time_id_{{ $student->id }}"
+                                                                    name="class_study_time_id"
+                                                                    data-selected="{{ (string) $student->class_study_time_id }}"
+                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                    <option value="">Select class first</option>
+                                                                </select>
+                                                            </div>
+                                                        @endif
+                                                    @endif
+
                                                     <div>
                                                         <label for="edit_avatar_image_{{ $student->id }}"
                                                             class="mb-1 block text-xs font-semibold text-slate-600">Avatar
@@ -325,7 +472,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-3 py-10 text-center text-sm text-slate-500">
+                                    <td colspan="{{ 6 + ($hasMajorSubjectColumn ? 1 : 0) + ($hasClassStudyTimeColumn ? 1 : 0) }}"
+                                        class="px-3 py-10 text-center text-sm text-slate-500">
                                         No students found.
                                     </td>
                                 </tr>
@@ -344,11 +492,132 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            if (typeof Swal === 'undefined') {
-                return;
-            }
+            const hasSwal = typeof Swal !== 'undefined';
+            const subjectsByClass = @json($subjectsByClass ?? []);
+            const studyTimesByClass = @json($studyTimesByClass ?? []);
+            const periodLabels = @json($periodLabels ?? []);
+
+            const to12Hour = (value) => {
+                if (!value) {
+                    return '';
+                }
+                const [hourRaw, minuteRaw] = String(value).split(':');
+                const hour = Number(hourRaw || 0);
+                const minute = String(minuteRaw || '00').padStart(2, '0');
+                const suffix = hour >= 12 ? 'PM' : 'AM';
+                const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+                return `${hour12.toString().padStart(2, '0')}:${minute} ${suffix}`;
+            };
+
+            const resetSelect = (select, placeholder) => {
+                if (!select) {
+                    return;
+                }
+
+                select.innerHTML = '';
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = placeholder;
+                select.appendChild(option);
+            };
+
+            const renderMajorSubjects = (select, classId, selectedId) => {
+                if (!select) {
+                    return;
+                }
+
+                const key = String(classId || '');
+                const subjects = key && subjectsByClass[key] ? subjectsByClass[key] : [];
+                resetSelect(select, key ? 'Select major subject' : 'Select class first');
+
+                subjects.forEach((item) => {
+                    const option = document.createElement('option');
+                    option.value = String(item.id);
+                    option.textContent = `${item.name} (${item.code})`;
+                    if (String(item.id) === String(selectedId || '')) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                select.disabled = !key;
+            };
+
+            const renderStudyTimes = (select, classId, selectedId) => {
+                if (!select) {
+                    return;
+                }
+
+                const key = String(classId || '');
+                const slots = key && studyTimesByClass[key] ? studyTimesByClass[key] : [];
+                resetSelect(select, key ? 'Select study time' : 'Select class first');
+
+                slots.forEach((item) => {
+                    const option = document.createElement('option');
+                    option.value = String(item.id);
+                    const periodKey = String(item.period || '').toLowerCase();
+                    const period = periodLabels[periodKey] || (periodKey ? (periodKey.charAt(0).toUpperCase() + periodKey.slice(1)) : 'Custom');
+                    option.textContent = `${period}: ${to12Hour(item.start_time)} -> ${to12Hour(item.end_time)}`;
+                    if (String(item.id) === String(selectedId || '')) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                select.disabled = !key;
+            };
+
+            const wireClassDependentFields = (classSelect, majorSelect, studyTimeSelect) => {
+                if (!classSelect) {
+                    return;
+                }
+
+                const apply = (useCurrentSelection = true) => {
+                    const classId = classSelect.value || '';
+                    const majorSelected = useCurrentSelection
+                        ? (majorSelect?.value || majorSelect?.dataset.selected || '')
+                        : '';
+                    const studySelected = useCurrentSelection
+                        ? (studyTimeSelect?.value || studyTimeSelect?.dataset.selected || '')
+                        : '';
+
+                    if (majorSelect) {
+                        renderMajorSubjects(majorSelect, classId, majorSelected);
+                        majorSelect.dataset.selected = '';
+                    }
+
+                    if (studyTimeSelect) {
+                        renderStudyTimes(studyTimeSelect, classId, studySelected);
+                        studyTimeSelect.dataset.selected = '';
+                    }
+                };
+
+                apply(true);
+                classSelect.addEventListener('change', () => apply(false));
+            };
+
+            @if ($hasClassColumn)
+                wireClassDependentFields(
+                    document.getElementById('school_class_id'),
+                    @if ($hasMajorSubjectColumn) document.getElementById('major_subject_id') @else null @endif,
+                    @if ($hasClassStudyTimeColumn) document.getElementById('class_study_time_id') @else null @endif
+                );
+
+                document.querySelectorAll('[id^="edit_school_class_id_"]').forEach((classSelect) => {
+                    const suffix = classSelect.id.replace('edit_school_class_id_', '');
+                    wireClassDependentFields(
+                        classSelect,
+                        @if ($hasMajorSubjectColumn) document.getElementById(`edit_major_subject_id_${suffix}`) @else null @endif,
+                        @if ($hasClassStudyTimeColumn) document.getElementById(`edit_class_study_time_id_${suffix}`) @else null @endif
+                    );
+                });
+            @endif
 
             const confirmSubmit = (selector, buildConfig) => {
+                if (!hasSwal) {
+                    return;
+                }
+
                 document.querySelectorAll(selector).forEach((form) => {
                     form.addEventListener('submit', function (event) {
                         if (form.dataset.confirmed === '1') {
@@ -409,7 +678,7 @@
             }));
 
             const validationErrors = @json($errors->all());
-            if (validationErrors.length > 0) {
+            if (hasSwal && validationErrors.length > 0) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Validation Error',
@@ -418,27 +687,29 @@
                 return;
             }
 
-            @if (session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: @json(session('error'))
-                });
-            @elseif (session('warning'))
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Warning',
-                    text: @json(session('warning'))
-                });
-            @elseif (session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: @json(session('success')),
-                    timer: 2200,
-                    showConfirmButton: false
-                });
-            @endif
+            if (hasSwal) {
+                @if (session('error'))
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: @json(session('error'))
+                    });
+                @elseif (session('warning'))
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Warning',
+                        text: @json(session('warning'))
+                    });
+                @elseif (session('success'))
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: @json(session('success')),
+                        timer: 2200,
+                        showConfirmButton: false
+                    });
+                @endif
+            }
             });
     </script>
 @endsection

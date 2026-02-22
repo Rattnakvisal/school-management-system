@@ -53,6 +53,9 @@ Route::middleware('guest')->group(function () {
 
         Route::get('/register', 'showRegister')->name('register');
         Route::post('/register', 'register')->name('register.submit');
+        Route::get('/register/verify', 'showRegisterOtpForm')->name('register.verify');
+        Route::post('/register/verify', 'verifyRegisterOtp')->name('register.verify.post');
+        Route::post('/register/resend-otp', 'resendRegisterOtp')->name('register.resend');
     });
 
     /*

@@ -133,7 +133,10 @@
     }
 
     .student-stage .student-reveal,
-    .teacher-stage .teacher-reveal {
+    .teacher-stage .teacher-reveal,
+    .class-stage .class-reveal,
+    .subject-stage .subject-reveal,
+    .study-stage .study-reveal {
         opacity: 0;
         transform: translateY(18px) scale(0.985);
         animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -142,18 +145,27 @@
     }
 
     .student-stage .student-float,
-    .teacher-stage .teacher-float {
+    .teacher-stage .teacher-float,
+    .class-stage .class-float,
+    .subject-stage .subject-float,
+    .study-stage .study-float {
         transition: transform 220ms ease, box-shadow 220ms ease;
     }
 
     .student-stage .student-float:hover,
-    .teacher-stage .teacher-float:hover {
+    .teacher-stage .teacher-float:hover,
+    .class-stage .class-float:hover,
+    .subject-stage .subject-float:hover,
+    .study-stage .study-float:hover {
         transform: translateY(-4px);
         box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
     }
 
     .student-stage .status-dot,
-    .teacher-stage .status-dot {
+    .teacher-stage .status-dot,
+    .class-stage .status-dot,
+    .subject-stage .status-dot,
+    .study-stage .status-dot {
         animation: student-pulse 2s ease-in-out infinite;
     }
 
@@ -208,14 +220,23 @@
     .student-stage .student-reveal,
     .student-stage .status-dot,
     .teacher-stage .teacher-reveal,
-    .teacher-stage .status-dot {
+    .teacher-stage .status-dot,
+    .class-stage .class-reveal,
+    .class-stage .status-dot,
+    .subject-stage .subject-reveal,
+    .subject-stage .status-dot,
+    .study-stage .study-reveal,
+    .study-stage .status-dot {
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
     }
 
     .student-stage .student-float,
-    .teacher-stage .teacher-float {
+    .teacher-stage .teacher-float,
+    .class-stage .class-float,
+    .subject-stage .subject-float,
+    .study-stage .study-float {
         transition: none !important;
     }
 

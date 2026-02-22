@@ -69,9 +69,9 @@
                         $item('admin.teachers.index', 'Teachers', 'user'),
                         $item('admin.classes.index', 'Classes', 'grid'),
                         $item('admin.subjects.index', 'Subjects', 'book'),
+                        $item('admin.student-study.index', 'Student Study', 'academic'),
                         $item('admin.attendance.index', 'Attendance', 'check'),
                         $item('admin.exams.index', 'Exams', 'clipboard'),
-                        $item('admin.notices.index', 'Notices', 'bell'),
                         $item('admin.contacts.index', 'Contacts', 'mail', $contactUnread ?? 0),
                         $item('admin.settings', 'Settings', 'cog'),
                     ];
@@ -115,6 +115,12 @@
                                 @case('book')
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12v-2H6V4h12v16h2V4a2 2 0 0 0-2-2Z" />
+                                    </svg>
+                                @break
+
+                                @case('academic')
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3Zm0 10.83L4.74 10 12 6.17 19.26 10 12 13.83ZM4 13.2V17c0 1.66 3.58 3 8 3s8-1.34 8-3v-3.8l-8 4.37-8-4.37Z" />
                                     </svg>
                                 @break
 
@@ -188,7 +194,7 @@
 
             {{-- TOPBAR --}}
             <header class="sticky top-0 z-30 bg-slate-100/80 backdrop-blur border-b border-slate-200">
-                <div class="h-16 px-4 sm:px-6 flex items-center gap-3">
+                <div class="h-16 px-3 sm:px-6 flex items-center gap-2 sm:gap-3">
 
                     {{-- Mobile menu button --}}
                     <button class="lg:hidden p-2 rounded-xl hover:bg-white" @click="mobile=true" aria-label="Open menu">
@@ -198,7 +204,7 @@
                     </button>
 
                     {{-- Search --}}
-                    <div class="flex-1">
+                    <div class="flex-1 min-w-0">
                         <div class="relative max-w-xl">
                             <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -206,14 +212,14 @@
                                         d="M10 2a8 8 0 1 0 5.29 14.06l4.33 4.33 1.41-1.41-4.33-4.33A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" />
                                 </svg>
                             </span>
-                            <input type="text" placeholder="Search anything here"
+                            <input type="text" placeholder="Search"
                                 class="w-full rounded-full bg-white border border-slate-200 pl-11 pr-4 py-2.5
                                       text-sm outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-200" />
                         </div>
                     </div>
 
                     {{-- Actions --}}
-                    <div class="flex items-center gap-2">
+                    <div class="flex shrink-0 items-center gap-2">
 
                         {{-- Notifications dropdown --}}
                         <div class="relative" @click.outside="notifOpen=false">
@@ -235,8 +241,8 @@
                                 @endif
                             </button>
 
-                            <div x-show="notifOpen" x-transition.origin.top.right
-                                class="absolute right-0 mt-2 w-80 overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-xl">
+                            <div x-show="notifOpen" x-cloak x-transition.origin.top.right
+                                class="fixed left-3 right-3 top-20 z-[80] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80">
 
                                 <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                                     <div class="text-sm font-bold text-slate-900">Notifications</div>
@@ -303,8 +309,8 @@
                                 @endif
                             </button>
 
-                            <div x-show="messageOpen" x-transition.origin.top.right
-                                class="absolute right-0 mt-2 w-96 overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-xl">
+                            <div x-show="messageOpen" x-cloak x-transition.origin.top.right
+                                class="fixed left-3 right-3 top-20 z-[80] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96">
                                 <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                                     <div class="text-sm font-bold text-slate-900">Contact Messages</div>
                                     @if (($contactUnread ?? 0) > 0)
@@ -382,8 +388,8 @@
                                 </svg>
                             </button>
 
-                            <div x-show="profileOpen" x-transition.origin.top.right
-                                class="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden">
+                            <div x-show="profileOpen" x-cloak x-transition.origin.top.right
+                                class="fixed left-3 right-3 top-20 z-[80] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-56">
                                 <div class="px-4 py-3 border-b border-slate-100">
                                     <div class="text-sm font-bold text-slate-900">{{ auth()->user()->name }}</div>
                                     <div class="text-xs text-slate-500">{{ auth()->user()->email }}</div>

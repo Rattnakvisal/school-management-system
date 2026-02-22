@@ -33,7 +33,7 @@
                             </div>
                             <h1 class="mt-2 text-2xl font-bold text-slate-900">Create Account</h1>
                             <p class="mt-1 text-sm text-slate-500">
-                                New registrations are created as student accounts.
+                                New registrations are created as student accounts and require OTP email verification.
                             </p>
                         </div>
 
@@ -126,7 +126,7 @@
                                         class="w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-3 pr-20
                                               focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
                                         placeholder="Re-type password">
-                                    <button type="button" onclick="togglePass('password', this)"
+                                    <button type="button" onclick="togglePass('password_confirmation', this)"
                                         class="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-900">
 
                                         <!-- Eye Icon (default visible) -->

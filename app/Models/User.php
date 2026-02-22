@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -22,12 +24,16 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'password',
         'role',
         'google_id',
         'provider',
         'avatar',
         'is_active',
+        'school_class_id',
+        'major_subject_id',
+        'class_study_time_id',
     ];
 
     /**
@@ -51,7 +57,35 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'school_class_id' => 'integer',
+            'major_subject_id' => 'integer',
+            'class_study_time_id' => 'integer',
         ];
+    }
+
+    public function schoolClass(): BelongsTo
+    {
+        return $this->belongsTo(SchoolClass::class);
+    }
+
+    public function majorSubject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class, 'major_subject_id');
+    }
+
+    public function classStudyTime(): BelongsTo
+    {
+        return $this->belongsTo(ClassStudyTime::class, 'class_study_time_id');
+    }
+
+    public function subjects(): HasMany
+    {
+        return $this->hasMany(Subject::class, 'school_class_id', 'school_class_id');
+    }
+
+    public function taughtSubjects(): HasMany
+    {
+        return $this->hasMany(Subject::class, 'teacher_id');
     }
 
     public function getAvatarUrlAttribute(): string

@@ -3,6 +3,9 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
+use App\Http\Controllers\Admin\ClassController;
+use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\StudentStudyController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,11 +29,20 @@ Route::middleware(['auth', 'admin'])
         Route::patch('/contacts/{contactMessage}/read', [ContactMessageController::class, 'markRead'])->name('contacts.read');
         Route::post('/contacts/read-all', [ContactMessageController::class, 'markAllRead'])->name('contacts.readAll');
         Route::delete('/contacts/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contacts.destroy');
-        Route::view('/classes', 'admin.classes')->name('classes.index');
-        Route::view('/subjects', 'admin.subjects')->name('subjects.index');
+        Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
+        Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
+        Route::put('/classes/{schoolClass}', [ClassController::class, 'update'])->name('classes.update');
+        Route::patch('/classes/{schoolClass}/status', [ClassController::class, 'toggleStatus'])->name('classes.status');
+        Route::delete('/classes/{schoolClass}', [ClassController::class, 'destroy'])->name('classes.destroy');
+
+        Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
+        Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store');
+        Route::put('/subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
+        Route::patch('/subjects/{subject}/status', [SubjectController::class, 'toggleStatus'])->name('subjects.status');
+        Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
+        Route::get('/student-study', [StudentStudyController::class, 'index'])->name('student-study.index');
         Route::view('/attendance', 'admin.attendance')->name('attendance.index');
         Route::view('/exams', 'admin.exams')->name('exams.index');
-        Route::view('/notices', 'admin.notices')->name('notices.index');
         Route::view('/settings', 'admin.settings')->name('settings');
         // Mark all admin notifications as read
         Route::post('/notifications/read-all', function () {
