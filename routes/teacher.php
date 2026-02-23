@@ -1,13 +1,17 @@
 <?php
 
+use App\Http\Controllers\Teacher\ClassController;
+use App\Http\Controllers\Teacher\DashboardController;
+use App\Http\Controllers\Teacher\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:teacher'])
     ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {
-        Route::view('/dashboard', 'teacher.dashboard')->name('dashboard');
-        Route::view('/classes', 'teacher.classes')->name('classes.index');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
+        Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
         Route::view('/students', 'teacher.students')->name('students.index');
         Route::view('/attendance', 'teacher.attendance')->name('attendance.index');
         Route::view('/assignments', 'teacher.assignments')->name('assignments.index');

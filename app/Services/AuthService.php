@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Route as RouteFacade;
+use Illuminate\Support\Facades\Schema;
 
 class AuthService
 {
@@ -51,12 +52,13 @@ class AuthService
         $gEmail  = method_exists($googleUser, 'getEmail') ? $googleUser->getEmail() : ($googleUser->email ?? null);
         $gName   = method_exists($googleUser, 'getName') ? $googleUser->getName() : ($googleUser->name ?? null);
         $gAvatar = method_exists($googleUser, 'getAvatar') ? $googleUser->getAvatar() : ($googleUser->avatar ?? null);
+        $avatarForStorage = $this->normalizeGoogleAvatar($gAvatar);
 
         if (empty($gEmail)) {
             throw new \RuntimeException('Google account did not provide an email address.');
         }
 
-        return DB::transaction(function () use ($gId, $gEmail, $gName, $gAvatar) {
+        return DB::transaction(function () use ($gId, $gEmail, $gName, $avatarForStorage) {
             $user = User::where('google_id', $gId)
                 ->orWhere('email', $gEmail)
                 ->lockForUpdate()
@@ -78,14 +80,14 @@ class AuthService
                     'role'      => $role,
                     'google_id' => $gId,
                     'provider'  => 'google',
-                    'avatar'    => $gAvatar,
+                    'avatar'    => $avatarForStorage,
                 ]);
             } else {
                 // Preserve existing role - only update other profile fields
                 $user->forceFill([
                     'google_id' => $user->google_id ?: $gId,
                     'provider'  => 'google',
-                    'avatar'    => $gAvatar ?: $user->avatar,
+                    'avatar'    => $avatarForStorage ?: $user->avatar,
                     'name'      => $user->name ?: ($gName ?: $gEmail),
                 ])->save();
             }
@@ -162,6 +164,45 @@ class AuthService
                 report($e);
                 return null;
             }
+        }
+    }
+
+    private function normalizeGoogleAvatar(mixed $avatar): ?string
+    {
+        $value = trim((string) ($avatar ?? ''));
+        if ($value === '') {
+            return null;
+        }
+
+        $maxLength = $this->resolveAvatarColumnMaxLength();
+        if ($maxLength !== null && mb_strlen($value) > $maxLength) {
+            return null;
+        }
+
+        return $value;
+    }
+
+    private function resolveAvatarColumnMaxLength(): ?int
+    {
+        try {
+            if (!Schema::hasColumn('users', 'avatar')) {
+                return null;
+            }
+
+            $columnType = strtolower((string) DB::connection()
+                ->getSchemaBuilder()
+                ->getColumnType('users', 'avatar'));
+
+            return match ($columnType) {
+                'char', 'string', 'varchar', 'tinytext' => 255,
+                'text' => 65535,
+                'mediumtext' => 16777215,
+                'longtext' => PHP_INT_MAX,
+                default => 255, // Safe default for unknown schema types.
+            };
+        } catch (\Throwable $e) {
+            report($e);
+            return 255; // Conservative fallback to prevent SQLSTATE[22001].
         }
     }
 }

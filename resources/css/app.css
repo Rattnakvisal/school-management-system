@@ -179,10 +179,13 @@
 
     .student-stage,
     .teacher-stage,
+    .teacher-classes-stage,
+    .teacher-time-stage,
     .class-stage,
     .subject-stage,
     .study-stage,
-    .contact-stage {
+    .contact-stage,
+    .study-time-stage {
         position: relative;
     }
 
@@ -196,10 +199,13 @@
 
     .student-stage .student-reveal,
     .teacher-stage .teacher-reveal,
+    .teacher-classes-stage .teacher-classes-reveal,
+    .teacher-time-stage .teacher-time-reveal,
     .class-stage .class-reveal,
     .subject-stage .subject-reveal,
     .study-stage .study-reveal,
-    .contact-stage .contact-reveal {
+    .contact-stage .contact-reveal,
+    .study-time-stage .study-time-reveal {
         opacity: 0;
         transform: translateY(18px) scale(0.985);
         animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -213,10 +219,13 @@
 
     .student-stage .student-float,
     .teacher-stage .teacher-float,
+    .teacher-classes-stage .teacher-classes-float,
+    .teacher-time-stage .teacher-time-float,
     .class-stage .class-float,
     .subject-stage .subject-float,
     .study-stage .study-float,
-    .contact-stage .contact-float {
+    .contact-stage .contact-float,
+    .study-time-stage .study-time-float {
         transition: transform 220ms ease, box-shadow 220ms ease;
     }
 
@@ -227,10 +236,13 @@
 
     .student-stage .student-float:hover,
     .teacher-stage .teacher-float:hover,
+    .teacher-classes-stage .teacher-classes-float:hover,
+    .teacher-time-stage .teacher-time-float:hover,
     .class-stage .class-float:hover,
     .subject-stage .subject-float:hover,
     .study-stage .study-float:hover,
-    .contact-stage .contact-float:hover {
+    .contact-stage .contact-float:hover,
+    .study-time-stage .study-time-float:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-md);
     }
@@ -241,10 +253,12 @@
 
     .student-stage .status-dot,
     .teacher-stage .status-dot,
+    .teacher-time-stage .status-dot,
     .class-stage .status-dot,
     .subject-stage .status-dot,
     .study-stage .status-dot,
-    .contact-stage .status-dot {
+    .contact-stage .status-dot,
+    .study-time-stage .status-dot {
         animation: student-pulse 2s ease-in-out infinite;
     }
 
@@ -300,7 +314,6 @@
         box-shadow: 0 8px 18px -18px rgba(15, 23, 42, 0.55);
     }
 
-    /* Keep your variants but make them consistent */
     .admin-page-stat--emerald {
         border-color: #bbf7d0;
         background: #f0fdf4;
@@ -398,7 +411,6 @@
         min-width: 980px;
         border-collapse: separate;
         border-spacing: 0 0.5rem;
-        /* a bit more air */
     }
 
     .stage thead th {
@@ -445,7 +457,6 @@
         background: #f7faff;
     }
 
-    /* Pagination divider */
     .stage .pagination,
     .stage nav[role="navigation"] {
         border-top: 1px solid var(--border-2);
@@ -458,7 +469,9 @@
     .subject-stage .max-h-\[560px\]::-webkit-scrollbar,
     .study-stage .max-h-\[560px\]::-webkit-scrollbar,
     .contact-stage .max-h-\[560px\]::-webkit-scrollbar,
-    .study-time-stage .max-h-\[560px\]::-webkit-scrollbar {
+    .study-time-stage .max-h-\[560px\]::-webkit-scrollbar,
+    .teacher-time-stage .max-h-\[560px\]::-webkit-scrollbar,
+    .teacher-classes-stage .max-h-\[560px\]::-webkit-scrollbar {
         width: 10px;
         height: 10px;
     }
@@ -469,7 +482,9 @@
     .subject-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
     .study-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
     .contact-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
-    .study-time-stage .max-h-\[560px\]::-webkit-scrollbar-thumb {
+    .study-time-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
+    .teacher-time-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
+    .teacher-classes-stage .max-h-\[560px\]::-webkit-scrollbar-thumb {
         background: #94a3b8;
         border-radius: 999px;
         border: 2px solid #f8fafc;
@@ -481,7 +496,9 @@
     .subject-stage .max-h-\[560px\]::-webkit-scrollbar-track,
     .study-stage .max-h-\[560px\]::-webkit-scrollbar-track,
     .contact-stage .max-h-\[560px\]::-webkit-scrollbar-track,
-    .study-time-stage .max-h-\[560px\]::-webkit-scrollbar-track {
+    .study-time-stage .max-h-\[560px\]::-webkit-scrollbar-track,
+    .teacher-time-stage .max-h-\[560px\]::-webkit-scrollbar-track,
+    .teacher-classes-stage .max-h-\[560px\]::-webkit-scrollbar-track {
         background: #e2e8f0;
         border-radius: 999px;
     }
@@ -492,63 +509,79 @@
     .subject-stage .max-h-\[560px\],
     .study-stage .max-h-\[560px\],
     .contact-stage .max-h-\[560px\],
-    .study-time-stage .max-h-\[560px\] {
+    .study-time-stage .max-h-\[560px\],
+    .teacher-time-stage .max-h-\[560px\],
+    .teacher-classes-stage .max-h-\[560px\] {
         scrollbar-width: thin;
         scrollbar-color: #94a3b8 #e2e8f0;
     }
 
-    .student-stage .student-list-filters select {
+    /* Student list table readability */
+    .student-stage .student-table {
+        min-width: 1240px;
+        table-layout: auto;
+    }
+
+    .student-stage .student-table .student-col-student {
+        min-width: 260px;
+    }
+
+    .student-stage .student-table .student-col-email {
+        min-width: 270px;
+    }
+
+    .student-stage .student-table .student-col-class {
+        min-width: 130px;
+    }
+
+    .student-stage .student-table .student-col-major {
+        min-width: 240px;
+    }
+
+    .student-stage .student-table .student-col-study {
+        min-width: 240px;
+    }
+
+    .student-stage .student-table .student-col-status {
         min-width: 120px;
     }
 
-    .student-stage .student-filter-button {
-        min-width: 92px;
+    .student-stage .student-table .student-col-created {
+        min-width: 120px;
     }
 
-    .student-stage .student-list-scroll {
-        overflow-y: hidden;
+    .student-stage .student-table .student-col-actions {
+        min-width: 230px;
     }
 
-    .student-stage .student-table {
-        min-width: 1120px;
-        table-layout: auto;
-        border-spacing: 0 0.55rem;
-    }
-
-    .student-stage .student-table th {
+    .student-stage .student-name,
+    .student-stage .student-major-name {
         line-height: 1.35;
         white-space: normal;
     }
 
-    .student-stage .student-table td {
+    .student-stage .student-email {
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    /* Teacher classes table readability */
+    .teacher-classes-stage table {
+        min-width: 1020px;
+    }
+
+    .teacher-time-stage table {
+        min-width: 980px;
+    }
+
+    .teacher-classes-stage td,
+    .teacher-classes-stage th {
         vertical-align: top;
     }
 
-    .student-stage .student-name {
-        line-height: 1.3;
-        white-space: nowrap;
-    }
-
-    .student-stage .student-email {
-        line-height: 1.45;
-        color: #475569;
-        white-space: nowrap;
-        word-break: normal;
-        overflow-wrap: normal;
-    }
-
-    .student-stage .student-table td:last-child {
-        min-width: 224px;
-    }
-
-    .student-stage .student-table th:nth-child(1),
-    .student-stage .student-table td:nth-child(1) {
-        min-width: 240px;
-    }
-
-    .student-stage .student-table th:nth-child(2),
-    .student-stage .student-table td:nth-child(2) {
-        min-width: 300px;
+    .teacher-time-stage td,
+    .teacher-time-stage th {
+        vertical-align: top;
     }
 
     /* ==============================
@@ -558,27 +591,39 @@
         --stage-accent: #6366f1;
     }
 
-    /* indigo */
     .teacher-stage {
         --stage-accent: #0ea5e9;
     }
 
-    /* sky */
+    .teacher-classes-stage {
+        --stage-accent: #4f46e5;
+    }
+
+    .teacher-time-stage {
+        --stage-accent: #2563eb;
+    }
+
     .class-stage {
         --stage-accent: #10b981;
     }
 
-    /* emerald */
     .subject-stage {
         --stage-accent: #f59e0b;
     }
 
-    /* amber */
     .study-stage {
         --stage-accent: #ec4899;
     }
 
-    /* pink */
+    .contact-stage {
+        --stage-accent: #22c55e;
+    }
+
+    /* ✅ NEW: Time Studies accent */
+    .study-time-stage {
+        --stage-accent: #8b5cf6;
+        /* violet */
+    }
 
     /* Optional: use accent ring per stage */
     .student-stage {
@@ -587,6 +632,14 @@
 
     .teacher-stage {
         --ring: 0 0 0 4px rgba(14, 165, 233, 0.20);
+    }
+
+    .teacher-classes-stage {
+        --ring: 0 0 0 4px rgba(79, 70, 229, 0.20);
+    }
+
+    .teacher-time-stage {
+        --ring: 0 0 0 4px rgba(37, 99, 235, 0.20);
     }
 
     .class-stage {
@@ -599,6 +652,15 @@
 
     .study-stage {
         --ring: 0 0 0 4px rgba(236, 72, 153, 0.20);
+    }
+
+    .contact-stage {
+        --ring: 0 0 0 4px rgba(34, 197, 94, 0.20);
+    }
+
+    /* ✅ NEW: Time Studies ring */
+    .study-time-stage {
+        --ring: 0 0 0 4px rgba(139, 92, 246, 0.20);
     }
 
     /* ==============================
@@ -648,16 +710,21 @@
     .stage .status-dot,
     .student-stage .student-reveal,
     .teacher-stage .teacher-reveal,
+    .teacher-classes-stage .teacher-classes-reveal,
+    .teacher-time-stage .teacher-time-reveal,
     .class-stage .class-reveal,
     .subject-stage .subject-reveal,
     .study-stage .study-reveal,
     .contact-stage .contact-reveal,
+    .study-time-stage .study-time-reveal,
     .student-stage .status-dot,
     .teacher-stage .status-dot,
+    .teacher-time-stage .status-dot,
     .class-stage .status-dot,
     .subject-stage .status-dot,
     .study-stage .status-dot,
-    .contact-stage .status-dot {
+    .contact-stage .status-dot,
+    .study-time-stage .status-dot {
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
@@ -666,10 +733,13 @@
     .stage .float-card,
     .student-stage .student-float,
     .teacher-stage .teacher-float,
+    .teacher-classes-stage .teacher-classes-float,
+    .teacher-time-stage .teacher-time-float,
     .class-stage .class-float,
     .subject-stage .subject-float,
     .study-stage .study-float,
-    .contact-stage .contact-float {
+    .contact-stage .contact-float,
+    .study-time-stage .study-time-float {
         transition: none !important;
     }
 

@@ -49,11 +49,6 @@ class GoogleController extends Controller
 
             // Delegate creation/lookup to AuthService (keeps logic centralized)
             $user = $this->authService->handleGoogleUser($socialUser);
-            $user->forceFill([
-                'google_id' => $socialUser->getId(),
-                'provider'  => 'google',
-                'avatar'    => $socialUser->getAvatar(),
-            ])->save();
 
             // Ensure user is logged in on the web guard before redirecting.
             Auth::guard('web')->login($user, true);

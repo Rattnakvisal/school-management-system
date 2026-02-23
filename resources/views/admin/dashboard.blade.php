@@ -10,6 +10,13 @@
         $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good Evening');
         $studentsNeedStudyTime = max(0, (int) ($studentsTotal ?? 0) - (int) ($studentsWithStudyTime ?? 0));
         $focusCount = (int) ($messagesUnread ?? 0) + $studentsNeedStudyTime;
+        $trendChartData = $chartData['trend'] ?? ['labels' => [], 'students' => [], 'teachers' => []];
+        $studentProfileChartData = $chartData['studentProfile'] ?? ['labels' => [], 'values' => []];
+        $compositionChartData = $chartData['composition'] ?? ['labels' => [], 'values' => []];
+        $classLoadChartData = $chartData['classLoad'] ?? ['labels' => [], 'values' => []];
+        $subjectHealthChartData = $chartData['subjectHealth'] ?? ['labels' => [], 'values' => []];
+        $periodChartData = $chartData['periods'] ?? ['labels' => [], 'values' => []];
+        $attendanceChartData = $chartData['attendance'] ?? ['labels' => [], 'present' => [], 'absent' => [], 'hasData' => false];
     @endphp
 
     <div class="dashboard-stage space-y-6">
@@ -103,9 +110,50 @@
         </section>
 
         <section class="grid gap-6 xl:grid-cols-12">
+            <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
+                style="--d: 7;">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="text-base font-bold text-slate-900">Students</h2>
+                    <span class="text-xs text-slate-500">Active vs Inactive</span>
+                </div>
+                <div class="h-[280px]">
+                    <canvas id="studentsSnapshotChart"></canvas>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-3 text-center">
+                    <div class="rounded-xl border border-sky-100 bg-sky-50 px-3 py-2">
+                        <div class="text-xs font-semibold text-slate-500">Active</div>
+                        <div class="text-lg font-black text-slate-900">{{ number_format($studentsActive ?? 0) }}</div>
+                    </div>
+                    <div class="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2">
+                        <div class="text-xs font-semibold text-slate-500">Inactive</div>
+                        <div class="text-lg font-black text-slate-900">
+                            {{ number_format(max(0, ($studentsTotal ?? 0) - ($studentsActive ?? 0))) }}
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
+                style="--d: 8;">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="text-base font-bold text-slate-900">Attendance</h2>
+                    <span class="text-xs text-slate-500">Last 5 Days</span>
+                </div>
+                <div class="h-[320px]">
+                    <canvas id="attendanceOverviewChart"></canvas>
+                </div>
+                @if (!($chartData['attendance']['hasData'] ?? false))
+                    <p class="mt-3 text-xs text-slate-500">
+                        No attendance records found yet. Chart will update automatically when attendance data is available.
+                    </p>
+                @endif
+            </article>
+        </section>
+
+        <section class="grid gap-6 xl:grid-cols-12">
             <div class="space-y-6 xl:col-span-8">
                 <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                    style="--d: 7;">
+                    style="--d: 9;">
                     <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                         <h2 class="text-base font-bold text-slate-900">Enrollment Trend (Last 6 Months)</h2>
                         <span class="text-xs text-slate-500">Students vs Teachers</span>
@@ -117,7 +165,7 @@
 
                 <div class="grid gap-6 lg:grid-cols-2">
                     <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                        style="--d: 8;">
+                        style="--d: 10;">
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-bold text-slate-900">System Composition</h2>
                             <span class="text-xs text-slate-500">Population split</span>
@@ -128,7 +176,7 @@
                     </article>
 
                     <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                        style="--d: 9;">
+                        style="--d: 11;">
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-bold text-slate-900">Study Period Distribution</h2>
                             <span class="text-xs text-slate-500">Morning, night, and more</span>
@@ -141,7 +189,7 @@
 
                 <div class="grid gap-6 lg:grid-cols-2">
                     <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                        style="--d: 10;">
+                        style="--d: 12;">
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-bold text-slate-900">Top Class Load</h2>
                             <span class="text-xs text-slate-500">Students per class</span>
@@ -152,7 +200,7 @@
                     </article>
 
                     <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                        style="--d: 11;">
+                        style="--d: 13;">
                         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-bold text-slate-900">Subject Health</h2>
                             <span class="text-xs text-slate-500">Status and assignment</span>
@@ -166,7 +214,7 @@
 
             <div class="space-y-6 xl:col-span-4">
                 <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                    style="--d: 12;">
+                    style="--d: 14;">
                     <h2 class="text-base font-bold text-slate-900">Study Profile</h2>
                     <p class="mt-1 text-xs text-slate-500">How well students are mapped to major subjects and study times.
                     </p>
@@ -198,7 +246,7 @@
                 </article>
 
                 <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                    style="--d: 13;">
+                    style="--d: 15;">
                     <div class="flex items-center justify-between">
                         <h2 class="text-base font-bold text-slate-900">Latest Messages</h2>
                         <a href="{{ route('admin.contacts.index') }}" class="text-xs font-semibold text-slate-400">View
@@ -256,11 +304,13 @@
                 return;
             }
 
-            const trendData = @json($chartData['trend'] ?? ['labels' => [], 'students' => [], 'teachers' => []]);
-            const compositionData = @json($chartData['composition'] ?? ['labels' => [], 'values' => []]);
-            const classLoadData = @json($chartData['classLoad'] ?? ['labels' => [], 'values' => []]);
-            const subjectHealthData = @json($chartData['subjectHealth'] ?? ['labels' => [], 'values' => []]);
-            const periodData = @json($chartData['periods'] ?? ['labels' => [], 'values' => []]);
+            const trendData = @json($trendChartData);
+            const studentProfileData = @json($studentProfileChartData);
+            const compositionData = @json($compositionChartData);
+            const classLoadData = @json($classLoadChartData);
+            const subjectHealthData = @json($subjectHealthChartData);
+            const periodData = @json($periodChartData);
+            const attendanceData = @json($attendanceChartData);
 
             const createGradient = (ctx, colorStart, colorEnd) => {
                 const gradient = ctx.createLinearGradient(0, 0, 0, 320);
@@ -345,6 +395,92 @@
                             mode: 'index',
                             intersect: false,
                         },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 12,
+                                    usePointStyle: true,
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                },
+                                grid: {
+                                    color: 'rgba(148,163,184,0.2)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const studentsSnapshotCanvas = document.getElementById('studentsSnapshotChart');
+            if (studentsSnapshotCanvas) {
+                new Chart(studentsSnapshotCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: studentProfileData.labels,
+                        datasets: [{
+                            data: studentProfileData.values,
+                            backgroundColor: ['#38bdf8', '#facc15'],
+                            borderWidth: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: buildStaggeredAnimation(150, 70, 980),
+                        cutout: '68%',
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 12,
+                                    usePointStyle: true,
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const attendanceOverviewCanvas = document.getElementById('attendanceOverviewChart');
+            if (attendanceOverviewCanvas) {
+                new Chart(attendanceOverviewCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: attendanceData.labels.length ? attendanceData.labels : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                        datasets: [{
+                            label: 'Total Present',
+                            data: attendanceData.present.length ? attendanceData.present : [0, 0, 0, 0, 0],
+                            backgroundColor: '#facc15',
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            maxBarThickness: 28,
+                        }, {
+                            label: 'Total Absent',
+                            data: attendanceData.absent.length ? attendanceData.absent : [0, 0, 0, 0, 0],
+                            backgroundColor: '#7dd3fc',
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            maxBarThickness: 28,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: buildStaggeredAnimation(170, 65, 980),
+                        animations: buildAxisAnimations(170),
                         plugins: {
                             legend: {
                                 position: 'top',

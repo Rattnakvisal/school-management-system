@@ -12,6 +12,7 @@ class SubjectStudyTime extends Model
 
     protected $fillable = [
         'subject_id',
+        'day_of_week',
         'period',
         'start_time',
         'end_time',
@@ -21,6 +22,7 @@ class SubjectStudyTime extends Model
     protected function casts(): array
     {
         return [
+            'day_of_week' => 'string',
             'sort_order' => 'integer',
         ];
     }

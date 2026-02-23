@@ -9,6 +9,7 @@ use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
@@ -115,6 +116,13 @@ class DashboardController extends Controller
                 'students' => $studentsMonthly,
                 'teachers' => $teachersMonthly,
             ],
+            'studentProfile' => [
+                'labels' => ['Active Students', 'Inactive Students'],
+                'values' => [
+                    $studentsActive,
+                    max(0, $studentsTotal - $studentsActive),
+                ],
+            ],
             'composition' => [
                 'labels' => ['Students', 'Teachers', 'Classes', 'Subjects'],
                 'values' => [$studentsTotal, $teachersTotal, $classesTotal, $subjectsTotal],
@@ -142,6 +150,7 @@ class DashboardController extends Controller
                     $periodCounts['custom'],
                 ],
             ],
+            'attendance' => $this->attendanceOverviewData(),
         ];
 
         return view('admin.dashboard', [
@@ -160,5 +169,90 @@ class DashboardController extends Controller
             'chartData' => $chartData,
             'latestContactMessages' => $latestContactMessages,
         ]);
+    }
+
+    private function attendanceOverviewData(): array
+    {
+        $days = [];
+        for ($i = 4; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->startOfDay();
+            $dayKey = $date->toDateString();
+            $days[$dayKey] = [
+                'label' => $date->format('D'),
+                'present' => 0,
+                'absent' => 0,
+            ];
+        }
+
+        $startDate = array_key_first($days);
+        if ($startDate === null) {
+            return [
+                'labels' => [],
+                'present' => [],
+                'absent' => [],
+                'hasData' => false,
+            ];
+        }
+
+        $tableCandidates = [
+            'student_attendances',
+            'attendances',
+            'attendance_records',
+        ];
+
+        foreach ($tableCandidates as $tableName) {
+            if (!Schema::hasTable($tableName)) {
+                continue;
+            }
+
+            $columns = array_map('strtolower', Schema::getColumnListing($tableName));
+            $dateColumn = collect(['attendance_date', 'date', 'recorded_on', 'created_at'])->first(
+                fn(string $column) => in_array($column, $columns, true)
+            );
+            $statusColumn = collect(['status', 'attendance_status'])->first(
+                fn(string $column) => in_array($column, $columns, true)
+            );
+
+            if (!$dateColumn || !$statusColumn) {
+                continue;
+            }
+
+            $rows = DB::table($tableName)
+                ->selectRaw("DATE($dateColumn) as day_key, LOWER($statusColumn) as status_key, COUNT(*) as total")
+                ->whereDate($dateColumn, '>=', $startDate)
+                ->groupBy('day_key', 'status_key')
+                ->get();
+
+            foreach ($rows as $row) {
+                $dayKey = (string) ($row->day_key ?? '');
+                if (!array_key_exists($dayKey, $days)) {
+                    continue;
+                }
+
+                $status = strtolower((string) ($row->status_key ?? ''));
+                $total = (int) ($row->total ?? 0);
+
+                if (in_array($status, ['absent', 'a', 'missed', 'leave', 'excused_absent'], true)) {
+                    $days[$dayKey]['absent'] += $total;
+                    continue;
+                }
+
+                $days[$dayKey]['present'] += $total;
+            }
+
+            return [
+                'labels' => array_values(array_map(static fn(array $day) => $day['label'], $days)),
+                'present' => array_values(array_map(static fn(array $day) => $day['present'], $days)),
+                'absent' => array_values(array_map(static fn(array $day) => $day['absent'], $days)),
+                'hasData' => $rows->isNotEmpty(),
+            ];
+        }
+
+        return [
+            'labels' => array_values(array_map(static fn(array $day) => $day['label'], $days)),
+            'present' => [0, 0, 0, 0, 0],
+            'absent' => [0, 0, 0, 0, 0],
+            'hasData' => false,
+        ];
     }
 }
