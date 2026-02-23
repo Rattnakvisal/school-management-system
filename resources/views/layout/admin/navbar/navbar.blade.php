@@ -69,6 +69,7 @@
                         $item('admin.teachers.index', 'Teachers', 'user'),
                         $item('admin.classes.index', 'Classes', 'grid'),
                         $item('admin.subjects.index', 'Subjects', 'book'),
+                        $item('admin.time-studies.index', 'Time Studies', 'clock'),
                         $item('admin.student-study.index', 'Student Study', 'academic'),
                         $item('admin.attendance.index', 'Attendance', 'check'),
                         $item('admin.exams.index', 'Exams', 'clipboard'),
@@ -220,7 +221,6 @@
 
                     {{-- Actions --}}
                     <div class="flex shrink-0 items-center gap-2">
-
                         {{-- Notifications dropdown --}}
                         <div class="relative" @click.outside="notifOpen=false">
                             <button class="relative p-2 rounded-xl bg-white border border-slate-200 hover:shadow-sm"

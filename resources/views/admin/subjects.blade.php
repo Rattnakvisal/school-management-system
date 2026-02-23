@@ -78,65 +78,13 @@
                         @enderror
                     </div>
 
-                    @php
-                        $createStudySlots = old('study_slots');
-                        if (!is_array($createStudySlots) || $createStudySlots === []) {
-                            $createStudySlots = [['period' => 'morning', 'start_time' => '', 'end_time' => '']];
-                        }
-                        $createSlotError =
-                            $errors->subjectCreate->first('study_slots') ?:
-                            $errors->subjectCreate->first('study_slots.*.period') ?:
-                            $errors->subjectCreate->first('study_slots.*.start_time') ?:
-                            $errors->subjectCreate->first('study_slots.*.end_time');
-                    @endphp
-
                     <div>
-                        <div class="mb-1 flex items-center justify-between gap-2">
-                            <label class="block text-xs font-semibold text-slate-600">Study Times (Morning / Night /
-                                More)</label>
-                            <button type="button"
-                                class="js-add-study-slot rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100"
-                                data-target="create-subject-study-slots">
-                                + Add Time
-                            </button>
+                        <label class="mb-1 block text-xs font-semibold text-slate-600">Study Times</label>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+                            Study times are now managed in Time Studies.
+                            <a href="{{ route('admin.time-studies.index', ['tab' => 'subject']) }}"
+                                class="font-semibold text-indigo-700 hover:text-indigo-900">Manage subject times</a>
                         </div>
-                        <div id="create-subject-study-slots" class="js-study-slots space-y-2" data-name-prefix="study_slots"
-                            data-next-index="{{ count($createStudySlots) }}">
-                            @foreach ($createStudySlots as $index => $slot)
-                                @php
-                                    $slotPeriod = strtolower(trim((string) ($slot['period'] ?? 'morning')));
-                                    $slotStart = trim((string) ($slot['start_time'] ?? ''));
-                                    $slotEnd = trim((string) ($slot['end_time'] ?? ''));
-                                @endphp
-                                <div
-                                    class="js-slot-row grid gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-                                    <select name="study_slots[{{ $index }}][period]"
-                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                        @foreach ($periodOptions as $periodKey => $periodLabel)
-                                            <option value="{{ $periodKey }}" {{ $slotPeriod === $periodKey ? 'selected' : '' }}>
-                                                {{ $periodLabel }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <input type="time" name="study_slots[{{ $index }}][start_time]" value="{{ $slotStart }}"
-                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <input type="time" name="study_slots[{{ $index }}][end_time]" value="{{ $slotEnd }}"
-                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <button type="button"
-                                        class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
-                                        Remove
-                                    </button>
-                                </div>
-                            @endforeach
-                        </div>
-                        <input id="study_start_time" name="study_start_time" type="hidden"
-                            value="{{ old('study_start_time') }}">
-                        <input id="study_end_time" name="study_end_time" type="hidden" value="{{ old('study_end_time') }}">
-                        <p class="mt-1 text-[11px] text-slate-500">Auto-syncs from selected class schedules when class is
-                            selected.</p>
-                        @if ($createSlotError)
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $createSlotError }}</p>
-                        @endif
                     </div>
 
                     <div>
@@ -228,370 +176,382 @@
             <section
                 class="subject-reveal subject-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
                 style="--sd: 4;">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <h2 class="text-lg font-black text-slate-900">Subject List</h2>
+                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-black text-slate-900">Subject List</h2>
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
+                            </svg>
+                            Filters
+                        </button>
+                    </div>
 
-                    <form method="GET" action="{{ route('admin.subjects.index') }}"
-                        class="grid w-full max-w-5xl gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto_auto]">
-                        <input id="q" name="q" type="text" value="{{ $search }}"
-                            placeholder="Search by subject, code, start/end time, or description"
-                            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                        <select name="class_id"
-                            class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes</option>
-                            @foreach ($classes as $classOption)
-                                <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
-                                    {{ $classOption->display_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <select name="status"
-                            class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All</option>
-                            <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                        <button type="submit"
-                            class="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white">Filter</button>
-                        <a href="{{ route('admin.subjects.index') }}"
-                            class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
-                            Reset
-                        </a>
-                    </form>
-                </div>
+                    <div x-show="filterOpen" x-cloak x-transition.opacity
+                        class="fixed inset-0 z-[80] bg-slate-900/40" @click="filterOpen = false"></div>
+
+                    <div class="grid gap-4">
+                        <aside x-show="filterOpen" x-cloak
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="translate-x-full"
+                            x-transition:enter-end="translate-x-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="translate-x-0"
+                            x-transition:leave-end="translate-x-full"
+                            class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
+                            <div class="flex h-full flex-col">
+                                <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                                    <h3 class="text-3xl font-black text-slate-900">Filters</h3>
+                                    <div class="flex items-center gap-4">
+                                        <a href="{{ route('admin.subjects.index') }}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                                            Clear All
+                                        </a>
+                                        <button type="button" @click="filterOpen = false"
+                                            class="text-2xl font-bold leading-none text-slate-700 hover:text-slate-900" aria-label="Close filters">
+                                            &times;
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <form method="GET" action="{{ route('admin.subjects.index') }}" class="flex min-h-0 flex-1 flex-col"
+                                    @submit="filterOpen = false">
+                                    <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Search</h4>
+                                            <input id="q" name="q" type="text" value="{{ $search }}"
+                                                placeholder="Search subject, code, teacher, class, time, or schedule"
+                                                class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        </section>
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Class</h4>
+                                            <select name="class_id"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes</option>
+                                                @foreach ($classes as $classOption)
+                                                    <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                                        {{ $classOption->display_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </section>
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Teacher</h4>
+                                            <select name="teacher_id"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $teacherId === 'all' ? 'selected' : '' }}>All Teachers</option>
+                                                @foreach ($teachers as $teacherOption)
+                                                    <option value="{{ $teacherOption->id }}" {{ $teacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                        {{ $teacherOption->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </section>
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Status</h4>
+                                            <select name="status"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All</option>
+                                                <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
+                                                <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                            </select>
+                                        </section>
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Period</h4>
+                                            <select name="period"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Periods</option>
+                                                @foreach ($periodOptions as $periodKey => $periodLabel)
+                                                    <option value="{{ $periodKey }}" {{ $period === $periodKey ? 'selected' : '' }}>
+                                                        {{ $periodLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </section>
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Schedule</h4>
+                                            <select name="schedule"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $schedule === 'all' ? 'selected' : '' }}>All Schedules</option>
+                                                <option value="with_schedule" {{ $schedule === 'with_schedule' ? 'selected' : '' }}>With Schedule</option>
+                                                <option value="without_schedule" {{ $schedule === 'without_schedule' ? 'selected' : '' }}>Without Schedule</option>
+                                            </select>
+                                        </section>
+                                    </div>
+                                    <div class="border-t border-slate-200 px-5 py-4">
+                                        <button type="submit"
+                                            class="inline-flex w-full items-center justify-center rounded-lg bg-slate-950 px-4 py-3 text-lg font-bold text-white transition hover:bg-slate-800">
+                                            Apply Filters
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </aside>
+                    </div>
 
                 <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
                     <div class="max-h-[560px] overflow-auto">
-                    <table class="w-full min-w-[1150px] text-left text-sm">
-                        <thead
-                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                            <tr>
-                                <th class="px-3 py-3 font-semibold">Subject</th>
-                                <th class="px-3 py-3 font-semibold">Code</th>
-                                <th class="px-3 py-3 font-semibold">Study Time</th>
-                                <th class="px-3 py-3 font-semibold">Class</th>
-                                <th class="px-3 py-3 font-semibold">Teacher</th>
-                                <th class="px-3 py-3 font-semibold">Students Learning</th>
-                                <th class="px-3 py-3 font-semibold">Status</th>
-                                <th class="px-3 py-3 font-semibold">Created</th>
-                                <th class="px-3 py-3 font-semibold text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 bg-white">
-                            @forelse ($subjects as $subject)
-                                <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
-                                    <td class="px-3 py-3">
-                                        <div class=" whitespace-nowrap font-semibold text-slate-700">
-                                            {{ $subject->name }}
-                                        </div>
-                                        <div class="text-xs text-slate-400">
-                                            {{ \Illuminate\Support\Str::limit($subject->description ?: 'No description', 60) }}
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-slate-600">{{ $subject->code }}</td>
-                                    <td class="px-3 py-3 text-slate-600">
-                                        @if ($subject->studySchedules->isNotEmpty())
-                                            <div class="flex max-w-sm flex-wrap gap-1.5">
-                                                @foreach ($subject->studySchedules as $slot)
-                                                    <div
-                                                        class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
-                                                        <span class="font-bold uppercase tracking-wide text-indigo-700">
-                                                            {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
-                                                        </span>
-                                                        <span class="text-indigo-300">|</span>
-                                                        <span class="whitespace-nowrap font-semibold text-slate-700">
-                                                            {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }} ->
-                                                            {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
-                                                        </span>
-                                                    </div>
-                                                @endforeach
+                        <table class="w-full min-w-[1150px] text-left text-sm">
+                            <thead
+                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                <tr>
+                                    <th class="px-3 py-3 font-semibold">Subject</th>
+                                    <th class="px-3 py-3 font-semibold">Code</th>
+                                    <th class="px-3 py-3 font-semibold">Study Time</th>
+                                    <th class="px-3 py-3 font-semibold">Class</th>
+                                    <th class="px-3 py-3 font-semibold">Teacher</th>
+                                    <th class="px-3 py-3 font-semibold">Students Learning</th>
+                                    <th class="px-3 py-3 font-semibold">Status</th>
+                                    <th class="px-3 py-3 font-semibold">Created</th>
+                                    <th class="px-3 py-3 font-semibold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white">
+                                @forelse ($subjects as $subject)
+                                    <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
+                                        <td class="px-3 py-3">
+                                            <div class=" whitespace-nowrap font-semibold text-slate-700">
+                                                {{ $subject->name }}
                                             </div>
-                                        @else
-                                            @php
-                                                $subjectStartTime = $subject->study_start_time ?: $subject->study_time;
-                                                $subjectEndTime = $subject->study_end_time;
-                                            @endphp
-                                            @if ($subjectStartTime && $subjectEndTime)
-                                                {{ \Carbon\Carbon::parse($subjectStartTime)->format('h:i A') }} ->
-                                                {{ \Carbon\Carbon::parse($subjectEndTime)->format('h:i A') }}
-                                            @elseif ($subjectStartTime)
-                                                {{ \Carbon\Carbon::parse($subjectStartTime)->format('h:i A') }}
-                                            @else
-                                                -
-                                            @endif
-                                        @endif
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-slate-600">
-                                        {{ $subject->schoolClass?->display_name ?: 'Unassigned' }}
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-3 text-slate-600">{{ $subject->teacher?->name ?: 'Unassigned' }}</td>
-                                    <td class="px-3 py-3 text-slate-600">{{ $subject->students_count ?? 0 }}</td>
-                                    <td class="px-3 py-3">
-                                        @if ($subject->is_active)
-                                            <span
-                                                class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                                <span class="status-dot h-2 w-2 rounded-full bg-emerald-500"></span>Active
-                                            </span>
-                                        @else
-                                            <span
-                                                class="inline-flex items-center gap-2 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
-                                                <span class="h-2 w-2 rounded-full bg-rose-500"></span>Inactive
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="px-3 py-3 text-slate-500">{{ $subject->created_at->format('M d, Y') }}</td>
-                                    <td class="px-3 py-3">
-                                        <div class="flex flex-wrap items-center justify-end gap-2">
-                                            <button @click="open = true" type="button"
-                                                class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
-                                                Edit
-                                            </button>
-
-                                            <form method="POST" action="{{ route('admin.subjects.status', $subject) }}"
-                                                class="js-status-form" data-subject="{{ $subject->name }}"
-                                                data-action="{{ $subject->is_active ? 'set inactive' : 'set active' }}">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                    class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold {{ $subject->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
-                                                    {{ $subject->is_active ? 'Set Inactive' : 'Set Active' }}
-                                                </button>
-                                            </form>
-
-                                            <form method="POST" action="{{ route('admin.subjects.destroy', $subject) }}"
-                                                class="js-delete-form" data-subject="{{ $subject->name }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
-                                                    Delete
-                                                </button>
-                                            </form>
-                                        </div>
-
-                                        <div x-show="open" x-cloak class="fixed inset-0 z-[70] grid place-items-center p-4"
-                                            aria-modal="true" role="dialog">
-                                            <div class="absolute inset-0 bg-slate-900/50" @click="open = false"></div>
-
-                                            <div class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
-                                                <div class="mb-4 flex items-center justify-between">
-                                                    <h3 class="text-lg font-black text-slate-900">Edit Subject</h3>
-                                                    <button type="button" @click="open = false"
-                                                        class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
-                                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                                            <path
-                                                                d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
-                                                        </svg>
-                                                    </button>
+                                            <div class="text-xs text-slate-400">
+                                                {{ \Illuminate\Support\Str::limit($subject->description ?: 'No description', 60) }}
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-3 text-slate-600">{{ $subject->code }}</td>
+                                        <td class="px-3 py-3 text-slate-600">
+                                            @if ($subject->studySchedules->isNotEmpty())
+                                                <div class="flex max-w-sm flex-wrap gap-1.5">
+                                                    @foreach ($subject->studySchedules as $slot)
+                                                        <div
+                                                            class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
+                                                            <span class="font-bold uppercase tracking-wide text-indigo-700">
+                                                                {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
+                                                            </span>
+                                                            <span class="text-indigo-300">|</span>
+                                                            <span class="whitespace-nowrap font-semibold text-slate-700">
+                                                                {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }} ->
+                                                                {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
+                                                            </span>
+                                                        </div>
+                                                    @endforeach
                                                 </div>
+                                            @else
+                                                @php
+                                                    $subjectStartTime = $subject->study_start_time ?: $subject->study_time;
+                                                    $subjectEndTime = $subject->study_end_time;
+                                                @endphp
+                                                @if ($subjectStartTime && $subjectEndTime)
+                                                    {{ \Carbon\Carbon::parse($subjectStartTime)->format('h:i A') }} ->
+                                                    {{ \Carbon\Carbon::parse($subjectEndTime)->format('h:i A') }}
+                                                @elseif ($subjectStartTime)
+                                                    {{ \Carbon\Carbon::parse($subjectStartTime)->format('h:i A') }}
+                                                @else
+                                                    -
+                                                @endif
+                                            @endif
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-3 text-slate-600">
+                                            {{ $subject->schoolClass?->display_name ?: 'Unassigned' }}
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-3 text-slate-600">
+                                            {{ $subject->teacher?->name ?: 'Unassigned' }}</td>
+                                        <td class="px-3 py-3 text-slate-600">{{ $subject->students_count ?? 0 }}</td>
+                                        <td class="px-3 py-3">
+                                            @if ($subject->is_active)
+                                                <span
+                                                    class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                                    <span class="status-dot h-2 w-2 rounded-full bg-emerald-500"></span>Active
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="inline-flex items-center gap-2 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
+                                                    <span class="h-2 w-2 rounded-full bg-rose-500"></span>Inactive
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-3 text-slate-500">{{ $subject->created_at->format('M d, Y') }}</td>
+                                        <td class="px-3 py-3">
+                                            <div class="flex flex-wrap items-center justify-end gap-2">
+                                                <button @click="open = true" type="button"
+                                                    class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                                                    Edit
+                                                </button>
 
-                                                <form method="POST" action="{{ route('admin.subjects.update', $subject) }}"
-                                                    class="js-edit-form space-y-4" data-subject="{{ $subject->name }}">
+                                                <form method="POST" action="{{ route('admin.subjects.status', $subject) }}"
+                                                    class="js-status-form" data-subject="{{ $subject->name }}"
+                                                    data-action="{{ $subject->is_active ? 'set inactive' : 'set active' }}">
                                                     @csrf
-                                                    @method('PUT')
+                                                    @method('PATCH')
+                                                    <button type="submit"
+                                                        class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold {{ $subject->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                                                        {{ $subject->is_active ? 'Set Inactive' : 'Set Active' }}
+                                                    </button>
+                                                </form>
 
-                                                    <div>
-                                                        <label for="edit_name_{{ $subject->id }}"
-                                                            class="mb-1 block text-xs font-semibold text-slate-600">Subject
-                                                            Name</label>
-                                                        <input id="edit_name_{{ $subject->id }}" name="name" type="text"
-                                                            value="{{ $subject->name }}"
-                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                    </div>
-
-                                                    <div>
-                                                        <label for="edit_code_{{ $subject->id }}"
-                                                            class="mb-1 block text-xs font-semibold text-slate-600">Code</label>
-                                                        <input id="edit_code_{{ $subject->id }}" name="code" type="text"
-                                                            value="{{ $subject->code }}"
-                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm uppercase outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                    </div>
-
-                                                    @php
-                                                        $editStudySlots = $subject->studySchedules
-                                                            ->map(function ($slot) {
-                                                                return [
-                                                                    'period' => strtolower((string) $slot->period),
-                                                                    'start_time' => $slot->start_time ? \Carbon\Carbon::parse($slot->start_time)->format('H:i') : '',
-                                                                    'end_time' => $slot->end_time ? \Carbon\Carbon::parse($slot->end_time)->format('H:i') : '',
-                                                                ];
-                                                            })
-                                                            ->values()
-                                                            ->all();
-
-                                                        if ($editStudySlots === []) {
-                                                            $fallbackStart = $subject->study_start_time ?: $subject->study_time;
-                                                            $fallbackEnd = $subject->study_end_time;
-                                                            if ($fallbackStart && $fallbackEnd) {
-                                                                $editStudySlots[] = [
-                                                                    'period' => 'custom',
-                                                                    'start_time' => \Carbon\Carbon::parse($fallbackStart)->format('H:i'),
-                                                                    'end_time' => \Carbon\Carbon::parse($fallbackEnd)->format('H:i'),
-                                                                ];
-                                                            } else {
-                                                                $editStudySlots[] = [
-                                                                    'period' => 'morning',
-                                                                    'start_time' => '',
-                                                                    'end_time' => '',
-                                                                ];
-                                                            }
-                                                        }
-                                                    @endphp
-
-                                                    <div>
-                                                        <div class="mb-1 flex items-center justify-between gap-2">
-                                                            <label class="block text-xs font-semibold text-slate-600">Study
-                                                                Times</label>
-                                                            <button type="button"
-                                                                class="js-add-study-slot rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100"
-                                                                data-target="edit-subject-study-slots-{{ $subject->id }}">
-                                                                + Add Time
-                                                            </button>
-                                                        </div>
-                                                        <div id="edit-subject-study-slots-{{ $subject->id }}"
-                                                            class="js-study-slots space-y-2" data-name-prefix="study_slots"
-                                                            data-next-index="{{ count($editStudySlots) }}">
-                                                            @foreach ($editStudySlots as $index => $slot)
-                                                                @php
-                                                                    $slotPeriod = strtolower(trim((string) ($slot['period'] ?? 'morning')));
-                                                                    $slotStart = trim((string) ($slot['start_time'] ?? ''));
-                                                                    $slotEnd = trim((string) ($slot['end_time'] ?? ''));
-                                                                @endphp
-                                                                <div
-                                                                    class="js-slot-row grid gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-                                                                    <select name="study_slots[{{ $index }}][period]"
-                                                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                        @foreach ($periodOptions as $periodKey => $periodLabel)
-                                                                            <option value="{{ $periodKey }}" {{ $slotPeriod === $periodKey ? 'selected' : '' }}>
-                                                                                {{ $periodLabel }}
-                                                                            </option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                    <input type="time" name="study_slots[{{ $index }}][start_time]"
-                                                                        value="{{ $slotStart }}"
-                                                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                    <input type="time" name="study_slots[{{ $index }}][end_time]"
-                                                                        value="{{ $slotEnd }}"
-                                                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                    <button type="button"
-                                                                        class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
-                                                                        Remove
-                                                                    </button>
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                        <input id="edit_study_start_time_{{ $subject->id }}"
-                                                            name="study_start_time" type="hidden"
-                                                            value="{{ ($subject->study_start_time ?: $subject->study_time) ? \Carbon\Carbon::parse($subject->study_start_time ?: $subject->study_time)->format('H:i') : '' }}">
-                                                        <input id="edit_study_end_time_{{ $subject->id }}" name="study_end_time"
-                                                            type="hidden"
-                                                            value="{{ $subject->study_end_time ? \Carbon\Carbon::parse($subject->study_end_time)->format('H:i') : '' }}">
-                                                        <p class="mt-1 text-[11px] text-slate-500">Auto-syncs from selected
-                                                            class
-                                                            schedules.</p>
-                                                    </div>
-
-                                                    <div>
-                                                        <label for="edit_school_class_id_{{ $subject->id }}"
-                                                            class="mb-1 block text-xs font-semibold text-slate-600">Assign to
-                                                            Class</label>
-                                                        <select id="edit_school_class_id_{{ $subject->id }}"
-                                                            name="school_class_id"
-                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                            <option value="">Unassigned</option>
-                                                            @foreach ($classes as $classOption)
-                                                                @php
-                                                                    $classSlots = $classOption->studySchedules
-                                                                        ->map(function ($slot) {
-                                                                            return [
-                                                                                'period' => strtolower((string) $slot->period),
-                                                                                'start_time' => $slot->start_time ? \Carbon\Carbon::parse($slot->start_time)->format('H:i') : '',
-                                                                                'end_time' => $slot->end_time ? \Carbon\Carbon::parse($slot->end_time)->format('H:i') : '',
-                                                                            ];
-                                                                        })
-                                                                        ->values()
-                                                                        ->all();
-
-                                                                    if ($classSlots === []) {
-                                                                        $fallbackStart = $classOption->study_start_time ?: $classOption->study_time;
-                                                                        $fallbackEnd = $classOption->study_end_time;
-                                                                        if ($fallbackStart && $fallbackEnd) {
-                                                                            $classSlots[] = [
-                                                                                'period' => 'custom',
-                                                                                'start_time' => \Carbon\Carbon::parse($fallbackStart)->format('H:i'),
-                                                                                'end_time' => \Carbon\Carbon::parse($fallbackEnd)->format('H:i'),
-                                                                            ];
-                                                                        }
-                                                                    }
-                                                                @endphp
-                                                                <option value="{{ $classOption->id }}"
-                                                                    data-study-slots='@json($classSlots)'
-                                                                    data-study-start="{{ ($classOption->study_start_time ?: $classOption->study_time) ? \Illuminate\Support\Str::substr((string) ($classOption->study_start_time ?: $classOption->study_time), 0, 5) : '' }}"
-                                                                    data-study-end="{{ $classOption->study_end_time ? \Illuminate\Support\Str::substr((string) $classOption->study_end_time, 0, 5) : '' }}"
-                                                                    {{ (string) $subject->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
-                                                                    {{ $classOption->display_name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-
-                                                    <div>
-                                                        <label for="edit_teacher_id_{{ $subject->id }}"
-                                                            class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
-                                                        <select id="edit_teacher_id_{{ $subject->id }}" name="teacher_id"
-                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                            <option value="">Unassigned</option>
-                                                            @foreach ($teachers as $teacherOption)
-                                                                <option value="{{ $teacherOption->id }}" {{ (string) $subject->teacher_id === (string) $teacherOption->id ? 'selected' : '' }}>
-                                                                    {{ $teacherOption->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-
-                                                    <div>
-                                                        <label for="edit_description_{{ $subject->id }}"
-                                                            class="mb-1 block text-xs font-semibold text-slate-600">Description</label>
-                                                        <textarea id="edit_description_{{ $subject->id }}" name="description"
-                                                            rows="3"
-                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $subject->description }}</textarea>
-                                                    </div>
-
-                                                    <label
-                                                        class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">
-                                                        <span class="text-sm font-semibold text-slate-700">Status</span>
-                                                        <span
-                                                            class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                                            <input type="checkbox" name="is_active" value="1"
-                                                                class="h-4 w-4 rounded border-slate-300" {{ $subject->is_active ? 'checked' : '' }}>
-                                                            Active
-                                                        </span>
-                                                    </label>
-
-                                                    <div class="flex justify-end gap-2 pt-2">
-                                                        <button type="button" @click="open = false"
-                                                            class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
-                                                            Cancel
-                                                        </button>
-                                                        <button type="submit"
-                                                            class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-                                                            Save Changes
-                                                        </button>
-                                                    </div>
+                                                <form method="POST" action="{{ route('admin.subjects.destroy', $subject) }}"
+                                                    class="js-delete-form" data-subject="{{ $subject->name }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                                        Delete
+                                                    </button>
                                                 </form>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9" class="px-3 py-10 text-center text-sm text-slate-500">
-                                        No subjects found.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+
+                                            <div x-show="open" x-cloak class="fixed inset-0 z-[70] grid place-items-center p-4"
+                                                aria-modal="true" role="dialog">
+                                                <div class="absolute inset-0 bg-slate-900/50" @click="open = false"></div>
+
+                                                <div class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
+                                                    <div class="mb-4 flex items-center justify-between">
+                                                        <h3 class="text-lg font-black text-slate-900">Edit Subject</h3>
+                                                        <button type="button" @click="open = false"
+                                                            class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path
+                                                                    d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+
+                                                    <form method="POST" action="{{ route('admin.subjects.update', $subject) }}"
+                                                        class="js-edit-form space-y-4" data-subject="{{ $subject->name }}">
+                                                        @csrf
+                                                        @method('PUT')
+
+                                                        <div>
+                                                            <label for="edit_name_{{ $subject->id }}"
+                                                                class="mb-1 block text-xs font-semibold text-slate-600">Subject
+                                                                Name</label>
+                                                            <input id="edit_name_{{ $subject->id }}" name="name" type="text"
+                                                                value="{{ $subject->name }}"
+                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                        </div>
+
+                                                        <div>
+                                                            <label for="edit_code_{{ $subject->id }}"
+                                                                class="mb-1 block text-xs font-semibold text-slate-600">Code</label>
+                                                            <input id="edit_code_{{ $subject->id }}" name="code" type="text"
+                                                                value="{{ $subject->code }}"
+                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm uppercase outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Study
+                                                                Times</label>
+                                                            <div
+                                                                class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+                                                                Manage this subject schedule from Time Studies.
+                                                                <a href="{{ route('admin.time-studies.index', ['tab' => 'subject', 'subject_id' => $subject->id]) }}"
+                                                                    class="font-semibold text-indigo-700 hover:text-indigo-900">Open
+                                                                    Time Studies</a>
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <label for="edit_school_class_id_{{ $subject->id }}"
+                                                                class="mb-1 block text-xs font-semibold text-slate-600">Assign
+                                                                to
+                                                                Class</label>
+                                                            <select id="edit_school_class_id_{{ $subject->id }}"
+                                                                name="school_class_id"
+                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                <option value="">Unassigned</option>
+                                                                @foreach ($classes as $classOption)
+                                                                    @php
+                                                                        $classSlots = $classOption->studySchedules
+                                                                            ->map(function ($slot) {
+                                                                                return [
+                                                                                    'period' => strtolower((string) $slot->period),
+                                                                                    'start_time' => $slot->start_time ? \Carbon\Carbon::parse($slot->start_time)->format('H:i') : '',
+                                                                                    'end_time' => $slot->end_time ? \Carbon\Carbon::parse($slot->end_time)->format('H:i') : '',
+                                                                                ];
+                                                                            })
+                                                                            ->values()
+                                                                            ->all();
+
+                                                                        if ($classSlots === []) {
+                                                                            $fallbackStart = $classOption->study_start_time ?: $classOption->study_time;
+                                                                            $fallbackEnd = $classOption->study_end_time;
+                                                                            if ($fallbackStart && $fallbackEnd) {
+                                                                                $classSlots[] = [
+                                                                                    'period' => 'custom',
+                                                                                    'start_time' => \Carbon\Carbon::parse($fallbackStart)->format('H:i'),
+                                                                                    'end_time' => \Carbon\Carbon::parse($fallbackEnd)->format('H:i'),
+                                                                                ];
+                                                                            }
+                                                                        }
+                                                                    @endphp
+                                                                    <option value="{{ $classOption->id }}"
+                                                                        data-study-slots='@json($classSlots)'
+                                                                        data-study-start="{{ ($classOption->study_start_time ?: $classOption->study_time) ? \Illuminate\Support\Str::substr((string) ($classOption->study_start_time ?: $classOption->study_time), 0, 5) : '' }}"
+                                                                        data-study-end="{{ $classOption->study_end_time ? \Illuminate\Support\Str::substr((string) $classOption->study_end_time, 0, 5) : '' }}"
+                                                                        {{ (string) $subject->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
+                                                                        {{ $classOption->display_name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        <div>
+                                                            <label for="edit_teacher_id_{{ $subject->id }}"
+                                                                class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
+                                                            <select id="edit_teacher_id_{{ $subject->id }}" name="teacher_id"
+                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                <option value="">Unassigned</option>
+                                                                @foreach ($teachers as $teacherOption)
+                                                                    <option value="{{ $teacherOption->id }}" {{ (string) $subject->teacher_id === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                                        {{ $teacherOption->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        <div>
+                                                            <label for="edit_description_{{ $subject->id }}"
+                                                                class="mb-1 block text-xs font-semibold text-slate-600">Description</label>
+                                                            <textarea id="edit_description_{{ $subject->id }}"
+                                                                name="description" rows="3"
+                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $subject->description }}</textarea>
+                                                        </div>
+
+                                                        <label
+                                                            class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">
+                                                            <span class="text-sm font-semibold text-slate-700">Status</span>
+                                                            <span
+                                                                class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
+                                                                <input type="checkbox" name="is_active" value="1"
+                                                                    class="h-4 w-4 rounded border-slate-300" {{ $subject->is_active ? 'checked' : '' }}>
+                                                                Active
+                                                            </span>
+                                                        </label>
+
+                                                        <div class="flex justify-end gap-2 pt-2">
+                                                            <button type="button" @click="open = false"
+                                                                class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                                                                Cancel
+                                                            </button>
+                                                            <button type="submit"
+                                                                class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
+                                                                Save Changes
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="9" class="px-3 py-10 text-center text-sm text-slate-500">
+                                            No subjects found.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -619,21 +579,21 @@
                 const endTime = defaults.end_time || '';
 
                 return `
-                                        <div class="js-slot-row grid gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-                                            <select name="${namePrefix}[${index}][period]"
-                                                class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                ${periodOptionHtml(period)}
-                                            </select>
-                                            <input type="time" name="${namePrefix}[${index}][start_time]" value="${startTime}"
-                                                class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                            <input type="time" name="${namePrefix}[${index}][end_time]" value="${endTime}"
-                                                class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                            <button type="button"
-                                                class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
-                                                Remove
-                                            </button>
-                                        </div>
-                                    `;
+                                            <div class="js-slot-row grid gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
+                                                <select name="${namePrefix}[${index}][period]"
+                                                    class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                    ${periodOptionHtml(period)}
+                                                </select>
+                                                <input type="time" name="${namePrefix}[${index}][start_time]" value="${startTime}"
+                                                    class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <input type="time" name="${namePrefix}[${index}][end_time]" value="${endTime}"
+                                                    class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <button type="button"
+                                                    class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        `;
             };
 
             const syncRemoveButtons = (container) => {
@@ -920,7 +880,7 @@
                         showConfirmButton: false
                     });
                 @endif
-                                }
+                                    }
         });
     </script>
 @endsection

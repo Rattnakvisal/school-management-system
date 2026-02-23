@@ -17,8 +17,12 @@ class SubjectController extends Controller
     {
         $search = trim((string) $request->query('q', ''));
         $status = (string) $request->query('status', 'all');
+        $period = (string) $request->query('period', 'all');
+        $schedule = (string) $request->query('schedule', 'all');
         $classIdRaw = (string) $request->query('class_id', 'all');
+        $teacherIdRaw = (string) $request->query('teacher_id', 'all');
         $classId = ctype_digit($classIdRaw) ? (int) $classIdRaw : null;
+        $teacherId = ctype_digit($teacherIdRaw) ? (int) $teacherIdRaw : null;
 
         $subjectQuery = Subject::query()
             ->with(['schoolClass', 'teacher', 'studySchedules'])
@@ -43,8 +47,24 @@ class SubjectController extends Controller
             $subjectQuery->where('school_class_id', $classId);
         }
 
+        if ($teacherId !== null) {
+            $subjectQuery->where('teacher_id', $teacherId);
+        }
+
         if (in_array($status, ['active', 'inactive'], true)) {
             $subjectQuery->where('is_active', $status === 'active');
+        }
+
+        if (in_array($period, $this->allowedPeriods(), true)) {
+            $subjectQuery->whereHas('studySchedules', function ($query) use ($period) {
+                $query->where('period', $period);
+            });
+        }
+
+        if ($schedule === 'with_schedule') {
+            $subjectQuery->whereHas('studySchedules');
+        } elseif ($schedule === 'without_schedule') {
+            $subjectQuery->whereDoesntHave('studySchedules');
         }
 
         $subjects = $subjectQuery
@@ -78,6 +98,9 @@ class SubjectController extends Controller
             'search' => $search,
             'status' => in_array($status, ['all', 'active', 'inactive'], true) ? $status : 'all',
             'classId' => $classId !== null ? (string) $classId : 'all',
+            'teacherId' => $teacherId !== null ? (string) $teacherId : 'all',
+            'period' => in_array($period, array_merge(['all'], $this->allowedPeriods()), true) ? $period : 'all',
+            'schedule' => in_array($schedule, ['all', 'with_schedule', 'without_schedule'], true) ? $schedule : 'all',
             'stats' => $stats,
             'periodOptions' => $this->periodOptions(),
         ]);
@@ -86,19 +109,10 @@ class SubjectController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateSubjectRequest($request, 'subjectCreate');
-        $studySlots = $this->resolveStudySlots(
-            isset($validated['school_class_id']) ? (int) $validated['school_class_id'] : null,
-            $validated['study_slots'] ?? [],
-            $validated['study_start_time'] ?? null,
-            $validated['study_end_time'] ?? null
-        );
-
-        $subject = Subject::create($this->buildPayload(
+        Subject::create($this->buildPayload(
             $validated,
-            $request->boolean('is_active', true),
-            $studySlots
+            $request->boolean('is_active', true)
         ));
-        $this->syncStudySlots($subject, $studySlots);
 
 
         return redirect()
@@ -109,19 +123,11 @@ class SubjectController extends Controller
     public function update(Request $request, Subject $subject)
     {
         $validated = $this->validateSubjectRequest($request, 'subjectUpdate', $subject);
-        $studySlots = $this->resolveStudySlots(
-            isset($validated['school_class_id']) ? (int) $validated['school_class_id'] : null,
-            $validated['study_slots'] ?? [],
-            $validated['study_start_time'] ?? null,
-            $validated['study_end_time'] ?? null
-        );
 
         $subject->update($this->buildPayload(
             $validated,
-            $request->boolean('is_active'),
-            $studySlots
+            $request->boolean('is_active')
         ));
-        $this->syncStudySlots($subject, $studySlots);
 
         return redirect()
             ->route('admin.subjects.index')
@@ -147,18 +153,11 @@ class SubjectController extends Controller
             ->with('success', 'Subject deleted successfully.');
     }
 
-    private function buildPayload(array $validated, bool $isActive, array $studySlots): array
+    private function buildPayload(array $validated, bool $isActive): array
     {
-        $primarySlot = $studySlots[0] ?? null;
-        $studyStartTime = $primarySlot['start_time'] ?? ($validated['study_start_time'] ?? null);
-        $studyEndTime = $primarySlot['end_time'] ?? ($validated['study_end_time'] ?? null);
-
         return [
             'name' => trim((string) $validated['name']),
             'code' => strtoupper(trim((string) $validated['code'])),
-            'study_time' => $studyStartTime,
-            'study_start_time' => $studyStartTime,
-            'study_end_time' => $studyEndTime,
             'school_class_id' => $validated['school_class_id'] ?? null,
             'teacher_id' => $validated['teacher_id'] ?? null,
             'description' => $this->nullableTrim($validated['description'] ?? null),
@@ -188,6 +187,14 @@ class SubjectController extends Controller
             'study_slots.*.period' => ['nullable', 'string', 'max:20'],
             'study_slots.*.start_time' => ['nullable', 'date_format:H:i'],
             'study_slots.*.end_time' => ['nullable', 'date_format:H:i'],
+            'additional_subjects' => ['nullable', 'array', 'max:20'],
+            'additional_subjects.*.name' => ['nullable', 'string', 'max:120'],
+            'additional_subjects.*.code' => ['nullable', 'string', 'max:40'],
+            'additional_subjects.*.period' => ['nullable', 'string', 'max:20'],
+            'additional_subjects.*.start_time' => ['nullable', 'date_format:H:i'],
+            'additional_subjects.*.end_time' => ['nullable', 'date_format:H:i'],
+            'additional_subjects.*.description' => ['nullable', 'string', 'max:1000'],
+            'additional_subjects.*.is_active' => ['nullable', 'boolean'],
             'school_class_id' => ['nullable', 'exists:school_classes,id'],
             'teacher_id' => ['nullable', Rule::exists('users', 'id')->where(fn($query) => $query->where('role', 'teacher'))],
             'description' => ['nullable', 'string', 'max:1000'],
@@ -195,7 +202,7 @@ class SubjectController extends Controller
         ]);
 
         $allowedPeriods = $this->allowedPeriods();
-        $validator->after(function ($validator) use ($request, $allowedPeriods) {
+        $validator->after(function ($validator) use ($request, $allowedPeriods, $bag) {
             $studySlots = $request->input('study_slots', []);
 
             foreach (array_values(is_array($studySlots) ? $studySlots : []) as $index => $slot) {
@@ -225,6 +232,82 @@ class SubjectController extends Controller
                     $validator->errors()->add("study_slots.$index.end_time", 'End time must be later than start time.');
                 }
             }
+
+            if ($bag !== 'subjectCreate') {
+                return;
+            }
+
+            $additionalSubjects = $request->input('additional_subjects', []);
+            $submittedCodes = [];
+            $baseCode = strtoupper(trim((string) $request->input('code', '')));
+            if ($baseCode !== '') {
+                $submittedCodes[$baseCode] = 'code';
+            }
+
+            foreach (array_values(is_array($additionalSubjects) ? $additionalSubjects : []) as $index => $row) {
+                $name = trim((string) ($row['name'] ?? ''));
+                $code = strtoupper(trim((string) ($row['code'] ?? '')));
+                $period = strtolower(trim((string) ($row['period'] ?? '')));
+                $startTime = trim((string) ($row['start_time'] ?? ''));
+                $endTime = trim((string) ($row['end_time'] ?? ''));
+                $description = trim((string) ($row['description'] ?? ''));
+
+                $hasAnyValue = $name !== '' || $code !== '' || $period !== '' || $startTime !== '' || $endTime !== '' || $description !== '';
+                if (!$hasAnyValue) {
+                    continue;
+                }
+
+                if ($name === '') {
+                    $validator->errors()->add("additional_subjects.$index.name", 'The subject name is required.');
+                }
+
+                if ($code === '') {
+                    $validator->errors()->add("additional_subjects.$index.code", 'The subject code is required.');
+                } elseif (isset($submittedCodes[$code])) {
+                    $validator->errors()->add("additional_subjects.$index.code", 'The subject code must be unique.');
+                } else {
+                    $submittedCodes[$code] = $index;
+                }
+
+                if ($period === '') {
+                    $validator->errors()->add("additional_subjects.$index.period", 'The period is required.');
+                } elseif (!in_array($period, $allowedPeriods, true)) {
+                    $validator->errors()->add("additional_subjects.$index.period", 'The selected period is invalid.');
+                }
+
+                if ($startTime === '') {
+                    $validator->errors()->add("additional_subjects.$index.start_time", 'The start time is required.');
+                }
+
+                if ($endTime === '') {
+                    $validator->errors()->add("additional_subjects.$index.end_time", 'The end time is required.');
+                }
+
+                if ($startTime !== '' && $endTime !== '' && strcmp($endTime, $startTime) <= 0) {
+                    $validator->errors()->add("additional_subjects.$index.end_time", 'End time must be later than start time.');
+                }
+            }
+
+            if ($submittedCodes !== []) {
+                $existingCodes = Subject::query()
+                    ->whereIn('code', array_keys($submittedCodes))
+                    ->pluck('code')
+                    ->map(static fn($code) => strtoupper(trim((string) $code)))
+                    ->all();
+
+                foreach ($existingCodes as $existingCode) {
+                    if (!array_key_exists($existingCode, $submittedCodes)) {
+                        continue;
+                    }
+
+                    $rowIndex = $submittedCodes[$existingCode];
+                    if ($rowIndex === 'code') {
+                        continue;
+                    }
+
+                    $validator->errors()->add("additional_subjects.$rowIndex.code", 'The subject code already exists.');
+                }
+            }
         });
 
         if ($validator->fails()) {
@@ -236,40 +319,48 @@ class SubjectController extends Controller
 
     private function resolveStudySlots(?int $classId, array $submittedStudySlots, ?string $submittedStartTime, ?string $submittedEndTime): array
     {
-        if ($classId) {
-            $class = SchoolClass::query()
-                ->with('studySchedules')
-                ->whereKey($classId)
-                ->first(['id', 'study_start_time', 'study_end_time', 'study_time']);
-
-            if ($class && $class->studySchedules->isNotEmpty()) {
-                return $class->studySchedules
-                    ->values()
-                    ->map(function ($slot, $index) {
-                        return [
-                            'period' => strtolower((string) $slot->period),
-                            'start_time' => $slot->start_time,
-                            'end_time' => $slot->end_time,
-                            'sort_order' => $index,
-                        ];
-                    })
-                    ->all();
-            }
-
-            $classStartTime = $class?->study_start_time ?: $class?->study_time;
-            $classEndTime = $class?->study_end_time;
-
-            if ($classStartTime && $classEndTime) {
-                return [[
-                    'period' => 'custom',
-                    'start_time' => $classStartTime,
-                    'end_time' => $classEndTime,
-                    'sort_order' => 0,
-                ]];
-            }
+        // Keep per-subject times when provided, even if a class is selected.
+        $normalizedSubmittedSlots = $this->normalizeStudySlots($submittedStudySlots, $submittedStartTime, $submittedEndTime);
+        if ($normalizedSubmittedSlots !== []) {
+            return $normalizedSubmittedSlots;
         }
 
-        return $this->normalizeStudySlots($submittedStudySlots, $submittedStartTime, $submittedEndTime);
+        if (!$classId) {
+            return [];
+        }
+
+        $class = SchoolClass::query()
+            ->with('studySchedules')
+            ->whereKey($classId)
+            ->first(['id', 'study_start_time', 'study_end_time', 'study_time']);
+
+        if ($class && $class->studySchedules->isNotEmpty()) {
+            return $class->studySchedules
+                ->values()
+                ->map(function ($slot, $index) {
+                    return [
+                        'period' => strtolower((string) $slot->period),
+                        'start_time' => $slot->start_time,
+                        'end_time' => $slot->end_time,
+                        'sort_order' => $index,
+                    ];
+                })
+                ->all();
+        }
+
+        $classStartTime = $class?->study_start_time ?: $class?->study_time;
+        $classEndTime = $class?->study_end_time;
+
+        if ($classStartTime && $classEndTime) {
+            return [[
+                'period' => 'custom',
+                'start_time' => $classStartTime,
+                'end_time' => $classEndTime,
+                'sort_order' => 0,
+            ]];
+        }
+
+        return [];
     }
 
     private function normalizeStudySlots(array $studySlots, ?string $fallbackStartTime, ?string $fallbackEndTime): array
@@ -312,6 +403,73 @@ class SubjectController extends Controller
         }
 
         return $normalized;
+    }
+
+    private function normalizeAdditionalSubjects(array $additionalSubjects, bool $defaultIsActive): array
+    {
+        $normalized = [];
+
+        foreach (array_values($additionalSubjects) as $row) {
+            $name = trim((string) ($row['name'] ?? ''));
+            $code = strtoupper(trim((string) ($row['code'] ?? '')));
+            $period = strtolower(trim((string) ($row['period'] ?? '')));
+            $startTime = trim((string) ($row['start_time'] ?? ''));
+            $endTime = trim((string) ($row['end_time'] ?? ''));
+            $description = $this->nullableTrim($row['description'] ?? null);
+
+            $hasAnyValue = $name !== '' || $code !== '' || $period !== '' || $startTime !== '' || $endTime !== '' || $description !== null;
+            if (!$hasAnyValue) {
+                continue;
+            }
+
+            if ($name === '' || $code === '' || $startTime === '' || $endTime === '') {
+                continue;
+            }
+
+            if (!in_array($period, $this->allowedPeriods(), true)) {
+                $period = 'custom';
+            }
+
+            $normalized[] = [
+                'name' => $name,
+                'code' => $code,
+                'period' => $period,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'description' => $description,
+                'is_active' => (string) ($row['is_active'] ?? ($defaultIsActive ? '1' : '0')) === '1',
+            ];
+        }
+
+        return $normalized;
+    }
+
+    private function createAdditionalSubjects(array $validated, array $additionalSubjects): void
+    {
+        if ($additionalSubjects === []) {
+            return;
+        }
+
+        foreach ($additionalSubjects as $row) {
+            $subject = Subject::create([
+                'name' => $row['name'],
+                'code' => $row['code'],
+                'study_time' => $row['start_time'],
+                'study_start_time' => $row['start_time'],
+                'study_end_time' => $row['end_time'],
+                'school_class_id' => $validated['school_class_id'] ?? null,
+                'teacher_id' => $validated['teacher_id'] ?? null,
+                'description' => $row['description'],
+                'is_active' => $row['is_active'],
+            ]);
+
+            $this->syncStudySlots($subject, [[
+                'period' => $row['period'],
+                'start_time' => $row['start_time'],
+                'end_time' => $row['end_time'],
+                'sort_order' => 0,
+            ]]);
+        }
     }
 
     private function syncStudySlots(Subject $subject, array $studySlots): void

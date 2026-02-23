@@ -82,18 +82,11 @@ class ClassController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateClassRequest($request);
-        $studySlots = $this->normalizeStudySlots(
-            $validated['study_slots'] ?? [],
-            $validated['study_start_time'] ?? null,
-            $validated['study_end_time'] ?? null
-        );
 
-        $schoolClass = SchoolClass::create($this->buildPayload(
+        SchoolClass::create($this->buildPayload(
             $validated,
-            $request->boolean('is_active', true),
-            $studySlots
+            $request->boolean('is_active', true)
         ));
-        $this->syncStudySlots($schoolClass, $studySlots);
 
         return redirect()
             ->route('admin.classes.index')
@@ -103,18 +96,11 @@ class ClassController extends Controller
     public function update(Request $request, SchoolClass $schoolClass)
     {
         $validated = $this->validateClassRequest($request);
-        $studySlots = $this->normalizeStudySlots(
-            $validated['study_slots'] ?? [],
-            $validated['study_start_time'] ?? null,
-            $validated['study_end_time'] ?? null
-        );
 
         $schoolClass->update($this->buildPayload(
             $validated,
-            $request->boolean('is_active'),
-            $studySlots
+            $request->boolean('is_active')
         ));
-        $this->syncStudySlots($schoolClass, $studySlots);
 
         return redirect()
             ->route('admin.classes.index')
@@ -140,19 +126,12 @@ class ClassController extends Controller
             ->with('success', 'Class deleted successfully.');
     }
 
-    private function buildPayload(array $validated, bool $isActive, array $studySlots): array
+    private function buildPayload(array $validated, bool $isActive): array
     {
-        $primarySlot = $studySlots[0] ?? null;
-        $studyStartTime = $primarySlot['start_time'] ?? ($validated['study_start_time'] ?? null);
-        $studyEndTime = $primarySlot['end_time'] ?? ($validated['study_end_time'] ?? null);
-
         return [
             'name' => trim((string) $validated['name']),
             'section' => $this->nullableTrim($validated['section'] ?? null),
             'room' => $this->nullableTrim($validated['room'] ?? null),
-            'study_time' => $studyStartTime,
-            'study_start_time' => $studyStartTime,
-            'study_end_time' => $studyEndTime,
             'capacity' => $validated['capacity'] ?? null,
             'description' => $this->nullableTrim($validated['description'] ?? null),
             'is_active' => $isActive,

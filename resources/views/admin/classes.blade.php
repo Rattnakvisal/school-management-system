@@ -84,64 +84,13 @@
                         </div>
                     </div>
 
-                    @php
-                        $createStudySlots = old('study_slots');
-                        if (!is_array($createStudySlots) || $createStudySlots === []) {
-                            $createStudySlots = [['period' => 'morning', 'start_time' => '', 'end_time' => '']];
-                        }
-                        $createSlotError =
-                            $errors->first('study_slots') ?:
-                            $errors->first('study_slots.*.period') ?:
-                            $errors->first('study_slots.*.start_time') ?:
-                            $errors->first('study_slots.*.end_time');
-                    @endphp
-
                     <div>
-                        <div class="mb-1 flex items-center justify-between gap-2">
-                            <label class="block text-xs font-semibold text-slate-600">Study Times (Morning / Night /
-                                More)</label>
-                            <button type="button"
-                                class="js-add-study-slot rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100"
-                                data-target="create-study-slots">
-                                + Add Time
-                            </button>
+                        <label class="mb-1 block text-xs font-semibold text-slate-600">Study Times</label>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+                            Study times are now managed in Time Studies.
+                            <a href="{{ route('admin.time-studies.index', ['tab' => 'class']) }}"
+                                class="font-semibold text-indigo-700 hover:text-indigo-900">Manage class times</a>
                         </div>
-                        <div id="create-study-slots" class="js-study-slots space-y-2" data-name-prefix="study_slots"
-                            data-next-index="{{ count($createStudySlots) }}">
-                            @foreach ($createStudySlots as $index => $slot)
-                                @php
-                                    $slotPeriod = strtolower(trim((string) ($slot['period'] ?? 'morning')));
-                                    $slotStart = trim((string) ($slot['start_time'] ?? ''));
-                                    $slotEnd = trim((string) ($slot['end_time'] ?? ''));
-                                @endphp
-                                <div
-                                    class="js-slot-row grid gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-                                    <select name="study_slots[{{ $index }}][period]"
-                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                        @foreach ($periodOptions as $periodKey => $periodLabel)
-                                            <option value="{{ $periodKey }}"
-                                                {{ $slotPeriod === $periodKey ? 'selected' : '' }}>
-                                                {{ $periodLabel }}</option>
-                                        @endforeach
-                                    </select>
-                                    <input type="time" name="study_slots[{{ $index }}][start_time]"
-                                        value="{{ $slotStart }}"
-                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <input type="time" name="study_slots[{{ $index }}][end_time]"
-                                        value="{{ $slotEnd }}"
-                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <button type="button"
-                                        class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
-                                        Remove
-                                    </button>
-                                </div>
-                            @endforeach
-                        </div>
-                        <p class="mt-1 text-[11px] text-slate-500">Example: Morning 08:00 -> 11:00, Night 06:00 ->
-                            08:00 PM.</p>
-                        @if ($createSlotError)
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $createSlotError }}</p>
-                        @endif
                     </div>
 
                     <div>
@@ -185,47 +134,97 @@
             <section
                 class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
                 style="--sd: 4;">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <h2 class="text-lg font-black text-slate-900">Class List</h2>
+                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-black text-slate-900">Class List</h2>
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
+                            </svg>
+                            Filters
+                        </button>
+                    </div>
 
-                    <form method="GET" action="{{ route('admin.classes.index') }}"
-                        class="grid w-full max-w-5xl gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto_auto_auto]">
-                        <input id="q" name="q" type="text" value="{{ $search }}"
-                            placeholder="Search class, room, morning/night/custom time, or schedule"
-                            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                        <select name="status"
-                            class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All</option>
-                            <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                        <select name="period"
-                            class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Periods</option>
-                            @foreach ($periodOptions as $periodKey => $periodLabel)
-                                <option value="{{ $periodKey }}" {{ $period === $periodKey ? 'selected' : '' }}>
-                                    {{ $periodLabel }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <select name="schedule"
-                            class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="all" {{ $schedule === 'all' ? 'selected' : '' }}>All Schedules</option>
-                            <option value="with_schedule" {{ $schedule === 'with_schedule' ? 'selected' : '' }}>With
-                                Schedule</option>
-                            <option value="without_schedule" {{ $schedule === 'without_schedule' ? 'selected' : '' }}>
-                                Without Schedule</option>
-                        </select>
-                        <button type="submit"
-                            class="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white">Filter</button>
-                        <a href="{{ route('admin.classes.index') }}"
-                            class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
-                            Reset
-                        </a>
-                    </form>
-                </div>
+                    <div x-show="filterOpen" x-cloak x-transition.opacity
+                        class="fixed inset-0 z-[80] bg-slate-900/40" @click="filterOpen = false"></div>
 
-                <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+                    <div class="grid gap-4">
+                        <aside x-show="filterOpen" x-cloak
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="translate-x-full"
+                            x-transition:enter-end="translate-x-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="translate-x-0"
+                            x-transition:leave-end="translate-x-full"
+                            class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
+                            <div class="flex h-full flex-col">
+                                <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                                    <h3 class="text-3xl font-black text-slate-900">Filters</h3>
+                                    <div class="flex items-center gap-4">
+                                        <a href="{{ route('admin.classes.index') }}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                                            Clear All
+                                        </a>
+                                        <button type="button" @click="filterOpen = false"
+                                            class="text-2xl font-bold leading-none text-slate-700 hover:text-slate-900" aria-label="Close filters">
+                                            &times;
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <form method="GET" action="{{ route('admin.classes.index') }}" class="flex min-h-0 flex-1 flex-col"
+                                    @submit="filterOpen = false">
+                                    <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Search</h4>
+                                            <input id="q" name="q" type="text" value="{{ $search }}"
+                                                placeholder="Search class, room, morning/night/custom time, or schedule"
+                                                class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        </section>
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Status</h4>
+                                            <select name="status"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All</option>
+                                                <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
+                                                <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                            </select>
+                                        </section>
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Period</h4>
+                                            <select name="period"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Periods</option>
+                                                @foreach ($periodOptions as $periodKey => $periodLabel)
+                                                    <option value="{{ $periodKey }}" {{ $period === $periodKey ? 'selected' : '' }}>
+                                                        {{ $periodLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </section>
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Schedule</h4>
+                                            <select name="schedule"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $schedule === 'all' ? 'selected' : '' }}>All Schedules</option>
+                                                <option value="with_schedule" {{ $schedule === 'with_schedule' ? 'selected' : '' }}>With Schedule</option>
+                                                <option value="without_schedule" {{ $schedule === 'without_schedule' ? 'selected' : '' }}>Without Schedule</option>
+                                            </select>
+                                        </section>
+                                    </div>
+                                    <div class="border-t border-slate-200 px-5 py-4">
+                                        <button type="submit"
+                                            class="inline-flex w-full items-center justify-center rounded-lg bg-slate-950 px-4 py-3 text-lg font-bold text-white transition hover:bg-slate-800">
+                                            Apply Filters
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </aside>
+
+                        <div class="min-w-0">
+                            <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                     <div class="max-h-[560px] overflow-auto">
                         <table class="w-full min-w-[1050px] text-left text-sm">
                             <thead
@@ -386,82 +385,15 @@
                                                         </div>
                                                     </div>
 
-                                                    @php
-                                                        $editStudySlots = $schoolClass->studySchedules
-                                                            ->map(function ($slot) {
-                                                                return [
-                                                                    'period' => $slot->period,
-                                                                    'start_time' => $slot->start_time ? \Carbon\Carbon::parse($slot->start_time)->format('H:i') : '',
-                                                                    'end_time' => $slot->end_time ? \Carbon\Carbon::parse($slot->end_time)->format('H:i') : '',
-                                                                ];
-                                                            })
-                                                            ->values()
-                                                            ->all();
-
-                                                        if ($editStudySlots === []) {
-                                                            $fallbackStart = $schoolClass->study_start_time ?: $schoolClass->study_time;
-                                                            $fallbackEnd = $schoolClass->study_end_time;
-                                                            if ($fallbackStart && $fallbackEnd) {
-                                                                $editStudySlots[] = [
-                                                                    'period' => 'custom',
-                                                                    'start_time' => \Carbon\Carbon::parse($fallbackStart)->format('H:i'),
-                                                                    'end_time' => \Carbon\Carbon::parse($fallbackEnd)->format('H:i'),
-                                                                ];
-                                                            } else {
-                                                                $editStudySlots[] = [
-                                                                    'period' => 'morning',
-                                                                    'start_time' => '',
-                                                                    'end_time' => '',
-                                                                ];
-                                                            }
-                                                        }
-                                                    @endphp
-
                                                     <div>
-                                                        <div class="mb-1 flex items-center justify-between gap-2">
-                                                            <label class="block text-xs font-semibold text-slate-600">Study
-                                                                Times</label>
-                                                            <button type="button"
-                                                                class="js-add-study-slot rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-100"
-                                                                data-target="edit-study-slots-{{ $schoolClass->id }}">
-                                                                + Add Time
-                                                            </button>
-                                                        </div>
-                                                        <div id="edit-study-slots-{{ $schoolClass->id }}"
-                                                            class="js-study-slots space-y-2" data-name-prefix="study_slots"
-                                                            data-next-index="{{ count($editStudySlots) }}">
-                                                            @foreach ($editStudySlots as $index => $slot)
-                                                                @php
-                                                                    $slotPeriod = strtolower(trim((string) ($slot['period'] ?? 'morning')));
-                                                                    $slotStart = trim((string) ($slot['start_time'] ?? ''));
-                                                                    $slotEnd = trim((string) ($slot['end_time'] ?? ''));
-                                                                @endphp
-                                                                <div
-                                                                    class="js-slot-row grid gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-                                                                    <select
-                                                                        name="study_slots[{{ $index }}][period]"
-                                                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                        @foreach ($periodOptions as $periodKey => $periodLabel)
-                                                                            <option value="{{ $periodKey }}"
-                                                                                {{ $slotPeriod === $periodKey ? 'selected' : '' }}>
-                                                                                {{ $periodLabel }}
-                                                                            </option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                    <input type="time"
-                                                                        name="study_slots[{{ $index }}][start_time]"
-                                                                        value="{{ $slotStart }}"
-                                                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                    <input type="time"
-                                                                        name="study_slots[{{ $index }}][end_time]"
-                                                                        value="{{ $slotEnd }}"
-                                                                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                    <button type="button"
-                                                                        class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
-                                                                        Remove
-                                                                    </button>
-                                                                </div>
-                                                            @endforeach
+                                                        <label class="mb-1 block text-xs font-semibold text-slate-600">Study
+                                                            Times</label>
+                                                        <div
+                                                            class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+                                                            Manage this class schedule from Time Studies.
+                                                            <a href="{{ route('admin.time-studies.index', ['tab' => 'class', 'class_id' => $schoolClass->id]) }}"
+                                                                class="font-semibold text-indigo-700 hover:text-indigo-900">Open
+                                                                Time Studies</a>
                                                         </div>
                                                     </div>
 
@@ -522,6 +454,9 @@
 
                 <div class="mt-5">
                     {{ $classes->links() }}
+                </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>

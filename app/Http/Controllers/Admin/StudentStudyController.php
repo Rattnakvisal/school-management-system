@@ -23,6 +23,7 @@ class StudentStudyController extends Controller
         $subjectId = ctype_digit($subjectIdRaw) ? (int) $subjectIdRaw : null;
         $hasMajorSubjectColumn = $this->hasMajorSubjectColumn();
         $hasClassStudyTimeColumn = $this->hasClassStudyTimeColumn();
+        $hasSubjectStudyTimesTable = Schema::hasTable('subject_study_times');
 
         $studyQuery = DB::table('users as students')
             ->leftJoin('school_classes as classes', 'classes.id', '=', 'students.school_class_id')
@@ -45,6 +46,17 @@ class StudentStudyController extends Controller
             $studyQuery->leftJoin('class_study_times as class_slots', 'class_slots.id', '=', 'students.class_study_time_id');
         }
 
+        if ($hasSubjectStudyTimesTable) {
+            $firstSubjectSlot = DB::table('subject_study_times')
+                ->selectRaw('MIN(id) as id, subject_id')
+                ->groupBy('subject_id');
+
+            $studyQuery->leftJoinSub($firstSubjectSlot, 'subject_slot_map', function ($join) {
+                $join->on('subject_slot_map.subject_id', '=', 'subjects.id');
+            });
+            $studyQuery->leftJoin('subject_study_times as subject_slots', 'subject_slots.id', '=', 'subject_slot_map.id');
+        }
+
         $studyQuery->leftJoin('users as teachers', function ($join) {
             $join->on('teachers.id', '=', 'subjects.teacher_id')
                 ->where('teachers.role', '=', 'teacher');
@@ -64,8 +76,8 @@ class StudentStudyController extends Controller
             'subjects.id as subject_id',
             'subjects.name as subject_name',
             'subjects.code as subject_code',
-            DB::raw('COALESCE(subjects.study_start_time, subjects.study_time) as subject_study_start_time'),
-            'subjects.study_end_time as subject_study_end_time',
+            DB::raw(($hasSubjectStudyTimesTable ? 'subject_slots.start_time' : 'COALESCE(subjects.study_start_time, subjects.study_time)') . ' as subject_study_start_time'),
+            DB::raw(($hasSubjectStudyTimesTable ? 'subject_slots.end_time' : 'subjects.study_end_time') . ' as subject_study_end_time'),
             'teachers.name as teacher_name',
             'teachers.email as teacher_email',
             'teachers.created_at as teacher_created_at',
@@ -88,7 +100,7 @@ class StudentStudyController extends Controller
         }
 
         if ($search !== '') {
-            $studyQuery->where(function ($query) use ($search) {
+            $studyQuery->where(function ($query) use ($search, $hasSubjectStudyTimesTable) {
                 $query->where('students.name', 'like', '%' . $search . '%')
                     ->orWhere('students.email', 'like', '%' . $search . '%')
                     ->orWhere('classes.name', 'like', '%' . $search . '%')
@@ -104,6 +116,11 @@ class StudentStudyController extends Controller
                     ->orWhere('subjects.study_end_time', 'like', '%' . $search . '%')
                     ->orWhere('teachers.name', 'like', '%' . $search . '%')
                     ->orWhere('teachers.email', 'like', '%' . $search . '%');
+
+                if ($hasSubjectStudyTimesTable) {
+                    $query->orWhere('subject_slots.start_time', 'like', '%' . $search . '%')
+                        ->orWhere('subject_slots.end_time', 'like', '%' . $search . '%');
+                }
             });
         }
 

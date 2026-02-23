@@ -180,47 +180,96 @@
             <section
                 class="student-reveal student-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--sd: 4;">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <h2 class="text-lg font-black text-slate-900">Student List</h2>
+                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-black text-slate-900">Student List</h2>
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
+                            </svg>
+                            Filters
+                        </button>
+                    </div>
 
-                    <form method="GET" action="{{ route('admin.students.index') }}"
-                        class="grid w-full max-w-5xl gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-2 {{ $hasClassColumn ? 'sm:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto_auto]' : 'sm:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto]' }}">
-                        <input id="q" name="q" type="text" value="{{ $search }}"
-                            placeholder="Search by name, email, or class"
-                            class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                        @if ($hasClassColumn)
-                            <select name="class_id"
-                                class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes</option>
-                                @foreach ($classes as $classOption)
-                                    <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
-                                        {{ $classOption->display_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        @else
-                            <input type="hidden" name="class_id" value="all">
-                        @endif
-                        @if ($hasStatusColumn)
-                            <select name="status"
-                                class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All</option>
-                                <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                        @else
-                            <input type="hidden" name="status" value="all">
-                        @endif
-                        <button type="submit"
-                            class="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white">Filter</button>
-                        <a href="{{ route('admin.students.index') }}"
-                            class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
-                            Reset
-                        </a>
-                    </form>
-                </div>
+                    <div x-show="filterOpen" x-cloak x-transition.opacity
+                        class="fixed inset-0 z-[80] bg-slate-900/40" @click="filterOpen = false"></div>
 
-                <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+                    <div class="grid gap-4">
+                        <aside x-show="filterOpen" x-cloak
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="translate-x-full"
+                            x-transition:enter-end="translate-x-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="translate-x-0"
+                            x-transition:leave-end="translate-x-full"
+                            class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
+                            <div class="flex h-full flex-col">
+                                <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                                    <h3 class="text-3xl font-black text-slate-900">Filters</h3>
+                                    <div class="flex items-center gap-4">
+                                        <a href="{{ route('admin.students.index') }}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                                            Clear All
+                                        </a>
+                                        <button type="button" @click="filterOpen = false"
+                                            class="text-2xl font-bold leading-none text-slate-700 hover:text-slate-900" aria-label="Close filters">
+                                            &times;
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <form method="GET" action="{{ route('admin.students.index') }}" class="flex min-h-0 flex-1 flex-col"
+                                    @submit="filterOpen = false">
+                                    <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Search</h4>
+                                            <input id="q" name="q" type="text" value="{{ $search }}"
+                                                placeholder="Search by name, email, or class"
+                                                class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        </section>
+                                        @if ($hasClassColumn)
+                                            <section class="space-y-2">
+                                                <h4 class="text-xl font-bold text-slate-900">Class</h4>
+                                                <select name="class_id"
+                                                    class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                    <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes</option>
+                                                    @foreach ($classes as $classOption)
+                                                        <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                                            {{ $classOption->display_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </section>
+                                        @else
+                                            <input type="hidden" name="class_id" value="all">
+                                        @endif
+                                        @if ($hasStatusColumn)
+                                            <section class="space-y-2">
+                                                <h4 class="text-xl font-bold text-slate-900">Status</h4>
+                                                <select name="status"
+                                                    class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                    <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All</option>
+                                                    <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
+                                                    <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                                </select>
+                                            </section>
+                                        @else
+                                            <input type="hidden" name="status" value="all">
+                                        @endif
+                                    </div>
+                                    <div class="border-t border-slate-200 px-5 py-4">
+                                        <button type="submit"
+                                            class="inline-flex w-full items-center justify-center rounded-lg bg-slate-950 px-4 py-3 text-lg font-bold text-white transition hover:bg-slate-800">
+                                            Apply Filters
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </aside>
+
+                        <div class="min-w-0">
+                            <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                     <div class="max-h-[560px] overflow-auto">
                         <table class="w-full min-w-[1180px] text-left text-sm">
                             <thead
@@ -504,6 +553,9 @@
 
                 <div class="mt-5">
                     {{ $students->links() }}
+                </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>

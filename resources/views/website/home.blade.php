@@ -210,6 +210,181 @@
             }
         }
 
+        .chatbot-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #f8fafc;
+        }
+
+        .chatbot-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chatbot-scroll::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 999px;
+        }
+
+        .chatbot-scroll::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        .chatbot-robot {
+            --robot-size: 32px;
+            position: relative;
+            display: inline-block;
+            width: var(--robot-size);
+            height: calc(var(--robot-size) + 10px);
+            animation: robot-float 2.6s ease-in-out infinite;
+        }
+
+        .chatbot-robot--sm {
+            --robot-size: 24px;
+        }
+
+        .chatbot-antenna {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 9px;
+            background: #a5f3fc;
+            transform: translateX(-50%);
+        }
+
+        .chatbot-antenna::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -5px;
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: #22d3ee;
+            transform: translateX(-50%);
+            box-shadow: 0 0 0 0 rgba(34, 211, 238, .55);
+            animation: robot-pulse 1.6s ease-in-out infinite;
+        }
+
+        .chatbot-head {
+            position: absolute;
+            top: 9px;
+            left: 50%;
+            width: var(--robot-size);
+            height: calc(var(--robot-size) * .78);
+            border-radius: 10px;
+            border: 2px solid #0e7490;
+            background: linear-gradient(180deg, #cffafe 0%, #a5f3fc 100%);
+            transform: translateX(-50%);
+            box-shadow: inset 0 -3px 0 rgba(14, 116, 144, .16);
+        }
+
+        .chatbot-head::before,
+        .chatbot-head::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 4px;
+            height: 12px;
+            border-radius: 999px;
+            background: #67e8f9;
+            transform-origin: top center;
+            animation: robot-wave 2.1s ease-in-out infinite;
+        }
+
+        .chatbot-head::before {
+            left: -5px;
+            transform: translateY(-50%) rotate(-12deg);
+        }
+
+        .chatbot-head::after {
+            right: -5px;
+            transform: translateY(-50%) rotate(12deg);
+            animation-delay: .2s;
+        }
+
+        .chatbot-face {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .chatbot-eye {
+            width: 5px;
+            height: 5px;
+            border-radius: 999px;
+            background: #0f172a;
+            transform-origin: center;
+            animation: robot-blink 4.2s ease-in-out infinite;
+        }
+
+        .chatbot-eye--right {
+            animation-delay: .24s;
+        }
+
+        .chatbot-mouth {
+            position: absolute;
+            left: 50%;
+            bottom: 5px;
+            width: 11px;
+            height: 5px;
+            border-bottom: 2px solid #0e7490;
+            border-radius: 0 0 8px 8px;
+            transform: translateX(-50%);
+        }
+
+        @keyframes robot-float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+
+        @keyframes robot-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 211, 238, .45);
+            }
+
+            60% {
+                box-shadow: 0 0 0 8px rgba(34, 211, 238, 0);
+            }
+        }
+
+        @keyframes robot-blink {
+
+            0%,
+            44%,
+            48%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            46% {
+                transform: scaleY(.1);
+            }
+        }
+
+        @keyframes robot-wave {
+
+            0%,
+            100% {
+                transform: translateY(-50%) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-50%) rotate(16deg);
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
 
             .hero-shine::after,
@@ -242,6 +417,14 @@
             .card-hover,
             .icon-pop {
                 transition: none;
+            }
+
+            .chatbot-robot,
+            .chatbot-antenna::before,
+            .chatbot-eye,
+            .chatbot-head::before,
+            .chatbot-head::after {
+                animation: none !important;
             }
         }
     </style>
@@ -1171,23 +1354,198 @@
         </main>
 
         <!-- FOOTER -->
-        <footer data-reveal class="border-t border-slate-200 bg-white/80">
-            <div
-                class="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-sm text-slate-900 sm:px-6">
-                <p>Copyright {{ date('Y') }} {{ $schoolName }}. All rights reserved.</p>
-                <div class="flex items-center gap-4 font-semibold">
-                    <a href="#about" class="transition hover:text-slate-800">About</a>
-                    <a href="#admission" class="transition hover:text-slate-800">Admission</a>
-                    <a href="#contact" class="transition hover:text-slate-800">Contact</a>
+        <footer class="bg-slate-900 text-slate-300">
+            <div class="mx-auto max-w-7xl px-6 py-14">
+
+                <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+
+                    <!-- School Info -->
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-lg font-bold text-white">{{ $schoolName }}</h3>
+                        </div>
+
+                        <p class="mt-4 text-sm leading-relaxed text-slate-400">
+                            Empowering students with quality education, innovation, and leadership skills
+                            for a brighter future.
+                        </p>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div>
+                        <h4 class="mb-4 text-white font-semibold">Quick Links</h4>
+                        <ul class="space-y-3 text-sm">
+
+                            <li class="flex items-center gap-2">
+                                <!-- Arrow Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                                <a href="#about" class="hover:text-white transition">About Us</a>
+                            </li>
+
+                            <li class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                                <a href="#programs" class="hover:text-white transition">Programs</a>
+                            </li>
+
+                            <li class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                                <a href="#news" class="hover:text-white transition">News & Events</a>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <!-- Admissions -->
+                    <div>
+                        <h4 class="mb-4 text-white font-semibold">Admissions</h4>
+                        <ul class="space-y-3 text-sm">
+
+                            <li class="flex items-center gap-2">
+                                <!-- Check Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                <a href="#admission" class="hover:text-white transition">Apply Now</a>
+                            </li>
+
+                            <li class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                <a href="#requirements" class="hover:text-white transition">Requirements</a>
+                            </li>
+
+                            <li class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                <a href="#fees" class="hover:text-white transition">Tuition Fees</a>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <!-- Contact -->
+                    <div>
+                        <h4 class="mb-4 text-white font-semibold">Contact Us</h4>
+                        <ul class="space-y-4 text-sm text-slate-400">
+
+                            <!-- Location -->
+                            <li class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                                </svg>
+                                Phnom Penh, Cambodia
+                            </li>
+
+                            <!-- Phone -->
+                            <li class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 5h2l3 7-1.5 2a11 11 0 005.5 5.5L14 17l7 3v2a1 1 0 01-1 1C10 23 1 14 1 4a1 1 0 011-1z" />
+                                </svg>
+                                +855 12 345 678
+                            </li>
+
+                            <!-- Email -->
+                            <li class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 12H8m8 0l-8 0m8 0a4 4 0 10-8 0 4 4 0 008 0z" />
+                                </svg>
+                                info@school.edu.kh
+                            </li>
+
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- Bottom -->
+                <div class="mt-10 border-t border-slate-700 pt-6 text-center text-sm text-slate-500">
+                    © {{ date('Y') }} {{ $schoolName }}. All rights reserved.
+                </div>
+
             </div>
         </footer>
 
-        <!-- Back to top -->
-        <button x-show="top" x-cloak x-transition @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
-            class="fixed bottom-5 right-5 z-50 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-slate-800">
-            Top
-        </button>
+        <!-- Static chatbot -->
+        <div id="school-chatbot" class="fixed bottom-5 right-5 z-50">
+            <button id="chatbot-toggle" type="button"
+                class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-cyan-600 text-white shadow-xl transition hover:bg-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-200"
+                aria-expanded="false" aria-controls="chatbot-panel" aria-label="Open chatbot">
+                <span class="chatbot-robot" aria-hidden="true">
+                    <span class="chatbot-antenna"></span>
+                    <span class="chatbot-head">
+                        <span class="chatbot-face">
+                            <span class="chatbot-eye"></span>
+                            <span class="chatbot-eye chatbot-eye--right"></span>
+                        </span>
+                        <span class="chatbot-mouth"></span>
+                    </span>
+                </span>
+            </button>
+
+            <section id="chatbot-panel"
+                class="mt-3 hidden w-[min(92vw,360px)] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
+                aria-live="polite">
+                <header class="bg-slate-900 px-4 py-3 text-white">
+                    <div class="flex items-center gap-3">
+                        <span class="chatbot-robot chatbot-robot--sm shrink-0" aria-hidden="true">
+                            <span class="chatbot-antenna"></span>
+                            <span class="chatbot-head">
+                                <span class="chatbot-face">
+                                    <span class="chatbot-eye"></span>
+                                    <span class="chatbot-eye chatbot-eye--right"></span>
+                                </span>
+                                <span class="chatbot-mouth"></span>
+                            </span>
+                        </span>
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-cyan-300">Assistant</p>
+                            <h3 class="mt-1 text-sm font-semibold">School Q&A Chatbot</h3>
+                        </div>
+                    </div>
+                </header>
+
+                <div id="chatbot-messages" class="chatbot-scroll h-80 space-y-3 overflow-y-auto bg-slate-50 px-3 py-3">
+                </div>
+
+                <div class="border-t border-slate-200 bg-white p-3">
+                    <div id="chatbot-quick-questions" class="mb-3 flex flex-wrap gap-2"></div>
+                    <form id="chatbot-form" class="flex items-center gap-2">
+                        <input id="chatbot-input" type="text"
+                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
+                            placeholder="Ask a question..." autocomplete="off">
+                        <button type="submit"
+                            class="rounded-xl bg-cyan-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-cyan-500">
+                            Send
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </div>
     </div>
 
     <script>
@@ -1214,6 +1572,155 @@
             }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
 
             items.forEach((el) => io.observe(el));
+
+            const chatbot = document.getElementById('school-chatbot');
+            if (!chatbot) {
+                return;
+            }
+
+            const schoolName = @json($schoolName);
+            const toggle = document.getElementById('chatbot-toggle');
+            const panel = document.getElementById('chatbot-panel');
+            const form = document.getElementById('chatbot-form');
+            const input = document.getElementById('chatbot-input');
+            const messages = document.getElementById('chatbot-messages');
+            const quickWrap = document.getElementById('chatbot-quick-questions');
+
+            const quickQuestions = [
+                'How can I apply for admission?',
+                'What programs are available?',
+                'What are the office hours?',
+                'How do I contact the school?',
+                'Can parents track student progress online?',
+                'Do teachers manage attendance in the system?'
+            ];
+
+            const answers = [
+                {
+                    keywords: ['admission', 'apply', 'enroll', 'registration', 'register'],
+                    answer: `You can apply online from the Admission section, then submit student details and required documents. The school team reviews your request and confirms enrollment.`
+                },
+                {
+                    keywords: ['program', 'primary', 'secondary', 'club', 'sports', 'curricular'],
+                    answer: `${schoolName} offers Primary, Lower Secondary, Upper Secondary, and Co-Curricular programs including clubs, arts, and sports.`
+                },
+                {
+                    keywords: ['contact', 'phone', 'email', 'address', 'location'],
+                    answer: `Contact admissions by the website contact form, phone (+855 XXX XXX XXX), or email (admissions@schooli.edu). Campus location is Phnom Penh, Cambodia.`
+                },
+                {
+                    keywords: ['hour', 'time', 'open', 'office', 'schedule'],
+                    answer: `Office hours are Monday to Friday, 8:00 AM to 5:00 PM.`
+                },
+                {
+                    keywords: ['parent', 'progress', 'report', 'attendance'],
+                    answer: `Yes. Parents can track attendance, notices, and academic progress through the platform.`
+                },
+                {
+                    keywords: ['teacher', 'attendance', 'manage'],
+                    answer: `Yes. Teachers can record daily attendance and view attendance history reports in the system.`
+                },
+                {
+                    keywords: ['role', 'permission', 'dashboard', 'admin', 'student'],
+                    answer: `The platform uses role-based access with separate dashboards for admin, teachers, and students.`
+                },
+                {
+                    keywords: ['hello', 'hi', 'hey'],
+                    answer: `Hello! Ask me about admission, programs, office hours, contact details, or student tracking.`
+                }
+            ];
+
+            const normalize = (text) => text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').trim();
+
+            const addMessage = (role, text) => {
+                const row = document.createElement('div');
+                row.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
+
+                const bubble = document.createElement('div');
+                bubble.className = role === 'user'
+                    ? 'max-w-[85%] rounded-2xl rounded-br-sm bg-cyan-600 px-3 py-2 text-sm text-white'
+                    : 'max-w-[85%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm text-slate-700 ring-1 ring-slate-200';
+                bubble.textContent = text;
+
+                row.appendChild(bubble);
+                messages.appendChild(row);
+                messages.scrollTop = messages.scrollHeight;
+                return bubble;
+            };
+
+            const pickAnswer = (question) => {
+                const clean = normalize(question);
+                if (!clean) {
+                    return 'Please type a question so I can help you.';
+                }
+
+                let best = null;
+                let bestScore = 0;
+                for (const item of answers) {
+                    let score = 0;
+                    for (const key of item.keywords) {
+                        if (clean.includes(key)) {
+                            score += 1;
+                        }
+                    }
+                    if (score > bestScore) {
+                        best = item;
+                        bestScore = score;
+                    }
+                }
+
+                if (best && bestScore > 0) {
+                    return best.answer;
+                }
+
+                return `I can help with admission, programs, contact details, office hours, and platform features. Please ask one of those topics.`;
+            };
+
+            const renderQuickQuestions = () => {
+                quickWrap.innerHTML = '';
+                const shuffled = [...quickQuestions].sort(() => Math.random() - 0.5).slice(0, 3);
+                shuffled.forEach((q) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-300 hover:text-cyan-700';
+                    btn.textContent = q;
+                    btn.addEventListener('click', () => sendQuestion(q));
+                    quickWrap.appendChild(btn);
+                });
+            };
+
+            const sendQuestion = (question) => {
+                const text = (question || '').trim();
+                if (!text) {
+                    return;
+                }
+
+                addMessage('user', text);
+                const thinkingBubble = addMessage('bot', 'Typing...');
+                setTimeout(() => {
+                    thinkingBubble.textContent = pickAnswer(text);
+                    messages.scrollTop = messages.scrollHeight;
+                }, 380);
+                renderQuickQuestions();
+                input.value = '';
+            };
+
+            toggle.addEventListener('click', () => {
+                const isOpen = !panel.classList.contains('hidden');
+                panel.classList.toggle('hidden', isOpen);
+                toggle.setAttribute('aria-expanded', String(!isOpen));
+                if (!isOpen) {
+                    input.focus();
+                }
+            });
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                sendQuestion(input.value);
+            });
+
+            addMessage('bot', `Hi, welcome to ${schoolName}. Ask me a question and I will answer automatically.`);
+            renderQuickQuestions();
         });
     </script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>

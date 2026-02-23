@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\ClassController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\StudentStudyController;
+use App\Http\Controllers\Admin\TimeStudyController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,13 @@ Route::middleware(['auth', 'admin'])
         Route::patch('/subjects/{subject}/status', [SubjectController::class, 'toggleStatus'])->name('subjects.status');
         Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
         Route::get('/student-study', [StudentStudyController::class, 'index'])->name('student-study.index');
+        Route::get('/time-studies', [TimeStudyController::class, 'index'])->name('time-studies.index');
+        Route::post('/time-studies/classes', [TimeStudyController::class, 'storeClass'])->name('time-studies.classes.store');
+        Route::put('/time-studies/classes/{classStudyTime}', [TimeStudyController::class, 'updateClass'])->name('time-studies.classes.update');
+        Route::delete('/time-studies/classes/{classStudyTime}', [TimeStudyController::class, 'destroyClass'])->name('time-studies.classes.destroy');
+        Route::post('/time-studies/subjects', [TimeStudyController::class, 'storeSubject'])->name('time-studies.subjects.store');
+        Route::put('/time-studies/subjects/{subjectStudyTime}', [TimeStudyController::class, 'updateSubject'])->name('time-studies.subjects.update');
+        Route::delete('/time-studies/subjects/{subjectStudyTime}', [TimeStudyController::class, 'destroySubject'])->name('time-studies.subjects.destroy');
         Route::view('/attendance', 'admin.attendance')->name('attendance.index');
         Route::view('/exams', 'admin.exams')->name('exams.index');
         Route::view('/settings', 'admin.settings')->name('settings');
