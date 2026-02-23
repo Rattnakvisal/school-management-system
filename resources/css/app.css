@@ -57,6 +57,7 @@
 }
 
 @keyframes student-pulse {
+
     0%,
     100% {
         transform: scale(1);
@@ -69,10 +70,22 @@
     }
 }
 
-@keyframes site-rise {
+@keyframes chrome-slide-in {
     from {
         opacity: 0;
-        transform: translateY(22px);
+        transform: translateX(-16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes chrome-drop-in {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
     }
 
     to {
@@ -81,18 +94,22 @@
     }
 }
 
-@keyframes site-float {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-8px);
-    }
-}
-
+/* ================================
+   Better base tokens + consistency
+================================== */
 @layer utilities {
+    .layout-rail {
+        animation: chrome-slide-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .layout-topbar {
+        animation: chrome-drop-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-page-animate]>* {
+        will-change: transform, opacity;
+    }
+
     .dashboard-stage .dash-reveal {
         opacity: 0;
         transform: translateY(18px) scale(0.985);
@@ -132,11 +149,44 @@
         animation-delay: calc(var(--d, 0) * 100ms);
     }
 
-    .student-stage .student-reveal,
-    .teacher-stage .teacher-reveal,
-    .class-stage .class-reveal,
-    .subject-stage .subject-reveal,
-    .study-stage .study-reveal {
+    :root {
+        --surface: #ffffff;
+        --surface-soft: #f8fafc;
+        --surface-2: #f1f5f9;
+        --border: #dbe3f0;
+        --border-2: #e2e8f0;
+
+        --text: #0f172a;
+        --text-soft: #475569;
+        --muted: #64748b;
+
+        --shadow-sm: 0 10px 20px -18px rgba(15, 23, 42, 0.45);
+        --shadow-md: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
+
+        --ring: 0 0 0 4px rgba(59, 130, 246, 0.18);
+        /* blue ring default */
+    }
+
+    /* =========================================
+     Unified "stage" patterns (less repetition)
+  ========================================== */
+    .stage {
+        position: relative;
+    }
+
+    .student-stage,
+    .teacher-stage,
+    .class-stage,
+    .subject-stage,
+    .study-stage,
+    .contact-stage {
+        position: relative;
+    }
+
+    .stage .reveal {
         opacity: 0;
         transform: translateY(18px) scale(0.985);
         animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -144,31 +194,11 @@
         will-change: transform, opacity;
     }
 
-    .student-stage .student-float,
-    .teacher-stage .teacher-float,
-    .class-stage .class-float,
-    .subject-stage .subject-float,
-    .study-stage .study-float {
-        transition: transform 220ms ease, box-shadow 220ms ease;
-    }
-
-    .student-stage .student-float:hover,
-    .teacher-stage .teacher-float:hover,
-    .class-stage .class-float:hover,
-    .subject-stage .subject-float:hover,
-    .study-stage .study-float:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
-    }
-
-    .student-stage .status-dot,
-    .teacher-stage .status-dot,
-    .class-stage .status-dot,
-    .subject-stage .status-dot,
-    .study-stage .status-dot {
-        animation: student-pulse 2s ease-in-out infinite;
-    }
-
+    .student-stage .student-reveal,
+    .teacher-stage .teacher-reveal,
+    .class-stage .class-reveal,
+    .subject-stage .subject-reveal,
+    .study-stage .study-reveal,
     .contact-stage .contact-reveal {
         opacity: 0;
         transform: translateY(18px) scale(0.985);
@@ -177,33 +207,426 @@
         will-change: transform, opacity;
     }
 
+    .stage .float-card {
+        transition: transform 220ms ease, box-shadow 220ms ease;
+    }
+
+    .student-stage .student-float,
+    .teacher-stage .teacher-float,
+    .class-stage .class-float,
+    .subject-stage .subject-float,
+    .study-stage .study-float,
     .contact-stage .contact-float {
         transition: transform 220ms ease, box-shadow 220ms ease;
     }
 
-    .contact-stage .contact-float:hover {
+    .stage .float-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+        box-shadow: var(--shadow-md);
     }
 
+    .student-stage .student-float:hover,
+    .teacher-stage .teacher-float:hover,
+    .class-stage .class-float:hover,
+    .subject-stage .subject-float:hover,
+    .study-stage .study-float:hover,
+    .contact-stage .contact-float:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stage .status-dot {
+        animation: student-pulse 2s ease-in-out infinite;
+    }
+
+    .student-stage .status-dot,
+    .teacher-stage .status-dot,
+    .class-stage .status-dot,
+    .subject-stage .status-dot,
+    .study-stage .status-dot,
     .contact-stage .status-dot {
         animation: student-pulse 2s ease-in-out infinite;
     }
 
-    .site-stage .site-reveal {
-        opacity: 0;
-        transform: translateY(22px);
-        animation: site-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        animation-delay: calc(var(--sd, 0) * 100ms);
-        will-change: transform, opacity;
+    /* ======================
+     Page header (upgrade)
+  ======================= */
+    .admin-page-header {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 55%, #f5f3ff 100%);
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
     }
 
-    .site-stage .site-float {
-        animation: site-float 6s ease-in-out infinite;
+    /* subtle glow bubble */
+    .admin-page-header::after {
+        content: "";
+        position: absolute;
+        right: -4rem;
+        top: -4rem;
+        width: 14rem;
+        height: 14rem;
+        border-radius: 9999px;
+        background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.22), transparent 60%);
+        pointer-events: none;
+        filter: blur(1px);
+    }
+
+    .admin-page-title {
+        color: var(--text);
+        letter-spacing: -0.02em;
+    }
+
+    .admin-page-subtitle {
+        color: var(--text-soft);
+    }
+
+    /* ==================================
+     Better pills (stat badges)
+  =================================== */
+    .admin-page-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 9999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.86);
+        backdrop-filter: blur(6px);
+        padding: 0.4rem 0.8rem;
+        color: #334155;
+        box-shadow: 0 8px 18px -18px rgba(15, 23, 42, 0.55);
+    }
+
+    /* Keep your variants but make them consistent */
+    .admin-page-stat--emerald {
+        border-color: #bbf7d0;
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .admin-page-stat--rose {
+        border-color: #fecdd3;
+        background: #fff1f2;
+        color: #be123c;
+    }
+
+    .admin-page-stat--sky {
+        border-color: #bae6fd;
+        background: #f0f9ff;
+        color: #075985;
+    }
+
+    .admin-page-stat--amber {
+        border-color: #fde68a;
+        background: #fffbeb;
+        color: #a16207;
+    }
+
+    .admin-page-stat--indigo {
+        border-color: #c7d2fe;
+        background: #eef2ff;
+        color: #4338ca;
+    }
+
+    .admin-page-stat--cyan {
+        border-color: #a5f3fc;
+        background: #ecfeff;
+        color: #0e7490;
+    }
+
+    /* ==================================
+     Inputs / Focus (more modern)
+  =================================== */
+    .stage input:not([type="checkbox"]):not([type="file"]),
+    .stage select,
+    .stage textarea {
+        border-color: var(--border);
+        background: #fcfdff;
+        color: var(--text);
+        transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    }
+
+    .stage input:not([type="checkbox"]):not([type="file"]):focus,
+    .stage select:focus,
+    .stage textarea:focus {
+        background: #fff;
+        border-color: rgba(59, 130, 246, 0.55);
+        box-shadow: var(--ring);
+        outline: none;
+    }
+
+    .stage input[type="file"] {
+        border-style: dashed;
+        background: #f8fbff;
+    }
+
+    .stage input[type="checkbox"] {
+        accent-color: var(--stage-accent, #3b82f6);
+    }
+
+    /* ======================
+     Buttons (micro polish)
+  ======================= */
+    .stage button {
+        transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+    }
+
+    .stage button:hover {
+        filter: brightness(1.02);
+        box-shadow: 0 14px 24px -22px rgba(15, 23, 42, 0.55);
+    }
+
+    .stage button:active {
+        transform: translateY(1px);
+        box-shadow: none;
+    }
+
+    /* ==================================
+     Tables (cleaner “cards”, sticky head)
+  =================================== */
+    .stage .overflow-x-auto {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+        padding: 0.35rem;
+    }
+
+    .stage table {
+        min-width: 980px;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+        /* a bit more air */
+    }
+
+    .stage thead th {
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        position: sticky;
+        top: 0;
+        background: rgba(248, 251, 255, 0.92);
+        backdrop-filter: blur(6px);
+        z-index: 10;
+    }
+
+    .stage tbody tr {
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .stage tbody td {
+        background: rgba(255, 255, 255, 0.96);
+        border-top: 1px solid var(--border-2);
+        border-bottom: 1px solid var(--border-2);
+    }
+
+    .stage tbody td:first-child {
+        border-left: 1px solid var(--border-2);
+        border-top-left-radius: 0.9rem;
+        border-bottom-left-radius: 0.9rem;
+    }
+
+    .stage tbody td:last-child {
+        border-right: 1px solid var(--border-2);
+        border-top-right-radius: 0.9rem;
+        border-bottom-right-radius: 0.9rem;
+    }
+
+    .stage tbody tr:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 26px -24px rgba(15, 23, 42, 0.55);
+    }
+
+    .stage tbody tr:hover td {
+        background: #f7faff;
+    }
+
+    /* Pagination divider */
+    .stage .pagination,
+    .stage nav[role="navigation"] {
+        border-top: 1px solid var(--border-2);
+        padding-top: 0.85rem;
+    }
+
+    .class-stage .max-h-\[560px\]::-webkit-scrollbar,
+    .student-stage .max-h-\[560px\]::-webkit-scrollbar,
+    .teacher-stage .max-h-\[560px\]::-webkit-scrollbar,
+    .subject-stage .max-h-\[560px\]::-webkit-scrollbar,
+    .study-stage .max-h-\[560px\]::-webkit-scrollbar,
+    .contact-stage .max-h-\[560px\]::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .class-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
+    .student-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
+    .teacher-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
+    .subject-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
+    .study-stage .max-h-\[560px\]::-webkit-scrollbar-thumb,
+    .contact-stage .max-h-\[560px\]::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 999px;
+        border: 2px solid #f8fafc;
+    }
+
+    .class-stage .max-h-\[560px\]::-webkit-scrollbar-track,
+    .student-stage .max-h-\[560px\]::-webkit-scrollbar-track,
+    .teacher-stage .max-h-\[560px\]::-webkit-scrollbar-track,
+    .subject-stage .max-h-\[560px\]::-webkit-scrollbar-track,
+    .study-stage .max-h-\[560px\]::-webkit-scrollbar-track,
+    .contact-stage .max-h-\[560px\]::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    .class-stage .max-h-\[560px\],
+    .student-stage .max-h-\[560px\],
+    .teacher-stage .max-h-\[560px\],
+    .subject-stage .max-h-\[560px\],
+    .study-stage .max-h-\[560px\],
+    .contact-stage .max-h-\[560px\] {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+    }
+
+    .student-stage .student-list-filters select {
+        min-width: 120px;
+    }
+
+    .student-stage .student-filter-button {
+        min-width: 92px;
+    }
+
+    .student-stage .student-list-scroll {
+        overflow-y: hidden;
+    }
+
+    .student-stage .student-table {
+        min-width: 1120px;
+        table-layout: auto;
+        border-spacing: 0 0.55rem;
+    }
+
+    .student-stage .student-table th {
+        line-height: 1.35;
+        white-space: normal;
+    }
+
+    .student-stage .student-table td {
+        vertical-align: top;
+    }
+
+    .student-stage .student-name {
+        line-height: 1.3;
+        white-space: nowrap;
+    }
+
+    .student-stage .student-email {
+        line-height: 1.45;
+        color: #475569;
+        white-space: nowrap;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+
+    .student-stage .student-table td:last-child {
+        min-width: 224px;
+    }
+
+    .student-stage .student-table th:nth-child(1),
+    .student-stage .student-table td:nth-child(1) {
+        min-width: 240px;
+    }
+
+    .student-stage .student-table th:nth-child(2),
+    .student-stage .student-table td:nth-child(2) {
+        min-width: 300px;
+    }
+
+    /* ==============================
+     Define per-stage accent easily
+  =============================== */
+    .student-stage {
+        --stage-accent: #6366f1;
+    }
+
+    /* indigo */
+    .teacher-stage {
+        --stage-accent: #0ea5e9;
+    }
+
+    /* sky */
+    .class-stage {
+        --stage-accent: #10b981;
+    }
+
+    /* emerald */
+    .subject-stage {
+        --stage-accent: #f59e0b;
+    }
+
+    /* amber */
+    .study-stage {
+        --stage-accent: #ec4899;
+    }
+
+    /* pink */
+
+    /* Optional: use accent ring per stage */
+    .student-stage {
+        --ring: 0 0 0 4px rgba(99, 102, 241, 0.20);
+    }
+
+    .teacher-stage {
+        --ring: 0 0 0 4px rgba(14, 165, 233, 0.20);
+    }
+
+    .class-stage {
+        --ring: 0 0 0 4px rgba(16, 185, 129, 0.20);
+    }
+
+    .subject-stage {
+        --ring: 0 0 0 4px rgba(245, 158, 11, 0.20);
+    }
+
+    .study-stage {
+        --ring: 0 0 0 4px rgba(236, 72, 153, 0.20);
+    }
+
+    /* ==============================
+     Mobile tweaks
+  =============================== */
+    @media (max-width: 1024px) {
+        .admin-page-header {
+            padding: 1.2rem;
+        }
+
+        .stage .overflow-x-auto {
+            padding: 0.2rem;
+            border-radius: 0.85rem;
+        }
+
+        .student-stage .student-table {
+            min-width: 980px;
+            table-layout: auto;
+        }
     }
 }
 
+/* ===================================
+   Reduced motion support (keep yours)
+=================================== */
 @media (prefers-reduced-motion: reduce) {
+
+    .layout-rail,
+    .layout-topbar {
+        animation: none !important;
+    }
+
     .dashboard-stage .dash-reveal,
     .dashboard-stage .dash-ring,
     .dashboard-stage .dash-bar,
@@ -217,45 +640,45 @@
         transition: none !important;
     }
 
+    .stage .reveal,
+    .stage .status-dot,
     .student-stage .student-reveal,
-    .student-stage .status-dot,
     .teacher-stage .teacher-reveal,
-    .teacher-stage .status-dot,
     .class-stage .class-reveal,
-    .class-stage .status-dot,
     .subject-stage .subject-reveal,
-    .subject-stage .status-dot,
     .study-stage .study-reveal,
-    .study-stage .status-dot {
-        animation: none !important;
-        opacity: 1 !important;
-        transform: none !important;
-    }
-
-    .student-stage .student-float,
-    .teacher-stage .teacher-float,
-    .class-stage .class-float,
-    .subject-stage .subject-float,
-    .study-stage .study-float {
-        transition: none !important;
-    }
-
     .contact-stage .contact-reveal,
+    .student-stage .status-dot,
+    .teacher-stage .status-dot,
+    .class-stage .status-dot,
+    .subject-stage .status-dot,
+    .study-stage .status-dot,
     .contact-stage .status-dot {
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
     }
 
+    .stage .float-card,
+    .student-stage .student-float,
+    .teacher-stage .teacher-float,
+    .class-stage .class-float,
+    .subject-stage .subject-float,
+    .study-stage .study-float,
     .contact-stage .contact-float {
         transition: none !important;
     }
 
-    .site-stage .site-reveal,
-    .site-stage .site-float {
-        animation: none !important;
-        opacity: 1 !important;
-        transform: none !important;
+    .admin-page-header::after {
+        display: none !important;
+    }
+
+    .stage button,
+    .stage input,
+    .stage select,
+    .stage textarea,
+    .stage tbody tr {
+        transition: none !important;
     }
 }
 

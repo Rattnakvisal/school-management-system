@@ -26,7 +26,7 @@
 
         {{-- SIDEBAR --}}
         <aside
-            class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 shadow-sm
+            class="layout-rail fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 shadow-sm
                   transition-all duration-300 lg:translate-x-0 h-screen flex flex-col"
             :class="mobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
 
@@ -144,7 +144,7 @@
         <div class="lg:pl-72">
 
             {{-- TOPBAR --}}
-            <header class="sticky top-0 bg-slate-100/80 backdrop-blur border-b border-slate-200 z-30">
+            <header class="layout-topbar sticky top-0 bg-slate-100/80 backdrop-blur border-b border-slate-200 z-30">
                 <div class="h-16 flex items-center px-4 gap-3">
 
                     <button class="lg:hidden p-2 rounded-xl hover:bg-white" @click="mobile=true">
@@ -223,7 +223,7 @@
                 </div>
             </header>
 
-            <main class="p-6">
+            <main class="p-6" data-page-animate>
                 @yield('page')
             </main>
         </div>

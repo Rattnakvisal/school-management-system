@@ -3,20 +3,20 @@
 @section('page')
     <div class="class-stage space-y-6">
         <section
-            class="class-reveal overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-900 to-blue-800 p-6 text-white shadow-lg"
+            class="class-reveal admin-page-header overflow-hidden"
             style="--sd: 1;">
             <div class="flex flex-wrap items-center justify-between gap-5">
                 <div>
-                    <h1 class="text-3xl font-black tracking-tight">Class Management</h1>
-                    <p class="mt-1 text-sm text-indigo-100">Create, organize, and manage classroom groups.</p>
+                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Class Management</h1>
+                    <p class="admin-page-subtitle mt-1 text-sm">Create, organize, and manage classroom groups.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="rounded-full bg-white/15 px-3 py-1.5">Total: {{ $stats['total'] }}</span>
-                    <span class="rounded-full bg-emerald-400/20 px-3 py-1.5 text-emerald-100">Active:
+                    <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
+                    <span class="admin-page-stat admin-page-stat--emerald">Active:
                         {{ $stats['active'] }}</span>
-                    <span class="rounded-full bg-rose-400/20 px-3 py-1.5 text-rose-100">Inactive:
+                    <span class="admin-page-stat admin-page-stat--rose">Inactive:
                         {{ $stats['inactive'] }}</span>
-                    <span class="rounded-full bg-sky-400/20 px-3 py-1.5 text-sky-100">With Schedule:
+                    <span class="admin-page-stat admin-page-stat--sky">With Schedule:
                         {{ $stats['withSchedule'] ?? 0 }}</span>
                 </div>
             </div>
@@ -526,24 +526,6 @@
             </section>
         </div>
     </div>
-
-    <style>
-        .class-stage .max-h-\[560px\]::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-
-        .class-stage .max-h-\[560px\]::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 999px;
-            border: 2px solid #f8fafc;
-        }
-
-        .class-stage .max-h-\[560px\]::-webkit-scrollbar-track {
-            background: #e2e8f0;
-            border-radius: 999px;
-        }
-    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

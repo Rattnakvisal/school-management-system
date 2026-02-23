@@ -3,18 +3,18 @@
 @section('page')
     <div class="contact-stage space-y-6">
         <section
-            class="contact-reveal overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-900 to-blue-800 p-6 text-white shadow-lg"
+            class="contact-reveal admin-page-header overflow-hidden"
             style="--sd: 1;">
             <div class="flex flex-wrap items-center justify-between gap-5">
                 <div>
-                    <h1 class="text-3xl font-black tracking-tight">Contact Messages</h1>
-                    <p class="mt-1 text-sm text-indigo-100">Messages from the home page contact form.</p>
+                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Contact Messages</h1>
+                    <p class="admin-page-subtitle mt-1 text-sm">Messages from the home page contact form.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="rounded-full bg-white/15 px-3 py-1.5">Total: {{ $stats['total'] }}</span>
-                    <span class="rounded-full bg-amber-300/20 px-3 py-1.5 text-amber-100">Unread:
+                    <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
+                    <span class="admin-page-stat admin-page-stat--amber">Unread:
                         {{ $stats['unread'] }}</span>
-                    <span class="rounded-full bg-emerald-400/20 px-3 py-1.5 text-emerald-100">Read:
+                    <span class="admin-page-stat admin-page-stat--emerald">Read:
                         {{ $stats['read'] }}</span>
                 </div>
             </div>
@@ -65,9 +65,10 @@
                 </div>
             </div>
 
-            <div class="mt-5 overflow-x-auto">
-                <table class="min-w-full text-left text-sm">
-                    <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+            <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+                <div class="max-h-[560px] overflow-auto">
+                <table class="w-full min-w-[1100px] text-left text-sm">
+                    <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                         <tr>
                             <th class="px-3 py-3 font-semibold">Sender</th>
                             <th class="px-3 py-3 font-semibold">Subject</th>
@@ -77,9 +78,9 @@
                             <th class="px-3 py-3 font-semibold text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 bg-white">
                         @forelse ($messages as $message)
-                            <tr class="hover:bg-slate-50">
+                            <tr class="align-top hover:bg-slate-50/80">
                                 <td class="px-3 py-3">
                                     <div class="font-semibold text-slate-800">{{ $message->name }}</div>
                                     <a href="mailto:{{ $message->email }}" class="text-xs text-slate-500 pointer">{{ $message->email }}</a>
@@ -115,7 +116,7 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit"
-                                                    class="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
+                                                    class="whitespace-nowrap rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
                                                     Mark Read
                                                 </button>
                                             </form>
@@ -130,7 +131,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                                class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
                                                 Delete
                                             </button>
                                         </form>
@@ -146,6 +147,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <div class="mt-5">

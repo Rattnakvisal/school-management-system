@@ -3,19 +3,19 @@
 @section('page')
     <div class="teacher-stage space-y-6">
         <section
-            class="teacher-reveal overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-900 to-blue-800 p-6 text-white shadow-lg"
+            class="teacher-reveal admin-page-header overflow-hidden"
             style="--sd: 1;">
             <div class="flex flex-wrap items-center justify-between gap-5">
                 <div>
-                    <h1 class="text-3xl font-black tracking-tight">teacher Management</h1>
-                    <p class="mt-1 text-sm text-indigo-100">Create, edit, activate, deactivate, and remove teacher accounts.
+                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Teacher Management</h1>
+                    <p class="admin-page-subtitle mt-1 text-sm">Create, edit, activate, deactivate, and remove teacher accounts.
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="rounded-full bg-white/15 px-3 py-1.5">Total: {{ $stats['total'] }}</span>
-                    <span class="rounded-full bg-emerald-400/20 px-3 py-1.5 text-emerald-100">Active:
+                    <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
+                    <span class="admin-page-stat admin-page-stat--emerald">Active:
                         {{ $stats['active'] }}</span>
-                    <span class="rounded-full bg-rose-400/20 px-3 py-1.5 text-rose-100">Inactive:
+                    <span class="admin-page-stat admin-page-stat--rose">Inactive:
                         {{ $stats['inactive'] }}</span>
                 </div>
             </div>
@@ -51,7 +51,7 @@
 
         <div class="grid gap-6 xl:grid-cols-12">
             <section
-                class="teacher-reveal teacher-float rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
+                class="teacher-reveal teacher-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
                 style="--sd: 3;">
                 <h2 class="text-lg font-black text-slate-900">Create teacher</h2>
                 <p class="mt-1 text-xs text-slate-500">New account will be saved with role `teacher`.</p>
@@ -128,13 +128,13 @@
             </section>
 
             <section
-                class="teacher-reveal teacher-float rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
+                class="teacher-reveal teacher-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--sd: 4;">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <h2 class="text-lg font-black text-slate-900">teacher List</h2>
 
                     <form method="GET" action="{{ route('admin.teachers.index') }}"
-                        class="grid w-full max-w-xl gap-2 sm:grid-cols-[1fr_auto_auto]">
+                        class="grid w-full max-w-5xl gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto]">
                         <input id="q" name="q" type="text" value="{{ $search }}" placeholder="Search by name or email"
                             class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                         @if ($hasStatusColumn)
@@ -149,12 +149,18 @@
                         @endif
                         <button type="submit"
                             class="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white">Filter</button>
+                        <a href="{{ route('admin.teachers.index') }}"
+                            class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                            Reset
+                        </a>
                     </form>
                 </div>
 
-                <div class="mt-5 overflow-x-auto">
-                    <table class="min-w-full text-left text-sm">
-                        <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+                <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+                    <div class="max-h-[560px] overflow-auto">
+                    <table class="w-full min-w-[920px] text-left text-sm">
+                        <thead
+                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                             <tr>
                                 <th class="px-3 py-3 font-semibold">teacher</th>
                                 <th class="px-3 py-3 font-semibold">Email</th>
@@ -163,9 +169,9 @@
                                 <th class="px-3 py-3 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-slate-100 bg-white">
                             @forelse ($teachers as $teacher)
-                                <tr class="hover:bg-slate-50" x-data="{ open: false }">
+                                <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
                                     <td class="px-3 py-3">
                                         <div class="flex items-center gap-3">
                                             <img src="{{ $teacher->avatar_url }}" alt="{{ $teacher->name }}"
@@ -197,7 +203,7 @@
                                     <td class="px-3 py-3">
                                         <div class="flex flex-wrap items-center justify-end gap-2">
                                             <button @click="open = true" type="button"
-                                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                                                class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                 Edit
                                             </button>
 
@@ -208,7 +214,7 @@
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit"
-                                                        class="rounded-lg border px-3 py-1.5 text-xs font-semibold {{ $teacher->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                                                        class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold {{ $teacher->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
                                                         {{ $teacher->is_active ? 'Set Inactive' : 'Set Active' }}
                                                     </button>
                                                 </form>
@@ -219,7 +225,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                                    class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
                                                     Delete
                                                 </button>
                                             </form>
@@ -332,6 +338,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
 
                 <div class="mt-5">

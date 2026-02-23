@@ -3,25 +3,25 @@
 @section('page')
     <div class="study-stage space-y-6">
         <section
-            class="study-reveal overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-900 to-blue-800 p-6 text-white shadow-lg"
+            class="study-reveal admin-page-header overflow-hidden"
             style="--sd: 1;">
             <div class="flex flex-wrap items-center justify-between gap-5">
                 <div>
-                    <h1 class="text-3xl font-black tracking-tight">Student Study</h1>
-                    <p class="mt-1 text-sm text-indigo-100">Students with selected class time, major subject, teacher, and created dates.</p>
+                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Student Study</h1>
+                    <p class="admin-page-subtitle mt-1 text-sm">Students with selected class time, major subject, teacher, and created dates.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="rounded-full bg-white/15 px-3 py-1.5">Students: {{ $stats['students'] }}</span>
-                    <span class="rounded-full bg-emerald-400/20 px-3 py-1.5 text-emerald-100">Subjects:
+                    <span class="admin-page-stat">Students: {{ $stats['students'] }}</span>
+                    <span class="admin-page-stat admin-page-stat--emerald">Subjects:
                         {{ $stats['subjects'] }}</span>
-                    <span class="rounded-full bg-sky-400/20 px-3 py-1.5 text-sky-100">Teachers:
+                    <span class="admin-page-stat admin-page-stat--sky">Teachers:
                         {{ $stats['teachers'] }}</span>
                     @if ($hasMajorSubjectColumn ?? false)
-                        <span class="rounded-full bg-indigo-300/20 px-3 py-1.5 text-indigo-100">With Major:
+                        <span class="admin-page-stat admin-page-stat--indigo">With Major:
                             {{ $stats['withMajorSubject'] ?? 0 }}</span>
                     @endif
                     @if ($hasClassStudyTimeColumn ?? false)
-                        <span class="rounded-full bg-cyan-300/20 px-3 py-1.5 text-cyan-100">With Study Time:
+                        <span class="admin-page-stat admin-page-stat--cyan">With Study Time:
                             {{ $stats['withStudyTime'] ?? 0 }}</span>
                     @endif
                 </div>
@@ -75,7 +75,7 @@
             </div>
 
             <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
-                <div class="max-h-[620px] overflow-auto">
+                <div class="max-h-[560px] overflow-auto">
                     <table class="w-full min-w-[1220px] text-left text-sm">
                         <thead
                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">

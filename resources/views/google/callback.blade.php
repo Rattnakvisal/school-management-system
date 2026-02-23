@@ -9,7 +9,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+<body class="min-h-screen bg-gray-100 flex items-center justify-center p-4" data-page-animate>
 
     <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 text-center">
         <div class="mx-auto w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center mb-4">

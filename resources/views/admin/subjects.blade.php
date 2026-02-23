@@ -2,21 +2,19 @@
 
 @section('page')
     <div class="subject-stage space-y-6">
-        <section
-            class="subject-reveal overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-900 to-blue-800 p-6 text-white shadow-lg"
-            style="--sd: 1;">
+        <section class="subject-reveal admin-page-header overflow-hidden" style="--sd: 1;">
             <div class="flex flex-wrap items-center justify-between gap-5">
                 <div>
-                    <h1 class="text-3xl font-black tracking-tight">Subject Management</h1>
-                    <p class="mt-1 text-sm text-indigo-100">Create and assign subjects to classes.</p>
+                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Subject Management</h1>
+                    <p class="admin-page-subtitle mt-1 text-sm">Create and assign subjects to classes.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="rounded-full bg-white/15 px-3 py-1.5">Total: {{ $stats['total'] }}</span>
-                    <span class="rounded-full bg-emerald-400/20 px-3 py-1.5 text-emerald-100">Active:
+                    <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
+                    <span class="admin-page-stat admin-page-stat--emerald">Active:
                         {{ $stats['active'] }}</span>
-                    <span class="rounded-full bg-sky-400/20 px-3 py-1.5 text-sky-100">Assigned:
+                    <span class="admin-page-stat admin-page-stat--sky">Assigned:
                         {{ $stats['assigned'] }}</span>
-                    <span class="rounded-full bg-amber-300/20 px-3 py-1.5 text-amber-100">With Teacher:
+                    <span class="admin-page-stat admin-page-stat--amber">With Teacher:
                         {{ $stats['withTeacher'] }}</span>
                 </div>
             </div>
@@ -52,7 +50,7 @@
 
         <div class="grid gap-6 xl:grid-cols-12">
             <section
-                class="subject-reveal subject-float rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
+                class="subject-reveal subject-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
                 style="--sd: 3;">
                 <h2 class="text-lg font-black text-slate-900">Create Subject</h2>
                 <p class="mt-1 text-xs text-slate-500">Create a new subject and optionally assign it to a class.</p>
@@ -115,16 +113,14 @@
                                     <select name="study_slots[{{ $index }}][period]"
                                         class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         @foreach ($periodOptions as $periodKey => $periodLabel)
-                                            <option value="{{ $periodKey }}"
-                                                {{ $slotPeriod === $periodKey ? 'selected' : '' }}>
-                                                {{ $periodLabel }}</option>
+                                            <option value="{{ $periodKey }}" {{ $slotPeriod === $periodKey ? 'selected' : '' }}>
+                                                {{ $periodLabel }}
+                                            </option>
                                         @endforeach
                                     </select>
-                                    <input type="time" name="study_slots[{{ $index }}][start_time]"
-                                        value="{{ $slotStart }}"
+                                    <input type="time" name="study_slots[{{ $index }}][start_time]" value="{{ $slotStart }}"
                                         class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <input type="time" name="study_slots[{{ $index }}][end_time]"
-                                        value="{{ $slotEnd }}"
+                                    <input type="time" name="study_slots[{{ $index }}][end_time]" value="{{ $slotEnd }}"
                                         class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                     <button type="button"
                                         class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
@@ -174,8 +170,7 @@
                                         }
                                     }
                                 @endphp
-                                <option value="{{ $classOption->id }}"
-                                    data-study-slots='@json($classSlots)'
+                                <option value="{{ $classOption->id }}" data-study-slots='@json($classSlots)'
                                     data-study-start="{{ ($classOption->study_start_time ?: $classOption->study_time) ? \Illuminate\Support\Str::substr((string) ($classOption->study_start_time ?: $classOption->study_time), 0, 5) : '' }}"
                                     data-study-end="{{ $classOption->study_end_time ? \Illuminate\Support\Str::substr((string) $classOption->study_end_time, 0, 5) : '' }}"
                                     {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
@@ -194,8 +189,7 @@
                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             <option value="">Unassigned</option>
                             @foreach ($teachers as $teacherOption)
-                                <option value="{{ $teacherOption->id }}"
-                                    {{ (string) old('teacher_id') === (string) $teacherOption->id ? 'selected' : '' }}>
+                                <option value="{{ $teacherOption->id }}" {{ (string) old('teacher_id') === (string) $teacherOption->id ? 'selected' : '' }}>
                                     {{ $teacherOption->name }}
                                 </option>
                             @endforeach
@@ -219,8 +213,7 @@
                     <label class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">
                         <span class="text-sm font-semibold text-slate-700">Initial Status</span>
                         <span class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
-                            <input type="checkbox" name="is_active" value="1" class="h-4 w-4 rounded border-slate-300"
-                                {{ old('is_active', '1') ? 'checked' : '' }}>
+                            <input type="checkbox" name="is_active" value="1" class="h-4 w-4 rounded border-slate-300" {{ old('is_active', '1') ? 'checked' : '' }}>
                             Active
                         </span>
                     </label>
@@ -233,13 +226,13 @@
             </section>
 
             <section
-                class="subject-reveal subject-float rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
+                class="subject-reveal subject-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
                 style="--sd: 4;">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <h2 class="text-lg font-black text-slate-900">Subject List</h2>
 
                     <form method="GET" action="{{ route('admin.subjects.index') }}"
-                        class="grid w-full max-w-3xl gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
+                        class="grid w-full max-w-5xl gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto_auto]">
                         <input id="q" name="q" type="text" value="{{ $search }}"
                             placeholder="Search by subject, code, start/end time, or description"
                             class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
@@ -247,8 +240,7 @@
                             class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes</option>
                             @foreach ($classes as $classOption)
-                                <option value="{{ $classOption->id }}"
-                                    {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
                                     {{ $classOption->display_name }}
                                 </option>
                             @endforeach
@@ -261,12 +253,18 @@
                         </select>
                         <button type="submit"
                             class="rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white">Filter</button>
+                        <a href="{{ route('admin.subjects.index') }}"
+                            class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                            Reset
+                        </a>
                     </form>
                 </div>
 
-                <div class="mt-5 overflow-x-auto">
-                    <table class="min-w-full text-left text-sm">
-                        <thead class="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+                <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+                    <div class="max-h-[560px] overflow-auto">
+                    <table class="w-full min-w-[1150px] text-left text-sm">
+                        <thead
+                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                             <tr>
                                 <th class="px-3 py-3 font-semibold">Subject</th>
                                 <th class="px-3 py-3 font-semibold">Code</th>
@@ -279,16 +277,18 @@
                                 <th class="px-3 py-3 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-slate-100 bg-white">
                             @forelse ($subjects as $subject)
-                                <tr class="hover:bg-slate-50" x-data="{ open: false }">
+                                <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
                                     <td class="px-3 py-3">
-                                        <div class="font-semibold text-slate-800">{{ $subject->name }}</div>
+                                        <div class=" whitespace-nowrap font-semibold text-slate-700">
+                                            {{ $subject->name }}
+                                        </div>
                                         <div class="text-xs text-slate-400">
                                             {{ \Illuminate\Support\Str::limit($subject->description ?: 'No description', 60) }}
                                         </div>
                                     </td>
-                                    <td class="px-3 py-3 text-slate-600">{{ $subject->code }}</td>
+                                    <td class="whitespace-nowrap px-3 py-3 text-slate-600">{{ $subject->code }}</td>
                                     <td class="px-3 py-3 text-slate-600">
                                         @if ($subject->studySchedules->isNotEmpty())
                                             <div class="flex max-w-sm flex-wrap gap-1.5">
@@ -321,9 +321,10 @@
                                             @endif
                                         @endif
                                     </td>
-                                    <td class="px-3 py-3 text-slate-600">{{ $subject->schoolClass?->display_name ?: 'Unassigned' }}
+                                    <td class="whitespace-nowrap px-3 py-3 text-slate-600">
+                                        {{ $subject->schoolClass?->display_name ?: 'Unassigned' }}
                                     </td>
-                                    <td class="px-3 py-3 text-slate-600">{{ $subject->teacher?->name ?: 'Unassigned' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-3 text-slate-600">{{ $subject->teacher?->name ?: 'Unassigned' }}</td>
                                     <td class="px-3 py-3 text-slate-600">{{ $subject->students_count ?? 0 }}</td>
                                     <td class="px-3 py-3">
                                         @if ($subject->is_active)
@@ -342,7 +343,7 @@
                                     <td class="px-3 py-3">
                                         <div class="flex flex-wrap items-center justify-end gap-2">
                                             <button @click="open = true" type="button"
-                                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                                                class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                 Edit
                                             </button>
 
@@ -352,7 +353,7 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit"
-                                                    class="rounded-lg border px-3 py-1.5 text-xs font-semibold {{ $subject->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                                                    class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold {{ $subject->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
                                                     {{ $subject->is_active ? 'Set Inactive' : 'Set Active' }}
                                                 </button>
                                             </form>
@@ -362,7 +363,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                                    class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
                                                     Delete
                                                 </button>
                                             </form>
@@ -461,18 +462,15 @@
                                                                     <select name="study_slots[{{ $index }}][period]"
                                                                         class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                         @foreach ($periodOptions as $periodKey => $periodLabel)
-                                                                            <option value="{{ $periodKey }}"
-                                                                                {{ $slotPeriod === $periodKey ? 'selected' : '' }}>
+                                                                            <option value="{{ $periodKey }}" {{ $slotPeriod === $periodKey ? 'selected' : '' }}>
                                                                                 {{ $periodLabel }}
                                                                             </option>
                                                                         @endforeach
                                                                     </select>
-                                                                    <input type="time"
-                                                                        name="study_slots[{{ $index }}][start_time]"
+                                                                    <input type="time" name="study_slots[{{ $index }}][start_time]"
                                                                         value="{{ $slotStart }}"
                                                                         class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                    <input type="time"
-                                                                        name="study_slots[{{ $index }}][end_time]"
+                                                                    <input type="time" name="study_slots[{{ $index }}][end_time]"
                                                                         value="{{ $slotEnd }}"
                                                                         class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     <button type="button"
@@ -482,13 +480,14 @@
                                                                 </div>
                                                             @endforeach
                                                         </div>
-                                                        <input id="edit_study_start_time_{{ $subject->id }}" name="study_start_time"
-                                                            type="hidden"
+                                                        <input id="edit_study_start_time_{{ $subject->id }}"
+                                                            name="study_start_time" type="hidden"
                                                             value="{{ ($subject->study_start_time ?: $subject->study_time) ? \Carbon\Carbon::parse($subject->study_start_time ?: $subject->study_time)->format('H:i') : '' }}">
                                                         <input id="edit_study_end_time_{{ $subject->id }}" name="study_end_time"
                                                             type="hidden"
                                                             value="{{ $subject->study_end_time ? \Carbon\Carbon::parse($subject->study_end_time)->format('H:i') : '' }}">
-                                                        <p class="mt-1 text-[11px] text-slate-500">Auto-syncs from selected class
+                                                        <p class="mt-1 text-[11px] text-slate-500">Auto-syncs from selected
+                                                            class
                                                             schedules.</p>
                                                     </div>
 
@@ -539,13 +538,11 @@
                                                     <div>
                                                         <label for="edit_teacher_id_{{ $subject->id }}"
                                                             class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
-                                                        <select id="edit_teacher_id_{{ $subject->id }}"
-                                                            name="teacher_id"
+                                                        <select id="edit_teacher_id_{{ $subject->id }}" name="teacher_id"
                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                             <option value="">Unassigned</option>
                                                             @foreach ($teachers as $teacherOption)
-                                                                <option value="{{ $teacherOption->id }}"
-                                                                    {{ (string) $subject->teacher_id === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                                <option value="{{ $teacherOption->id }}" {{ (string) $subject->teacher_id === (string) $teacherOption->id ? 'selected' : '' }}>
                                                                     {{ $teacherOption->name }}
                                                                 </option>
                                                             @endforeach
@@ -555,7 +552,8 @@
                                                     <div>
                                                         <label for="edit_description_{{ $subject->id }}"
                                                             class="mb-1 block text-xs font-semibold text-slate-600">Description</label>
-                                                        <textarea id="edit_description_{{ $subject->id }}" name="description" rows="3"
+                                                        <textarea id="edit_description_{{ $subject->id }}" name="description"
+                                                            rows="3"
                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $subject->description }}</textarea>
                                                     </div>
 
@@ -565,8 +563,7 @@
                                                         <span
                                                             class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
                                                             <input type="checkbox" name="is_active" value="1"
-                                                                class="h-4 w-4 rounded border-slate-300"
-                                                                {{ $subject->is_active ? 'checked' : '' }}>
+                                                                class="h-4 w-4 rounded border-slate-300" {{ $subject->is_active ? 'checked' : '' }}>
                                                             Active
                                                         </span>
                                                     </label>
@@ -595,6 +592,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
 
                 <div class="mt-5">
@@ -606,7 +604,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const hasSwal = typeof Swal !== 'undefined';
             const periodOptions = @json($periodOptions);
 
@@ -621,21 +619,21 @@
                 const endTime = defaults.end_time || '';
 
                 return `
-                    <div class="js-slot-row grid gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
-                        <select name="${namePrefix}[${index}][period]"
-                            class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            ${periodOptionHtml(period)}
-                        </select>
-                        <input type="time" name="${namePrefix}[${index}][start_time]" value="${startTime}"
-                            class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                        <input type="time" name="${namePrefix}[${index}][end_time]" value="${endTime}"
-                            class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                        <button type="button"
-                            class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
-                            Remove
-                        </button>
-                    </div>
-                `;
+                                        <div class="js-slot-row grid gap-2 rounded-xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
+                                            <select name="${namePrefix}[${index}][period]"
+                                                class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                ${periodOptionHtml(period)}
+                                            </select>
+                                            <input type="time" name="${namePrefix}[${index}][start_time]" value="${startTime}"
+                                                class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            <input type="time" name="${namePrefix}[${index}][end_time]" value="${endTime}"
+                                                class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            <button type="button"
+                                                class="js-remove-study-slot rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    `;
             };
 
             const syncRemoveButtons = (container) => {
@@ -767,7 +765,7 @@
             document.querySelectorAll('.js-study-slots').forEach((container) => {
                 syncRemoveButtons(container);
 
-                container.addEventListener('click', function(event) {
+                container.addEventListener('click', function (event) {
                     const removeButton = event.target.closest('.js-remove-study-slot');
                     if (!removeButton) {
                         return;
@@ -792,7 +790,7 @@
             });
 
             document.querySelectorAll('.js-add-study-slot').forEach((button) => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const targetId = button.dataset.target || '';
                     const container = targetId ? document.getElementById(targetId) : null;
                     if (!container) {
@@ -830,7 +828,7 @@
                 }
 
                 document.querySelectorAll(selector).forEach((form) => {
-                    form.addEventListener('submit', function(event) {
+                    form.addEventListener('submit', function (event) {
                         if (form.dataset.confirmed === '1') {
                             return;
                         }
@@ -922,7 +920,7 @@
                         showConfirmButton: false
                     });
                 @endif
-            }
+                                }
         });
     </script>
 @endsection

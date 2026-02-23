@@ -251,6 +251,8 @@
         open:false,
         top:false,
         active:'#home',
+        showBanner:false,
+        bannerStorageKey:'website_home_banner_hidden_until',
         setActive(){
             const ids=['#home','#about','#features','#programs','#facilities','#admission','#faq','#contact'];
             const y = window.scrollY + 120;
@@ -259,11 +261,47 @@
                 if (!el) continue;
                 if (el.offsetTop <= y){ this.active = ids[i]; break; }
             }
+        },
+        initBanner(){
+            const forceBanner = new URLSearchParams(window.location.search).get('banner') === '1';
+            try {
+                if (forceBanner) {
+                    window.localStorage.removeItem(this.bannerStorageKey);
+                }
+                const raw = window.localStorage.getItem(this.bannerStorageKey);
+                const hiddenUntil = raw ? Number(raw) : 0;
+                if (!Number.isNaN(hiddenUntil) && hiddenUntil > Date.now()) {
+                    this.showBanner = false;
+                    return;
+                }
+            } catch (_) {}
+
+            setTimeout(() => {
+                this.showBanner = true;
+                document.body.classList.add('overflow-hidden');
+            }, 260);
+        },
+        closeBanner(remember = false){
+            this.showBanner = false;
+            document.body.classList.remove('overflow-hidden');
+            if (remember) {
+                try {
+                    window.localStorage.setItem(this.bannerStorageKey, String(Date.now() + (24 * 60 * 60 * 1000)));
+                } catch (_) {}
+            }
+        },
+        openProgramsFromBanner(){
+            this.closeBanner();
+            const target = document.querySelector('#programs');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
     }" x-init="
         window.addEventListener('scroll', () => { top = window.scrollY > 520; setActive(); });
         setActive();
-    ">
+        initBanner();
+    " @keydown.escape.window="if (showBanner) closeBanner()">
     @php
         $schoolName = $schoolName ?? 'Schooli';
         $studentsTotal = $studentsTotal ?? 0;
@@ -306,6 +344,100 @@
     @endphp
 
     <div class="relative overflow-hidden" id="home">
+        <!-- Opening banner -->
+        <div x-show="showBanner" x-cloak x-transition.opacity class="fixed inset-0 z-[90]">
+            <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" @click="closeBanner()"></div>
+
+            <div class="relative mx-auto flex min-h-screen w-full max-w-6xl items-center px-3 py-6 sm:px-6">
+                <section @click.stop
+                    class="relative w-full overflow-hidden rounded-3xl border border-indigo-200/20 bg-gradient-to-r from-indigo-700 via-blue-700 to-cyan-700 text-white shadow-2xl">
+                    <button type="button" @click="closeBanner()"
+                        class="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition hover:bg-white/20"
+                        aria-label="Close banner">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                    </button>
+
+                    <div
+                        class="pointer-events-none absolute -right-14 -top-14 h-56 w-56 rounded-full bg-white/20 blur-3xl">
+                    </div>
+                    <div
+                        class="pointer-events-none absolute -bottom-16 left-16 h-56 w-56 rounded-full bg-cyan-300/25 blur-3xl">
+                    </div>
+
+                    <div class="relative grid lg:grid-cols-12">
+                        <div class="p-6 sm:p-8 lg:col-span-7">
+                            <span
+                                class="inline-flex rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wide text-cyan-100">
+                                New Semester 2026
+                            </span>
+                            <h2 class="mt-4 text-3xl font-semibold leading-tight sm:text-4xl">
+                                Welcome to {{ $schoolName }}
+                            </h2>
+                            <p class="mt-3 max-w-2xl text-sm text-blue-100 sm:text-base">
+                                Explore programs, admissions, and campus life. Start your enrollment and connect with
+                                our academic team.
+                            </p>
+
+                            <div class="mt-5 grid gap-2 sm:grid-cols-2">
+                                @foreach ($programs as $item)
+                                    <div class="rounded-xl border border-white/20 bg-white/10 px-3 py-2">
+                                        <div class="text-[11px] font-bold uppercase tracking-wide text-cyan-100">
+                                            {{ $item['level'] }}
+                                        </div>
+                                        <div class="text-sm font-semibold">{{ $item['title'] }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <div class="mt-6 flex flex-wrap items-center gap-2">
+                                <button type="button" @click="openProgramsFromBanner()"
+                                    class="rounded-xl bg-white px-4 py-2 text-sm font-bold text-indigo-700 transition hover:bg-cyan-50">
+                                    Explore Programs
+                                </button>
+                                @guest
+                                    <a href="{{ route('register') }}"
+                                        class="rounded-xl border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                                        Apply Now
+                                    </a>
+                                @else
+                                    <a href="{{ route($dashboardRoute) }}"
+                                        class="rounded-xl border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
+                                        Open Dashboard
+                                    </a>
+                                @endguest
+                                <button type="button" @click="closeBanner(true)"
+                                    class="rounded-xl border border-white/30 px-4 py-2 text-sm font-semibold text-blue-50 transition hover:bg-white/10">
+                                    Don't show today
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="relative hidden lg:block lg:col-span-5">
+                            <img src="{{ asset('images/study.jpg') }}" alt="School students"
+                                class="h-full min-h-[420px] w-full object-cover">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-l from-slate-950/60 via-slate-900/20 to-transparent">
+                            </div>
+                            <div
+                                class="absolute bottom-5 left-5 right-5 rounded-2xl border border-white/20 bg-slate-900/55 p-4 backdrop-blur">
+                                <p class="text-xs font-bold uppercase tracking-wide text-cyan-200">Quick Info</p>
+                                <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+                                    <div class="rounded-lg bg-white/10 px-3 py-2">Students:
+                                        {{ number_format($studentsTotal) }}
+                                    </div>
+                                    <div class="rounded-lg bg-white/10 px-3 py-2">Teachers:
+                                        {{ number_format($teachersTotal) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
         <!-- Background blobs -->
         <div class="pointer-events-none absolute inset-0">
             <div class="orb absolute -left-28 top-0 h-80 w-80 rounded-full bg-cyan-300/30 blur-3xl"></div>
@@ -398,7 +530,7 @@
             </div>
         </header>
 
-        <main class="relative z-10">
+        <main class="relative z-10" data-page-animate>
             <!-- HERO -->
             <section class="mx-auto w-full max-w-7xl px-4 pb-10 pt-10 sm:px-6 lg:pb-14 lg:pt-14">
                 <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-10">
@@ -1041,7 +1173,7 @@
         <!-- FOOTER -->
         <footer data-reveal class="border-t border-slate-200 bg-white/80">
             <div
-                class="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-sm text-slate-500 sm:px-6">
+                class="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-sm text-slate-900 sm:px-6">
                 <p>Copyright {{ date('Y') }} {{ $schoolName }}. All rights reserved.</p>
                 <div class="flex items-center gap-4 font-semibold">
                     <a href="#about" class="transition hover:text-slate-800">About</a>
@@ -1084,6 +1216,7 @@
             items.forEach((el) => io.observe(el));
         });
     </script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </body>
 
 </html>

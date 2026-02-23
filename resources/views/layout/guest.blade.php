@@ -9,7 +9,9 @@
 </head>
 
 <body class="antialiased">
-    @yield('content')
+    <main data-page-animate>
+        @yield('content')
+    </main>
 </body>
 
 </html>
