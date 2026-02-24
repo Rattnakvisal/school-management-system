@@ -123,15 +123,11 @@
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
 
-                                {{-- forgot --}}
-                                @if (Route::has('password.request'))
-                                    <div class="mt-3 text-right">
-                                        <a href="{{ route('password.request') }}"
-                                            class="text-sm font-medium text-slate-500 hover:text-slate-900 hover:underline">
-                                            Forgot Password ?
-                                        </a>
-                                    </div>
-                                @endif
+                                <div class="mt-3 text-right">
+                                    <span class="text-sm font-medium text-slate-500">
+                                        Forgot password? Contact administrator.
+                                    </span>
+                                </div>
                             </div>
 
                             {{-- Remember --}}
@@ -178,10 +174,7 @@
                         </div>
 
                         <p class="mt-7 text-center text-sm text-slate-600">
-                            New user?
-                            <a href="{{ route('register') }}" class="font-semibold text-slate-900 hover:underline">
-                                Create account
-                            </a>
+                            Need an account? Contact administrator.
                         </p>
                     </div>
                 </div>

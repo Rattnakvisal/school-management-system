@@ -519,7 +519,7 @@
         ];
 
         $steps = [
-            ['t' => 'Create account', 'd' => 'Register as a student or parent to access the portal.'],
+            ['t' => 'Get access account', 'd' => 'Request an account from the school administrator.'],
             ['t' => 'Submit information', 'd' => 'Complete profile details and required documents.'],
             ['t' => 'Review & placement', 'd' => 'Academic coordinator confirms grade placement.'],
             ['t' => 'Confirm enrollment', 'd' => 'Receive activation and class schedule in the portal.'],
@@ -580,9 +580,9 @@
                                     Explore Programs
                                 </button>
                                 @guest
-                                    <a href="{{ route('register') }}"
+                                    <a href="{{ route('login') }}"
                                         class="rounded-xl border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
-                                        Apply Now
+                                        Login to Portal
                                     </a>
                                 @else
                                     <a href="{{ route($dashboardRoute) }}"
@@ -679,9 +679,9 @@
                                 class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
                                 Login
                             </a>
-                            <a href="{{ route('register') }}"
+                            <a href="#contact"
                                 class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-slate-800">
-                                Register
+                                Contact Admin
                             </a>
                         @endauth
                     </div>
@@ -705,8 +705,8 @@
                         @else
                             <a href="{{ route('login') }}"
                                 class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-center text-sm font-semibold text-slate-700">Login</a>
-                            <a href="{{ route('register') }}"
-                                class="rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-bold text-white">Register</a>
+                            <a href="#contact"
+                                class="rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-bold text-white">Contact Admin</a>
                         @endauth
                     </div>
                 </div>
@@ -744,9 +744,9 @@
                                     Open Dashboard
                                 </a>
                             @else
-                                <a href="{{ route('register') }}"
+                                <a href="#contact"
                                     class="pulse-cta rounded-2xl bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-800">
-                                    Start Enrollment
+                                    Contact Admissions
                                 </a>
                                 <a href="{{ route('login') }}"
                                     class="rounded-2xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
@@ -1102,7 +1102,7 @@
 
                     <div class="mt-6">
                         @guest
-                            <a href="{{ route('register') }}"
+                            <a href="{{ route('login') }}"
                                 class="inline-flex rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-cyan-200">Apply
                                 Now</a>
                         @else
@@ -1308,9 +1308,6 @@
 
                         <div class="mt-6 space-y-3">
                             @guest
-                                <a href="{{ route('register') }}"
-                                    class="block rounded-xl bg-white px-4 py-3 text-center text-sm font-semibold text-slate-900 transition hover:bg-cyan-50">Create
-                                    Account</a>
                                 <a href="{{ route('login') }}"
                                     class="block rounded-xl border border-white/30 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10">Login</a>
                             @else

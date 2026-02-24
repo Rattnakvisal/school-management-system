@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
-use App\Http\Controllers\Auth\PasswordOtpController;
 use App\Http\Controllers\Website\ContactMessageController as WebsiteContactMessageController;
 
 /*
@@ -50,28 +49,6 @@ Route::middleware('guest')->group(function () {
     Route::controller(AuthController::class)->group(function () {
         Route::get('/login', 'showLogin')->name('login');
         Route::post('/login', 'login')->name('login.submit');
-
-        Route::get('/register', 'showRegister')->name('register');
-        Route::post('/register', 'register')->name('register.submit');
-        Route::get('/register/verify', 'showRegisterOtpForm')->name('register.verify');
-        Route::post('/register/verify', 'verifyRegisterOtp')->name('register.verify.post');
-        Route::post('/register/resend-otp', 'resendRegisterOtp')->name('register.resend');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Forgot Password (OTP)
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('forgot-password')->name('password.')->controller(PasswordOtpController::class)->group(function () {
-        Route::get('/', 'requestForm')->name('request');          // GET /forgot-password
-        Route::post('/', 'sendOtp')->name('email');               // POST /forgot-password
-
-        Route::get('/verify', 'verifyForm')->name('verify');      // GET /forgot-password/verify
-        Route::post('/verify', 'verifyOtp')->name('verify.post'); // POST /forgot-password/verify
-
-        Route::get('/reset/{token}', 'resetForm')->name('reset'); // GET /forgot-password/reset/{token}
-        Route::post('/reset', 'updatePassword')->name('update');  // POST /forgot-password/reset
     });
 
     /*
