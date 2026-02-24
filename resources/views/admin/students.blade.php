@@ -364,10 +364,6 @@
                                                                 <div class="student-major-name font-semibold text-slate-700">
                                                                     {{ $student->majorSubject->name }}
                                                                 </div>
-                                                                <span
-                                                                    class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
-                                                                    {{ $student->majorSubject->code }}
-                                                                </span>
                                                             @else
                                                                 <span class="text-slate-400">-</span>
                                                             @endif
@@ -785,7 +781,7 @@
                 subjects.forEach((item) => {
                     const option = document.createElement('option');
                     option.value = String(item.id);
-                    option.textContent = `${item.name} (${item.code})`;
+                    option.textContent = `${item.name}`;
                     if (String(item.id) === String(selectedId || '')) {
                         option.selected = true;
                     }

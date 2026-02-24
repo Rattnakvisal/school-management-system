@@ -25,7 +25,7 @@ class SubjectController extends Controller
         $teacherId = ctype_digit($teacherIdRaw) ? (int) $teacherIdRaw : null;
 
         $subjectQuery = Subject::query()
-            ->with(['schoolClass', 'teacher', 'studySchedules'])
+            ->with(['schoolClass', 'teacher', 'studySchedules.schoolClass', 'studySchedules.teacher'])
             ->withCount('students')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
@@ -44,11 +44,21 @@ class SubjectController extends Controller
             });
 
         if ($classId !== null) {
-            $subjectQuery->where('school_class_id', $classId);
+            $subjectQuery->where(function ($query) use ($classId) {
+                $query->where('school_class_id', $classId)
+                    ->orWhereHas('studySchedules', function ($slotQuery) use ($classId) {
+                        $slotQuery->where('school_class_id', $classId);
+                    });
+            });
         }
 
         if ($teacherId !== null) {
-            $subjectQuery->where('teacher_id', $teacherId);
+            $subjectQuery->where(function ($query) use ($teacherId) {
+                $query->where('teacher_id', $teacherId)
+                    ->orWhereHas('studySchedules', function ($slotQuery) use ($teacherId) {
+                        $slotQuery->where('teacher_id', $teacherId);
+                    });
+            });
         }
 
         if (in_array($status, ['active', 'inactive'], true)) {
@@ -158,8 +168,6 @@ class SubjectController extends Controller
         return [
             'name' => trim((string) $validated['name']),
             'code' => strtoupper(trim((string) $validated['code'])),
-            'school_class_id' => $validated['school_class_id'] ?? null,
-            'teacher_id' => $validated['teacher_id'] ?? null,
             'description' => $this->nullableTrim($validated['description'] ?? null),
             'is_active' => $isActive,
         ];
@@ -195,8 +203,6 @@ class SubjectController extends Controller
             'additional_subjects.*.end_time' => ['nullable', 'date_format:H:i'],
             'additional_subjects.*.description' => ['nullable', 'string', 'max:1000'],
             'additional_subjects.*.is_active' => ['nullable', 'boolean'],
-            'school_class_id' => ['nullable', 'exists:school_classes,id'],
-            'teacher_id' => ['nullable', Rule::exists('users', 'id')->where(fn($query) => $query->where('role', 'teacher'))],
             'description' => ['nullable', 'string', 'max:1000'],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -457,8 +463,8 @@ class SubjectController extends Controller
                 'study_time' => $row['start_time'],
                 'study_start_time' => $row['start_time'],
                 'study_end_time' => $row['end_time'],
-                'school_class_id' => $validated['school_class_id'] ?? null,
-                'teacher_id' => $validated['teacher_id'] ?? null,
+                'school_class_id' => null,
+                'teacher_id' => null,
                 'description' => $row['description'],
                 'is_active' => $row['is_active'],
             ]);

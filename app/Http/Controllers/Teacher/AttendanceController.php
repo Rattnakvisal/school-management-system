@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
 use App\Models\StudentAttendance;
+use App\Models\Subject;
+use App\Models\SubjectStudyTime;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,24 +23,32 @@ class AttendanceController extends Controller
         $allowedStatuses = $this->allowedStatuses();
         $attendanceStatuses = array_keys($allowedStatuses);
         $hasClassDayColumn = Schema::hasColumn('class_study_times', 'day_of_week');
+        $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
+        $hasSubjectTeacherColumn = Schema::hasColumn('subject_study_times', 'teacher_id');
+        $useSlotAssignments = $hasSubjectClassColumn && $hasSubjectTeacherColumn;
 
-        $classes = SchoolClass::query()
-            ->whereHas('subjects', function ($query) use ($teacherId) {
-                $query->where('teacher_id', $teacherId);
-            })
-            ->with([
-                'subjects' => function ($query) use ($teacherId) {
-                    $query->where('teacher_id', $teacherId)->orderBy('name');
-                },
-                'studySchedules' => function ($query) use ($hasClassDayColumn) {
-                    $select = ['id', 'school_class_id', 'period', 'start_time', 'end_time', 'sort_order'];
-                    if ($hasClassDayColumn) {
-                        $select[] = 'day_of_week';
-                    }
+        if ($useSlotAssignments) {
+            $teacherClassIds = SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->whereNotNull('school_class_id')
+                ->distinct()
+                ->pluck('school_class_id')
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => $id > 0)
+                ->values();
 
-                    $query->select($select)
-                        ->when($hasClassDayColumn, function ($inner) {
-                            $inner->orderByRaw("CASE day_of_week
+            $classes = SchoolClass::query()
+                ->whereIn('id', $teacherClassIds->all())
+                ->with([
+                    'studySchedules' => function ($query) use ($hasClassDayColumn) {
+                        $select = ['id', 'school_class_id', 'period', 'start_time', 'end_time', 'sort_order'];
+                        if ($hasClassDayColumn) {
+                            $select[] = 'day_of_week';
+                        }
+
+                        $query->select($select)
+                            ->when($hasClassDayColumn, function ($inner) {
+                                $inner->orderByRaw("CASE day_of_week
                                 WHEN 'monday' THEN 1
                                 WHEN 'tuesday' THEN 2
                                 WHEN 'wednesday' THEN 3
@@ -47,23 +57,92 @@ class AttendanceController extends Controller
                                 WHEN 'saturday' THEN 6
                                 WHEN 'sunday' THEN 7
                                 ELSE 8 END");
-                        })
-                        ->orderBy('sort_order')
-                        ->orderBy('start_time');
-                },
-            ])
-            ->withCount([
-                'students' => function ($query) {
-                    $query->where('role', 'student');
-                },
-                'subjects as taught_subjects_count' => function ($query) use ($teacherId) {
+                            })
+                            ->orderBy('sort_order')
+                            ->orderBy('start_time');
+                    },
+                ])
+                ->withCount([
+                    'students' => function ($query) {
+                        $query->where('role', 'student');
+                    },
+                    'studySchedules as class_slots_count',
+                ])
+                ->orderBy('name')
+                ->orderBy('section')
+                ->get(['id', 'name', 'section', 'room']);
+
+            $subjectsByClass = collect();
+            if ($teacherClassIds->isNotEmpty()) {
+                $subjectsByClass = Subject::query()
+                    ->select(['subjects.id', 'subjects.name', 'subject_study_times.school_class_id'])
+                    ->join('subject_study_times', 'subject_study_times.subject_id', '=', 'subjects.id')
+                    ->where('subject_study_times.teacher_id', $teacherId)
+                    ->whereIn('subject_study_times.school_class_id', $teacherClassIds->all())
+                    ->distinct()
+                    ->orderBy('subjects.name')
+                    ->get()
+                    ->groupBy(fn($row) => (string) $row->school_class_id);
+            }
+
+            $classes->each(function (SchoolClass $schoolClass) use ($subjectsByClass): void {
+                $assignedSubjects = $subjectsByClass
+                    ->get((string) $schoolClass->id, collect())
+                    ->values()
+                    ->map(function ($row) {
+                        return new Subject([
+                            'id' => (int) $row->id,
+                            'name' => (string) $row->name,
+                        ]);
+                    });
+
+                $schoolClass->setRelation('subjects', $assignedSubjects);
+                $schoolClass->setAttribute('taught_subjects_count', $assignedSubjects->count());
+            });
+        } else {
+            $classes = SchoolClass::query()
+                ->whereHas('subjects', function ($query) use ($teacherId) {
                     $query->where('teacher_id', $teacherId);
-                },
-                'studySchedules as class_slots_count',
-            ])
-            ->orderBy('name')
-            ->orderBy('section')
-            ->get(['id', 'name', 'section', 'room']);
+                })
+                ->with([
+                    'subjects' => function ($query) use ($teacherId) {
+                        $query->where('teacher_id', $teacherId)->orderBy('name');
+                    },
+                    'studySchedules' => function ($query) use ($hasClassDayColumn) {
+                        $select = ['id', 'school_class_id', 'period', 'start_time', 'end_time', 'sort_order'];
+                        if ($hasClassDayColumn) {
+                            $select[] = 'day_of_week';
+                        }
+
+                        $query->select($select)
+                            ->when($hasClassDayColumn, function ($inner) {
+                                $inner->orderByRaw("CASE day_of_week
+                                WHEN 'monday' THEN 1
+                                WHEN 'tuesday' THEN 2
+                                WHEN 'wednesday' THEN 3
+                                WHEN 'thursday' THEN 4
+                                WHEN 'friday' THEN 5
+                                WHEN 'saturday' THEN 6
+                                WHEN 'sunday' THEN 7
+                                ELSE 8 END");
+                            })
+                            ->orderBy('sort_order')
+                            ->orderBy('start_time');
+                    },
+                ])
+                ->withCount([
+                    'students' => function ($query) {
+                        $query->where('role', 'student');
+                    },
+                    'subjects as taught_subjects_count' => function ($query) use ($teacherId) {
+                        $query->where('teacher_id', $teacherId);
+                    },
+                    'studySchedules as class_slots_count',
+                ])
+                ->orderBy('name')
+                ->orderBy('section')
+                ->get(['id', 'name', 'section', 'room']);
+        }
 
         $classIds = $classes->pluck('id')->map(fn($id) => (int) $id)->values();
         $selectedClassIdRaw = trim((string) $request->query('class_id', (string) $request->old('school_class_id', '')));
@@ -201,9 +280,25 @@ class AttendanceController extends Controller
         }
 
         $classIds = SchoolClass::query()
-            ->whereHas('subjects', function ($query) use ($teacherId) {
-                $query->where('teacher_id', $teacherId);
-            })
+            ->when(
+                Schema::hasColumn('subject_study_times', 'school_class_id') && Schema::hasColumn('subject_study_times', 'teacher_id'),
+                function ($query) use ($teacherId) {
+                    $query->whereIn(
+                        'id',
+                        SubjectStudyTime::query()
+                            ->where('teacher_id', $teacherId)
+                            ->whereNotNull('school_class_id')
+                            ->distinct()
+                            ->pluck('school_class_id')
+                            ->all()
+                    );
+                },
+                function ($query) use ($teacherId) {
+                    $query->whereHas('subjects', function ($subjectQuery) use ($teacherId) {
+                        $subjectQuery->where('teacher_id', $teacherId);
+                    });
+                }
+            )
             ->pluck('id')
             ->map(fn($id) => (int) $id)
             ->values()

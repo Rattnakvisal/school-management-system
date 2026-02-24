@@ -75,7 +75,7 @@
                                     <section class="space-y-2">
                                         <h4 class="text-xl font-bold text-slate-900">Search</h4>
                                         <input id="q" name="q" type="text" value="{{ $search }}"
-                                            placeholder="Search student, email, class, room, subject, time, code, or teacher"
+                                            placeholder="Search student, email, class, room, subject, time, or teacher"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                     </section>
                                     <section class="space-y-2">
@@ -97,7 +97,7 @@
                                             <option value="all" {{ $subjectId === 'all' ? 'selected' : '' }}>All Subjects</option>
                                             @foreach ($subjects as $subjectOption)
                                                 <option value="{{ $subjectOption->id }}" {{ $subjectId === (string) $subjectOption->id ? 'selected' : '' }}>
-                                                    {{ $subjectOption->name }} ({{ $subjectOption->code }})
+                                                    {{ $subjectOption->name }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -187,7 +187,6 @@
                                     <td class="px-3 py-3 text-slate-600">
                                         @if ($row->subject_name)
                                             <div>{{ $row->subject_name }}</div>
-                                            <div class="text-xs text-slate-400">{{ $row->subject_code ? '(' . $row->subject_code . ')' : '-' }}</div>
                                         @else
                                             Unassigned
                                         @endif

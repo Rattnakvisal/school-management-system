@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
 use App\Models\StudentAttendance;
 use App\Models\Subject;
+use App\Models\SubjectStudyTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
@@ -16,20 +17,55 @@ class SettingsController extends Controller
     {
         $teacher = $request->user();
         $teacherId = (int) ($teacher?->id ?? 0);
+        $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
+        $hasSubjectTeacherColumn = Schema::hasColumn('subject_study_times', 'teacher_id');
+        $useSlotAssignments = $hasSubjectClassColumn && $hasSubjectTeacherColumn;
 
-        $classes = SchoolClass::query()
-            ->whereHas('subjects', function ($query) use ($teacherId) {
-                $query->where('teacher_id', $teacherId);
-            })
-            ->withCount([
-                'students',
-                'subjects as taught_subjects_count' => function ($query) use ($teacherId) {
+        if ($useSlotAssignments) {
+            $classIds = SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->whereNotNull('school_class_id')
+                ->distinct()
+                ->pluck('school_class_id')
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => $id > 0)
+                ->values();
+
+            $classes = SchoolClass::query()
+                ->whereIn('id', $classIds->all())
+                ->withCount('students')
+                ->orderBy('name')
+                ->orderBy('section')
+                ->get(['id', 'name', 'section', 'room']);
+
+            $subjectCountsByClass = SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->whereIn('school_class_id', $classIds->all())
+                ->selectRaw('school_class_id, COUNT(DISTINCT subject_id) as subject_count')
+                ->groupBy('school_class_id')
+                ->pluck('subject_count', 'school_class_id');
+
+            $classes->each(function (SchoolClass $schoolClass) use ($subjectCountsByClass): void {
+                $schoolClass->setAttribute(
+                    'taught_subjects_count',
+                    (int) $subjectCountsByClass->get((int) $schoolClass->id, 0)
+                );
+            });
+        } else {
+            $classes = SchoolClass::query()
+                ->whereHas('subjects', function ($query) use ($teacherId) {
                     $query->where('teacher_id', $teacherId);
-                },
-            ])
-            ->orderBy('name')
-            ->orderBy('section')
-            ->get(['id', 'name', 'section', 'room']);
+                })
+                ->withCount([
+                    'students',
+                    'subjects as taught_subjects_count' => function ($query) use ($teacherId) {
+                        $query->where('teacher_id', $teacherId);
+                    },
+                ])
+                ->orderBy('name')
+                ->orderBy('section')
+                ->get(['id', 'name', 'section', 'room']);
+        }
 
         $classIds = $classes->pluck('id')->map(fn($id) => (int) $id)->values();
         $selectedClassIdRaw = (string) $request->query('class_id', (string) ($classes->first()?->id ?? ''));
@@ -43,10 +79,16 @@ class SettingsController extends Controller
         }
 
         $hasAttendanceTable = Schema::hasTable('student_attendances');
+        $subjectCount = $useSlotAssignments
+            ? (int) SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->distinct('subject_id')
+                ->count('subject_id')
+            : (int) Subject::query()->where('teacher_id', $teacherId)->count();
 
         $stats = [
             'classes' => $classes->count(),
-            'subjects' => (int) Subject::query()->where('teacher_id', $teacherId)->count(),
+            'subjects' => $subjectCount,
             'students' => (int) $classes->sum('students_count'),
             'checkedToday' => 0,
             'checkedThisWeek' => 0,
@@ -159,4 +201,3 @@ class SettingsController extends Controller
             ->with('success', 'Password updated successfully.');
     }
 }
-

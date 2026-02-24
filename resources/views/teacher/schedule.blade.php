@@ -13,7 +13,7 @@
                 <div>
                     <h1 class="admin-page-title text-3xl font-black tracking-tight">My Schedule</h1>
                     <p class="admin-page-subtitle mt-1 text-sm">
-                        View class and subject study times you teach.
+                        View your teaching list by day, time, subject, and class.
                     </p>
                 </div>
 
@@ -56,7 +56,7 @@
         </section>
 
         <section class="teacher-time-reveal teacher-time-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
-            style="--sd: 2;" x-data="{ filterOpen: false, tab: 'class' }">
+            style="--sd: 2;" x-data="{ filterOpen: false, tab: 'teach' }">
             <div class="space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-1">
@@ -65,10 +65,10 @@
                             class="rounded-lg px-4 py-2 text-sm font-semibold transition">
                             Class Times ({{ number_format(($stats['classSlots'] ?? 0)) }})
                         </button>
-                        <button type="button" @click="tab = 'subject'"
-                            :class="tab === 'subject' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-800'"
+                        <button type="button" @click="tab = 'teach'"
+                            :class="tab === 'teach' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-800'"
                             class="rounded-lg px-4 py-2 text-sm font-semibold transition">
-                            Subject Times ({{ number_format(($stats['subjectSlots'] ?? 0)) }})
+                            Teach List ({{ number_format(($stats['subjectSlots'] ?? 0)) }})
                         </button>
                     </div>
 
@@ -247,19 +247,18 @@
                             </tbody>
                         </table>
 
-                        <table x-show="tab === 'subject'" x-cloak class="w-full min-w-[1080px] text-left text-sm">
+                        <table x-show="tab === 'teach'" x-cloak class="w-full min-w-[1080px] text-left text-sm">
                             <thead
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
-                                    <th class="px-3 py-3 font-semibold">Subject</th>
-                                    <th class="px-3 py-3 font-semibold">Code</th>
-                                    <th class="px-3 py-3 font-semibold">Class</th>
                                     @if ($dayColumnEnabled)
                                         <th class="px-3 py-3 font-semibold">Day</th>
                                     @endif
-                                    <th class="px-3 py-3 font-semibold">Period</th>
                                     <th class="px-3 py-3 font-semibold">Start</th>
                                     <th class="px-3 py-3 font-semibold">End</th>
+                                    <th class="px-3 py-3 font-semibold">Subject</th>
+                                    <th class="px-3 py-3 font-semibold">Class</th>
+                                    <th class="px-3 py-3 font-semibold">Period</th>
                                     <th class="px-3 py-3 font-semibold">Status</th>
                                 </tr>
                             </thead>
@@ -273,16 +272,10 @@
                                     @endphp
                                     <tr class="js-schedule-row align-top hover:bg-slate-50/80"
                                         data-type="subject"
-                                        data-label="{{ $slot->subject?->name ?? 'Subject Schedule' }}"
+                                        data-label="{{ ($slot->subject?->name ?? 'Subject Schedule') . ' • ' . ($slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Class') }}"
                                         data-day="{{ $slotDayKey }}"
                                         data-start="{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i:s') }}"
                                         data-end="{{ \Carbon\Carbon::parse($slot->end_time)->format('H:i:s') }}">
-                                        <td class="px-3 py-3">
-                                            <div class="font-semibold text-slate-900">{{ $slot->subject?->name ?? 'Unknown Subject' }}</div>
-                                        </td>
-                                        <td class="px-3 py-3 text-slate-700">{{ $slot->subject?->code ?: 'N/A' }}</td>
-                                        <td class="px-3 py-3 text-slate-700">{{ $slot->subject?->schoolClass?->display_name ?: 'N/A' }}
-                                        </td>
                                         @if ($dayColumnEnabled)
                                             <td class="px-3 py-3">
                                                 <span
@@ -291,17 +284,22 @@
                                                 </span>
                                             </td>
                                         @endif
-                                        <td class="px-3 py-3">
-                                            <span
-                                                class="inline-flex items-center rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">
-                                                {{ $periodLabel }}
-                                            </span>
-                                        </td>
                                         <td class="px-3 py-3 font-semibold text-slate-700">
                                             {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
                                         </td>
                                         <td class="px-3 py-3 font-semibold text-slate-700">
                                             {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
+                                        </td>
+                                        <td class="px-3 py-3">
+                                            <div class="font-semibold text-slate-900">{{ $slot->subject?->name ?? 'Unknown Subject' }}</div>
+                                        </td>
+                                        <td class="px-3 py-3 text-slate-700">{{ $slot->schoolClass?->display_name ?: ($slot->subject?->schoolClass?->display_name ?: 'N/A') }}
+                                        </td>
+                                        <td class="px-3 py-3">
+                                            <span
+                                                class="inline-flex items-center rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                                                {{ $periodLabel }}
+                                            </span>
                                         </td>
                                         <td class="px-3 py-3">
                                             <span
@@ -312,7 +310,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="{{ $dayColumnEnabled ? 8 : 7 }}"
+                                        <td colspan="{{ $dayColumnEnabled ? 7 : 6 }}"
                                             class="px-3 py-10 text-center text-sm text-slate-500">
                                             No subject study times found.
                                         </td>

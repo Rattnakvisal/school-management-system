@@ -12,6 +12,8 @@ class SubjectStudyTime extends Model
 
     protected $fillable = [
         'subject_id',
+        'school_class_id',
+        'teacher_id',
         'day_of_week',
         'period',
         'start_time',
@@ -24,11 +26,23 @@ class SubjectStudyTime extends Model
         return [
             'day_of_week' => 'string',
             'sort_order' => 'integer',
+            'school_class_id' => 'integer',
+            'teacher_id' => 'integer',
         ];
     }
 
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function schoolClass(): BelongsTo
+    {
+        return $this->belongsTo(SchoolClass::class, 'school_class_id');
+    }
+
+    public function teacher(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
     }
 }

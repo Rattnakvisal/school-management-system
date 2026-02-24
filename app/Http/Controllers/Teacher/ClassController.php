@@ -4,7 +4,12 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
+use App\Models\Subject;
+use App\Models\SubjectStudyTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ClassController extends Controller
 {
@@ -17,11 +22,28 @@ class ClassController extends Controller
         $schedule = strtolower(trim((string) $request->query('schedule', 'all')));
         $allowedPeriods = ['morning', 'afternoon', 'evening', 'night', 'custom'];
         $allowedSchedules = ['all', 'with_schedule', 'without_schedule'];
+        $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
+        $hasSubjectTeacherColumn = Schema::hasColumn('subject_study_times', 'teacher_id');
+        $useSlotAssignments = $hasSubjectClassColumn && $hasSubjectTeacherColumn;
 
-        $baseTeacherClassesQuery = SchoolClass::query()
-            ->whereHas('subjects', function ($query) use ($teacherId) {
-                $query->where('teacher_id', $teacherId);
-            });
+        if ($useSlotAssignments) {
+            $teacherClassIds = SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->whereNotNull('school_class_id')
+                ->distinct()
+                ->pluck('school_class_id')
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => $id > 0)
+                ->values();
+
+            $baseTeacherClassesQuery = SchoolClass::query()
+                ->whereIn('id', $teacherClassIds->all());
+        } else {
+            $baseTeacherClassesQuery = SchoolClass::query()
+                ->whereHas('subjects', function ($query) use ($teacherId) {
+                    $query->where('teacher_id', $teacherId);
+                });
+        }
 
         $roomOptions = (clone $baseTeacherClassesQuery)
             ->whereNotNull('room')
@@ -32,30 +54,8 @@ class ClassController extends Controller
             ->values();
 
         $classQuery = (clone $baseTeacherClassesQuery)
-            ->with([
-                'studySchedules',
-                'subjects' => function ($query) use ($teacherId) {
-                    $query->where('teacher_id', $teacherId)->orderBy('name');
-                },
-            ])
-            ->withCount([
-                'students',
-                'subjects as taught_subjects_count' => function ($query) use ($teacherId) {
-                    $query->where('teacher_id', $teacherId);
-                },
-            ])
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('section', 'like', '%' . $search . '%')
-                        ->orWhere('room', 'like', '%' . $search . '%')
-                        ->orWhereHas('subjects', function ($subjectQuery) use ($search) {
-                            $subjectQuery
-                                ->where('name', 'like', '%' . $search . '%')
-                                ->orWhere('code', 'like', '%' . $search . '%');
-                        });
-                });
-            })
+            ->with('studySchedules')
+            ->withCount('students')
             ->when($room !== '' && strtolower($room) !== 'all', function ($query) use ($room) {
                 $query->where('room', $room);
             })
@@ -73,9 +73,92 @@ class ClassController extends Controller
             ->orderBy('name')
             ->orderBy('section');
 
+        if ($useSlotAssignments) {
+            $classQuery->when($search !== '', function ($query) use ($search, $teacherId) {
+                $query->where(function ($inner) use ($search, $teacherId) {
+                    $inner->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('section', 'like', '%' . $search . '%')
+                        ->orWhere('room', 'like', '%' . $search . '%')
+                        ->orWhereExists(function ($slotQuery) use ($teacherId, $search) {
+                            $slotQuery->select(DB::raw('1'))
+                                ->from('subject_study_times as sst')
+                                ->join('subjects as s', 's.id', '=', 'sst.subject_id')
+                                ->whereColumn('sst.school_class_id', 'school_classes.id')
+                                ->where('sst.teacher_id', $teacherId)
+                                ->where(function ($subjectQuery) use ($search) {
+                                    $subjectQuery->where('s.name', 'like', '%' . $search . '%')
+                                        ->orWhere('s.code', 'like', '%' . $search . '%');
+                                });
+                        });
+                });
+            });
+        } else {
+            $classQuery
+                ->with([
+                    'subjects' => function ($query) use ($teacherId) {
+                        $query->where('teacher_id', $teacherId)->orderBy('name');
+                    },
+                ])
+                ->withCount([
+                    'subjects as taught_subjects_count' => function ($query) use ($teacherId) {
+                        $query->where('teacher_id', $teacherId);
+                    },
+                ])
+                ->when($search !== '', function ($query) use ($search) {
+                    $query->where(function ($inner) use ($search) {
+                        $inner->where('name', 'like', '%' . $search . '%')
+                            ->orWhere('section', 'like', '%' . $search . '%')
+                            ->orWhere('room', 'like', '%' . $search . '%')
+                            ->orWhereHas('subjects', function ($subjectQuery) use ($search) {
+                                $subjectQuery
+                                    ->where('name', 'like', '%' . $search . '%')
+                                    ->orWhere('code', 'like', '%' . $search . '%');
+                            });
+                    });
+                });
+        }
+
         $classes = $classQuery
             ->paginate(10)
             ->withQueryString();
+
+        if ($useSlotAssignments) {
+            $classIds = $classes->getCollection()
+                ->pluck('id')
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => $id > 0)
+                ->values();
+
+            $subjectsByClass = collect();
+            if ($classIds->isNotEmpty()) {
+                $subjectsByClass = Subject::query()
+                    ->select(['subjects.id', 'subjects.name', 'subject_study_times.school_class_id'])
+                    ->join('subject_study_times', 'subject_study_times.subject_id', '=', 'subjects.id')
+                    ->where('subject_study_times.teacher_id', $teacherId)
+                    ->whereIn('subject_study_times.school_class_id', $classIds->all())
+                    ->distinct()
+                    ->orderBy('subjects.name')
+                    ->get()
+                    ->groupBy(fn($row) => (string) $row->school_class_id);
+            }
+
+            $classes->getCollection()->transform(function (SchoolClass $schoolClass) use ($subjectsByClass) {
+                $assignedSubjects = $subjectsByClass
+                    ->get((string) $schoolClass->id, collect())
+                    ->values()
+                    ->map(function ($row) {
+                        return new Subject([
+                            'id' => (int) $row->id,
+                            'name' => (string) $row->name,
+                        ]);
+                    });
+
+                $schoolClass->setRelation('subjects', $assignedSubjects instanceof Collection ? $assignedSubjects : collect());
+                $schoolClass->setAttribute('taught_subjects_count', $assignedSubjects->count());
+
+                return $schoolClass;
+            });
+        }
 
         $totalClasses = (clone $classQuery)->toBase()->getCountForPagination();
         $totalStudents = $classes->getCollection()->sum('students_count');

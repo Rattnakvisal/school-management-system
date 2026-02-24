@@ -9,6 +9,7 @@ use App\Models\Subject;
 use App\Models\SubjectStudyTime;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
@@ -37,20 +38,55 @@ class DashboardController extends Controller
         $todayKey = strtolower(Carbon::now()->englishDayOfWeek);
         $hasClassDayColumn = Schema::hasColumn('class_study_times', 'day_of_week');
         $hasSubjectDayColumn = Schema::hasColumn('subject_study_times', 'day_of_week');
+        $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
+        $hasSubjectTeacherColumn = Schema::hasColumn('subject_study_times', 'teacher_id');
+        $useSlotAssignments = $hasSubjectClassColumn && $hasSubjectTeacherColumn;
 
-        $teacherClasses = SchoolClass::query()
-            ->whereHas('subjects', function ($query) use ($teacherId) {
-                $query->where('teacher_id', $teacherId);
-            })
-            ->withCount([
-                'students',
-                'subjects as taught_subjects_count' => function ($query) use ($teacherId) {
+        if ($useSlotAssignments) {
+            $teacherClassIds = SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->whereNotNull('school_class_id')
+                ->distinct()
+                ->pluck('school_class_id')
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => $id > 0)
+                ->values();
+
+            $teacherClasses = SchoolClass::query()
+                ->whereIn('id', $teacherClassIds->all())
+                ->withCount('students')
+                ->orderBy('name')
+                ->orderBy('section')
+                ->get(['id', 'name', 'section']);
+
+            $subjectCountsByClass = SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->whereIn('school_class_id', $teacherClassIds->all())
+                ->select('school_class_id', DB::raw('COUNT(DISTINCT subject_id) as subject_count'))
+                ->groupBy('school_class_id')
+                ->pluck('subject_count', 'school_class_id');
+
+            $teacherClasses->each(function (SchoolClass $schoolClass) use ($subjectCountsByClass): void {
+                $schoolClass->setAttribute(
+                    'taught_subjects_count',
+                    (int) $subjectCountsByClass->get((int) $schoolClass->id, 0)
+                );
+            });
+        } else {
+            $teacherClasses = SchoolClass::query()
+                ->whereHas('subjects', function ($query) use ($teacherId) {
                     $query->where('teacher_id', $teacherId);
-                },
-            ])
-            ->orderBy('name')
-            ->orderBy('section')
-            ->get(['id', 'name', 'section']);
+                })
+                ->withCount([
+                    'students',
+                    'subjects as taught_subjects_count' => function ($query) use ($teacherId) {
+                        $query->where('teacher_id', $teacherId);
+                    },
+                ])
+                ->orderBy('name')
+                ->orderBy('section')
+                ->get(['id', 'name', 'section']);
+        }
 
         $classIds = $teacherClasses->pluck('id')->map(fn($id) => (int) $id)->values();
 
@@ -76,9 +112,13 @@ class DashboardController extends Controller
             ->get();
 
         $subjectSlotsQuery = SubjectStudyTime::query()
-            ->with('subject.schoolClass:id,name,section')
-            ->whereHas('subject', function ($query) use ($teacherId) {
+            ->with(['subject.schoolClass:id,name,section', 'schoolClass:id,name,section'])
+            ->when($useSlotAssignments, function ($query) use ($teacherId) {
                 $query->where('teacher_id', $teacherId);
+            }, function ($query) use ($teacherId) {
+                $query->whereHas('subject', function ($subjectQuery) use ($teacherId) {
+                    $subjectQuery->where('teacher_id', $teacherId);
+                });
             })
             ->orderBy('subject_id');
 
@@ -144,7 +184,7 @@ class DashboardController extends Controller
                 return [
                     'type' => 'subject',
                     'title' => $slot->subject?->name ?? 'Subject Schedule',
-                    'subtitle' => $slot->subject?->schoolClass?->display_name ?? 'Unassigned class',
+                    'subtitle' => $slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Unassigned class',
                     'period' => $periodLabels[strtolower((string) $slot->period)] ?? ucfirst((string) $slot->period),
                     'start' => $startAt->format('h:i A'),
                     'end' => $endAt->format('h:i A'),
@@ -160,10 +200,17 @@ class DashboardController extends Controller
             ->values()
             ->all();
 
+        $subjectCount = $useSlotAssignments
+            ? (int) SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->distinct('subject_id')
+                ->count('subject_id')
+            : (int) Subject::query()->where('teacher_id', $teacherId)->count();
+
         $stats = [
             'classes' => $teacherClasses->count(),
             'students' => (int) $teacherClasses->sum('students_count'),
-            'subjects' => (int) Subject::query()->where('teacher_id', $teacherId)->count(),
+            'subjects' => $subjectCount,
             'todaySchedules' => count($todayTimeline),
         ];
 

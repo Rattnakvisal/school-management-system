@@ -6,7 +6,7 @@
             <div class="flex flex-wrap items-center justify-between gap-5">
                 <div>
                     <h1 class="admin-page-title text-3xl font-black tracking-tight">Subject Management</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">Create and assign subjects to classes.</p>
+                    <p class="admin-page-subtitle mt-1 text-sm">Create subjects and manage schedules in Time Studies.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
                     <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
@@ -53,7 +53,7 @@
                 class="subject-reveal subject-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
                 style="--sd: 3;">
                 <h2 class="text-lg font-black text-slate-900">Create Subject</h2>
-                <p class="mt-1 text-xs text-slate-500">Create a new subject and optionally assign it to a class.</p>
+                <p class="mt-1 text-xs text-slate-500">Create a new subject. Manage class and time from Time Studies.</p>
 
                 <form method="POST" action="{{ route('admin.subjects.store') }}" class="js-create-form mt-5 space-y-4">
                     @csrf
@@ -68,15 +68,8 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="code" class="mb-1 block text-xs font-semibold text-slate-600">Code</label>
-                        <input id="code" name="code" type="text" value="{{ old('code') }}"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm uppercase outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                            placeholder="MATH101">
-                        @error('code', 'subjectCreate')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <input type="hidden" name="code"
+                        value="{{ old('code', 'SUB' . now()->format('His') . strtoupper(substr(md5((string) microtime(true)), 0, 4))) }}">
 
                     <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-600">Study Times</label>
@@ -85,66 +78,6 @@
                             <a href="{{ route('admin.time-studies.index', ['tab' => 'subject']) }}"
                                 class="font-semibold text-indigo-700 hover:text-indigo-900">Manage subject times</a>
                         </div>
-                    </div>
-
-                    <div>
-                        <label for="school_class_id" class="mb-1 block text-xs font-semibold text-slate-600">Assign to
-                            Class</label>
-                        <select id="school_class_id" name="school_class_id"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="">Unassigned</option>
-                            @foreach ($classes as $classOption)
-                                @php
-                                    $classSlots = $classOption->studySchedules
-                                        ->map(function ($slot) {
-                                            return [
-                                                'period' => strtolower((string) $slot->period),
-                                                'start_time' => $slot->start_time ? \Carbon\Carbon::parse($slot->start_time)->format('H:i') : '',
-                                                'end_time' => $slot->end_time ? \Carbon\Carbon::parse($slot->end_time)->format('H:i') : '',
-                                            ];
-                                        })
-                                        ->values()
-                                        ->all();
-
-                                    if ($classSlots === []) {
-                                        $fallbackStart = $classOption->study_start_time ?: $classOption->study_time;
-                                        $fallbackEnd = $classOption->study_end_time;
-                                        if ($fallbackStart && $fallbackEnd) {
-                                            $classSlots[] = [
-                                                'period' => 'custom',
-                                                'start_time' => \Carbon\Carbon::parse($fallbackStart)->format('H:i'),
-                                                'end_time' => \Carbon\Carbon::parse($fallbackEnd)->format('H:i'),
-                                            ];
-                                        }
-                                    }
-                                @endphp
-                                <option value="{{ $classOption->id }}" data-study-slots='@json($classSlots)'
-                                    data-study-start="{{ ($classOption->study_start_time ?: $classOption->study_time) ? \Illuminate\Support\Str::substr((string) ($classOption->study_start_time ?: $classOption->study_time), 0, 5) : '' }}"
-                                    data-study-end="{{ $classOption->study_end_time ? \Illuminate\Support\Str::substr((string) $classOption->study_end_time, 0, 5) : '' }}"
-                                    {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
-                                    {{ $classOption->display_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('school_class_id', 'subjectCreate')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="teacher_id" class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
-                        <select id="teacher_id" name="teacher_id"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="">Unassigned</option>
-                            @foreach ($teachers as $teacherOption)
-                                <option value="{{ $teacherOption->id }}" {{ (string) old('teacher_id') === (string) $teacherOption->id ? 'selected' : '' }}>
-                                    {{ $teacherOption->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('teacher_id', 'subjectCreate')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     <div>
@@ -221,7 +154,7 @@
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Search</h4>
                                             <input id="q" name="q" type="text" value="{{ $search }}"
-                                                placeholder="Search subject, code, teacher, class, time, or schedule"
+                                                placeholder="Search subject, teacher, class, time, or schedule"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         </section>
                                         <section class="space-y-2">
@@ -297,7 +230,6 @@
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
                                     <th class="px-3 py-3 font-semibold">Subject</th>
-                                    <th class="px-3 py-3 font-semibold">Code</th>
                                     <th class="px-3 py-3 font-semibold">Study Time</th>
                                     <th class="px-3 py-3 font-semibold">Class</th>
                                     <th class="px-3 py-3 font-semibold">Teacher</th>
@@ -318,7 +250,6 @@
                                                 {{ \Illuminate\Support\Str::limit($subject->description ?: 'No description', 60) }}
                                             </div>
                                         </td>
-                                        <td class="whitespace-nowrap px-3 py-3 text-slate-600">{{ $subject->code }}</td>
                                         <td class="px-3 py-3 text-slate-600">
                                             @if ($subject->studySchedules->isNotEmpty())
                                                 <div class="flex max-w-sm flex-wrap gap-1.5">
@@ -352,10 +283,45 @@
                                             @endif
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-3 text-slate-600">
-                                            {{ $subject->schoolClass?->display_name ?: 'Unassigned' }}
+                                            @php
+                                                $slotClasses = $subject->studySchedules
+                                                    ->map(fn($slot) => $slot->schoolClass?->display_name)
+                                                    ->filter()
+                                                    ->unique()
+                                                    ->values();
+                                            @endphp
+                                            @if ($slotClasses->isNotEmpty())
+                                                <div class="flex flex-wrap gap-1.5">
+                                                    @foreach ($slotClasses as $slotClassName)
+                                                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                                                            {{ $slotClassName }}
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                {{ $subject->schoolClass?->display_name ?: 'Unassigned' }}
+                                            @endif
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-3 text-slate-600">
-                                            {{ $subject->teacher?->name ?: 'Unassigned' }}</td>
+                                            @php
+                                                $slotTeachers = $subject->studySchedules
+                                                    ->map(fn($slot) => $slot->teacher?->name)
+                                                    ->filter()
+                                                    ->unique()
+                                                    ->values();
+                                            @endphp
+                                            @if ($slotTeachers->isNotEmpty())
+                                                <div class="flex flex-wrap gap-1.5">
+                                                    @foreach ($slotTeachers as $slotTeacherName)
+                                                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                                                            {{ $slotTeacherName }}
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                {{ $subject->teacher?->name ?: 'Unassigned' }}
+                                            @endif
+                                        </td>
                                         <td class="px-3 py-3 text-slate-600">{{ $subject->students_count ?? 0 }}</td>
                                         <td class="px-3 py-3">
                                             @if ($subject->is_active)
@@ -430,13 +396,8 @@
                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                         </div>
 
-                                                        <div>
-                                                            <label for="edit_code_{{ $subject->id }}"
-                                                                class="mb-1 block text-xs font-semibold text-slate-600">Code</label>
-                                                            <input id="edit_code_{{ $subject->id }}" name="code" type="text"
-                                                                value="{{ $subject->code }}"
-                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm uppercase outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                        </div>
+                                                        <input type="hidden" id="edit_code_{{ $subject->id }}" name="code"
+                                                            value="{{ $subject->code }}">
 
                                                         <div>
                                                             <label class="mb-1 block text-xs font-semibold text-slate-600">Study
@@ -448,65 +409,6 @@
                                                                     class="font-semibold text-indigo-700 hover:text-indigo-900">Open
                                                                     Time Studies</a>
                                                             </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <label for="edit_school_class_id_{{ $subject->id }}"
-                                                                class="mb-1 block text-xs font-semibold text-slate-600">Assign
-                                                                to
-                                                                Class</label>
-                                                            <select id="edit_school_class_id_{{ $subject->id }}"
-                                                                name="school_class_id"
-                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                <option value="">Unassigned</option>
-                                                                @foreach ($classes as $classOption)
-                                                                    @php
-                                                                        $classSlots = $classOption->studySchedules
-                                                                            ->map(function ($slot) {
-                                                                                return [
-                                                                                    'period' => strtolower((string) $slot->period),
-                                                                                    'start_time' => $slot->start_time ? \Carbon\Carbon::parse($slot->start_time)->format('H:i') : '',
-                                                                                    'end_time' => $slot->end_time ? \Carbon\Carbon::parse($slot->end_time)->format('H:i') : '',
-                                                                                ];
-                                                                            })
-                                                                            ->values()
-                                                                            ->all();
-
-                                                                        if ($classSlots === []) {
-                                                                            $fallbackStart = $classOption->study_start_time ?: $classOption->study_time;
-                                                                            $fallbackEnd = $classOption->study_end_time;
-                                                                            if ($fallbackStart && $fallbackEnd) {
-                                                                                $classSlots[] = [
-                                                                                    'period' => 'custom',
-                                                                                    'start_time' => \Carbon\Carbon::parse($fallbackStart)->format('H:i'),
-                                                                                    'end_time' => \Carbon\Carbon::parse($fallbackEnd)->format('H:i'),
-                                                                                ];
-                                                                            }
-                                                                        }
-                                                                    @endphp
-                                                                    <option value="{{ $classOption->id }}"
-                                                                        data-study-slots='@json($classSlots)'
-                                                                        data-study-start="{{ ($classOption->study_start_time ?: $classOption->study_time) ? \Illuminate\Support\Str::substr((string) ($classOption->study_start_time ?: $classOption->study_time), 0, 5) : '' }}"
-                                                                        data-study-end="{{ $classOption->study_end_time ? \Illuminate\Support\Str::substr((string) $classOption->study_end_time, 0, 5) : '' }}"
-                                                                        {{ (string) $subject->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
-                                                                        {{ $classOption->display_name }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-
-                                                        <div>
-                                                            <label for="edit_teacher_id_{{ $subject->id }}"
-                                                                class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
-                                                            <select id="edit_teacher_id_{{ $subject->id }}" name="teacher_id"
-                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                <option value="">Unassigned</option>
-                                                                @foreach ($teachers as $teacherOption)
-                                                                    <option value="{{ $teacherOption->id }}" {{ (string) $subject->teacher_id === (string) $teacherOption->id ? 'selected' : '' }}>
-                                                                        {{ $teacherOption->name }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
                                                         </div>
 
                                                         <div>
@@ -545,7 +447,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="px-3 py-10 text-center text-sm text-slate-500">
+                                        <td colspan="8" class="px-3 py-10 text-center text-sm text-slate-500">
                                             No subjects found.
                                         </td>
                                     </tr>

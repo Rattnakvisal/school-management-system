@@ -245,7 +245,7 @@
                                                                     @forelse ($schoolClass->subjects as $subject)
                                                                         <span
                                                                             class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
-                                                                            {{ $subject->name }} ({{ $subject->code }})
+                                                                            {{ $subject->name }}
                                                                         </span>
                                                                     @empty
                                                                         <span class="text-xs text-slate-400">No subjects

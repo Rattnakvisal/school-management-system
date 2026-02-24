@@ -102,15 +102,18 @@
                 <div class="mb-5 grid gap-2 sm:grid-cols-3">
                     <div class="teacher-settings-inline-kpi rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                         <div class="text-[11px] font-semibold text-slate-500">Classes</div>
-                        <div class="mt-0.5 text-base font-black text-slate-900">{{ number_format($stats['classes'] ?? 0) }}</div>
+                        <div class="mt-0.5 text-base font-black text-slate-900">{{ number_format($stats['classes'] ?? 0) }}
+                        </div>
                     </div>
                     <div class="teacher-settings-inline-kpi rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2.5">
                         <div class="text-[11px] font-semibold text-indigo-600">Today Checks</div>
-                        <div class="mt-0.5 text-base font-black text-indigo-800">{{ number_format($stats['checkedToday'] ?? 0) }}</div>
+                        <div class="mt-0.5 text-base font-black text-indigo-800">
+                            {{ number_format($stats['checkedToday'] ?? 0) }}</div>
                     </div>
                     <div class="teacher-settings-inline-kpi rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
                         <div class="text-[11px] font-semibold text-amber-600">Week Checks</div>
-                        <div class="mt-0.5 text-base font-black text-amber-800">{{ number_format($stats['checkedThisWeek'] ?? 0) }}</div>
+                        <div class="mt-0.5 text-base font-black text-amber-800">
+                            {{ number_format($stats['checkedThisWeek'] ?? 0) }}</div>
                     </div>
                 </div>
 
@@ -192,12 +195,12 @@
             <section
                 class="teacher-reveal teacher-float teacher-settings-panel rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7"
                 style="--sd: 4;" x-data="{
-                            classQuery: '',
-                            selectedClassId: '{{ $classId ?? '' }}',
-                            setDate(d){ this.$refs.date.value = d; },
-                            today(){ return '{{ \Carbon\Carbon::now()->toDateString() }}'; },
-                            yesterday(){ return '{{ \Carbon\Carbon::now()->subDay()->toDateString() }}'; }
-                        }">
+                                classQuery: '',
+                                selectedClassId: '{{ $classId ?? '' }}',
+                                setDate(d){ this.$refs.date.value = d; },
+                                today(){ return '{{ \Carbon\Carbon::now()->toDateString() }}'; },
+                                yesterday(){ return '{{ \Carbon\Carbon::now()->subDay()->toDateString() }}'; }
+                            }">
 
                 {{-- Header --}}
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -250,12 +253,12 @@
                         <div class="md:col-span-4">
                             <label class="mb-1 block text-xs font-semibold text-slate-600">Search Class</label>
                             <input type="text" x-model="classQuery" placeholder="Type to filter classes..." oninput="
-                                            const q = this.value.trim().toLowerCase();
-                                            const sel = this.closest('form').querySelector('select[name=class_id]');
-                                            [...sel.options].forEach(o => {
-                                                o.hidden = q ? !o.text.toLowerCase().includes(q) : false;
-                                            });
-                                        "
+                                                const q = this.value.trim().toLowerCase();
+                                                const sel = this.closest('form').querySelector('select[name=class_id]');
+                                                [...sel.options].forEach(o => {
+                                                    o.hidden = q ? !o.text.toLowerCase().includes(q) : false;
+                                                });
+                                            "
                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             <p class="mt-1 text-[11px] text-slate-500">Tip: type “10A”, “Grade”, etc.</p>
                         </div>

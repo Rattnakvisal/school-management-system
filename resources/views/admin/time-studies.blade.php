@@ -66,46 +66,46 @@
                 <p class="mt-1 text-xs text-slate-500">Create study schedules for classes and subjects.</p>
 
                 @php
-                    $classFormClassId = old('school_class_id', (string) ($classes->first()?->id ?? ''));
                     $classFormDayOfWeek = old('day_of_week', 'all');
                     $classSlotRows = old('class_slots');
                     if (!is_array($classSlotRows) || count($classSlotRows) === 0) {
                         $classSlotRows = [
                             [
                                 'day_of_week' => $classFormDayOfWeek,
-                                'period' => old('period', 'morning'),
+                                'period' => old('period', 'custom'),
                                 'start_time' => old('start_time', ''),
                                 'end_time' => old('end_time', ''),
                             ],
                         ];
                     }
                     $subjectFormClassId = old('subject_class_id', (string) ($classes->first()?->id ?? ''));
+                    $subjectFormSlotRows = old('subject_slots');
+                    if (!is_array($subjectFormSlotRows) || count($subjectFormSlotRows) === 0) {
+                        $subjectFormSlotRows = [
+                            [
+                                'subject_id' => old('subject_id', ''),
+                                'teacher_id' => old('teacher_id', ''),
+                                'class_time_id' => old('class_time_id', ''),
+                            ],
+                        ];
+                    }
                 @endphp
 
                 <!-- Class Study Time -->
                 <form method="POST" action="{{ route('admin.time-studies.classes.store') }}"
+                    id="class_time_create_form"
                     class="js-create-form mt-5 space-y-4">
                     @csrf
 
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-black text-slate-900">Class Study Time</h3>
-                        <span class="text-[11px] font-semibold text-slate-400">For whole class</span>
+                        <span class="text-[11px] font-semibold text-slate-400">For all classes</span>
                     </div>
 
                     <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
-                        <select name="school_class_id"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            @foreach ($classes as $classOption)
-                                <option value="{{ $classOption->id }}"
-                                    {{ $classFormClassId === (string) $classOption->id ? 'selected' : '' }}>
-                                    {{ $classOption->display_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('school_class_id')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
+                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+                            This creates the selected date/time for every class.
+                        </p>
                     </div>
 
                     @error('class_slots')
@@ -141,7 +141,7 @@
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Period</label>
                                         <select name="class_slots[{{ $slotIndex }}][period]"
-                                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            class="js-class-period-select w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             @foreach ($periodOptions as $periodKey => $periodLabel)
                                                 <option value="{{ $periodKey }}" {{ $rowPeriod === $periodKey ? 'selected' : '' }}>
                                                     {{ $periodLabel }}
@@ -155,9 +155,11 @@
 
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Start</label>
-                                        <input type="time" name="class_slots[{{ $slotIndex }}][start_time]"
+                                        <input type="text" name="class_slots[{{ $slotIndex }}][start_time]"
                                             value="{{ $rowStart }}" required
-                                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            placeholder="07:30 AM or 19:30"
+                                            class="js-class-time-input js-class-start-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
                                         @error('class_slots.' . $slotIndex . '.start_time')
                                             <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                                         @enderror
@@ -165,9 +167,11 @@
 
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">End</label>
-                                        <input type="time" name="class_slots[{{ $slotIndex }}][end_time]"
+                                        <input type="text" name="class_slots[{{ $slotIndex }}][end_time]"
                                             value="{{ $rowEnd }}" required
-                                            class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            placeholder="09:00 AM or 21:00"
+                                            class="js-class-time-input js-class-end-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
                                         @error('class_slots.' . $slotIndex . '.end_time')
                                             <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                                         @enderror
@@ -207,7 +211,7 @@
                                 <div class="sm:col-span-3">
                                     <label class="mb-1 block text-xs font-semibold text-slate-600">Period</label>
                                     <select name="class_slots[__INDEX__][period]"
-                                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        class="js-class-period-select w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         @foreach ($periodOptions as $periodKey => $periodLabel)
                                             <option value="{{ $periodKey }}" {{ $periodKey === 'morning' ? 'selected' : '' }}>
                                                 {{ $periodLabel }}
@@ -218,14 +222,18 @@
 
                                 <div class="sm:col-span-3">
                                     <label class="mb-1 block text-xs font-semibold text-slate-600">Start</label>
-                                    <input type="time" name="class_slots[__INDEX__][start_time]" required
-                                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    <input type="text" name="class_slots[__INDEX__][start_time]" required
+                                        placeholder="07:30 AM or 19:30"
+                                        class="js-class-time-input js-class-start-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
                                 </div>
 
                                 <div class="sm:col-span-3">
                                     <label class="mb-1 block text-xs font-semibold text-slate-600">End</label>
-                                    <input type="time" name="class_slots[__INDEX__][end_time]" required
-                                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    <input type="text" name="class_slots[__INDEX__][end_time]" required
+                                        placeholder="09:00 AM or 21:00"
+                                        class="js-class-time-input js-class-end-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
                                 </div>
                             </div>
 
@@ -270,32 +278,122 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
-                        <select id="subject_form_subject_id" name="subject_id" data-selected="{{ old('subject_id', '') }}"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="">Select a subject</option>
-                        </select>
-                        @error('subject_id')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
+                    @error('subject_slots')
+                        <p class="text-xs font-semibold text-red-600">{{ $message }}</p>
+                    @enderror
+
+                    <div id="subject_slot_rows" class="space-y-3" data-next-index="{{ count($subjectFormSlotRows) }}">
+                        @foreach ($subjectFormSlotRows as $slotIndex => $subjectSlotRow)
+                            @php
+                                $rowSubjectId = (string) ($subjectSlotRow['subject_id'] ?? '');
+                                $rowTeacherId = (string) ($subjectSlotRow['teacher_id'] ?? '');
+                                $rowClassTimeId = (string) ($subjectSlotRow['class_time_id'] ?? '');
+                            @endphp
+                            <div class="js-subject-slot-row rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3">
+                                <div class="grid gap-3">
+                                    <div>
+                                        <label class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
+                                        <select name="subject_slots[{{ $slotIndex }}][subject_id]"
+                                            data-selected="{{ $rowSubjectId }}"
+                                            class="js-subject-form-subject w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            <option value="">Select a subject</option>
+                                        </select>
+                                        @error('subject_slots.' . $slotIndex . '.subject_id')
+                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label class="mb-1 block text-xs font-semibold text-slate-600">Class Time</label>
+                                        <select name="subject_slots[{{ $slotIndex }}][class_time_id]"
+                                            data-selected="{{ $rowClassTimeId }}"
+                                            class="js-subject-form-class-time w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            <option value="">Select class time</option>
+                                        </select>
+                                        @error('subject_slots.' . $slotIndex . '.class_time_id')
+                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
+                                        <select name="subject_slots[{{ $slotIndex }}][teacher_id]"
+                                            data-selected="{{ $rowTeacherId }}"
+                                            class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            <option value="">Unassigned</option>
+                                            @foreach ($teachers as $teacherOption)
+                                                <option value="{{ $teacherOption->id }}"
+                                                    {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                    {{ $teacherOption->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('subject_slots.' . $slotIndex . '.teacher_id')
+                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="mt-2 flex justify-end">
+                                    <button type="button"
+                                        class="js-remove-subject-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
 
-                    <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-600">Class Time</label>
-                        <select id="subject_form_class_time_id" name="class_time_id"
-                            data-selected="{{ old('class_time_id', '') }}"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="">Select class time</option>
-                        </select>
-                        @error('class_time_id')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <button id="add_subject_slot_btn" type="button"
+                        class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                        + Add More Subject Time
+                    </button>
+
+                    <template id="subject_slot_row_template">
+                        <div class="js-subject-slot-row rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3">
+                            <div class="grid gap-3">
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
+                                    <select name="subject_slots[__INDEX__][subject_id]"
+                                        class="js-subject-form-subject w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="">Select a subject</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Class Time</label>
+                                    <select name="subject_slots[__INDEX__][class_time_id]"
+                                        class="js-subject-form-class-time w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="">Select class time</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
+                                    <select name="subject_slots[__INDEX__][teacher_id]"
+                                        class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="">Unassigned</option>
+                                        @foreach ($teachers as $teacherOption)
+                                            <option value="{{ $teacherOption->id }}">
+                                                {{ $teacherOption->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 flex justify-end">
+                                <button type="button"
+                                    class="js-remove-subject-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </template>
 
                     <button type="submit"
                         class="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
-                        Add Subject Time From Class
+                        Add Subject Times From Class
                     </button>
                 </form>
             </section>
@@ -309,19 +407,23 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <h2 class="text-lg font-black text-slate-900">
-                            {{ $tab === 'subject' ? 'Subject List' : 'Class List' }}
+                            {{ $tab === 'class' ? 'Class List' : ($tab === 'subject' ? 'Subject List' : 'Teacher Study List') }}
                         </h2>
 
                         <div class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
                             <div class="max-w-full overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
                                 <div class="inline-flex min-w-max">
-                                <a href="{{ route('admin.time-studies.index', ['tab' => 'class', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId]) }}"
+                                <a href="{{ route('admin.time-studies.index', ['tab' => 'class', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId]) }}"
                                     class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'class' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
                                     Class Times
                                 </a>
-                                <a href="{{ route('admin.time-studies.index', ['tab' => 'subject', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId]) }}"
+                                <a href="{{ route('admin.time-studies.index', ['tab' => 'subject', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId]) }}"
                                     class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'subject' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
                                     Subject Times
+                                </a>
+                                <a href="{{ route('admin.time-studies.index', ['tab' => 'teacher', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId]) }}"
+                                    class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'teacher' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                    Teacher Times
                                 </a>
                                 </div>
                             </div>
@@ -375,7 +477,7 @@
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Search</h4>
                                             <input id="q" name="q" type="text" value="{{ $search }}"
-                                                placeholder="Search class, subject, period, or time"
+                                                placeholder="Search class, teacher, subject, period, or time"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         </section>
 
@@ -424,7 +526,20 @@
                                                 <option value="all" {{ $subjectId === 'all' ? 'selected' : '' }}>All Subjects</option>
                                                 @foreach ($subjects as $subjectOption)
                                                     <option value="{{ $subjectOption->id }}" {{ $subjectId === (string) $subjectOption->id ? 'selected' : '' }}>
-                                                        {{ $subjectOption->name }} ({{ $subjectOption->code }})
+                                                        {{ $subjectOption->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </section>
+
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Teacher</h4>
+                                            <select name="teacher_id"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="all" {{ $teacherId === 'all' ? 'selected' : '' }}>All Teachers</option>
+                                                @foreach ($teachers as $teacherOption)
+                                                    <option value="{{ $teacherOption->id }}" {{ $teacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                        {{ $teacherOption->name }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -535,7 +650,7 @@
                                                                     </div>
 
                                                                     <form method="POST" action="{{ route('admin.time-studies.classes.update', $slot) }}"
-                                                                        class="js-edit-form space-y-4"
+                                                                        class="js-edit-form js-class-edit-form space-y-4"
                                                                         data-subject="{{ $slot->schoolClass?->display_name ?? 'Class Time' }}">
                                                                         @csrf
                                                                         @method('PUT')
@@ -568,7 +683,7 @@
                                                                             <div>
                                                                                 <label class="mb-1 block text-xs font-semibold text-slate-600">Period</label>
                                                                                 <select name="period"
-                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                    class="js-edit-class-period w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                     @foreach ($periodOptions as $periodKey => $periodLabel)
                                                                                         <option value="{{ $periodKey }}" {{ strtolower((string) $slot->period) === $periodKey ? 'selected' : '' }}>
                                                                                             {{ $periodLabel }}
@@ -582,7 +697,7 @@
                                                                                 <input type="time" name="start_time"
                                                                                     value="{{ \Illuminate\Support\Str::substr((string) $slot->start_time, 0, 5) }}"
                                                                                     required
-                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                    class="js-edit-class-start w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                             </div>
 
                                                                             <div>
@@ -590,7 +705,7 @@
                                                                                 <input type="time" name="end_time"
                                                                                     value="{{ \Illuminate\Support\Str::substr((string) $slot->end_time, 0, 5) }}"
                                                                                     required
-                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                    class="js-edit-class-end w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                             </div>
                                                                         </div>
 
@@ -618,13 +733,12 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
-                                    @else
+                                    @elseif ($tab === 'subject')
                                         {{-- SUBJECT TABLE --}}
                                         <table class="w-full min-w-[1280px] text-left text-sm">
                                             <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                 <tr>
                                                     <th class="px-3 py-3 font-semibold">Subject</th>
-                                                    <th class="px-3 py-3 font-semibold">Code</th>
                                                     <th class="px-3 py-3 font-semibold">Day</th>
                                                     <th class="px-3 py-3 font-semibold">Period</th>
                                                     <th class="px-3 py-3 font-semibold">Start</th>
@@ -637,7 +751,7 @@
                                             <tbody class="divide-y divide-slate-100 bg-white">
                                                 @forelse ($subjectTimes as $slot)
                                                     @php
-                                                        $slotClassId = (string) ($slot->subject?->school_class_id ?? '');
+                                                        $slotClassId = (string) (($slot->school_class_id ?? null) ?: ($slot->subject?->school_class_id ?? ''));
                                                         $slotClassTimeId = '';
                                                         $slotDay = strtolower((string) ($slot->day_of_week ?? 'all'));
                                                         $slotPeriod = strtolower((string) $slot->period);
@@ -669,10 +783,6 @@
                                                             </div>
                                                         </td>
 
-                                                        <td class="whitespace-nowrap px-3 py-3 align-top text-slate-600">
-                                                            {{ $slot->subject?->code ?? '-' }}
-                                                        </td>
-
                                                         <td class="px-3 py-3 align-top text-slate-700">
                                                             <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                                                                 {{ $dayOptions[$slotDay] ?? ucfirst($slotDay) }}
@@ -694,7 +804,7 @@
                                                         </td>
 
                                                         <td class="whitespace-nowrap px-3 py-3 align-top text-slate-700">
-                                                            {{ $slot->subject?->schoolClass?->display_name ?? 'Unassigned' }}
+                                                            {{ $slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Unassigned' }}
                                                         </td>
 
                                                         <td class="px-3 py-3 align-top">
@@ -769,6 +879,20 @@
                                                                             </select>
                                                                         </div>
 
+                                                                        <div>
+                                                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
+                                                                            <select name="teacher_id"
+                                                                                data-selected="{{ (string) (($slot->teacher_id ?? null) ?: ($slot->subject?->teacher_id ?? '')) }}"
+                                                                                class="js-subject-edit-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                <option value="">Unassigned</option>
+                                                                                @foreach ($teachers as $teacherOption)
+                                                                                    <option value="{{ $teacherOption->id }}" {{ (int) (($slot->teacher_id ?? null) ?: ($slot->subject?->teacher_id ?? 0)) === (int) $teacherOption->id ? 'selected' : '' }}>
+                                                                                        {{ $teacherOption->name }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
+
                                                                         <div class="flex justify-end gap-2 pt-2">
                                                                             <button type="button" @click="openSubjectEdit = false"
                                                                                 class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
@@ -786,8 +910,73 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="8" class="px-3 py-10 text-center text-sm text-slate-500">
+                                                        <td colspan="7" class="px-3 py-10 text-center text-sm text-slate-500">
                                                             No subject study times found.
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    @else
+                                        {{-- TEACHER TABLE --}}
+                                        <table class="w-full min-w-[1280px] text-left text-sm">
+                                            <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                                <tr>
+                                                    <th class="px-3 py-3 font-semibold">Teacher</th>
+                                                    <th class="px-3 py-3 font-semibold">Subject</th>
+                                                    <th class="px-3 py-3 font-semibold">Class</th>
+                                                    <th class="px-3 py-3 font-semibold">Day</th>
+                                                    <th class="px-3 py-3 font-semibold">Period</th>
+                                                    <th class="px-3 py-3 font-semibold">Start</th>
+                                                    <th class="px-3 py-3 font-semibold">End</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody class="divide-y divide-slate-100 bg-white">
+                                                @forelse ($teacherTimes as $slot)
+                                                    @php
+                                                        $slotTeacherName = $slot->teacher?->name ?? $slot->subject?->teacher?->name ?? 'Unassigned';
+                                                        $slotDay = strtolower((string) ($slot->day_of_week ?? 'all'));
+                                                    @endphp
+
+                                                    <tr class="align-top hover:bg-slate-50/80">
+                                                        <td class="px-3 py-3 align-top">
+                                                            <div class="whitespace-nowrap font-semibold text-slate-800">
+                                                                {{ $slotTeacherName }}
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-3 py-3 align-top">
+                                                            <div class="whitespace-nowrap font-semibold text-slate-800">
+                                                                {{ $slot->subject?->name ?? '-' }}
+                                                            </div>
+                                                            <div class="text-xs text-slate-400">
+                                                                {{ \Illuminate\Support\Str::limit($slot->subject?->description ?: 'No description', 60) }}
+                                                            </div>
+                                                        </td>
+                                                        <td class="whitespace-nowrap px-3 py-3 align-top text-slate-700">
+                                                            {{ $slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Unassigned' }}
+                                                        </td>
+                                                        <td class="px-3 py-3 align-top text-slate-700">
+                                                            <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                                {{ $dayOptions[$slotDay] ?? ucfirst($slotDay) }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="px-3 py-3 align-top text-slate-700">
+                                                            <span class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
+                                                                {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="whitespace-nowrap px-3 py-3 align-top text-slate-700">
+                                                            {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
+                                                        </td>
+                                                        <td class="whitespace-nowrap px-3 py-3 align-top text-slate-700">
+                                                            {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="7" class="px-3 py-10 text-center text-sm text-slate-500">
+                                                            No teacher study times found.
                                                         </td>
                                                     </tr>
                                                 @endforelse
@@ -799,7 +988,7 @@
                             </div>
 
                             <div class="mt-5">
-                                {{ $tab === 'class' ? $classTimes->links() : $subjectTimes->links() }}
+                                {{ $tab === 'class' ? $classTimes->links() : ($tab === 'subject' ? $subjectTimes->links() : $teacherTimes->links()) }}
                             </div>
                         </div>
                     </div>
@@ -816,18 +1005,23 @@
 
             const subjectOptionsByClass = @json($subjectOptionsByClass);
             const subjectOptionsAll = @json($subjectOptionsAll);
+            const teacherOptionsAll = @json($teacherOptionsAll);
             const classTimeOptionsByClass = @json($classTimeOptionsByClass);
             const occupiedClassSlotsByClass = @json($occupiedClassSlotsByClass);
-
-            const getSubjectsForClass = (classId) => {
+            const teacherBusySlots = @json($teacherBusySlots);
+            const getSubjectsForClass = (classId, mode = 'class') => {
+                if (mode === 'all') return subjectOptionsAll;
+                if (mode === 'assignable') return subjectOptionsAll;
                 if (!classId || classId === 'all') return subjectOptionsAll;
-                return subjectOptionsByClass[classId] || [];
+
+                const classSubjects = subjectOptionsByClass[classId] || [];
+                return classSubjects;
             };
 
-            const renderSubjectOptions = (subjectSelect, classId, selectedValue, includeAllOption = false) => {
+            const renderSubjectOptions = (subjectSelect, classId, selectedValue, includeAllOption = false, mode = 'class') => {
                 if (!subjectSelect) return;
 
-                const subjects = getSubjectsForClass(classId);
+                const subjects = getSubjectsForClass(classId, mode);
                 const options = [];
 
                 if (includeAllOption) {
@@ -836,7 +1030,10 @@
                 }
 
                 if (subjects.length === 0) {
-                    options.push('<option value="">No subjects in selected class</option>');
+                    const emptyMessage = mode === 'all'
+                        ? 'No subjects available'
+                        : 'No subjects in selected class';
+                    options.push(`<option value="">${emptyMessage}</option>`);
                     subjectSelect.innerHTML = options.join('');
                     return;
                 }
@@ -856,26 +1053,186 @@
                 const occupiedSlots = occupiedClassSlotsByClass[classId] || {};
                 const options = [];
 
-                const availableSlots = slots.filter((slot) => {
-                    const ownerId = occupiedSlots[slot.key];
-                    if (!ownerId) return true;
-
-                    if (currentSubjectStudyTimeId === null || currentSubjectStudyTimeId === '') return false;
-                    return String(ownerId) === String(currentSubjectStudyTimeId);
-                });
-
-                if (availableSlots.length === 0) {
+                if (slots.length === 0) {
                     options.push('<option value="">No class times in selected class</option>');
                     timeSelect.innerHTML = options.join('');
                     return;
                 }
 
-                for (const slot of availableSlots) {
+                options.push('<option value="">Select class time</option>');
+
+                for (const slot of slots) {
+                    const ownerId = occupiedSlots[slot.key];
+                    const isCurrentSlot = currentSubjectStudyTimeId !== null
+                        && currentSubjectStudyTimeId !== ''
+                        && String(ownerId) === String(currentSubjectStudyTimeId);
+                    const isOccupiedByAnotherSubject = Boolean(ownerId) && !isCurrentSlot;
+
                     const selected = String(selectedValue) === String(slot.id) ? ' selected' : '';
-                    options.push(`<option value="${slot.id}"${selected}>${slot.label}</option>`);
+                    const disabled = isOccupiedByAnotherSubject ? ' disabled' : '';
+                    const label = isOccupiedByAnotherSubject
+                        ? `${slot.label} (Already used in this class)`
+                        : slot.label;
+                    options.push(`<option value="${slot.id}"${selected}${disabled}>${label}</option>`);
                 }
 
                 timeSelect.innerHTML = options.join('');
+            };
+
+            const getClassSlotById = (classId, classTimeId) => {
+                if (!classId || !classTimeId) return null;
+
+                const slots = classTimeOptionsByClass[classId] || [];
+                for (const slot of slots) {
+                    if (String(slot.id) === String(classTimeId)) {
+                        return slot;
+                    }
+                }
+
+                return null;
+            };
+
+            const renderTeacherOptions = (teacherSelect, classId, classTimeId, selectedValue, currentSubjectStudyTimeId = null) => {
+                if (!teacherSelect) return;
+
+                const selectedSlot = getClassSlotById(classId, classTimeId);
+                const options = ['<option value="">Unassigned</option>'];
+
+                const selectedDay = String(selectedSlot?.day_of_week || 'all').toLowerCase();
+                const selectedStart = String(selectedSlot?.start_time || '');
+                const selectedEnd = String(selectedSlot?.end_time || '');
+
+                const dayOverlaps = (busyDay) => {
+                    const normalizedBusyDay = String(busyDay || 'all').toLowerCase();
+                    if (!selectedSlot) return false;
+                    if (selectedDay === 'all' || normalizedBusyDay === 'all') return true;
+                    return selectedDay === normalizedBusyDay;
+                };
+
+                const timeOverlaps = (busyStart, busyEnd) => {
+                    if (!selectedSlot) return false;
+                    return selectedStart < String(busyEnd) && selectedEnd > String(busyStart);
+                };
+
+                for (const teacher of teacherOptionsAll) {
+                    const isBusyInAnotherClass = teacherBusySlots.some((busySlot) => {
+                        if (String(busySlot.teacher_id) !== String(teacher.id)) return false;
+                        if (!dayOverlaps(busySlot.day_of_week)) return false;
+                        if (!timeOverlaps(busySlot.start_time, busySlot.end_time)) return false;
+
+                        return !(currentSubjectStudyTimeId !== null
+                            && currentSubjectStudyTimeId !== ''
+                            && String(busySlot.subject_study_time_id) === String(currentSubjectStudyTimeId));
+                    });
+
+                    const selected = String(selectedValue) === String(teacher.id) ? ' selected' : '';
+                    const disabled = isBusyInAnotherClass ? ' disabled' : '';
+                    const label = isBusyInAnotherClass
+                        ? `${teacher.label} (Busy at this time)`
+                        : teacher.label;
+                    options.push(`<option value="${teacher.id}"${selected}${disabled}>${label}</option>`);
+                }
+
+                teacherSelect.innerHTML = options.join('');
+            };
+
+            const normalizeFlexibleTime = (rawValue) => {
+                const value = String(rawValue || '').trim();
+                if (!value) return null;
+
+                const twentyFourMatch = value.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+                if (twentyFourMatch) {
+                    const hour = String(twentyFourMatch[1]).padStart(2, '0');
+                    const minute = String(twentyFourMatch[2]).padStart(2, '0');
+                    return `${hour}:${minute}`;
+                }
+
+                const twelveHourMatch = value.match(/^(0?[1-9]|1[0-2]):([0-5]\d)\s*(AM|PM)$/i);
+                if (twelveHourMatch) {
+                    let hour = Number(twelveHourMatch[1]);
+                    const minute = String(twelveHourMatch[2]).padStart(2, '0');
+                    const meridiem = String(twelveHourMatch[3]).toUpperCase();
+
+                    if (meridiem === 'AM') {
+                        hour = hour === 12 ? 0 : hour;
+                    } else {
+                        hour = hour === 12 ? 12 : hour + 12;
+                    }
+
+                    return `${String(hour).padStart(2, '0')}:${minute}`;
+                }
+
+                const hourOnlyTwelveHourMatch = value.match(/^(0?[1-9]|1[0-2])\s*(AM|PM)$/i);
+                if (hourOnlyTwelveHourMatch) {
+                    let hour = Number(hourOnlyTwelveHourMatch[1]);
+                    const meridiem = String(hourOnlyTwelveHourMatch[2]).toUpperCase();
+
+                    if (meridiem === 'AM') {
+                        hour = hour === 12 ? 0 : hour;
+                    } else {
+                        hour = hour === 12 ? 12 : hour + 12;
+                    }
+
+                    return `${String(hour).padStart(2, '0')}:00`;
+                }
+
+                return null;
+            };
+
+            const periodDefaultTimes = {
+                morning: { start: '07:00', end: '10:00' },
+                afternoon: { start: '10:00', end: '13:00' },
+                evening: { start: '13:00', end: '16:00' },
+                night: { start: '17:00', end: '20:00' },
+                custom: null,
+            };
+
+            const applyPeriodPreset = (periodValue, startInput, endInput, force = false) => {
+                if (!startInput || !endInput) return;
+
+                const preset = periodDefaultTimes[String(periodValue || '').toLowerCase()] || null;
+                if (!preset) return;
+
+                if (!force) {
+                    const hasStart = String(startInput.value || '').trim() !== '';
+                    const hasEnd = String(endInput.value || '').trim() !== '';
+                    if (hasStart || hasEnd) return;
+                }
+
+                startInput.value = preset.start;
+                endInput.value = preset.end;
+            };
+
+            const bindClassSlotPeriodBehavior = (row) => {
+                if (!row) return;
+
+                const periodSelect = row.querySelector('.js-class-period-select');
+                const startInput = row.querySelector('.js-class-start-input');
+                const endInput = row.querySelector('.js-class-end-input');
+                if (!periodSelect || !startInput || !endInput) return;
+
+                applyPeriodPreset(periodSelect.value, startInput, endInput, false);
+
+                periodSelect.addEventListener('change', () => {
+                    applyPeriodPreset(periodSelect.value, startInput, endInput, true);
+                });
+            };
+
+            const bindClassEditPeriodBehavior = (form) => {
+                if (!form) return;
+
+                const periodSelect = form.querySelector('.js-edit-class-period');
+                const startInput = form.querySelector('.js-edit-class-start');
+                const endInput = form.querySelector('.js-edit-class-end');
+                if (!periodSelect || !startInput || !endInput) return;
+
+                periodSelect.addEventListener('change', () => {
+                    const preset = periodDefaultTimes[String(periodSelect.value || '').toLowerCase()] || null;
+                    if (!preset) return;
+
+                    startInput.value = preset.start;
+                    endInput.value = preset.end;
+                });
             };
 
             // Add more rows for Class Study Time
@@ -898,6 +1255,8 @@
                 addClassSlotBtn.addEventListener('click', () => {
                     const html = classSlotTemplate.innerHTML.split('__INDEX__').join(String(nextIndex));
                     classSlotRows.insertAdjacentHTML('beforeend', html);
+                    const addedRow = classSlotRows.querySelector('.js-class-slot-row:last-child');
+                    bindClassSlotPeriodBehavior(addedRow);
                     nextIndex += 1;
                     classSlotRows.dataset.nextIndex = String(nextIndex);
                     syncRemoveButtons();
@@ -921,23 +1280,149 @@
                 });
 
                 syncRemoveButtons();
+
+                classSlotRows.querySelectorAll('.js-class-slot-row').forEach((row) => {
+                    bindClassSlotPeriodBehavior(row);
+                });
+            }
+
+            document.querySelectorAll('.js-class-edit-form').forEach((form) => {
+                bindClassEditPeriodBehavior(form);
+            });
+
+            const classTimeCreateForm = document.getElementById('class_time_create_form');
+            if (classTimeCreateForm) {
+                classTimeCreateForm.addEventListener('submit', (event) => {
+                    const timeInputs = [...classTimeCreateForm.querySelectorAll('.js-class-time-input')];
+                    let firstInvalidInput = null;
+
+                    for (const input of timeInputs) {
+                        const normalized = normalizeFlexibleTime(input.value);
+                        if (!normalized) {
+                            if (!firstInvalidInput) firstInvalidInput = input;
+                            continue;
+                        }
+                        input.value = normalized;
+                    }
+
+                    if (!firstInvalidInput) return;
+
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    firstInvalidInput.focus();
+
+                    const message = 'Invalid time format. Use 07:30 AM or 19:30.';
+                    if (hasSwal) {
+                        Swal.fire({ icon: 'error', title: 'Invalid Time', text: message });
+                    } else {
+                        alert(message);
+                    }
+                });
             }
 
             // Add Subject Time form
             const subjectFormClass = document.getElementById('subject_form_class_id');
-            const subjectFormSubject = document.getElementById('subject_form_subject_id');
-            const subjectFormClassTime = document.getElementById('subject_form_class_time_id');
+            const subjectSlotRows = document.getElementById('subject_slot_rows');
+            const subjectSlotTemplate = document.getElementById('subject_slot_row_template');
+            const addSubjectSlotBtn = document.getElementById('add_subject_slot_btn');
 
-            if (subjectFormClass && subjectFormSubject && subjectFormClassTime) {
-                const selectedSubject = subjectFormSubject.dataset.selected || '';
-                const selectedClassTime = subjectFormClassTime.dataset.selected || '';
+            const bindSubjectSlotRow = (row, classId, useDatasetSelection = true) => {
+                if (!row) return;
 
-                renderSubjectOptions(subjectFormSubject, subjectFormClass.value, selectedSubject, false);
-                renderClassTimeOptions(subjectFormClassTime, subjectFormClass.value, selectedClassTime, null);
+                const subjectSelect = row.querySelector('.js-subject-form-subject');
+                const classTimeSelect = row.querySelector('.js-subject-form-class-time');
+                const teacherSelect = row.querySelector('.js-subject-form-teacher');
+                if (!subjectSelect || !classTimeSelect || !teacherSelect) return;
+
+                const selectedSubject = useDatasetSelection
+                    ? (subjectSelect.dataset.selected || subjectSelect.value || '')
+                    : (subjectSelect.value || '');
+                const selectedClassTime = useDatasetSelection
+                    ? (classTimeSelect.dataset.selected || classTimeSelect.value || '')
+                    : (classTimeSelect.value || '');
+                const selectedTeacher = useDatasetSelection
+                    ? (teacherSelect.dataset.selected || teacherSelect.value || '')
+                    : (teacherSelect.value || '');
+
+                renderSubjectOptions(subjectSelect, classId, selectedSubject, false, 'assignable');
+                renderClassTimeOptions(classTimeSelect, classId, selectedClassTime, null);
+                renderTeacherOptions(
+                    teacherSelect,
+                    classId,
+                    classTimeSelect.value || selectedClassTime,
+                    selectedTeacher,
+                    null
+                );
+
+                subjectSelect.dataset.selected = '';
+                classTimeSelect.dataset.selected = '';
+                teacherSelect.dataset.selected = '';
+
+                if (classTimeSelect.dataset.bound !== '1') {
+                    classTimeSelect.addEventListener('change', () => {
+                        renderTeacherOptions(
+                            teacherSelect,
+                            subjectFormClass?.value || '',
+                            classTimeSelect.value || '',
+                            teacherSelect.value || '',
+                            null
+                        );
+                    });
+                    classTimeSelect.dataset.bound = '1';
+                }
+            };
+
+            if (subjectFormClass && subjectSlotRows && subjectSlotTemplate && addSubjectSlotBtn) {
+                let nextIndex = Number(subjectSlotRows.dataset.nextIndex || subjectSlotRows.querySelectorAll('.js-subject-slot-row').length);
+
+                const syncSubjectSlotRemoveButtons = () => {
+                    const rows = subjectSlotRows.querySelectorAll('.js-subject-slot-row');
+                    rows.forEach((row) => {
+                        const removeButton = row.querySelector('.js-remove-subject-slot');
+                        if (!removeButton) return;
+                        removeButton.classList.toggle('hidden', rows.length <= 1);
+                    });
+                };
+
+                const refreshSubjectSlotRows = (useDatasetSelection = false) => {
+                    const currentClassId = subjectFormClass.value || '';
+                    subjectSlotRows.querySelectorAll('.js-subject-slot-row').forEach((row) => {
+                        bindSubjectSlotRow(row, currentClassId, useDatasetSelection);
+                    });
+                };
+
+                refreshSubjectSlotRows(true);
+                syncSubjectSlotRemoveButtons();
 
                 subjectFormClass.addEventListener('change', () => {
-                    renderSubjectOptions(subjectFormSubject, subjectFormClass.value, '', false);
-                    renderClassTimeOptions(subjectFormClassTime, subjectFormClass.value, '', null);
+                    refreshSubjectSlotRows(false);
+                });
+
+                addSubjectSlotBtn.addEventListener('click', () => {
+                    const html = subjectSlotTemplate.innerHTML.split('__INDEX__').join(String(nextIndex));
+                    subjectSlotRows.insertAdjacentHTML('beforeend', html);
+                    const addedRow = subjectSlotRows.querySelector('.js-subject-slot-row:last-child');
+                    bindSubjectSlotRow(addedRow, subjectFormClass.value || '', false);
+                    nextIndex += 1;
+                    subjectSlotRows.dataset.nextIndex = String(nextIndex);
+                    syncSubjectSlotRemoveButtons();
+                });
+
+                subjectSlotRows.addEventListener('click', (event) => {
+                    const clicked = event.target;
+                    if (!(clicked instanceof HTMLElement)) return;
+
+                    const removeButton = clicked.closest('.js-remove-subject-slot');
+                    if (!removeButton) return;
+
+                    const rows = subjectSlotRows.querySelectorAll('.js-subject-slot-row');
+                    if (rows.length <= 1) return;
+
+                    const row = removeButton.closest('.js-subject-slot-row');
+                    if (row) {
+                        row.remove();
+                        syncSubjectSlotRemoveButtons();
+                    }
                 });
             }
 
@@ -946,19 +1431,27 @@
                 const classSelect = form.querySelector('.js-subject-edit-class');
                 const subjectSelect = form.querySelector('.js-subject-edit-subject');
                 const classTimeSelect = form.querySelector('.js-subject-edit-class-time');
+                const teacherSelect = form.querySelector('.js-subject-edit-teacher');
                 const currentSubjectStudyTimeId = form.dataset.subjectStudyTimeId || '';
 
-                if (!classSelect || !subjectSelect || !classTimeSelect) return;
+                if (!classSelect || !subjectSelect || !classTimeSelect || !teacherSelect) return;
 
                 const selectedSubject = subjectSelect.dataset.selected || '';
                 const selectedClassTime = classTimeSelect.dataset.selected || '';
+                const selectedTeacher = teacherSelect.dataset.selected || '';
 
-                renderSubjectOptions(subjectSelect, classSelect.value, selectedSubject, false);
+                renderSubjectOptions(subjectSelect, classSelect.value, selectedSubject, false, 'assignable');
                 renderClassTimeOptions(classTimeSelect, classSelect.value, selectedClassTime, currentSubjectStudyTimeId);
+                renderTeacherOptions(teacherSelect, classSelect.value, selectedClassTime, selectedTeacher, currentSubjectStudyTimeId);
 
                 classSelect.addEventListener('change', () => {
-                    renderSubjectOptions(subjectSelect, classSelect.value, '', false);
+                    renderSubjectOptions(subjectSelect, classSelect.value, '', false, 'assignable');
                     renderClassTimeOptions(classTimeSelect, classSelect.value, '', currentSubjectStudyTimeId);
+                    renderTeacherOptions(teacherSelect, classSelect.value, '', '', currentSubjectStudyTimeId);
+                });
+
+                classTimeSelect.addEventListener('change', () => {
+                    renderTeacherOptions(teacherSelect, classSelect.value, classTimeSelect.value, teacherSelect.value, currentSubjectStudyTimeId);
                 });
             });
 
