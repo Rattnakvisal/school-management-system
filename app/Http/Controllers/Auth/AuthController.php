@@ -196,11 +196,15 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $role = (string) ($request->user()?->role ?? '');
+
         $this->authService->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('home');
+        return $role === 'teacher'
+            ? redirect()->to('/')
+            : redirect()->route('home');
     }
 
     private function dispatchRegisterOtp(User $user): array

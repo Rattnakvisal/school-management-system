@@ -84,8 +84,7 @@
                     $links = [
                         $item('teacher.dashboard', 'Dashboard', 'home'),
                         $item('teacher.classes.index', 'My Classes', 'grid'),
-                        $item('teacher.time-studies.index', 'Time Studies', 'clock'),
-                        $item('teacher.students.index', 'Students', 'users'),
+                        $item('teacher.schedule.index', 'Schedule', 'clock'),
                         $item('teacher.attendance.index', 'Attendance', 'check'),
                         $item('teacher.assignments.index', 'Assignments', 'clipboard'),
                         $item('teacher.grades.index', 'Grades', 'book'),
@@ -317,6 +316,17 @@
                                         </svg>
                                     </span>
                                     Settings
+                                </a>
+
+                                <a href="{{ route('teacher.attendance.index') }}"
+                                    class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                                    <span class="h-8 w-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+                                        <svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor"
+                                            stroke-width="2" viewBox="0 0 24 24">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    </span>
+                                    Check Attendance
                                 </a>
 
                                 <div class="border-t border-slate-100"></div>

@@ -2,22 +2,22 @@
 
 @section('page')
     <div class="teacher-classes-stage space-y-6">
-        <section class="teacher-classes-reveal rounded-3xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-sky-50 p-6 shadow-sm"
+        <section class="teacher-classes-reveal admin-page-header teacher-page-header"
             style="--sd: 1;">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-black tracking-tight text-slate-900">My Classes</h1>
-                    <p class="mt-1 text-sm text-slate-600">View classes you teach and open class details.</p>
+                    <h1 class="admin-page-title text-3xl font-black tracking-tight">My Classes</h1>
+                    <p class="admin-page-subtitle mt-1 text-sm">View classes you teach and open class details.</p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700">
+                <div class="teacher-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
+                    <span class="admin-page-stat">
                         Classes: {{ number_format($stats['classes'] ?? 0) }}
                     </span>
-                    <span class="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-sky-700">
+                    <span class="admin-page-stat admin-page-stat--sky">
                         Students: {{ number_format($stats['students'] ?? 0) }}
                     </span>
-                    <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-700">
+                    <span class="admin-page-stat admin-page-stat--indigo">
                         Subjects: {{ number_format($stats['subjects'] ?? 0) }}
                     </span>
                 </div>

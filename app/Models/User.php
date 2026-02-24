@@ -95,6 +95,16 @@ class User extends Authenticatable
         return $this->hasMany(Subject::class, 'teacher_id');
     }
 
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(StudentAttendance::class, 'student_id');
+    }
+
+    public function checkedAttendances(): HasMany
+    {
+        return $this->hasMany(StudentAttendance::class, 'teacher_id');
+    }
+
     public function getAvatarUrlAttribute(): string
     {
         $avatar = trim((string) $this->avatar);

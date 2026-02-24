@@ -119,13 +119,18 @@ class DashboardController extends Controller
         $todayClassSlots = $classSlots
             ->filter(fn($slot) => $dayMatches($slot->day_of_week ?? 'all', $todayKey))
             ->map(function ($slot) use ($periodLabels) {
+                $startAt = Carbon::parse($slot->start_time);
+                $endAt = Carbon::parse($slot->end_time);
+
                 return [
                     'type' => 'class',
                     'title' => $slot->schoolClass?->display_name ?? 'Class Schedule',
                     'subtitle' => 'Class Time',
                     'period' => $periodLabels[strtolower((string) $slot->period)] ?? ucfirst((string) $slot->period),
-                    'start' => Carbon::parse($slot->start_time)->format('h:i A'),
-                    'end' => Carbon::parse($slot->end_time)->format('h:i A'),
+                    'start' => $startAt->format('h:i A'),
+                    'end' => $endAt->format('h:i A'),
+                    'start_24' => $startAt->format('H:i:s'),
+                    'end_24' => $endAt->format('H:i:s'),
                     'start_sort' => (string) $slot->start_time,
                 ];
             });
@@ -133,13 +138,18 @@ class DashboardController extends Controller
         $todaySubjectSlots = $subjectSlots
             ->filter(fn($slot) => $dayMatches($slot->day_of_week ?? 'all', $todayKey))
             ->map(function ($slot) use ($periodLabels) {
+                $startAt = Carbon::parse($slot->start_time);
+                $endAt = Carbon::parse($slot->end_time);
+
                 return [
                     'type' => 'subject',
                     'title' => $slot->subject?->name ?? 'Subject Schedule',
                     'subtitle' => $slot->subject?->schoolClass?->display_name ?? 'Unassigned class',
                     'period' => $periodLabels[strtolower((string) $slot->period)] ?? ucfirst((string) $slot->period),
-                    'start' => Carbon::parse($slot->start_time)->format('h:i A'),
-                    'end' => Carbon::parse($slot->end_time)->format('h:i A'),
+                    'start' => $startAt->format('h:i A'),
+                    'end' => $endAt->format('h:i A'),
+                    'start_24' => $startAt->format('H:i:s'),
+                    'end_24' => $endAt->format('H:i:s'),
                     'start_sort' => (string) $slot->start_time,
                 ];
             });

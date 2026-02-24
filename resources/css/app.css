@@ -298,6 +298,32 @@
         color: var(--text-soft);
     }
 
+    .teacher-page-header {
+        border-color: #d9e2f2;
+        background: linear-gradient(128deg, #f8fafc 0%, #eef2ff 52%, #ecfeff 100%);
+        padding: clamp(1.2rem, 2vw, 1.6rem);
+    }
+
+    .teacher-page-header .admin-page-title {
+        font-size: clamp(1.75rem, 2.7vw, 2.35rem);
+        line-height: 1.1;
+    }
+
+    .teacher-page-header .admin-page-subtitle {
+        max-width: 46rem;
+    }
+
+    .teacher-page-header__stats {
+        margin-left: auto;
+        justify-content: flex-end;
+    }
+
+    .teacher-page-header__actions {
+        margin-left: auto;
+        width: fit-content;
+        justify-content: flex-end;
+    }
+
     /* ==================================
      Better pills (stat badges)
   =================================== */
@@ -574,6 +600,113 @@
         min-width: 980px;
     }
 
+    /* Teacher settings polish */
+    .teacher-settings-stage .teacher-settings-panel {
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(130% 120% at 110% -10%, rgba(99, 102, 241, 0.08), transparent 58%),
+            linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+        box-shadow: 0 22px 38px -34px rgba(15, 23, 42, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-hero {
+        background: linear-gradient(125deg, #eef2ff 0%, #f8fafc 48%, #ecfeff 100%);
+    }
+
+    .teacher-settings-stage .teacher-settings-hero::after {
+        background: radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.24), transparent 64%);
+    }
+
+    .teacher-settings-stage .teacher-settings-profile-head {
+        border: 1px solid #dbeafe;
+        border-radius: 1rem;
+        padding: 0.9rem;
+        background: linear-gradient(120deg, #f0f9ff 0%, #eef2ff 55%, #f8fafc 100%);
+    }
+
+    .teacher-settings-stage .teacher-settings-form-card {
+        transition: transform 220ms ease, box-shadow 220ms ease;
+        box-shadow: 0 12px 24px -26px rgba(15, 23, 42, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-form-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 34px -30px rgba(15, 23, 42, 0.5);
+    }
+
+    .teacher-settings-stage .teacher-settings-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        letter-spacing: 0.01em;
+    }
+
+    .teacher-settings-stage .teacher-settings-section-dot {
+        height: 0.55rem;
+        width: 0.55rem;
+        border-radius: 9999px;
+        background: linear-gradient(180deg, #6366f1, #4f46e5);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16);
+    }
+
+    .teacher-settings-stage .teacher-settings-check-form {
+        background:
+            linear-gradient(120deg, rgba(224, 231, 255, 0.55) 0%, rgba(240, 249, 255, 0.88) 45%, rgba(248, 250, 252, 0.9) 100%);
+    }
+
+    .teacher-settings-stage .teacher-settings-inline-kpi {
+        transition: transform 180ms ease, box-shadow 180ms ease;
+        box-shadow: 0 10px 20px -22px rgba(15, 23, 42, 0.5);
+    }
+
+    .teacher-settings-stage .teacher-settings-inline-kpi:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 28px -24px rgba(15, 23, 42, 0.52);
+    }
+
+    .teacher-settings-stage .teacher-settings-mini-stat {
+        transition: transform 200ms ease, box-shadow 200ms ease;
+        box-shadow: 0 10px 20px -24px rgba(15, 23, 42, 0.55);
+    }
+
+    .teacher-settings-stage .teacher-settings-mini-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 28px -24px rgba(15, 23, 42, 0.55);
+    }
+
+    .teacher-settings-stage .teacher-settings-class-card {
+        transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    }
+
+    .teacher-settings-stage .teacher-settings-class-card:hover {
+        transform: translateY(-2px);
+        border-color: #c7d2fe;
+        box-shadow: 0 16px 30px -26px rgba(79, 70, 229, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-kpi {
+        transition: transform 220ms ease, box-shadow 220ms ease;
+        box-shadow: 0 12px 24px -24px rgba(15, 23, 42, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-kpi:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 30px -24px rgba(15, 23, 42, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-table-wrap {
+        background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+    }
+
+    .teacher-settings-stage .teacher-settings-cta {
+        box-shadow: 0 14px 24px -24px rgba(79, 70, 229, 0.6);
+    }
+
+    .teacher-settings-stage .teacher-settings-cta:hover {
+        box-shadow: 0 22px 30px -24px rgba(79, 70, 229, 0.6);
+    }
+
     .teacher-classes-stage td,
     .teacher-classes-stage th {
         vertical-align: top;
@@ -593,6 +726,10 @@
 
     .teacher-stage {
         --stage-accent: #0ea5e9;
+    }
+
+    .teacher-settings-stage {
+        --stage-accent: #4f46e5;
     }
 
     .teacher-classes-stage {
@@ -634,6 +771,10 @@
         --ring: 0 0 0 4px rgba(14, 165, 233, 0.20);
     }
 
+    .teacher-settings-stage {
+        --ring: 0 0 0 4px rgba(79, 70, 229, 0.20);
+    }
+
     .teacher-classes-stage {
         --ring: 0 0 0 4px rgba(79, 70, 229, 0.20);
     }
@@ -671,6 +812,10 @@
             padding: 1.2rem;
         }
 
+        .teacher-page-header .admin-page-title {
+            font-size: clamp(1.55rem, 5vw, 2rem);
+        }
+
         .stage .overflow-x-auto {
             padding: 0.2rem;
             border-radius: 0.85rem;
@@ -679,6 +824,19 @@
         .student-stage .student-table {
             min-width: 980px;
             table-layout: auto;
+        }
+
+        .teacher-settings-stage .teacher-settings-panel {
+            border-radius: 1.25rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .teacher-page-header__stats,
+        .teacher-page-header__actions {
+            margin-left: 0;
+            width: 100%;
+            justify-content: flex-start;
         }
     }
 }

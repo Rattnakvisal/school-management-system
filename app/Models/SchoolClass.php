@@ -50,6 +50,11 @@ class SchoolClass extends Model
             ->orderBy('start_time');
     }
 
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(StudentAttendance::class);
+    }
+
     public function getDisplayNameAttribute(): string
     {
         $name = trim((string) $this->name);
