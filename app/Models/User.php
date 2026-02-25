@@ -74,6 +74,12 @@ class User extends Authenticatable
         return $this->belongsTo(Subject::class, 'major_subject_id');
     }
 
+    public function majorSubjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Subject::class, 'student_major_subjects', 'user_id', 'subject_id')
+            ->withTimestamps();
+    }
+
     public function classStudyTime(): BelongsTo
     {
         return $this->belongsTo(ClassStudyTime::class, 'class_study_time_id');

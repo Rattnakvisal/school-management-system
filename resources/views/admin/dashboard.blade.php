@@ -4,6 +4,8 @@
     @php
         $majorRate = ($studentsTotal ?? 0) > 0 ? round((($studentsWithMajor ?? 0) / $studentsTotal) * 100, 1) : 0;
         $studyTimeRate = ($studentsTotal ?? 0) > 0 ? round((($studentsWithStudyTime ?? 0) / $studentsTotal) * 100, 1) : 0;
+        $dashboardNow = $dashboardNow ?? now();
+        $dashboardAgenda = collect($dashboardAgenda ?? []);
         $fullName = trim((string) (auth()->user()->name ?? 'Admin'));
         $firstName = explode(' ', $fullName)[0] ?? 'Admin';
         $hour = (int) now()->hour;
@@ -293,6 +295,67 @@
                         @endforelse
                     </div>
                 </article>
+
+                <article class="dash-reveal dash-hover rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-5 shadow-sm ring-1 ring-indigo-100/60"
+                    style="--d: 16;">
+                    <div class="mb-4 flex items-start justify-between gap-2">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-900">Agenda</h2>
+                            <p class="mt-1 text-xs text-slate-500">{{ $dashboardNow->format('F Y') }}</p>
+                        </div>
+                        <div class="rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-right">
+                            <div class="text-[10px] font-bold uppercase tracking-wide text-indigo-600">Now</div>
+                            <div id="dash_agenda_clock" class="text-xs font-semibold text-indigo-800">
+                                {{ $dashboardNow->format('h:i:s A') }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        @forelse ($dashboardAgenda as $agendaItem)
+                            <div class="rounded-2xl border border-slate-200 bg-white/90 px-3 py-2.5">
+                                <div class="flex items-start gap-3">
+                                    <div class="min-w-[92px] rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-center">
+                                        <div class="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                                            {{ $agendaItem['weekday_label'] ?? '-' }}
+                                        </div>
+                                        <div class="text-[11px] font-semibold text-slate-700">
+                                            {{ $agendaItem['date_label'] ?? '-' }}
+                                        </div>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="text-xs font-semibold text-slate-800">
+                                                {{ $agendaItem['class_label'] ?? 'Unassigned Class' }}
+                                            </div>
+                                            <span class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                                                {{ $agendaItem['relative_label'] ?? 'Upcoming' }}
+                                            </span>
+                                        </div>
+                                        <div class="mt-0.5 text-[11px] text-slate-500">
+                                            {{ $agendaItem['day_label'] ?? 'All Days' }} | {{ $agendaItem['period_label'] ?? 'Custom' }}
+                                        </div>
+                                        <div class="mt-0.5 text-[11px] text-slate-500">
+                                            {{ $agendaItem['date_full_label'] ?? ($agendaItem['date_label'] ?? '-') }}
+                                        </div>
+                                        <div class="mt-1 text-xs font-bold text-indigo-700">
+                                            {{ $agendaItem['time_label'] ?? '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-3 py-4 text-center text-xs text-slate-500">
+                                No schedule slots yet. Add class study times to see agenda.
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <a href="{{ route('admin.time-studies.index') }}"
+                        class="mt-3 inline-flex items-center rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">
+                        Open Time Studies
+                    </a>
+                </article>
             </div>
         </section>
     </div>
@@ -300,6 +363,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const agendaClockElement = document.getElementById('dash_agenda_clock');
+            if (agendaClockElement) {
+                const updateAgendaClock = () => {
+                    const now = new Date();
+                    const hh = String(((now.getHours() + 11) % 12) + 1).padStart(2, '0');
+                    const mm = String(now.getMinutes()).padStart(2, '0');
+                    const ss = String(now.getSeconds()).padStart(2, '0');
+                    const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+                    agendaClockElement.textContent = `${hh}:${mm}:${ss} ${ampm}`;
+                };
+                updateAgendaClock();
+                window.setInterval(updateAgendaClock, 1000);
+            }
+
             if (typeof Chart === 'undefined') {
                 return;
             }

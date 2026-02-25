@@ -35,9 +35,15 @@ class DashboardController extends Controller
         $classesActive = $hasClassStatusColumn ? (clone $classesBaseQuery)->where('is_active', true)->count() : $classesTotal;
         $subjectsActive = $hasSubjectStatusColumn ? (clone $subjectsBaseQuery)->where('is_active', true)->count() : $subjectsTotal;
         $subjectsWithTeacher = (clone $subjectsBaseQuery)->whereNotNull('teacher_id')->count();
-        $studentsWithMajor = Schema::hasColumn('users', 'major_subject_id')
-            ? (clone $studentsBaseQuery)->whereNotNull('major_subject_id')->count()
-            : 0;
+        $studentsWithMajor = Schema::hasTable('student_major_subjects')
+            ? (int) DB::table('student_major_subjects')
+                ->join('users', 'users.id', '=', 'student_major_subjects.user_id')
+                ->where('users.role', 'student')
+                ->distinct('student_major_subjects.user_id')
+                ->count('student_major_subjects.user_id')
+            : (Schema::hasColumn('users', 'major_subject_id')
+                ? (clone $studentsBaseQuery)->whereNotNull('major_subject_id')->count()
+                : 0);
         $studentsWithStudyTime = Schema::hasColumn('users', 'class_study_time_id')
             ? (clone $studentsBaseQuery)->whereNotNull('class_study_time_id')->count()
             : 0;
@@ -153,6 +159,9 @@ class DashboardController extends Controller
             'attendance' => $this->attendanceOverviewData(),
         ];
 
+        $dashboardNow = Carbon::now();
+        $dashboardAgenda = $this->dashboardAgendaData($dashboardNow);
+
         return view('admin.dashboard', [
             'studentsTotal' => $studentsTotal,
             'teachersTotal' => $teachersTotal,
@@ -168,6 +177,8 @@ class DashboardController extends Controller
             'messagesUnread' => $messagesUnread,
             'chartData' => $chartData,
             'latestContactMessages' => $latestContactMessages,
+            'dashboardNow' => $dashboardNow,
+            'dashboardAgenda' => $dashboardAgenda,
         ]);
     }
 
@@ -254,5 +265,108 @@ class DashboardController extends Controller
             'absent' => [0, 0, 0, 0, 0],
             'hasData' => false,
         ];
+    }
+
+    private function dashboardAgendaData(Carbon $now): array
+    {
+        if (!Schema::hasTable('class_study_times')) {
+            return [];
+        }
+
+        $hasDayColumn = Schema::hasColumn('class_study_times', 'day_of_week');
+        $columns = ['id', 'school_class_id', 'period', 'start_time', 'end_time', 'sort_order'];
+        if ($hasDayColumn) {
+            $columns[] = 'day_of_week';
+        }
+
+        $weekIndexByDay = [
+            'sunday' => 0,
+            'monday' => 1,
+            'tuesday' => 2,
+            'wednesday' => 3,
+            'thursday' => 4,
+            'friday' => 5,
+            'saturday' => 6,
+        ];
+
+        return ClassStudyTime::query()
+            ->with('schoolClass:id,name,section')
+            ->orderBy('sort_order')
+            ->orderBy('start_time')
+            ->get($columns)
+            ->map(function (ClassStudyTime $slot) use ($now, $hasDayColumn, $weekIndexByDay) {
+                $className = trim((string) ($slot->schoolClass?->name ?? ''));
+                $classSection = trim((string) ($slot->schoolClass?->section ?? ''));
+                $classLabel = $className !== ''
+                    ? ($classSection !== '' ? $className . ' - ' . $classSection : $className)
+                    : 'Unassigned Class';
+
+                $dayKey = $hasDayColumn
+                    ? strtolower(trim((string) ($slot->day_of_week ?? 'all')))
+                    : 'all';
+                if ($dayKey === '' || !array_key_exists($dayKey, $weekIndexByDay)) {
+                    $dayKey = 'all';
+                }
+
+                $start = substr((string) ($slot->start_time ?? ''), 0, 5);
+                $end = substr((string) ($slot->end_time ?? ''), 0, 5);
+                $period = strtolower(trim((string) ($slot->period ?? '')));
+
+                if ($dayKey === 'all') {
+                    $nextDateTime = $now->copy()->startOfDay();
+                } else {
+                    $targetWeekday = $weekIndexByDay[$dayKey];
+                    $daysUntil = ($targetWeekday - $now->dayOfWeek + 7) % 7;
+                    $nextDateTime = $now->copy()->startOfDay()->addDays($daysUntil);
+                }
+
+                if ($start !== '' && str_contains($start, ':')) {
+                    [$h, $m] = array_pad(explode(':', $start), 2, '0');
+                    $nextDateTime->setTime((int) $h, (int) $m, 0);
+                }
+
+                if ($nextDateTime->lt($now)) {
+                    $nextDateTime->addDays($dayKey === 'all' ? 1 : 7);
+                }
+
+                $timeLabel = '-';
+                if ($start !== '' && str_contains($start, ':')) {
+                    $startLabel = Carbon::createFromFormat('H:i', $start)->format('h:i A');
+                    if ($end !== '' && str_contains($end, ':')) {
+                        $endLabel = Carbon::createFromFormat('H:i', $end)->format('h:i A');
+                        $timeLabel = $startLabel . ' -> ' . $endLabel;
+                    } else {
+                        $timeLabel = $startLabel;
+                    }
+                }
+
+                $relativeLabel = 'Upcoming';
+                if ($nextDateTime->isSameDay($now)) {
+                    $relativeLabel = 'Today';
+                } elseif ($nextDateTime->isSameDay($now->copy()->addDay())) {
+                    $relativeLabel = 'Tomorrow';
+                } else {
+                    $diffDays = (int) $now->copy()->startOfDay()->diffInDays($nextDateTime->copy()->startOfDay(), false);
+                    if ($diffDays > 1) {
+                        $relativeLabel = 'In ' . $diffDays . ' days';
+                    }
+                }
+
+                return [
+                    'sort_ts' => $nextDateTime->timestamp,
+                    'date_label' => $nextDateTime->format('M d, Y'),
+                    'date_full_label' => $nextDateTime->format('l, F d, Y'),
+                    'weekday_label' => $nextDateTime->format('D'),
+                    'day_label' => $dayKey === 'all' ? 'All Days' : ucfirst($dayKey),
+                    'period_label' => $period !== '' ? ucfirst($period) : 'Custom',
+                    'time_label' => $timeLabel,
+                    'class_label' => $classLabel,
+                    'relative_label' => $relativeLabel,
+                ];
+            })
+            ->sortBy('sort_ts')
+            ->take(4)
+            ->values()
+            ->all();
     }
 }

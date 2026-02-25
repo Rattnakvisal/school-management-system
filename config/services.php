@@ -53,4 +53,12 @@ return [
         'client_secret' => env('GITHUB_CLIENT_SECRET'),
         'redirect' => env('GITHUB_CALLBACK_REDIRECTS')
     ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'bot_username' => env('TELEGRAM_BOT_USERNAME'),
+        'admin_chat_id' => env('TELEGRAM_ADMIN_CHAT_ID'),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
+        'verify_ssl' => env('TELEGRAM_VERIFY_SSL', true),
+    ],
 ];

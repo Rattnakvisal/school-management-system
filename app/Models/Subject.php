@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Subject extends Model
@@ -47,6 +48,13 @@ class Subject extends Model
     public function students(): HasMany
     {
         return $this->hasMany(User::class, 'school_class_id', 'school_class_id')->where('role', 'student');
+    }
+
+    public function majorStudents(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'student_major_subjects', 'subject_id', 'user_id')
+            ->where('users.role', 'student')
+            ->withTimestamps();
     }
 
     public function studySchedules(): HasMany

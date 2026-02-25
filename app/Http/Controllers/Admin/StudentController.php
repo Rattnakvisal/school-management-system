@@ -26,6 +26,7 @@ class StudentController extends Controller
         $hasStatusColumn = $this->hasStatusColumn();
         $hasClassColumn = $this->hasClassColumn();
         $hasMajorSubjectColumn = $this->hasMajorSubjectColumn();
+        $hasStudentMajorSubjectsTable = $this->hasStudentMajorSubjectsTable();
         $hasClassStudyTimeColumn = $this->hasClassStudyTimeColumn();
         $hasStudentStudyTimesTable = $this->hasStudentStudyTimesTable();
         $classId = $hasClassColumn && ctype_digit($classIdRaw) ? (int) $classIdRaw : null;
@@ -38,14 +39,17 @@ class StudentController extends Controller
             ->when($hasMajorSubjectColumn, function ($query) {
                 $query->with('majorSubject');
             })
+            ->when($hasMajorSubjectColumn && $hasStudentMajorSubjectsTable, function ($query) {
+                $query->with('majorSubjects.schoolClass');
+            })
             ->when($hasClassStudyTimeColumn, function ($query) use ($hasStudentStudyTimesTable) {
                 $query->with('classStudyTime');
                 if ($hasStudentStudyTimesTable) {
                     $query->with('studyTimes');
                 }
             })
-            ->when($search !== '', function ($query) use ($search, $hasClassColumn) {
-                $query->where(function ($inner) use ($search, $hasClassColumn) {
+            ->when($search !== '', function ($query) use ($search, $hasClassColumn, $hasMajorSubjectColumn, $hasStudentMajorSubjectsTable) {
+                $query->where(function ($inner) use ($search, $hasClassColumn, $hasMajorSubjectColumn, $hasStudentMajorSubjectsTable) {
                     $inner->where('name', 'like', '%' . $search . '%')
                         ->orWhere('email', 'like', '%' . $search . '%');
 
@@ -54,6 +58,20 @@ class StudentController extends Controller
                             $classQuery->where('name', 'like', '%' . $search . '%')
                                 ->orWhere('section', 'like', '%' . $search . '%');
                         });
+                    }
+
+                    if ($hasMajorSubjectColumn) {
+                        $inner->orWhereHas('majorSubject', function ($subjectQuery) use ($search) {
+                            $subjectQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('code', 'like', '%' . $search . '%');
+                        });
+
+                        if ($hasStudentMajorSubjectsTable) {
+                            $inner->orWhereHas('majorSubjects', function ($subjectQuery) use ($search) {
+                                $subjectQuery->where('name', 'like', '%' . $search . '%')
+                                    ->orWhere('code', 'like', '%' . $search . '%');
+                            });
+                        }
                     }
                 });
             });
@@ -85,14 +103,18 @@ class StudentController extends Controller
             : collect();
         $subjectsByClass = $this->subjectsByClassMap($hasClassColumn, $hasMajorSubjectColumn);
         $studyTimesByClass = $this->studyTimesByClassMap($hasClassColumn, $hasClassStudyTimeColumn);
-        $subjectStudySlotKeysBySubject = $this->subjectStudySlotKeysBySubjectMap($hasMajorSubjectColumn, $hasClassStudyTimeColumn);
+        $subjectStudySlotsByClassSubject = $this->subjectStudySlotsByClassSubjectMap($hasClassColumn, $hasMajorSubjectColumn, $hasClassStudyTimeColumn);
+        $classStudyTimeIdsByClassSubject = $this->classStudyTimeIdsByClassSubjectMapFromSlots($studyTimesByClass, $subjectStudySlotsByClassSubject);
+        $classStudyTimeIdsBySubjectAll = $this->classStudyTimeIdsBySubjectAllMap($classStudyTimeIdsByClassSubject);
 
         return view('admin.students', [
             'students' => $students,
             'classes' => $classes,
             'subjectsByClass' => $subjectsByClass,
             'studyTimesByClass' => $studyTimesByClass,
-            'subjectStudySlotKeysBySubject' => $subjectStudySlotKeysBySubject,
+            'subjectStudySlotsByClassSubject' => $subjectStudySlotsByClassSubject,
+            'classStudyTimeIdsByClassSubject' => $classStudyTimeIdsByClassSubject,
+            'classStudyTimeIdsBySubjectAll' => $classStudyTimeIdsBySubjectAll,
             'periodLabels' => $this->periodLabels(),
             'search' => $search,
             'status' => in_array($status, ['all', 'active', 'inactive'], true) ? $status : 'all',
@@ -101,6 +123,7 @@ class StudentController extends Controller
             'hasStatusColumn' => $hasStatusColumn,
             'hasClassColumn' => $hasClassColumn,
             'hasMajorSubjectColumn' => $hasMajorSubjectColumn,
+            'hasStudentMajorSubjectsTable' => $hasStudentMajorSubjectsTable,
             'hasClassStudyTimeColumn' => $hasClassStudyTimeColumn,
         ]);
     }
@@ -108,6 +131,7 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateStudentRequest($request);
+        $selectedMajorSubjectIds = $this->extractSelectedMajorSubjectIdsFromRequest($request);
         $selectedStudyTimeIds = $this->extractSelectedStudyTimeIdsFromRequest($request);
 
         $avatarResult = $this->resolveAvatarUpload($request);
@@ -134,7 +158,7 @@ class StudentController extends Controller
 
         if ($this->hasMajorSubjectColumn()) {
             $payload['major_subject_id'] = $payload['role'] === 'student'
-                ? ($validated['major_subject_id'] ?? null)
+                ? ($selectedMajorSubjectIds[0] ?? null)
                 : null;
         }
 
@@ -145,6 +169,10 @@ class StudentController extends Controller
         }
 
         $student = User::create($payload);
+        $this->syncStudentMajorSubjects(
+            $student,
+            $payload['role'] === 'student' ? $selectedMajorSubjectIds : []
+        );
         $this->syncStudentStudyTimes(
             $student,
             $payload['role'] === 'student' ? $selectedStudyTimeIds : []
@@ -165,6 +193,7 @@ class StudentController extends Controller
     {
         $student = $this->studentOrFail($student);
         $validated = $this->validateStudentRequest($request, $student);
+        $selectedMajorSubjectIds = $this->extractSelectedMajorSubjectIdsFromRequest($request);
         $selectedStudyTimeIds = $this->extractSelectedStudyTimeIdsFromRequest($request);
 
         $avatarResult = $this->resolveAvatarUpload($request, $student);
@@ -195,7 +224,7 @@ class StudentController extends Controller
 
         if ($this->hasMajorSubjectColumn()) {
             $payload['major_subject_id'] = $payload['role'] === 'student'
-                ? ($validated['major_subject_id'] ?? null)
+                ? ($selectedMajorSubjectIds[0] ?? null)
                 : null;
         }
 
@@ -206,6 +235,10 @@ class StudentController extends Controller
         }
 
         $student->update($payload);
+        $this->syncStudentMajorSubjects(
+            $student,
+            $payload['role'] === 'student' ? $selectedMajorSubjectIds : []
+        );
         $this->syncStudentStudyTimes(
             $student,
             $payload['role'] === 'student' ? $selectedStudyTimeIds : []
@@ -278,6 +311,11 @@ class StudentController extends Controller
         return Schema::hasColumn('users', 'class_study_time_id');
     }
 
+    private function hasStudentMajorSubjectsTable(): bool
+    {
+        return Schema::hasTable('student_major_subjects');
+    }
+
     private function hasStudentStudyTimesTable(): bool
     {
         return Schema::hasTable('student_study_times');
@@ -285,6 +323,12 @@ class StudentController extends Controller
 
     private function validateStudentRequest(Request $request, ?User $student = null): array
     {
+        if (!$request->has('major_subject_ids') && $request->filled('major_subject_id')) {
+            $request->merge([
+                'major_subject_ids' => [$request->input('major_subject_id')],
+            ]);
+        }
+
         if (!$request->has('class_study_time_ids') && $request->filled('class_study_time_id')) {
             $request->merge([
                 'class_study_time_ids' => [$request->input('class_study_time_id')],
@@ -308,11 +352,18 @@ class StudentController extends Controller
         }
 
         if ($hasMajorSubjectColumn) {
-            $rules['major_subject_id'] = [
+            $rules['major_subject_ids'] = [
                 'exclude_unless:role,student',
+                $hasClassColumn ? 'required_with:school_class_id' : 'nullable',
+                'array',
+            ];
+            $rules['major_subject_ids.*'] = [
+                'integer',
+                'exists:subjects,id',
+            ];
+            $rules['major_subject_id'] = [
                 'nullable',
                 'exists:subjects,id',
-                $hasClassColumn ? 'required_with:school_class_id' : 'nullable',
             ];
         }
 
@@ -326,7 +377,18 @@ class StudentController extends Controller
             $rules['class_study_time_id'] = ['nullable', 'exists:class_study_times,id'];
         }
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = [
+            'major_subject_ids.required_with' => 'Please select at least one major subject when a home class is selected.',
+            'class_study_time_ids.required_with' => 'Please select at least one study time when a home class is selected.',
+        ];
+
+        $attributes = [
+            'school_class_id' => 'home class',
+            'major_subject_ids' => 'major subjects',
+            'class_study_time_ids' => 'study times',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages, $attributes);
         $validator->after(function ($validator) use ($request, $hasClassColumn, $hasMajorSubjectColumn, $hasClassStudyTimeColumn) {
             $role = strtolower((string) $request->input('role', 'student'));
             if ($role !== 'student') {
@@ -334,90 +396,85 @@ class StudentController extends Controller
             }
 
             $classId = $hasClassColumn ? (int) ($request->input('school_class_id') ?? 0) : 0;
-            $majorSubjectId = $hasMajorSubjectColumn ? (int) ($request->input('major_subject_id') ?? 0) : 0;
+            $majorSubjectIds = $hasMajorSubjectColumn
+                ? $this->extractSelectedMajorSubjectIdsFromRequest($request)
+                : [];
             $selectedStudyTimeIds = $hasClassStudyTimeColumn
                 ? $this->extractSelectedStudyTimeIdsFromRequest($request)
                 : [];
 
-            if ($majorSubjectId > 0) {
-                $subject = Subject::query()->select(['id', 'school_class_id'])->find($majorSubjectId);
-                if ($subject && $classId > 0 && (int) $subject->school_class_id !== $classId) {
-                    $validator->errors()->add('major_subject_id', 'Selected major subject does not belong to the selected class.');
+            if ($hasClassColumn && $hasMajorSubjectColumn && $classId > 0 && !empty($majorSubjectIds)) {
+                $hasInvalidSubject = collect($majorSubjectIds)
+                    ->contains(fn(int $subjectId) => !$this->subjectBelongsToClass($subjectId, $classId));
+
+                if ($hasInvalidSubject) {
+                    $validator->errors()->add(
+                        'major_subject_ids',
+                        'Selected major subjects must belong to the selected home class.'
+                    );
+                }
+            }
+
+            if ($hasClassColumn && $hasClassStudyTimeColumn && $classId > 0 && !empty($selectedStudyTimeIds)) {
+                $invalidStudyTimeCount = ClassStudyTime::query()
+                    ->whereIn('id', $selectedStudyTimeIds)
+                    ->where('school_class_id', '!=', $classId)
+                    ->count();
+
+                if ($invalidStudyTimeCount > 0) {
+                    $validator->errors()->add(
+                        'class_study_time_ids',
+                        'Selected study times must belong to the selected home class.'
+                    );
                 }
             }
 
             if ($hasClassStudyTimeColumn && !empty($selectedStudyTimeIds)) {
-                if ($hasClassColumn && $classId <= 0) {
-                    $validator->errors()->add('class_study_time_ids', 'Please select class before selecting study time.');
-                    return;
-                }
-
-                if ($classId > 0) {
-                    $validCount = ClassStudyTime::query()
-                        ->whereIn('id', $selectedStudyTimeIds)
-                        ->where('school_class_id', $classId)
-                        ->count();
-
-                    if ($validCount !== count($selectedStudyTimeIds)) {
-                        $validator->errors()->add(
-                            'class_study_time_ids',
-                            'One or more selected study times do not belong to the selected class.'
-                        );
-                        return;
-                    }
-                }
-
-                if ($majorSubjectId > 0 && Schema::hasTable('subject_study_times')) {
+                if (!empty($majorSubjectIds) && Schema::hasTable('subject_study_times')) {
                     $hasClassDayColumn = Schema::hasColumn('class_study_times', 'day_of_week');
                     $hasSubjectDayColumn = Schema::hasColumn('subject_study_times', 'day_of_week');
-                    $useDayInSlotKey = $hasClassDayColumn && $hasSubjectDayColumn;
+                    $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
 
                     $subjectColumns = ['period', 'start_time', 'end_time'];
                     if ($hasSubjectDayColumn) {
                         $subjectColumns[] = 'day_of_week';
                     }
 
-                    $subjectSlotKeys = SubjectStudyTime::query()
-                        ->where('subject_id', $majorSubjectId)
-                        ->get($subjectColumns)
-                        ->map(function ($slot) use ($useDayInSlotKey) {
-                            $dayPrefix = $useDayInSlotKey
-                                ? strtolower((string) ($slot->day_of_week ?? 'all')) . '|'
-                                : '';
+                    $subjectSlotsQuery = SubjectStudyTime::query()
+                        ->whereIn('subject_id', $majorSubjectIds);
+                    if ($classId > 0 && $hasSubjectClassColumn) {
+                        $subjectSlotsQuery->where('school_class_id', $classId);
+                    }
 
-                            return $dayPrefix . strtolower((string) $slot->period)
-                                . '|'
-                                . substr((string) $slot->start_time, 0, 5)
-                                . '|'
-                                . substr((string) $slot->end_time, 0, 5);
-                        })
-                        ->unique()
+                    $subjectSlots = $subjectSlotsQuery
+                        ->get($subjectColumns)
+                        ->map(fn($slot) => $this->normalizeStudySlot($slot, $hasSubjectDayColumn))
+                        ->unique(fn(array $slot) => $this->studySlotSignature($slot))
                         ->values();
 
-                    if ($subjectSlotKeys->isNotEmpty()) {
+                    if ($subjectSlots->isNotEmpty()) {
                         $classColumns = ['period', 'start_time', 'end_time'];
                         if ($hasClassDayColumn) {
                             $classColumns[] = 'day_of_week';
                         }
 
-                        $selectedSlotKeys = ClassStudyTime::query()
-                            ->whereIn('id', $selectedStudyTimeIds)
-                            ->get($classColumns)
-                            ->map(function ($slot) use ($useDayInSlotKey) {
-                                $dayPrefix = $useDayInSlotKey
-                                    ? strtolower((string) ($slot->day_of_week ?? 'all')) . '|'
-                                    : '';
+                        $selectedClassSlotsQuery = ClassStudyTime::query()
+                            ->whereIn('id', $selectedStudyTimeIds);
+                        if ($classId > 0) {
+                            $selectedClassSlotsQuery->where('school_class_id', $classId);
+                        }
 
-                                return $dayPrefix . strtolower((string) $slot->period)
-                                    . '|'
-                                    . substr((string) $slot->start_time, 0, 5)
-                                    . '|'
-                                    . substr((string) $slot->end_time, 0, 5);
-                            })
+                        $selectedClassSlots = $selectedClassSlotsQuery
+                            ->get($classColumns)
+                            ->map(fn($slot) => $this->normalizeStudySlot($slot, $hasClassDayColumn))
                             ->values();
 
-                        $invalidSelections = $selectedSlotKeys
-                            ->filter(fn(string $slotKey) => !$subjectSlotKeys->contains($slotKey))
+                        $invalidSelections = $selectedClassSlots
+                            ->filter(function (array $classSlot) use ($subjectSlots) {
+                                return !$subjectSlots->contains(function (array $subjectSlot) use ($classSlot) {
+                                    return $this->studySlotsAreCompatible($classSlot, $subjectSlot);
+                                });
+                            })
                             ->count();
 
                         if ($invalidSelections > 0) {
@@ -432,6 +489,31 @@ class StudentController extends Controller
         });
 
         return $validator->validate();
+    }
+
+    private function extractSelectedMajorSubjectIdsFromRequest(Request $request): array
+    {
+        $rawValues = $request->input('major_subject_ids', []);
+        if (!is_array($rawValues)) {
+            $rawValues = $rawValues !== null && $rawValues !== '' ? [$rawValues] : [];
+        }
+
+        $selectedIds = collect($rawValues)
+            ->filter(fn($value) => $value !== null && $value !== '')
+            ->map(fn($value) => (int) $value)
+            ->filter(fn(int $value) => $value > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($selectedIds)) {
+            $fallbackId = (int) ($request->input('major_subject_id') ?? 0);
+            if ($fallbackId > 0) {
+                $selectedIds = [$fallbackId];
+            }
+        }
+
+        return $selectedIds;
     }
 
     private function extractSelectedStudyTimeIdsFromRequest(Request $request): array
@@ -468,13 +550,22 @@ class StudentController extends Controller
         $student->studyTimes()->sync($selectedStudyTimeIds);
     }
 
+    private function syncStudentMajorSubjects(User $student, array $selectedMajorSubjectIds): void
+    {
+        if (!$this->hasStudentMajorSubjectsTable()) {
+            return;
+        }
+
+        $student->majorSubjects()->sync($selectedMajorSubjectIds);
+    }
+
     private function subjectsByClassMap(bool $hasClassColumn, bool $hasMajorSubjectColumn): array
     {
         if (!$hasClassColumn || !$hasMajorSubjectColumn) {
             return [];
         }
 
-        return Subject::query()
+        $fallbackMap = Subject::query()
             ->select(['id', 'name', 'code', 'school_class_id'])
             ->whereNotNull('school_class_id')
             ->orderBy('name')
@@ -486,10 +577,58 @@ class StudentController extends Controller
                         'id' => (int) $subject->id,
                         'name' => (string) $subject->name,
                         'code' => (string) $subject->code,
+                        'school_class_id' => (int) $subject->school_class_id,
                     ];
                 })->values()->all();
             })
             ->toArray();
+
+        if (!Schema::hasTable('subject_study_times')) {
+            return $fallbackMap;
+        }
+
+        $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
+        $query = SubjectStudyTime::query()
+            ->join('subjects', 'subjects.id', '=', 'subject_study_times.subject_id')
+            ->select([
+                'subjects.id',
+                'subjects.name',
+                'subjects.code',
+            ]);
+
+        if ($hasSubjectClassColumn) {
+            $query
+                ->whereNotNull('subject_study_times.school_class_id')
+                ->addSelect('subject_study_times.school_class_id as class_id');
+        } else {
+            $query
+                ->whereNotNull('subjects.school_class_id')
+                ->addSelect('subjects.school_class_id as class_id');
+        }
+
+        $mapped = $query
+            ->orderBy('subjects.name')
+            ->get()
+            ->filter(fn($row) => (int) ($row->class_id ?? 0) > 0)
+            ->groupBy(fn($row) => (string) $row->class_id)
+            ->map(function ($group) {
+                return $group
+                    ->unique(fn($row) => (int) $row->id)
+                    ->values()
+                    ->map(function ($subject) {
+                        return [
+                            'id' => (int) $subject->id,
+                            'name' => (string) $subject->name,
+                            'code' => (string) $subject->code,
+                            'school_class_id' => (int) $subject->class_id,
+                        ];
+                    })
+                    ->values()
+                    ->all();
+            })
+            ->toArray();
+
+        return !empty($mapped) ? $mapped : $fallbackMap;
     }
 
     private function studyTimesByClassMap(bool $hasClassColumn, bool $hasClassStudyTimeColumn): array
@@ -514,6 +653,7 @@ class StudentController extends Controller
                 return $group->map(function ($slot) {
                     return [
                         'id' => (int) $slot->id,
+                        'school_class_id' => (int) $slot->school_class_id,
                         'day_of_week' => strtolower((string) ($slot->day_of_week ?? 'all')),
                         'period' => strtolower((string) $slot->period),
                         'start_time' => substr((string) $slot->start_time, 0, 5),
@@ -524,46 +664,223 @@ class StudentController extends Controller
             ->toArray();
     }
 
-    private function subjectStudySlotKeysBySubjectMap(bool $hasMajorSubjectColumn, bool $hasClassStudyTimeColumn): array
+    private function subjectStudySlotsByClassSubjectMap(bool $hasClassColumn, bool $hasMajorSubjectColumn, bool $hasClassStudyTimeColumn): array
     {
-        if (!$hasMajorSubjectColumn || !$hasClassStudyTimeColumn || !Schema::hasTable('subject_study_times')) {
+        if (
+            !$hasClassColumn
+            || !$hasMajorSubjectColumn
+            || !$hasClassStudyTimeColumn
+            || !Schema::hasTable('subject_study_times')
+        ) {
             return [];
         }
 
-        $hasClassDayColumn = Schema::hasColumn('class_study_times', 'day_of_week');
         $hasSubjectDayColumn = Schema::hasColumn('subject_study_times', 'day_of_week');
-        $useDayInSlotKey = $hasClassDayColumn && $hasSubjectDayColumn;
+        $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
 
-        $columns = ['subject_id', 'period', 'start_time', 'end_time'];
+        $columns = [
+            'subject_study_times.subject_id',
+            'subject_study_times.period',
+            'subject_study_times.start_time',
+            'subject_study_times.end_time',
+        ];
         if ($hasSubjectDayColumn) {
-            $columns[] = 'day_of_week';
+            $columns[] = 'subject_study_times.day_of_week';
         }
 
-        return SubjectStudyTime::query()
-            ->select($columns)
-            ->orderBy('subject_id')
-            ->orderBy('sort_order')
-            ->orderBy('start_time')
-            ->get()
-            ->groupBy(fn($slot) => (string) $slot->subject_id)
-            ->map(function ($group) use ($useDayInSlotKey) {
-                return $group
-                    ->map(function ($slot) use ($useDayInSlotKey) {
-                        $dayPrefix = $useDayInSlotKey
-                            ? strtolower((string) ($slot->day_of_week ?? 'all')) . '|'
-                            : '';
+        if ($hasSubjectClassColumn) {
+            $columns[] = 'subject_study_times.school_class_id as class_id';
+        } else {
+            $columns[] = 'subjects.school_class_id as class_id';
+        }
 
-                        return $dayPrefix . strtolower((string) $slot->period)
-                            . '|'
-                            . substr((string) $slot->start_time, 0, 5)
-                            . '|'
-                            . substr((string) $slot->end_time, 0, 5);
+        $query = SubjectStudyTime::query()
+            ->select($columns)
+            ->orderBy('subject_study_times.subject_id')
+            ->orderBy('sort_order')
+            ->orderBy('subject_study_times.start_time');
+
+        if ($hasSubjectClassColumn) {
+            $query->whereNotNull('subject_study_times.school_class_id');
+        } else {
+            $query
+                ->join('subjects', 'subjects.id', '=', 'subject_study_times.subject_id')
+                ->whereNotNull('subjects.school_class_id');
+        }
+
+        return $query
+            ->get()
+            ->filter(fn($slot) => (int) ($slot->class_id ?? 0) > 0)
+            ->groupBy(fn($slot) => (string) $slot->class_id)
+            ->map(function ($group) use ($hasSubjectDayColumn) {
+                return $group->groupBy(fn($slot) => (string) $slot->subject_id)
+                    ->map(function ($subjectGroup) use ($hasSubjectDayColumn) {
+                        return $subjectGroup
+                            ->map(fn($slot) => $this->normalizeStudySlot($slot, $hasSubjectDayColumn))
+                            ->unique(fn(array $slot) => $this->studySlotSignature($slot))
+                            ->values()
+                            ->all();
                     })
-                    ->unique()
-                    ->values()
-                    ->all();
+                    ->toArray();
             })
             ->toArray();
+    }
+
+    private function classStudyTimeIdsByClassSubjectMapFromSlots(array $studyTimesByClass, array $subjectStudySlotsByClassSubject): array
+    {
+        $mapped = [];
+
+        foreach ($subjectStudySlotsByClassSubject as $classId => $subjects) {
+            $classKey = (string) $classId;
+            $classSlots = $studyTimesByClass[$classKey] ?? [];
+            if (!is_array($classSlots) || $classSlots === []) {
+                continue;
+            }
+
+            foreach ($subjects as $subjectId => $subjectSlots) {
+                $allowedSlotIds = [];
+                $subjectSlots = is_array($subjectSlots) ? $subjectSlots : [];
+
+                foreach ($classSlots as $classSlot) {
+                    $classSlot = is_array($classSlot) ? $classSlot : [];
+                    $slotId = (int) ($classSlot['id'] ?? 0);
+                    if ($slotId <= 0) {
+                        continue;
+                    }
+
+                    $matchesSubject = collect($subjectSlots)->contains(function ($subjectSlot) use ($classSlot) {
+                        return is_array($subjectSlot)
+                            && $this->studySlotsAreCompatible($classSlot, $subjectSlot);
+                    });
+
+                    if ($matchesSubject) {
+                        $allowedSlotIds[$slotId] = $slotId;
+                    }
+                }
+
+                $ids = array_values($allowedSlotIds);
+                sort($ids);
+                $mapped[$classKey][(string) $subjectId] = $ids;
+            }
+        }
+
+        return $mapped;
+    }
+
+    private function classStudyTimeIdsBySubjectAllMap(array $classStudyTimeIdsByClassSubject): array
+    {
+        $mapped = [];
+
+        foreach ($classStudyTimeIdsByClassSubject as $subjects) {
+            if (!is_array($subjects)) {
+                continue;
+            }
+
+            foreach ($subjects as $subjectId => $studyTimeIds) {
+                $subjectKey = (string) $subjectId;
+                if (!is_array($studyTimeIds)) {
+                    continue;
+                }
+
+                if (!isset($mapped[$subjectKey])) {
+                    $mapped[$subjectKey] = [];
+                }
+
+                foreach ($studyTimeIds as $studyTimeId) {
+                    $id = (int) $studyTimeId;
+                    if ($id > 0) {
+                        $mapped[$subjectKey][$id] = $id;
+                    }
+                }
+            }
+        }
+
+        return collect($mapped)
+            ->map(function (array $ids) {
+                $values = array_values($ids);
+                sort($values);
+                return $values;
+            })
+            ->toArray();
+    }
+
+    private function subjectBelongsToClass(int $subjectId, int $classId): bool
+    {
+        if ($subjectId <= 0 || $classId <= 0) {
+            return false;
+        }
+
+        if (Schema::hasTable('subject_study_times')) {
+            $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
+            if ($hasSubjectClassColumn) {
+                $hasClassMatch = SubjectStudyTime::query()
+                    ->where('subject_id', $subjectId)
+                    ->where('school_class_id', $classId)
+                    ->exists();
+                if ($hasClassMatch) {
+                    return true;
+                }
+
+                $hasAnyClassMapping = SubjectStudyTime::query()
+                    ->where('subject_id', $subjectId)
+                    ->whereNotNull('school_class_id')
+                    ->exists();
+                if ($hasAnyClassMapping) {
+                    return false;
+                }
+            }
+        }
+
+        $subject = Subject::query()
+            ->select(['id', 'school_class_id'])
+            ->find($subjectId);
+
+        return $subject !== null && (int) ($subject->school_class_id ?? 0) === $classId;
+    }
+
+    private function normalizeStudySlot(object $slot, bool $hasDayColumn): array
+    {
+        $day = 'all';
+        if ($hasDayColumn) {
+            $rawDay = strtolower(trim((string) ($slot->day_of_week ?? 'all')));
+            $day = $rawDay !== '' ? $rawDay : 'all';
+        }
+
+        return [
+            'day_of_week' => $day,
+            'period' => strtolower(trim((string) $slot->period)),
+            'start_time' => substr((string) $slot->start_time, 0, 5),
+            'end_time' => substr((string) $slot->end_time, 0, 5),
+        ];
+    }
+
+    private function studySlotSignature(array $slot): string
+    {
+        return strtolower((string) ($slot['day_of_week'] ?? 'all'))
+            . '|'
+            . strtolower((string) ($slot['period'] ?? ''))
+            . '|'
+            . substr((string) ($slot['start_time'] ?? ''), 0, 5)
+            . '|'
+            . substr((string) ($slot['end_time'] ?? ''), 0, 5);
+    }
+
+    private function studySlotsAreCompatible(array $classSlot, array $subjectSlot): bool
+    {
+        $samePeriod = strtolower((string) ($classSlot['period'] ?? '')) === strtolower((string) ($subjectSlot['period'] ?? ''));
+        $sameStart = substr((string) ($classSlot['start_time'] ?? ''), 0, 5) === substr((string) ($subjectSlot['start_time'] ?? ''), 0, 5);
+        $sameEnd = substr((string) ($classSlot['end_time'] ?? ''), 0, 5) === substr((string) ($subjectSlot['end_time'] ?? ''), 0, 5);
+
+        if (!$samePeriod || !$sameStart || !$sameEnd) {
+            return false;
+        }
+
+        $classDay = strtolower(trim((string) ($classSlot['day_of_week'] ?? 'all')));
+        $subjectDay = strtolower(trim((string) ($subjectSlot['day_of_week'] ?? 'all')));
+        $classDay = $classDay !== '' ? $classDay : 'all';
+        $subjectDay = $subjectDay !== '' ? $subjectDay : 'all';
+
+        return $classDay === $subjectDay || $classDay === 'all' || $subjectDay === 'all';
     }
 
     private function periodLabels(): array

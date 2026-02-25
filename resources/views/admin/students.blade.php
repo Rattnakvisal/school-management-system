@@ -98,7 +98,7 @@
 
                     @if ($hasClassColumn)
                         <div>
-                            <label for="school_class_id" class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
+                            <label for="school_class_id" class="mb-1 block text-xs font-semibold text-slate-600">Home Class (Optional)</label>
                             <select id="school_class_id" name="school_class_id"
                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                 <option value="">Unassigned</option>
@@ -115,12 +115,35 @@
 
                         @if ($hasMajorSubjectColumn)
                             <div>
+                                @php
+                                    $createSelectedMajorSubjectIds = old('major_subject_ids');
+                                    if (!is_array($createSelectedMajorSubjectIds) || count($createSelectedMajorSubjectIds) === 0) {
+                                        $legacyMajorId = old('major_subject_id');
+                                        $createSelectedMajorSubjectIds = $legacyMajorId ? [$legacyMajorId] : [];
+                                    }
+                                    $createSelectedMajorSubjectIds = collect($createSelectedMajorSubjectIds)
+                                        ->map(fn($value) => (string) $value)
+                                        ->filter(fn($value) => $value !== '')
+                                        ->values()
+                                        ->all();
+                                @endphp
                                 <label for="major_subject_id" class="mb-1 block text-xs font-semibold text-slate-600">Major
-                                    Subject</label>
-                                <select id="major_subject_id" name="major_subject_id" data-selected="{{ old('major_subject_id') }}"
-                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <option value="">Select class first</option>
+                                    Subjects</label>
+                                <select id="major_subject_id" name="major_subject_ids[]"
+                                    data-selected-list='@json($createSelectedMajorSubjectIds)'
+                                    data-checkbox-target="major_subject_checkbox_list" multiple size="5"
+                                    class="hidden">
+                                    <option value="">Select major subjects</option>
                                 </select>
+                                <div id="major_subject_checkbox_list"
+                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3"></div>
+                                <p class="mt-1 text-[11px] text-slate-500">You can select multiple major subjects.</p>
+                                @error('major_subject_ids')
+                                    <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                @enderror
+                                @error('major_subject_ids.*')
+                                    <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                @enderror
                                 @error('major_subject_id')
                                     <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                                 @enderror
@@ -152,10 +175,12 @@
                                     </a>
                                 </div>
                                 <select id="class_study_time_id" name="class_study_time_ids[]"
-                                    data-selected-list='@json($createSelectedStudyTimeIds)' multiple size="4"
-                                    class="min-h-[132px] w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    data-selected-list='@json($createSelectedStudyTimeIds)'
+                                    data-checkbox-target="study_time_checkbox_list" multiple size="4" class="hidden">
                                     <option value="">Select class first</option>
                                 </select>
+                                <div id="study_time_checkbox_list"
+                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3"></div>
                                 <p class="mt-1 text-[11px] text-slate-500">You can select multiple study times.</p>
                                 @error('class_study_time_ids')
                                     <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
@@ -318,7 +343,7 @@
                                                 <th class="student-col-email px-3 py-3 font-semibold">Email</th>
                                                 <th class="student-col-class px-3 py-3 font-semibold">Class</th>
                                                 @if ($hasMajorSubjectColumn)
-                                                    <th class="student-col-major px-3 py-3 font-semibold">Major Subject</th>
+                                                    <th class="student-col-major px-3 py-3 font-semibold">Major Subjects</th>
                                                 @endif
                                                 @if ($hasClassStudyTimeColumn)
                                                     <th class="student-col-study px-3 py-3 font-semibold">Study Time</th>
@@ -350,19 +375,44 @@
                                                     </td>
                                                     <td class="student-col-class px-3 py-3 align-top text-slate-600">
                                                         @if ($hasClassColumn)
-                                                            <span
-                                                                class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                                                                {{ $student->schoolClass?->display_name ?? 'Unassigned' }}
-                                                            </span>
+                                                            @if ($student->schoolClass)
+                                                                <span
+                                                                    class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                                    {{ $student->schoolClass->display_name }}
+                                                                </span>
+                                                            @else
+                                                                <span class="text-slate-400">-</span>
+                                                            @endif
                                                         @else
                                                             -
                                                         @endif
                                                     </td>
                                                     @if ($hasMajorSubjectColumn)
                                                         <td class="student-col-major px-3 py-3 align-top text-slate-600">
-                                                            @if ($student->majorSubject)
-                                                                <div class="student-major-name font-semibold text-slate-700">
-                                                                    {{ $student->majorSubject->name }}
+                                                            @php
+                                                                $majorSubjects = collect();
+                                                                if (($hasStudentMajorSubjectsTable ?? false) && $student->relationLoaded('majorSubjects') && $student->majorSubjects->isNotEmpty()) {
+                                                                    $majorSubjects = $student->majorSubjects;
+                                                                } elseif ($student->majorSubject) {
+                                                                    $majorSubjects = collect([$student->majorSubject]);
+                                                                }
+                                                            @endphp
+                                                            @if ($majorSubjects->isNotEmpty())
+                                                                <div class="flex max-w-full flex-col gap-1">
+                                                                    @foreach ($majorSubjects->take(3) as $majorSubject)
+                                                                        <div
+                                                                            class="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
+                                                                            <span class="font-semibold text-indigo-700">
+                                                                                {{ $majorSubject->name }}
+                                                                            </span>
+                                                                        </div>
+                                                                    @endforeach
+
+                                                                    @if ($majorSubjects->count() > 3)
+                                                                        <span class="text-[11px] font-semibold text-slate-500">
+                                                                            +{{ $majorSubjects->count() - 3 }} more majors
+                                                                        </span>
+                                                                    @endif
                                                                 </div>
                                                             @else
                                                                 <span class="text-slate-400">-</span>
@@ -542,7 +592,7 @@
                                                                     @if ($hasClassColumn)
                                                                         <div>
                                                                             <label for="edit_school_class_id_{{ $student->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Home Class (Optional)</label>
                                                                             <select id="edit_school_class_id_{{ $student->id }}"
                                                                                 name="school_class_id"
                                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
@@ -557,15 +607,31 @@
 
                                                                         @if ($hasMajorSubjectColumn)
                                                                             <div>
+                                                                                @php
+                                                                                    $editSelectedMajorSubjectIds = [];
+                                                                                    if (($hasStudentMajorSubjectsTable ?? false) && $student->relationLoaded('majorSubjects') && $student->majorSubjects->isNotEmpty()) {
+                                                                                        $editSelectedMajorSubjectIds = $student->majorSubjects
+                                                                                            ->pluck('id')
+                                                                                            ->map(fn($value) => (string) $value)
+                                                                                            ->values()
+                                                                                            ->all();
+                                                                                    } elseif ($student->major_subject_id) {
+                                                                                        $editSelectedMajorSubjectIds = [(string) $student->major_subject_id];
+                                                                                    }
+                                                                                @endphp
                                                                                 <label for="edit_major_subject_id_{{ $student->id }}"
                                                                                     class="mb-1 block text-xs font-semibold text-slate-600">Major
-                                                                                    Subject</label>
+                                                                                    Subjects</label>
                                                                                 <select id="edit_major_subject_id_{{ $student->id }}"
-                                                                                    name="major_subject_id"
-                                                                                    data-selected="{{ (string) $student->major_subject_id }}"
-                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                                    <option value="">Select class first</option>
+                                                                                    name="major_subject_ids[]"
+                                                                                    data-selected-list='@json($editSelectedMajorSubjectIds)'
+                                                                                    data-checkbox-target="edit_major_subject_checkbox_list_{{ $student->id }}"
+                                                                                    multiple size="5" class="hidden">
+                                                                                    <option value="">Select major subjects</option>
                                                                                 </select>
+                                                                                <div id="edit_major_subject_checkbox_list_{{ $student->id }}"
+                                                                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3"></div>
+                                                                                <p class="mt-1 text-[11px] text-slate-500">You can select multiple major subjects.</p>
                                                                             </div>
                                                                         @endif
 
@@ -589,10 +655,12 @@
                                                                                 <select id="edit_class_study_time_id_{{ $student->id }}"
                                                                                     name="class_study_time_ids[]"
                                                                                     data-selected-list='@json($editSelectedStudyTimeIds)'
-                                                                                    multiple size="4"
-                                                                                    class="min-h-[132px] w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                    data-checkbox-target="edit_study_time_checkbox_list_{{ $student->id }}"
+                                                                                    multiple size="4" class="hidden">
                                                                                     <option value="">Select class first</option>
                                                                                 </select>
+                                                                                <div id="edit_study_time_checkbox_list_{{ $student->id }}"
+                                                                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3"></div>
                                                                                 <p class="mt-1 text-[11px] text-slate-500">You can select multiple study times.</p>
                                                                             </div>
                                                                         @endif
@@ -690,7 +758,10 @@
             const hasSwal = typeof Swal !== 'undefined';
             const subjectsByClass = @json($subjectsByClass ?? []);
             const studyTimesByClass = @json($studyTimesByClass ?? []);
-            const subjectStudySlotKeysBySubject = @json($subjectStudySlotKeysBySubject ?? []);
+            const subjectStudySlotsByClassSubject = @json($subjectStudySlotsByClassSubject ?? []);
+            const classStudyTimeIdsByClassSubject = @json($classStudyTimeIdsByClassSubject ?? []);
+            const classStudyTimeIdsBySubjectAll = @json($classStudyTimeIdsBySubjectAll ?? []);
+            const classLabelById = @json(($classes ?? collect())->mapWithKeys(fn($classOption) => [(string) $classOption->id => (string) $classOption->display_name])->toArray());
             const periodLabels = @json($periodLabels ?? []);
 
             const to12Hour = (value) => {
@@ -760,68 +831,216 @@
                     .filter((value) => value !== '');
             };
 
-            const toSlotKey = (dayOfWeek, period, startTime, endTime) => {
-                const day = String(dayOfWeek || '').toLowerCase();
-                const prefix = day !== '' ? `${day}|` : '';
-                return `${prefix}${String(period || '').toLowerCase()}|${String(startTime || '').slice(0, 5)}|${String(endTime || '').slice(0, 5)}`;
+            const renderSelectAsCheckboxes = (select) => {
+                if (!select) {
+                    return;
+                }
+
+                const targetId = String(select.dataset.checkboxTarget || '').trim();
+                if (targetId === '') {
+                    return;
+                }
+
+                const container = document.getElementById(targetId);
+                if (!container) {
+                    return;
+                }
+
+                container.innerHTML = '';
+                const options = Array.from(select.options || []).filter((option) => String(option.value || '') !== '');
+                if (options.length === 0) {
+                    const placeholder = document.createElement('p');
+                    placeholder.className = 'text-xs font-medium text-slate-500';
+                    placeholder.textContent = String(select.options?.[0]?.textContent || 'No options available');
+                    container.appendChild(placeholder);
+                    return;
+                }
+
+                options.forEach((option, index) => {
+                    const label = document.createElement('label');
+                    label.className =
+                        'flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-700 transition hover:bg-slate-50';
+
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.value = String(option.value || '');
+                    input.checked = option.selected;
+                    input.disabled = !!select.disabled;
+                    input.className = 'mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500';
+                    input.addEventListener('change', () => {
+                        option.selected = input.checked;
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+
+                    const text = document.createElement('span');
+                    text.className = 'leading-5';
+                    text.textContent = String(option.textContent || `Option ${index + 1}`);
+
+                    label.appendChild(input);
+                    label.appendChild(text);
+                    container.appendChild(label);
+                });
             };
 
-            const renderMajorSubjects = (select, classId, selectedId) => {
+            const normalizeDay = (dayOfWeek) => {
+                const day = String(dayOfWeek || '').toLowerCase().trim();
+                return day !== '' ? day : 'all';
+            };
+
+            const normalizeTime = (value) => String(value || '').slice(0, 5);
+
+            const slotsShareBaseTime = (classSlot, subjectSlot) => {
+                return String(classSlot.period || '').toLowerCase() === String(subjectSlot.period || '').toLowerCase()
+                    && normalizeTime(classSlot.start_time) === normalizeTime(subjectSlot.start_time)
+                    && normalizeTime(classSlot.end_time) === normalizeTime(subjectSlot.end_time);
+            };
+
+            const slotDaysAreCompatible = (classSlot, subjectSlot) => {
+                const classDay = normalizeDay(classSlot.day_of_week);
+                const subjectDay = normalizeDay(subjectSlot.day_of_week);
+                return classDay === subjectDay || classDay === 'all' || subjectDay === 'all';
+            };
+
+            const classSlotMatchesSubjectSchedule = (classSlot, subjectSlots) => {
+                return subjectSlots.some((subjectSlot) => {
+                    return slotsShareBaseTime(classSlot, subjectSlot)
+                        && slotDaysAreCompatible(classSlot, subjectSlot);
+                });
+            };
+
+            const allSubjects = (() => {
+                const seen = new Set();
+                const rows = [];
+
+                Object.values(subjectsByClass || {}).forEach((group) => {
+                    if (!Array.isArray(group)) {
+                        return;
+                    }
+
+                    group.forEach((item) => {
+                        const id = String(item?.id || '');
+                        if (id === '' || seen.has(id)) {
+                            return;
+                        }
+                        seen.add(id);
+                        rows.push(item);
+                    });
+                });
+
+                return rows.sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || '')));
+            })();
+
+            const allStudyTimes = (() => {
+                const rows = [];
+                Object.entries(studyTimesByClass || {}).forEach(([classId, group]) => {
+                    if (!Array.isArray(group)) {
+                        return;
+                    }
+
+                    group.forEach((slot) => {
+                        rows.push({
+                            ...slot,
+                            school_class_id: Number(slot?.school_class_id || classId || 0)
+                        });
+                    });
+                });
+
+                return rows;
+            })();
+
+            const renderMajorSubjects = (select, classId, selectedIds = []) => {
                 if (!select) {
                     return;
                 }
 
                 const key = String(classId || '');
-                const subjects = key && subjectsByClass[key] ? subjectsByClass[key] : [];
-                const placeholder = !key
-                    ? 'Select class first'
-                    : (subjects.length > 0 ? 'Select major subject' : 'No subjects in selected class');
+                const subjects = key !== '' && Array.isArray(subjectsByClass?.[key]) ? subjectsByClass[key] : [];
+                let placeholder = 'Select class first';
+                if (subjects.length > 0 && key !== '') {
+                    placeholder = 'Select major subjects';
+                } else if (subjects.length === 0 && key !== '') {
+                    placeholder = 'No subjects in selected class';
+                }
                 resetSelect(select, placeholder);
+                const selectedSet = new Set(parseSelectedIds(selectedIds));
 
                 subjects.forEach((item) => {
                     const option = document.createElement('option');
                     option.value = String(item.id);
-                    option.textContent = `${item.name}`;
-                    if (String(item.id) === String(selectedId || '')) {
+                    const classLabel = classLabelById[String(item.school_class_id || '')] || '';
+                    option.textContent = classLabel ? `${item.name} (${classLabel})` : `${item.name}`;
+                    if (selectedSet.has(String(item.id))) {
                         option.selected = true;
                     }
                     select.appendChild(option);
                 });
 
-                select.disabled = !key || subjects.length === 0;
+                select.disabled = key === '' || subjects.length === 0;
+                renderSelectAsCheckboxes(select);
             };
 
-            const renderStudyTimes = (select, classId, selectedIds = [], subjectId = '', requireSubjectMatch = false, autoSelectAll = false) => {
+            const renderStudyTimes = (select, classId, selectedIds = [], subjectIds = [], requireSubjectMatch = false, autoSelectAll = false) => {
                 if (!select) {
                     return;
                 }
 
                 const key = String(classId || '');
-                let slots = key && studyTimesByClass[key] ? studyTimesByClass[key] : [];
-                const subjectKey = String(subjectId || '');
+                let slots = allStudyTimes;
+                const selectedSubjectIds = parseSelectedIds(subjectIds);
 
-                if (requireSubjectMatch && subjectKey === '') {
-                    slots = [];
-                } else if (subjectKey !== '') {
-                    const allowedSlotKeys = new Set(Array.isArray(subjectStudySlotKeysBySubject[subjectKey]) ? subjectStudySlotKeysBySubject[subjectKey] : []);
-                    slots = slots.filter((item) => {
-                        const strictKey = toSlotKey(item.day_of_week, item.period, item.start_time, item.end_time);
-                        const legacyKey = toSlotKey('', item.period, item.start_time, item.end_time);
-                        return allowedSlotKeys.has(strictKey) || allowedSlotKeys.has(legacyKey);
+                if (requireSubjectMatch && selectedSubjectIds.length === 0) {
+                    slots = key ? allStudyTimes.filter((item) => String(item.school_class_id || '') === key) : [];
+                } else if (selectedSubjectIds.length > 0) {
+                    const allowedStudyTimeIds = new Set();
+                    selectedSubjectIds.forEach((subjectKey) => {
+                        const idsForSubject = key !== ''
+                            ? classStudyTimeIdsByClassSubject?.[key]?.[String(subjectKey)]
+                            : classStudyTimeIdsBySubjectAll[String(subjectKey)];
+                        if (Array.isArray(idsForSubject)) {
+                            idsForSubject.forEach((id) => allowedStudyTimeIds.add(String(id)));
+                        }
                     });
+
+                    if (allowedStudyTimeIds.size > 0) {
+                        slots = allStudyTimes.filter((item) => {
+                            const matchesAllowedStudyTime = allowedStudyTimeIds.has(String(item.id));
+                            const matchesClass = key === '' || String(item.school_class_id || '') === key;
+                            return matchesAllowedStudyTime && matchesClass;
+                        });
+                    } else {
+                        const subjectSlots = selectedSubjectIds.flatMap((subjectKey) => {
+                            if (key !== '') {
+                                const slotsForSubject = subjectStudySlotsByClassSubject?.[key]?.[String(subjectKey)];
+                                return Array.isArray(slotsForSubject) ? slotsForSubject : [];
+                            }
+
+                            return Object.values(subjectStudySlotsByClassSubject || {}).flatMap((subjectMap) => {
+                                const slotsForSubject = subjectMap?.[String(subjectKey)];
+                                return Array.isArray(slotsForSubject) ? slotsForSubject : [];
+                            });
+                        });
+                        slots = allStudyTimes.filter((item) => {
+                            if (key !== '' && String(item.school_class_id || '') !== key) {
+                                return false;
+                            }
+                            return classSlotMatchesSubjectSchedule(item, subjectSlots);
+                        });
+                    }
+                } else if (key !== '') {
+                    slots = allStudyTimes.filter((item) => String(item.school_class_id || '') === key);
+                } else {
+                    slots = [];
                 }
 
-                let placeholder = 'Select class first';
-                if (key) {
-                    if (requireSubjectMatch && subjectKey === '') {
-                        placeholder = 'Select major subject first';
-                    } else if (slots.length > 0) {
-                        placeholder = 'Select study time';
-                    } else {
-                        placeholder = subjectKey !== ''
-                            ? 'No study time for selected subject'
-                            : 'No study times in selected class';
-                    }
+                let placeholder = 'Select major subjects first';
+                if (requireSubjectMatch && selectedSubjectIds.length === 0 && key === '') {
+                    placeholder = 'Select class first';
+                } else if (slots.length > 0) {
+                    placeholder = 'Select study time';
+                } else if (selectedSubjectIds.length > 0) {
+                    placeholder = 'No study time for selected subjects';
+                } else if (key !== '') {
+                    placeholder = 'No study times in selected class';
                 }
                 resetSelect(select, placeholder);
                 const selectedSet = new Set(parseSelectedIds(selectedIds));
@@ -833,7 +1052,8 @@
                     const period = periodLabels[periodKey] || (periodKey ? (periodKey.charAt(0).toUpperCase() + periodKey.slice(1)) : 'Custom');
                     const dayKey = String(item.day_of_week || 'all').toLowerCase();
                     const dayLabel = dayLabels[dayKey] || (dayKey ? (dayKey.charAt(0).toUpperCase() + dayKey.slice(1)) : 'All Days');
-                    option.textContent = `${dayLabel} | ${period}: ${to12Hour(item.start_time)} -> ${to12Hour(item.end_time)}`;
+                    const slotClassLabel = classLabelById[String(item.school_class_id || '')] || 'Class';
+                    option.textContent = `${slotClassLabel} | ${dayLabel} | ${period}: ${to12Hour(item.start_time)} -> ${to12Hour(item.end_time)}`;
                     if (selectedSet.has(String(item.id))) {
                         option.selected = true;
                     }
@@ -848,7 +1068,8 @@
                     });
                 }
 
-                select.disabled = !key || (requireSubjectMatch && subjectKey === '') || slots.length === 0;
+                select.disabled = slots.length === 0;
+                renderSelectAsCheckboxes(select);
             };
 
             const wireClassDependentFields = (classSelect, majorSelect, studyTimeSelect) => {
@@ -859,8 +1080,14 @@
                 const apply = (useCurrentSelection = true) => {
                     const classId = classSelect.value || '';
                     const majorSelected = useCurrentSelection
-                        ? (majorSelect?.value || majorSelect?.dataset.selected || '')
-                        : '';
+                        ? (() => {
+                            const fromCurrentSelection = selectedIdsFromSelect(majorSelect);
+                            if (fromCurrentSelection.length > 0) {
+                                return fromCurrentSelection;
+                            }
+                            return parseSelectedIds(majorSelect?.dataset.selectedList || majorSelect?.dataset.selected || '');
+                        })()
+                        : [];
                     const studySelected = useCurrentSelection
                         ? (() => {
                             const fromCurrentSelection = selectedIdsFromSelect(studyTimeSelect);
@@ -873,19 +1100,23 @@
 
                     if (majorSelect) {
                         renderMajorSubjects(majorSelect, classId, majorSelected);
+                        majorSelect.dataset.selectedList = '';
                         majorSelect.dataset.selected = '';
                     }
 
                     if (studyTimeSelect) {
                         const requireSubjectMatch = !!majorSelect;
-                        const selectedSubjectId = majorSelect
-                            ? (majorSelect.value || majorSelected || '')
-                            : '';
+                        const selectedSubjectIds = majorSelect
+                            ? (() => {
+                                const selectedValues = selectedIdsFromSelect(majorSelect);
+                                return selectedValues.length > 0 ? selectedValues : parseSelectedIds(majorSelected);
+                            })()
+                            : [];
                         renderStudyTimes(
                             studyTimeSelect,
                             classId,
                             studySelected,
-                            selectedSubjectId,
+                            selectedSubjectIds,
                             requireSubjectMatch,
                             !useCurrentSelection
                         );
@@ -899,7 +1130,8 @@
 
                 if (majorSelect && studyTimeSelect) {
                     majorSelect.addEventListener('change', () => {
-                        renderStudyTimes(studyTimeSelect, classSelect.value || '', [], majorSelect.value || '', true, true);
+                        const selectedMajorIds = selectedIdsFromSelect(majorSelect);
+                        renderStudyTimes(studyTimeSelect, classSelect.value || '', [], selectedMajorIds, true, true);
                     });
                 }
             };
@@ -931,7 +1163,8 @@
             const syncManageStudyTimeLinks = () => {
                 const createClassSelect = document.getElementById('school_class_id');
                 const createMajorSelect = document.getElementById('major_subject_id');
-                const href = buildTimeStudiesUrl(createClassSelect?.value || '', createMajorSelect?.value || '');
+                const selectedMajorIds = selectedIdsFromSelect(createMajorSelect);
+                const href = buildTimeStudiesUrl(createClassSelect?.value || '', selectedMajorIds[0] || '');
 
                 if (manageStudyTimeTop) {
                     manageStudyTimeTop.href = href;
@@ -960,6 +1193,39 @@
                 );
             });
 
+            const selectedValuesByName = (form, inputName) => {
+                const select = form?.querySelector(`[name="${inputName}"]`);
+                return selectedIdsFromSelect(select);
+            };
+
+            const validateStudentSelections = (form) => {
+                if (!form) {
+                    return null;
+                }
+
+                const role = String(form.querySelector('[name="role"]')?.value || 'student').toLowerCase();
+                if (role !== 'student') {
+                    return null;
+                }
+
+                const classId = String(form.querySelector('[name="school_class_id"]')?.value || '').trim();
+                if (classId === '') {
+                    return null;
+                }
+
+                const selectedMajorIds = selectedValuesByName(form, 'major_subject_ids[]');
+                if (selectedMajorIds.length === 0) {
+                    return 'Select at least one major subject for the selected class.';
+                }
+
+                const selectedStudyTimeIds = selectedValuesByName(form, 'class_study_time_ids[]');
+                if (selectedStudyTimeIds.length === 0) {
+                    return 'Select at least one study time for the selected class.';
+                }
+
+                return null;
+            };
+
             const confirmSubmit = (selector, buildConfig) => {
                 if (!hasSwal) {
                     return;
@@ -972,6 +1238,16 @@
                         }
 
                         event.preventDefault();
+                        const selectionMessage = validateStudentSelections(form);
+                        if (selectionMessage) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Selection Required',
+                                text: selectionMessage
+                            });
+                            return;
+                        }
+
                         const config = buildConfig(form);
 
                         Swal.fire(config).then((result) => {

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Website\TelegramBotController as WebsiteTelegramBotController;
 use App\Http\Controllers\Website\ContactMessageController as WebsiteContactMessageController;
 
 /*
@@ -29,10 +30,14 @@ Route::get('/', function () {
         'studentsTotal' => $studentsTotal,
         'teachersTotal' => $teachersTotal,
         'dashboardRoute' => $dashboardRoute,
+        'telegramBotUrl' => ($telegramUsername = trim((string) config('services.telegram.bot_username'))) !== ''
+            ? 'https://t.me/' . $telegramUsername . '?start=study_help'
+            : null,
     ]);
 })->name('home');
 
 Route::post('/contact', [WebsiteContactMessageController::class, 'store'])->name('contact.store');
+Route::post('/telegram/webhook/{secret?}', [WebsiteTelegramBotController::class, 'webhook'])->name('telegram.webhook');
 
 /*
 |--------------------------------------------------------------------------

@@ -23,7 +23,13 @@ class StudentStudyController extends Controller
         $subjectId = ctype_digit($subjectIdRaw) ? (int) $subjectIdRaw : null;
         $hasMajorSubjectColumn = $this->hasMajorSubjectColumn();
         $hasClassStudyTimeColumn = $this->hasClassStudyTimeColumn();
+        $hasStudentMajorSubjectsTable = Schema::hasTable('student_major_subjects');
+        $hasStudentStudyTimesTable = Schema::hasTable('student_study_times');
         $hasSubjectStudyTimesTable = Schema::hasTable('subject_study_times');
+        $hasClassDayColumn = $hasClassStudyTimeColumn && Schema::hasColumn('class_study_times', 'day_of_week');
+        $hasSubjectDayColumn = $hasSubjectStudyTimesTable && Schema::hasColumn('subject_study_times', 'day_of_week');
+        $hasSubjectClassColumn = $hasSubjectStudyTimesTable && Schema::hasColumn('subject_study_times', 'school_class_id');
+        $hasSubjectTeacherColumn = $hasSubjectStudyTimesTable && Schema::hasColumn('subject_study_times', 'teacher_id');
 
         $studyQuery = DB::table('users as students')
             ->leftJoin('school_classes as classes', 'classes.id', '=', 'students.school_class_id')
@@ -51,16 +57,86 @@ class StudentStudyController extends Controller
                 ->selectRaw('MIN(id) as id, subject_id')
                 ->groupBy('subject_id');
 
-            $studyQuery->leftJoinSub($firstSubjectSlot, 'subject_slot_map', function ($join) {
-                $join->on('subject_slot_map.subject_id', '=', 'subjects.id');
+            $studyQuery->leftJoinSub($firstSubjectSlot, 'subject_slot_fallback_map', function ($join) {
+                $join->on('subject_slot_fallback_map.subject_id', '=', 'subjects.id');
             });
-            $studyQuery->leftJoin('subject_study_times as subject_slots', 'subject_slots.id', '=', 'subject_slot_map.id');
+            $studyQuery->leftJoin('subject_study_times as subject_slots_fallback', 'subject_slots_fallback.id', '=', 'subject_slot_fallback_map.id');
+
+            if ($hasClassStudyTimeColumn) {
+                $matchedSlotMap = DB::table('subject_study_times as sst')
+                    ->join('class_study_times as cst', function ($join) use ($hasSubjectClassColumn, $hasClassDayColumn, $hasSubjectDayColumn) {
+                        $join
+                            ->on('cst.period', '=', 'sst.period')
+                            ->on('cst.start_time', '=', 'sst.start_time')
+                            ->on('cst.end_time', '=', 'sst.end_time');
+
+                        if ($hasSubjectClassColumn) {
+                            $join->on('cst.school_class_id', '=', 'sst.school_class_id');
+                        }
+
+                        if ($hasClassDayColumn && $hasSubjectDayColumn) {
+                            $join->where(function ($dayQuery) {
+                                $dayQuery
+                                    ->whereColumn('cst.day_of_week', 'sst.day_of_week')
+                                    ->orWhere('cst.day_of_week', 'all')
+                                    ->orWhere('sst.day_of_week', 'all');
+                            });
+                        }
+                    })
+                    ->selectRaw('MIN(sst.id) as id, sst.subject_id, cst.id as class_study_time_id')
+                    ->groupBy('sst.subject_id', 'cst.id');
+
+                $studyQuery->leftJoinSub($matchedSlotMap, 'subject_slot_match_map', function ($join) {
+                    $join
+                        ->on('subject_slot_match_map.subject_id', '=', 'subjects.id')
+                        ->on('subject_slot_match_map.class_study_time_id', '=', 'students.class_study_time_id');
+                });
+                $studyQuery->leftJoin('subject_study_times as subject_slots_matched', 'subject_slots_matched.id', '=', 'subject_slot_match_map.id');
+            }
         }
 
-        $studyQuery->leftJoin('users as teachers', function ($join) {
-            $join->on('teachers.id', '=', 'subjects.teacher_id')
+        $teacherIdExpression = 'subjects.teacher_id';
+        if ($hasSubjectStudyTimesTable && $hasSubjectTeacherColumn) {
+            $teacherIdExpression = $hasClassStudyTimeColumn
+                ? 'COALESCE(subject_slots_matched.teacher_id, subject_slots_fallback.teacher_id, subjects.teacher_id)'
+                : 'COALESCE(subject_slots_fallback.teacher_id, subjects.teacher_id)';
+        }
+
+        $studyQuery->leftJoin('users as teachers', function ($join) use ($teacherIdExpression) {
+            $join->on('teachers.id', '=', DB::raw($teacherIdExpression))
                 ->where('teachers.role', '=', 'teacher');
         });
+
+        $classStudyStartExpression = $hasClassStudyTimeColumn
+            ? 'COALESCE(class_slots.start_time, classes.study_start_time, classes.study_time)'
+            : 'COALESCE(classes.study_start_time, classes.study_time)';
+        $classStudyEndExpression = $hasClassStudyTimeColumn
+            ? 'COALESCE(class_slots.end_time, classes.study_end_time)'
+            : 'classes.study_end_time';
+        $classStudyPeriodExpression = $hasClassStudyTimeColumn ? 'class_slots.period' : 'NULL';
+        $classStudyDayExpression = $hasClassStudyTimeColumn && $hasClassDayColumn ? 'class_slots.day_of_week' : 'NULL';
+
+        if ($hasSubjectStudyTimesTable) {
+            $subjectStudyStartExpression = $hasClassStudyTimeColumn
+                ? 'COALESCE(subject_slots_matched.start_time, subject_slots_fallback.start_time)'
+                : 'subject_slots_fallback.start_time';
+            $subjectStudyEndExpression = $hasClassStudyTimeColumn
+                ? 'COALESCE(subject_slots_matched.end_time, subject_slots_fallback.end_time)'
+                : 'subject_slots_fallback.end_time';
+            $subjectStudyPeriodExpression = $hasClassStudyTimeColumn
+                ? 'COALESCE(subject_slots_matched.period, subject_slots_fallback.period)'
+                : 'subject_slots_fallback.period';
+            $subjectStudyDayExpression = $hasSubjectDayColumn
+                ? ($hasClassStudyTimeColumn
+                    ? 'COALESCE(subject_slots_matched.day_of_week, subject_slots_fallback.day_of_week)'
+                    : 'subject_slots_fallback.day_of_week')
+                : 'NULL';
+        } else {
+            $subjectStudyStartExpression = 'COALESCE(subjects.study_start_time, subjects.study_time)';
+            $subjectStudyEndExpression = 'subjects.study_end_time';
+            $subjectStudyPeriodExpression = 'NULL';
+            $subjectStudyDayExpression = 'NULL';
+        }
 
         $studyQuery->select([
             'students.id as student_id',
@@ -70,14 +146,18 @@ class StudentStudyController extends Controller
             'classes.name as class_name',
             'classes.section as class_section',
             'classes.room as class_room',
-            DB::raw(($hasClassStudyTimeColumn ? 'COALESCE(class_slots.start_time, classes.study_start_time, classes.study_time)' : 'COALESCE(classes.study_start_time, classes.study_time)') . ' as class_study_start_time'),
-            DB::raw(($hasClassStudyTimeColumn ? 'COALESCE(class_slots.end_time, classes.study_end_time)' : 'classes.study_end_time') . ' as class_study_end_time'),
-            DB::raw(($hasClassStudyTimeColumn ? 'class_slots.period' : 'NULL') . ' as class_study_period'),
+            'class_slots.id as class_study_time_id',
+            DB::raw($classStudyStartExpression . ' as class_study_start_time'),
+            DB::raw($classStudyEndExpression . ' as class_study_end_time'),
+            DB::raw($classStudyPeriodExpression . ' as class_study_period'),
+            DB::raw($classStudyDayExpression . ' as class_study_day'),
             'subjects.id as subject_id',
             'subjects.name as subject_name',
             'subjects.code as subject_code',
-            DB::raw(($hasSubjectStudyTimesTable ? 'subject_slots.start_time' : 'COALESCE(subjects.study_start_time, subjects.study_time)') . ' as subject_study_start_time'),
-            DB::raw(($hasSubjectStudyTimesTable ? 'subject_slots.end_time' : 'subjects.study_end_time') . ' as subject_study_end_time'),
+            DB::raw($subjectStudyStartExpression . ' as subject_study_start_time'),
+            DB::raw($subjectStudyEndExpression . ' as subject_study_end_time'),
+            DB::raw($subjectStudyPeriodExpression . ' as subject_study_period'),
+            DB::raw($subjectStudyDayExpression . ' as subject_study_day'),
             'teachers.name as teacher_name',
             'teachers.email as teacher_email',
             'teachers.created_at as teacher_created_at',
@@ -88,19 +168,43 @@ class StudentStudyController extends Controller
         }
 
         if ($subjectId !== null) {
-            $studyQuery->where('subjects.id', $subjectId);
+            if ($hasStudentMajorSubjectsTable) {
+                $studyQuery->where(function ($query) use ($subjectId) {
+                    $query->where('subjects.id', $subjectId)
+                        ->orWhereExists(function ($subQuery) use ($subjectId) {
+                            $subQuery->selectRaw('1')
+                                ->from('student_major_subjects as sms')
+                                ->whereColumn('sms.user_id', 'students.id')
+                                ->where('sms.subject_id', $subjectId);
+                        });
+                });
+            } else {
+                $studyQuery->where('subjects.id', $subjectId);
+            }
         }
 
         if (in_array($period, array_keys($this->periodOptions()), true)) {
             if ($hasClassStudyTimeColumn) {
-                $studyQuery->where('class_slots.period', $period);
+                $studyQuery->where(function ($query) use ($period, $hasStudentStudyTimesTable) {
+                    $query->where('class_slots.period', $period);
+
+                    if ($hasStudentStudyTimesTable) {
+                        $query->orWhereExists(function ($subQuery) use ($period) {
+                            $subQuery->selectRaw('1')
+                                ->from('student_study_times as sst')
+                                ->join('class_study_times as cst_filter', 'cst_filter.id', '=', 'sst.class_study_time_id')
+                                ->whereColumn('sst.user_id', 'students.id')
+                                ->where('cst_filter.period', $period);
+                        });
+                    }
+                });
             } else {
                 $studyQuery->whereRaw('1 = 0');
             }
         }
 
         if ($search !== '') {
-            $studyQuery->where(function ($query) use ($search, $hasSubjectStudyTimesTable) {
+            $studyQuery->where(function ($query) use ($search, $hasSubjectStudyTimesTable, $hasClassStudyTimeColumn) {
                 $query->where('students.name', 'like', '%' . $search . '%')
                     ->orWhere('students.email', 'like', '%' . $search . '%')
                     ->orWhere('classes.name', 'like', '%' . $search . '%')
@@ -118,8 +222,13 @@ class StudentStudyController extends Controller
                     ->orWhere('teachers.email', 'like', '%' . $search . '%');
 
                 if ($hasSubjectStudyTimesTable) {
-                    $query->orWhere('subject_slots.start_time', 'like', '%' . $search . '%')
-                        ->orWhere('subject_slots.end_time', 'like', '%' . $search . '%');
+                    $query->orWhere('subject_slots_fallback.start_time', 'like', '%' . $search . '%')
+                        ->orWhere('subject_slots_fallback.end_time', 'like', '%' . $search . '%');
+
+                    if ($hasClassStudyTimeColumn) {
+                        $query->orWhere('subject_slots_matched.start_time', 'like', '%' . $search . '%')
+                            ->orWhere('subject_slots_matched.end_time', 'like', '%' . $search . '%');
+                    }
                 }
             });
         }
@@ -130,16 +239,100 @@ class StudentStudyController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        $studentIds = $studies->pluck('student_id')
+            ->filter(fn($id) => (int) $id > 0)
+            ->map(fn($id) => (int) $id)
+            ->values()
+            ->all();
+
+        $majorSubjectsByStudent = [];
+        if ($hasStudentMajorSubjectsTable && !empty($studentIds)) {
+            $majorSubjectsByStudent = DB::table('student_major_subjects as sms')
+                ->join('subjects', 'subjects.id', '=', 'sms.subject_id')
+                ->whereIn('sms.user_id', $studentIds)
+                ->orderBy('subjects.name')
+                ->get([
+                    'sms.user_id as student_id',
+                    'subjects.id as subject_id',
+                    'subjects.name as subject_name',
+                    'subjects.code as subject_code',
+                ])
+                ->groupBy('student_id')
+                ->map(function ($rows) {
+                    return $rows->map(function ($row) {
+                        return [
+                            'id' => (int) $row->subject_id,
+                            'name' => (string) $row->subject_name,
+                            'code' => (string) ($row->subject_code ?? ''),
+                        ];
+                    })->values()->all();
+                })
+                ->toArray();
+        }
+
+        $studyTimesByStudent = [];
+        if ($hasStudentStudyTimesTable && !empty($studentIds)) {
+            $studyTimesByStudent = DB::table('student_study_times as sst')
+                ->join('class_study_times as cst', 'cst.id', '=', 'sst.class_study_time_id')
+                ->leftJoin('school_classes as classes', 'classes.id', '=', 'cst.school_class_id')
+                ->whereIn('sst.user_id', $studentIds)
+                ->orderBy('cst.start_time')
+                ->get([
+                    'sst.user_id as student_id',
+                    'cst.id as class_study_time_id',
+                    'cst.school_class_id',
+                    'cst.day_of_week',
+                    'cst.period',
+                    'cst.start_time',
+                    'cst.end_time',
+                    'classes.name as class_name',
+                    'classes.section as class_section',
+                ])
+                ->groupBy('student_id')
+                ->map(function ($rows) {
+                    return $rows->map(function ($row) {
+                        $classLabel = trim((string) ($row->class_name ?? ''));
+                        $section = trim((string) ($row->class_section ?? ''));
+                        if ($classLabel !== '' && $section !== '') {
+                            $classLabel .= ' - ' . $section;
+                        }
+
+                        return [
+                            'id' => (int) $row->class_study_time_id,
+                            'school_class_id' => $row->school_class_id !== null ? (int) $row->school_class_id : null,
+                            'class_label' => $classLabel,
+                            'day_of_week' => strtolower(trim((string) ($row->day_of_week ?? 'all'))),
+                            'period' => strtolower(trim((string) ($row->period ?? ''))),
+                            'start_time' => substr((string) ($row->start_time ?? ''), 0, 5),
+                            'end_time' => substr((string) ($row->end_time ?? ''), 0, 5),
+                        ];
+                    })->values()->all();
+                })
+                ->toArray();
+        }
+
         $stats = [
             'students' => User::query()->where('role', 'student')->count(),
             'subjects' => Subject::query()->count(),
             'teachers' => User::query()->where('role', 'teacher')->count(),
-            'withMajorSubject' => $hasMajorSubjectColumn
-                ? User::query()->where('role', 'student')->whereNotNull('major_subject_id')->count()
-                : 0,
-            'withStudyTime' => $hasClassStudyTimeColumn
-                ? User::query()->where('role', 'student')->whereNotNull('class_study_time_id')->count()
-                : 0,
+            'withMajorSubject' => $hasStudentMajorSubjectsTable
+                ? (int) DB::table('student_major_subjects')
+                    ->join('users', 'users.id', '=', 'student_major_subjects.user_id')
+                    ->where('users.role', 'student')
+                    ->distinct('student_major_subjects.user_id')
+                    ->count('student_major_subjects.user_id')
+                : ($hasMajorSubjectColumn
+                    ? User::query()->where('role', 'student')->whereNotNull('major_subject_id')->count()
+                    : 0),
+            'withStudyTime' => $hasStudentStudyTimesTable
+                ? (int) DB::table('student_study_times')
+                    ->join('users', 'users.id', '=', 'student_study_times.user_id')
+                    ->where('users.role', 'student')
+                    ->distinct('student_study_times.user_id')
+                    ->count('student_study_times.user_id')
+                : ($hasClassStudyTimeColumn
+                    ? User::query()->where('role', 'student')->whereNotNull('class_study_time_id')->count()
+                    : 0),
         ];
 
         $classes = SchoolClass::query()
@@ -167,6 +360,8 @@ class StudentStudyController extends Controller
             'stats' => $stats,
             'hasMajorSubjectColumn' => $hasMajorSubjectColumn,
             'hasClassStudyTimeColumn' => $hasClassStudyTimeColumn,
+            'majorSubjectsByStudent' => $majorSubjectsByStudent,
+            'studyTimesByStudent' => $studyTimesByStudent,
         ]);
     }
 

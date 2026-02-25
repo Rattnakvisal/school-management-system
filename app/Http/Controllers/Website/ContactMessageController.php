@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
+use App\Services\TelegramBotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ContactMessageController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, TelegramBotService $telegramBot)
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:120'],
@@ -25,15 +26,26 @@ class ContactMessageController extends Controller
                 ->withInput();
         }
 
+        $data = $validator->validated();
+
         ContactMessage::create([
-            'name' => $validator->validated()['name'],
-            'email' => $validator->validated()['email'],
-            'phone' => $validator->validated()['phone'] ?? null,
-            'subject' => $validator->validated()['subject'],
-            'message' => $validator->validated()['message'],
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'subject' => $data['subject'],
+            'message' => $data['message'],
             'user_id' => auth()->id(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+        ]);
+
+        // Optional: forward website contact to Telegram admin chat when configured.
+        $telegramBot->notifyAdminContact([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'subject' => $data['subject'],
+            'message' => $data['message'],
         ]);
 
         return redirect(route('home') . '#contact')

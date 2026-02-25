@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\StudentStudyController;
 use App\Http\Controllers\Admin\TimeStudyController;
 use App\Http\Controllers\Admin\ContactMessageController;
+use App\Http\Controllers\Admin\AttendanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'admin'])
@@ -49,7 +50,7 @@ Route::middleware(['auth', 'admin'])
         Route::post('/time-studies/subjects', [TimeStudyController::class, 'storeSubject'])->name('time-studies.subjects.store');
         Route::put('/time-studies/subjects/{subjectStudyTime}', [TimeStudyController::class, 'updateSubject'])->name('time-studies.subjects.update');
         Route::delete('/time-studies/subjects/{subjectStudyTime}', [TimeStudyController::class, 'destroySubject'])->name('time-studies.subjects.destroy');
-        Route::view('/attendance', 'admin.attendance')->name('attendance.index');
+        Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::view('/exams', 'admin.exams')->name('exams.index');
         Route::view('/settings', 'admin.settings')->name('settings');
         // Mark all admin notifications as read
