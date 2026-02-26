@@ -1,41 +1,33 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
-    <div class="study-stage space-y-6">
-        <section class="study-reveal admin-page-header overflow-hidden" style="--sd: 1;">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Attendance Monitoring</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">
-                        Admin view to check attendance records connected with teachers.
-                    </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="admin-page-stat">Records: {{ number_format($stats['records'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Students:
-                        {{ number_format($stats['students'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Teachers:
-                        {{ number_format($stats['teachers'] ?? 0) }}</span>
-                    <span class="admin-page-stat">Classes: {{ number_format($stats['classes'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Present:
-                        {{ number_format($stats['present'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--rose">Absent:
-                        {{ number_format($stats['absent'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--amber">Late:
-                        {{ number_format($stats['late'] ?? 0) }}</span>
-                </div>
-            </div>
-        </section>
+    <div class="attendence-stage space-y-6">
+        <x-admin.page-header reveal-class="attendence-reveal" delay="1" icon="attendance" title="Attendance Monitoring"
+            subtitle="Admin view to check attendance records connected with teachers.">
+            <x-slot:stats>
+                <span class="admin-page-stat">Records: {{ number_format($stats['records'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--sky">Students:
+                    {{ number_format($stats['students'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--emerald">Teachers:
+                    {{ number_format($stats['teachers'] ?? 0) }}</span>
+                <span class="admin-page-stat">Classes: {{ number_format($stats['classes'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--emerald">Present:
+                    {{ number_format($stats['present'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--rose">Absent:
+                    {{ number_format($stats['absent'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--amber">Late:
+                    {{ number_format($stats['late'] ?? 0) }}</span>
+            </x-slot:stats>
+        </x-admin.page-header>
 
         @if (!$hasAttendanceTable)
-            <div class="study-reveal rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700"
+            <div class="attendence-reveal rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700"
                 style="--sd: 2;">
                 Attendance table is missing. Run <code>php artisan migrate</code> to enable this page.
             </div>
         @endif
 
-        <section class="study-reveal study-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
+        <section class="attendence-reveal attendence-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
             style="--sd: 2;">
             <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                 <div class="flex items-center justify-between gap-3">
@@ -265,4 +257,3 @@
         </section>
     </div>
 @endsection
-

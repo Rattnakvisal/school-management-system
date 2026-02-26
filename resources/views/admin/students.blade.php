@@ -2,27 +2,20 @@
 
 @section('page')
     <div class="student-stage space-y-6">
-        <section class="student-reveal admin-page-header overflow-hidden" style="--sd: 1;">
-            <div class="flex flex-wrap items-center justify-between gap-5">
-                <div>
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Student Management</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">Create, edit, activate, deactivate, and remove student
-                        accounts.
-                    </p>
-                </div>
-                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Active:
-                        {{ $stats['active'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--rose">Inactive:
-                        {{ $stats['inactive'] }}</span>
-                    @if ($hasClassColumn)
-                        <span class="admin-page-stat admin-page-stat--sky">Assigned:
-                            {{ $stats['assigned'] }}</span>
-                    @endif
-                </div>
-            </div>
-        </section>
+        <x-admin.page-header reveal-class="student-reveal" delay="1" icon="students" title="Student Management"
+            subtitle="Create, edit, activate, deactivate, and remove student accounts.">
+            <x-slot:stats>
+                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
+                <span class="admin-page-stat admin-page-stat--emerald">Active:
+                    {{ $stats['active'] }}</span>
+                <span class="admin-page-stat admin-page-stat--rose">Inactive:
+                    {{ $stats['inactive'] }}</span>
+                @if ($hasClassColumn)
+                    <span class="admin-page-stat admin-page-stat--sky">Assigned:
+                        {{ $stats['assigned'] }}</span>
+                @endif
+            </x-slot:stats>
+        </x-admin.page-header>
 
         @if (session('success'))
             <div class="student-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
@@ -334,7 +327,7 @@
 
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                                <div class="max-h-[560px] overflow-auto">
+                                <div class="max-h-[700px] overflow-auto">
                                     <table class="student-table w-full min-w-[1180px] text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">

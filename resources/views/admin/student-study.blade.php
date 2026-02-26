@@ -2,31 +2,24 @@
 
 @section('page')
     <div class="study-stage space-y-6">
-        <section
-            class="study-reveal admin-page-header overflow-hidden"
-            style="--sd: 1;">
-            <div class="flex flex-wrap items-center justify-between gap-5">
-                <div>
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Student Study</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">Students with selected class time, major subject, teacher, and created dates.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="admin-page-stat">Students: {{ $stats['students'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Subjects:
-                        {{ $stats['subjects'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Teachers:
-                        {{ $stats['teachers'] }}</span>
-                    @if ($hasMajorSubjectColumn ?? false)
-                        <span class="admin-page-stat admin-page-stat--indigo">With Major:
-                            {{ $stats['withMajorSubject'] ?? 0 }}</span>
-                    @endif
-                    @if ($hasClassStudyTimeColumn ?? false)
-                        <span class="admin-page-stat admin-page-stat--cyan">With Study Time:
-                            {{ $stats['withStudyTime'] ?? 0 }}</span>
-                    @endif
-                </div>
-            </div>
-        </section>
+        <x-admin.page-header reveal-class="study-reveal" delay="1" icon="study" title="Student Study"
+            subtitle="Students with selected class time, major subject, teacher, and created dates.">
+            <x-slot:stats>
+                <span class="admin-page-stat">Students: {{ $stats['students'] }}</span>
+                <span class="admin-page-stat admin-page-stat--emerald">Subjects:
+                    {{ $stats['subjects'] }}</span>
+                <span class="admin-page-stat admin-page-stat--sky">Teachers:
+                    {{ $stats['teachers'] }}</span>
+                @if ($hasMajorSubjectColumn ?? false)
+                    <span class="admin-page-stat admin-page-stat--indigo">With Major:
+                        {{ $stats['withMajorSubject'] ?? 0 }}</span>
+                @endif
+                @if ($hasClassStudyTimeColumn ?? false)
+                    <span class="admin-page-stat admin-page-stat--cyan">With Study Time:
+                        {{ $stats['withStudyTime'] ?? 0 }}</span>
+                @endif
+            </x-slot:stats>
+        </x-admin.page-header>
 
         @php
             $dashboardNow = now();
@@ -196,7 +189,7 @@
                         </div>
 
                         <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                            <div class="max-h-[560px] overflow-auto">
+                            <div class="max-h-[700px] overflow-auto">
                                 <table class="w-full min-w-[1240px] text-left text-sm">
                                     <thead
                                         class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">

@@ -26,6 +26,13 @@ class TimeStudyController extends Controller
         $subjectIdRaw = (string) $request->query('subject_id', 'all');
         $teacherIdRaw = (string) $request->query('teacher_id', 'all');
         $search = trim((string) $request->query('q', ''));
+        $perPageRaw = (string) $request->query('per_page', '15');
+
+        $perPageOptions = [10, 15];
+        $perPage = (int) $perPageRaw;
+        if (!in_array($perPage, $perPageOptions, true)) {
+            $perPage = 15;
+        }
 
         $classId = ctype_digit($classIdRaw) ? (int) $classIdRaw : null;
         $subjectId = ctype_digit($subjectIdRaw) ? (int) $subjectIdRaw : null;
@@ -90,7 +97,7 @@ class TimeStudyController extends Controller
             })
             ->orderBy('sort_order')
             ->orderBy('start_time')
-            ->paginate(10, ['*'], 'class_page')
+            ->paginate($perPage, ['*'], 'class_page')
             ->withQueryString();
 
         $subjectTimes = SubjectStudyTime::query()
@@ -176,7 +183,7 @@ class TimeStudyController extends Controller
             })
             ->orderBy('sort_order')
             ->orderBy('start_time')
-            ->paginate(10, ['*'], 'subject_page')
+            ->paginate($perPage, ['*'], 'subject_page')
             ->withQueryString();
 
         $teacherTimes = SubjectStudyTime::query()
@@ -259,7 +266,7 @@ class TimeStudyController extends Controller
             })
             ->orderBy('sort_order')
             ->orderBy('start_time')
-            ->paginate(10, ['*'], 'teacher_page')
+            ->paginate($perPage, ['*'], 'teacher_page')
             ->withQueryString();
 
         $classes = SchoolClass::query()
@@ -459,6 +466,35 @@ class TimeStudyController extends Controller
             })
             ->toArray();
 
+        $recentLimit = 2;
+
+        $recentClassTimes = ClassStudyTime::query()
+            ->with('schoolClass')
+            ->latest('created_at')
+            ->limit($recentLimit)
+            ->get();
+
+        $recentSubjectTimes = SubjectStudyTime::query()
+            ->with(['subject.schoolClass', 'schoolClass', 'teacher', 'subject.teacher'])
+            ->latest('created_at')
+            ->limit($recentLimit)
+            ->get();
+
+        $recentTeacherTimes = SubjectStudyTime::query()
+            ->with(['subject.schoolClass', 'schoolClass', 'teacher', 'subject.teacher'])
+            ->where(function ($query) use ($hasSubjectTeacherColumn) {
+                if ($hasSubjectTeacherColumn) {
+                    $query->whereNotNull('teacher_id');
+                }
+
+                $query->orWhereHas('subject', function ($subjectQuery) {
+                    $subjectQuery->whereNotNull('teacher_id');
+                });
+            })
+            ->latest('created_at')
+            ->limit($recentLimit)
+            ->get();
+
         $stats = [
             'classSlots' => ClassStudyTime::query()->count(),
             'subjectSlots' => SubjectStudyTime::query()->count(),
@@ -473,6 +509,8 @@ class TimeStudyController extends Controller
             'classId' => $classId !== null ? (string) $classId : 'all',
             'subjectId' => $subjectId !== null ? (string) $subjectId : 'all',
             'teacherId' => $teacherId !== null ? (string) $teacherId : 'all',
+            'perPage' => $perPage,
+            'perPageOptions' => $perPageOptions,
             'classes' => $classes,
             'subjects' => $subjects,
             'teachers' => $teachers,
@@ -488,6 +526,9 @@ class TimeStudyController extends Controller
             'classTimeOptionsByClass' => $classTimeOptionsByClass,
             'occupiedClassSlotsByClass' => $occupiedClassSlotsByClass,
             'teacherBusySlots' => $teacherBusySlots,
+            'recentClassTimes' => $recentClassTimes,
+            'recentSubjectTimes' => $recentSubjectTimes,
+            'recentTeacherTimes' => $recentTeacherTimes,
             'search' => $search,
             'dayFeatureEnabled' => $hasClassDayColumn || $hasSubjectDayColumn,
             'hasClassDayColumn' => $hasClassDayColumn,

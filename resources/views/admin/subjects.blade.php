@@ -2,23 +2,18 @@
 
 @section('page')
     <div class="subject-stage space-y-6">
-        <section class="subject-reveal admin-page-header overflow-hidden" style="--sd: 1;">
-            <div class="flex flex-wrap items-center justify-between gap-5">
-                <div>
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Subject Management</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">Create subjects and manage schedules in Time Studies.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Active:
-                        {{ $stats['active'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Assigned:
-                        {{ $stats['assigned'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--amber">With Teacher:
-                        {{ $stats['withTeacher'] }}</span>
-                </div>
-            </div>
-        </section>
+        <x-admin.page-header reveal-class="subject-reveal" delay="1" icon="subjects" title="Subject Management"
+            subtitle="Create subjects and manage schedules in Time Studies.">
+            <x-slot:stats>
+                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
+                <span class="admin-page-stat admin-page-stat--emerald">Active:
+                    {{ $stats['active'] }}</span>
+                <span class="admin-page-stat admin-page-stat--sky">Assigned:
+                    {{ $stats['assigned'] }}</span>
+                <span class="admin-page-stat admin-page-stat--amber">With Teacher:
+                    {{ $stats['withTeacher'] }}</span>
+            </x-slot:stats>
+        </x-admin.page-header>
 
         @if (session('success'))
             <div class="subject-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
@@ -224,7 +219,7 @@
                     </div>
 
                 <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
-                    <div class="max-h-[560px] overflow-auto">
+                    <div class="max-h-[700px] overflow-auto">
                         <table class="w-full min-w-[1150px] text-left text-sm">
                             <thead
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">

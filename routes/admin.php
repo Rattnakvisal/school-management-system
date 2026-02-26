@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\StudentStudyController;
 use App\Http\Controllers\Admin\TimeStudyController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'admin'])
@@ -52,7 +53,9 @@ Route::middleware(['auth', 'admin'])
         Route::delete('/time-studies/subjects/{subjectStudyTime}', [TimeStudyController::class, 'destroySubject'])->name('time-studies.subjects.destroy');
         Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::view('/exams', 'admin.exams')->name('exams.index');
-        Route::view('/settings', 'admin.settings')->name('settings');
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+        Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
         // Mark all admin notifications as read
         Route::post('/notifications/read-all', function () {
             \App\Models\Notification::where('is_read', false)->update(['is_read' => true]);

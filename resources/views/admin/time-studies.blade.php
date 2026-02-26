@@ -4,27 +4,19 @@
     <div class="study-time-stage space-y-6">
 
         <!-- Header -->
-        <section class="study-time-reveal admin-page-header overflow-hidden" style="--sd: 1;">
-            <div class="flex flex-wrap items-center justify-between gap-5">
-                <div>
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Time Studies</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">
-                        Manage class and subject study schedules in one place.
-                    </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <span class="admin-page-stat">Class Slots: {{ $stats['classSlots'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Subject Slots: {{ $stats['subjectSlots'] }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">
-                        Classes With Slots: {{ $stats['classesWithSlots'] }}
-                    </span>
-                    <span class="admin-page-stat admin-page-stat--amber">
-                        Subjects With Slots: {{ $stats['subjectsWithSlots'] }}
-                    </span>
-                </div>
-            </div>
-        </section>
+        <x-admin.page-header reveal-class="study-time-reveal" delay="1" icon="time" title="Time Studies"
+            subtitle="Manage class and subject study schedules in one place.">
+            <x-slot:stats>
+                <span class="admin-page-stat">Class Slots: {{ $stats['classSlots'] }}</span>
+                <span class="admin-page-stat admin-page-stat--sky">Subject Slots: {{ $stats['subjectSlots'] }}</span>
+                <span class="admin-page-stat admin-page-stat--emerald">
+                    Classes With Slots: {{ $stats['classesWithSlots'] }}
+                </span>
+                <span class="admin-page-stat admin-page-stat--amber">
+                    Subjects With Slots: {{ $stats['subjectsWithSlots'] }}
+                </span>
+            </x-slot:stats>
+        </x-admin.page-header>
 
         <!-- Alerts (same style as Student page) -->
         @if (session('success'))
@@ -92,8 +84,7 @@
                 @endphp
 
                 <!-- Class Study Time -->
-                <form method="POST" action="{{ route('admin.time-studies.classes.store') }}"
-                    id="class_time_create_form"
+                <form method="POST" action="{{ route('admin.time-studies.classes.store') }}" id="class_time_create_form"
                     class="js-create-form mt-5 space-y-4">
                     @csrf
 
@@ -156,8 +147,7 @@
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Start</label>
                                         <input type="text" name="class_slots[{{ $slotIndex }}][start_time]"
-                                            value="{{ $rowStart }}" required
-                                            placeholder="07:30 AM or 19:30"
+                                            value="{{ $rowStart }}" required placeholder="07:30 AM or 19:30"
                                             class="js-class-time-input js-class-start-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
                                         @error('class_slots.' . $slotIndex . '.start_time')
@@ -167,9 +157,8 @@
 
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">End</label>
-                                        <input type="text" name="class_slots[{{ $slotIndex }}][end_time]"
-                                            value="{{ $rowEnd }}" required
-                                            placeholder="09:00 AM or 21:00"
+                                        <input type="text" name="class_slots[{{ $slotIndex }}][end_time]" value="{{ $rowEnd }}"
+                                            required placeholder="09:00 AM or 21:00"
                                             class="js-class-time-input js-class-end-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
                                         @error('class_slots.' . $slotIndex . '.end_time')
@@ -267,8 +256,7 @@
                         <select id="subject_form_class_id" name="subject_class_id"
                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             @foreach ($classes as $classOption)
-                                <option value="{{ $classOption->id }}"
-                                    {{ $subjectFormClassId === (string) $classOption->id ? 'selected' : '' }}>
+                                <option value="{{ $classOption->id }}" {{ $subjectFormClassId === (string) $classOption->id ? 'selected' : '' }}>
                                     {{ $classOption->display_name }}
                                 </option>
                             @endforeach
@@ -322,8 +310,7 @@
                                             class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             <option value="">Unassigned</option>
                                             @foreach ($teachers as $teacherOption)
-                                                <option value="{{ $teacherOption->id }}"
-                                                    {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                <option value="{{ $teacherOption->id }}" {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
                                                     {{ $teacherOption->name }}
                                                 </option>
                                             @endforeach
@@ -413,18 +400,18 @@
                         <div class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
                             <div class="max-w-full overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
                                 <div class="inline-flex min-w-max">
-                                <a href="{{ route('admin.time-studies.index', ['tab' => 'class', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId]) }}"
-                                    class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'class' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                                    Class Times
-                                </a>
-                                <a href="{{ route('admin.time-studies.index', ['tab' => 'subject', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId]) }}"
-                                    class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'subject' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                                    Subject Times
-                                </a>
-                                <a href="{{ route('admin.time-studies.index', ['tab' => 'teacher', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId]) }}"
-                                    class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'teacher' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
-                                    Teacher Times
-                                </a>
+                                    <a href="{{ route('admin.time-studies.index', ['tab' => 'class', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId, 'per_page' => $perPage]) }}"
+                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'class' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                        Class Times
+                                    </a>
+                                    <a href="{{ route('admin.time-studies.index', ['tab' => 'subject', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId, 'per_page' => $perPage]) }}"
+                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'subject' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                        Subject Times
+                                    </a>
+                                    <a href="{{ route('admin.time-studies.index', ['tab' => 'teacher', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId, 'per_page' => $perPage]) }}"
+                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'teacher' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                        Teacher Times
+                                    </a>
                                 </div>
                             </div>
 
@@ -440,24 +427,21 @@
                     </div>
 
                     <!-- Overlay -->
-                    <div x-show="filterOpen" x-cloak x-transition.opacity
-                        class="fixed inset-0 z-[80] bg-slate-900/40" @click="filterOpen = false"></div>
+                    <div x-show="filterOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[80] bg-slate-900/40"
+                        @click="filterOpen = false"></div>
 
                     <div class="grid gap-4">
                         <!-- Filter Panel (same as Student style) -->
-                        <aside x-show="filterOpen" x-cloak
-                            x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="translate-x-full"
-                            x-transition:enter-end="translate-x-0"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="translate-x-0"
+                        <aside x-show="filterOpen" x-cloak x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+                            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0"
                             x-transition:leave-end="translate-x-full"
                             class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
                             <div class="flex h-full flex-col">
                                 <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                                     <h3 class="text-3xl font-black text-slate-900">Filters</h3>
                                     <div class="flex items-center gap-4">
-                                        <a href="{{ route('admin.time-studies.index', ['tab' => $tab]) }}"
+                                        <a href="{{ route('admin.time-studies.index', ['tab' => $tab, 'per_page' => $perPage]) }}"
                                             class="text-sm font-semibold text-slate-500 hover:text-slate-700">
                                             Clear All
                                         </a>
@@ -485,7 +469,8 @@
                                             <h4 class="text-xl font-bold text-slate-900">Period</h4>
                                             <select name="period"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Periods</option>
+                                                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Periods
+                                                </option>
                                                 @foreach ($periodOptions as $periodKey => $periodLabel)
                                                     <option value="{{ $periodKey }}" {{ $period === $periodKey ? 'selected' : '' }}>
                                                         {{ $periodLabel }}
@@ -510,7 +495,8 @@
                                             <h4 class="text-xl font-bold text-slate-900">Class</h4>
                                             <select id="filter_class_id" name="class_id"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes</option>
+                                                <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes
+                                                </option>
                                                 @foreach ($classes as $classOption)
                                                     <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
                                                         {{ $classOption->display_name }}
@@ -521,9 +507,11 @@
 
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Subject</h4>
-                                            <select id="filter_subject_id" name="subject_id" data-selected="{{ $subjectId }}"
+                                            <select id="filter_subject_id" name="subject_id"
+                                                data-selected="{{ $subjectId }}"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="all" {{ $subjectId === 'all' ? 'selected' : '' }}>All Subjects</option>
+                                                <option value="all" {{ $subjectId === 'all' ? 'selected' : '' }}>All Subjects
+                                                </option>
                                                 @foreach ($subjects as $subjectOption)
                                                     <option value="{{ $subjectOption->id }}" {{ $subjectId === (string) $subjectOption->id ? 'selected' : '' }}>
                                                         {{ $subjectOption->name }}
@@ -536,7 +524,8 @@
                                             <h4 class="text-xl font-bold text-slate-900">Teacher</h4>
                                             <select name="teacher_id"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="all" {{ $teacherId === 'all' ? 'selected' : '' }}>All Teachers</option>
+                                                <option value="all" {{ $teacherId === 'all' ? 'selected' : '' }}>All Teachers
+                                                </option>
                                                 @foreach ($teachers as $teacherOption)
                                                     <option value="{{ $teacherOption->id }}" {{ $teacherId === (string) $teacherOption->id ? 'selected' : '' }}>
                                                         {{ $teacherOption->name }}
@@ -544,9 +533,22 @@
                                                 @endforeach
                                             </select>
                                         </section>
+
+                                        <section class="space-y-2">
+                                            <h4 class="text-xl font-bold text-slate-900">Rows</h4>
+                                            <select name="per_page"
+                                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                @foreach ($perPageOptions as $option)
+                                                    <option value="{{ $option }}" {{ (int) $perPage === (int) $option ? 'selected' : '' }}>
+                                                        {{ $option }} items
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </section>
                                     </div>
 
-                                    <div class="sticky bottom-0 border-t border-slate-200 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                                    <div
+                                        class="sticky bottom-0 border-t border-slate-200 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
                                         <button type="submit"
                                             class="inline-flex w-full items-center justify-center rounded-lg bg-slate-950 px-4 py-3 text-lg font-bold text-white transition hover:bg-slate-800">
                                             Apply Filters
@@ -559,11 +561,12 @@
                         <!-- TABLES (same sticky header / container as Student list) -->
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                                <div class="max-h-[560px] overflow-auto">
+                                <div class="max-h-[700px] overflow-auto">
 
                                     @if ($tab === 'class')
                                         <table class="w-full min-w-[1280px] text-left text-sm">
-                                            <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                            <thead
+                                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                 <tr>
                                                     <th class="px-3 py-3 font-semibold">Class</th>
                                                     <th class="px-3 py-3 font-semibold">Day</th>
@@ -591,13 +594,15 @@
                                                             @php
                                                                 $slotDay = strtolower((string) ($slot->day_of_week ?? 'all'));
                                                             @endphp
-                                                            <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                                                                 {{ $dayOptions[$slotDay] ?? ucfirst($slotDay) }}
                                                             </span>
                                                         </td>
 
                                                         <td class="px-3 py-3 align-top text-slate-700">
-                                                            <span class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
                                                                 {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
                                                             </span>
                                                         </td>
@@ -621,7 +626,8 @@
                                                                     Edit
                                                                 </button>
 
-                                                                <form method="POST" action="{{ route('admin.time-studies.classes.destroy', $slot) }}"
+                                                                <form method="POST"
+                                                                    action="{{ route('admin.time-studies.classes.destroy', $slot) }}"
                                                                     class="js-delete-time-form"
                                                                     data-label="{{ $slot->schoolClass?->display_name ?? 'class slot' }}">
                                                                     @csrf
@@ -635,28 +641,36 @@
 
                                                             <!-- Modal (same as Student edit modal style) -->
                                                             <div x-show="openClassEdit" x-cloak
-                                                                class="fixed inset-0 z-[70] grid place-items-center p-4" aria-modal="true" role="dialog">
-                                                                <div class="absolute inset-0 bg-slate-900/50" @click="openClassEdit = false"></div>
+                                                                class="fixed inset-0 z-[70] grid place-items-center p-4"
+                                                                aria-modal="true" role="dialog">
+                                                                <div class="absolute inset-0 bg-slate-900/50"
+                                                                    @click="openClassEdit = false"></div>
 
-                                                                <div class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
+                                                                <div
+                                                                    class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
                                                                     <div class="mb-4 flex items-center justify-between">
-                                                                        <h3 class="text-lg font-black text-slate-900">Edit Class Time</h3>
+                                                                        <h3 class="text-lg font-black text-slate-900">Edit Class
+                                                                            Time</h3>
                                                                         <button type="button" @click="openClassEdit = false"
                                                                             class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
-                                                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                                                                <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
+                                                                            <svg class="h-5 w-5" viewBox="0 0 24 24"
+                                                                                fill="currentColor">
+                                                                                <path
+                                                                                    d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
                                                                             </svg>
                                                                         </button>
                                                                     </div>
 
-                                                                    <form method="POST" action="{{ route('admin.time-studies.classes.update', $slot) }}"
+                                                                    <form method="POST"
+                                                                        action="{{ route('admin.time-studies.classes.update', $slot) }}"
                                                                         class="js-edit-form js-class-edit-form space-y-4"
                                                                         data-subject="{{ $slot->schoolClass?->display_name ?? 'Class Time' }}">
                                                                         @csrf
                                                                         @method('PUT')
 
                                                                         <div>
-                                                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
+                                                                            <label
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
                                                                             <select name="school_class_id"
                                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                 @foreach ($classes as $classOption)
@@ -669,7 +683,8 @@
 
                                                                         <div class="grid gap-4 sm:grid-cols-4">
                                                                             <div>
-                                                                                <label class="mb-1 block text-xs font-semibold text-slate-600">Day</label>
+                                                                                <label
+                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Day</label>
                                                                                 <select name="day_of_week"
                                                                                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                     @foreach ($dayOptions as $dayKey => $dayLabel)
@@ -681,7 +696,8 @@
                                                                             </div>
 
                                                                             <div>
-                                                                                <label class="mb-1 block text-xs font-semibold text-slate-600">Period</label>
+                                                                                <label
+                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Period</label>
                                                                                 <select name="period"
                                                                                     class="js-edit-class-period w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                     @foreach ($periodOptions as $periodKey => $periodLabel)
@@ -693,7 +709,8 @@
                                                                             </div>
 
                                                                             <div>
-                                                                                <label class="mb-1 block text-xs font-semibold text-slate-600">Start</label>
+                                                                                <label
+                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Start</label>
                                                                                 <input type="time" name="start_time"
                                                                                     value="{{ \Illuminate\Support\Str::substr((string) $slot->start_time, 0, 5) }}"
                                                                                     required
@@ -701,7 +718,8 @@
                                                                             </div>
 
                                                                             <div>
-                                                                                <label class="mb-1 block text-xs font-semibold text-slate-600">End</label>
+                                                                                <label
+                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">End</label>
                                                                                 <input type="time" name="end_time"
                                                                                     value="{{ \Illuminate\Support\Str::substr((string) $slot->end_time, 0, 5) }}"
                                                                                     required
@@ -736,7 +754,8 @@
                                     @elseif ($tab === 'subject')
                                         {{-- SUBJECT TABLE --}}
                                         <table class="w-full min-w-[1280px] text-left text-sm">
-                                            <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                            <thead
+                                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                 <tr>
                                                     <th class="px-3 py-3 font-semibold">Subject</th>
                                                     <th class="px-3 py-3 font-semibold">Day</th>
@@ -784,13 +803,15 @@
                                                         </td>
 
                                                         <td class="px-3 py-3 align-top text-slate-700">
-                                                            <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                                                                 {{ $dayOptions[$slotDay] ?? ucfirst($slotDay) }}
                                                             </span>
                                                         </td>
 
                                                         <td class="px-3 py-3 align-top text-slate-700">
-                                                            <span class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
                                                                 {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
                                                             </span>
                                                         </td>
@@ -814,7 +835,8 @@
                                                                     Edit
                                                                 </button>
 
-                                                                <form method="POST" action="{{ route('admin.time-studies.subjects.destroy', $slot) }}"
+                                                                <form method="POST"
+                                                                    action="{{ route('admin.time-studies.subjects.destroy', $slot) }}"
                                                                     class="js-delete-time-form"
                                                                     data-label="{{ $slot->subject?->name ?? 'subject slot' }}">
                                                                     @csrf
@@ -828,21 +850,28 @@
 
                                                             <!-- Edit Subject Modal -->
                                                             <div x-show="openSubjectEdit" x-cloak
-                                                                class="fixed inset-0 z-[70] grid place-items-center p-4" aria-modal="true" role="dialog">
-                                                                <div class="absolute inset-0 bg-slate-900/50" @click="openSubjectEdit = false"></div>
+                                                                class="fixed inset-0 z-[70] grid place-items-center p-4"
+                                                                aria-modal="true" role="dialog">
+                                                                <div class="absolute inset-0 bg-slate-900/50"
+                                                                    @click="openSubjectEdit = false"></div>
 
-                                                                <div class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
+                                                                <div
+                                                                    class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
                                                                     <div class="mb-4 flex items-center justify-between">
-                                                                        <h3 class="text-lg font-black text-slate-900">Edit Subject Time</h3>
+                                                                        <h3 class="text-lg font-black text-slate-900">Edit Subject
+                                                                            Time</h3>
                                                                         <button type="button" @click="openSubjectEdit = false"
                                                                             class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
-                                                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                                                                <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
+                                                                            <svg class="h-5 w-5" viewBox="0 0 24 24"
+                                                                                fill="currentColor">
+                                                                                <path
+                                                                                    d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
                                                                             </svg>
                                                                         </button>
                                                                     </div>
 
-                                                                    <form method="POST" action="{{ route('admin.time-studies.subjects.update', $slot) }}"
+                                                                    <form method="POST"
+                                                                        action="{{ route('admin.time-studies.subjects.update', $slot) }}"
                                                                         class="js-edit-form js-subject-edit-form space-y-4"
                                                                         data-subject="{{ $slot->subject?->name ?? 'Subject Time' }}"
                                                                         data-subject-study-time-id="{{ $slot->id }}">
@@ -850,7 +879,8 @@
                                                                         @method('PUT')
 
                                                                         <div>
-                                                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
+                                                                            <label
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
                                                                             <select name="subject_class_id"
                                                                                 class="js-subject-edit-class w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                 @foreach ($classes as $classOption)
@@ -862,7 +892,8 @@
                                                                         </div>
 
                                                                         <div>
-                                                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
+                                                                            <label
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
                                                                             <select name="subject_id"
                                                                                 data-selected="{{ $slot->subject_id }}"
                                                                                 class="js-subject-edit-subject w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
@@ -871,7 +902,9 @@
                                                                         </div>
 
                                                                         <div>
-                                                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Class Time</label>
+                                                                            <label
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Class
+                                                                                Time</label>
                                                                             <select name="class_time_id"
                                                                                 data-selected="{{ $slotClassTimeId }}"
                                                                                 class="js-subject-edit-class-time w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
@@ -880,7 +913,8 @@
                                                                         </div>
 
                                                                         <div>
-                                                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
+                                                                            <label
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
                                                                             <select name="teacher_id"
                                                                                 data-selected="{{ (string) (($slot->teacher_id ?? null) ?: ($slot->subject?->teacher_id ?? '')) }}"
                                                                                 class="js-subject-edit-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
@@ -920,7 +954,8 @@
                                     @else
                                         {{-- TEACHER TABLE --}}
                                         <table class="w-full min-w-[1280px] text-left text-sm">
-                                            <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                            <thead
+                                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                 <tr>
                                                     <th class="px-3 py-3 font-semibold">Teacher</th>
                                                     <th class="px-3 py-3 font-semibold">Subject</th>
@@ -957,12 +992,14 @@
                                                             {{ $slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Unassigned' }}
                                                         </td>
                                                         <td class="px-3 py-3 align-top text-slate-700">
-                                                            <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                                                                 {{ $dayOptions[$slotDay] ?? ucfirst($slotDay) }}
                                                             </span>
                                                         </td>
                                                         <td class="px-3 py-3 align-top text-slate-700">
-                                                            <span class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
                                                                 {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
                                                             </span>
                                                         </td>
@@ -990,6 +1027,74 @@
                             <div class="mt-5">
                                 {{ $tab === 'class' ? $classTimes->links() : ($tab === 'subject' ? $subjectTimes->links() : $teacherTimes->links()) }}
                             </div>
+
+                            @php
+                                $recentItems = $tab === 'class' ? $recentClassTimes : ($tab === 'subject' ? $recentSubjectTimes : $recentTeacherTimes);
+                            @endphp
+
+                            <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                <div class="mb-3 flex items-center justify-between gap-2">
+                                    <h3 class="text-sm font-black text-slate-900">Recently Added</h3>
+                                    <span class="text-xs font-semibold text-slate-500">Latest
+                                        {{ $recentItems->count() }}</span>
+                                </div>
+
+                                <div class="grid gap-3 md:grid-cols-2">
+                                    @forelse ($recentItems as $recent)
+                                        @php
+                                            $recentDay = strtolower((string) ($recent->day_of_week ?? 'all'));
+                                            $recentPeriod = strtolower((string) ($recent->period ?? 'custom'));
+                                        @endphp
+
+                                        <article class="rounded-xl border border-slate-200 bg-white p-3">
+                                            @if ($tab === 'class')
+                                                <div class="font-semibold text-slate-900">
+                                                    {{ $recent->schoolClass?->display_name ?? 'Class slot' }}
+                                                </div>
+                                            @elseif ($tab === 'subject')
+                                                <div class="font-semibold text-slate-900">
+                                                    {{ $recent->subject?->name ?? 'Subject slot' }}
+                                                </div>
+                                                <div class="text-xs text-slate-500">
+                                                    {{ $recent->schoolClass?->display_name ?? $recent->subject?->schoolClass?->display_name ?? 'Unassigned class' }}
+                                                </div>
+                                            @else
+                                                <div class="font-semibold text-slate-900">
+                                                    {{ $recent->teacher?->name ?? $recent->subject?->teacher?->name ?? 'Unassigned teacher' }}
+                                                </div>
+                                                <div class="text-xs text-slate-500">
+                                                    {{ $recent->subject?->name ?? 'Subject slot' }}
+                                                </div>
+                                            @endif
+
+                                            <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                                                <span
+                                                    class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-semibold text-slate-700">
+                                                    {{ $dayOptions[$recentDay] ?? ucfirst($recentDay) }}
+                                                </span>
+                                                <span
+                                                    class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 font-semibold uppercase tracking-wide text-indigo-700">
+                                                    {{ $periodOptions[$recentPeriod] ?? ucfirst($recentPeriod) }}
+                                                </span>
+                                            </div>
+
+                                            <div class="mt-2 text-xs text-slate-600">
+                                                {{ \Carbon\Carbon::parse($recent->start_time)->format('h:i A') }}
+                                                -
+                                                {{ \Carbon\Carbon::parse($recent->end_time)->format('h:i A') }}
+                                            </div>
+                                            <div class="mt-1 text-[11px] text-slate-400">
+                                                Added {{ optional($recent->created_at)->diffForHumans() ?? '-' }}
+                                            </div>
+                                        </article>
+                                    @empty
+                                        <div
+                                            class="md:col-span-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
+                                            No recent items yet.
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1000,7 +1105,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const hasSwal = typeof Swal !== 'undefined';
 
             const subjectOptionsByClass = @json($subjectOptionsByClass);
@@ -1473,7 +1578,7 @@
 
             const confirmSubmit = (selector, buildConfig) => {
                 document.querySelectorAll(selector).forEach((form) => {
-                    form.addEventListener('submit', function(event) {
+                    form.addEventListener('submit', function (event) {
                         if (form.dataset.confirmed === '1') return;
 
                         event.preventDefault();
@@ -1542,6 +1647,6 @@
                     showConfirmButton: false
                 });
             @endif
-        });
+                                                                                });
     </script>
 @endsection

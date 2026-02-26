@@ -11,8 +11,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-full bg-slate-100 text-slate-800">
-    <div x-data="adminShell()" x-init="init()" @keydown.escape.window="closeAll()" class="min-h-screen">
+<body class="min-h-full overflow-x-hidden bg-slate-100 text-slate-800">
+    <div x-data="adminShell()" x-init="init()" @keydown.escape.window="closeAll()" class="min-h-screen overflow-x-hidden">
 
         {{-- MOBILE OVERLAY --}}
         <div x-show="mobileOpen" x-transition.opacity class="fixed inset-0 z-40 bg-black/40 lg:hidden"
@@ -184,12 +184,12 @@
         </aside>
 
         {{-- MAIN AREA --}}
-        <div class="min-h-screen flex flex-col"
+        <div class="min-h-screen flex flex-col overflow-x-hidden"
             :class="collapsed ? 'lg:pl-20' : 'lg:pl-72'">
 
             {{-- TOPBAR --}}
             <header class="sticky top-0 z-30 bg-slate-100/80 backdrop-blur border-b border-slate-200">
-                <div class="h-16 px-3 sm:px-6 flex items-center gap-2 sm:gap-3">
+                <div class="min-h-16 px-3 py-2 sm:px-4 lg:px-6 flex flex-wrap items-center gap-2 sm:gap-3 md:flex-nowrap">
 
                     {{-- Mobile menu button --}}
                     <button class="lg:hidden p-2 rounded-xl hover:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-100"
@@ -200,7 +200,7 @@
                     </button>
 
                     {{-- Search --}}
-                    <div class="flex-1 min-w-0">
+                    <div class="order-3 w-full min-w-[170px] md:order-none md:w-auto md:flex-1 md:min-w-0">
                         <div class="relative max-w-xl">
                             <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -215,7 +215,7 @@
                     </div>
 
                     {{-- Actions --}}
-                    <div class="flex shrink-0 items-center gap-2">
+                    <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 md:ml-0">
                         {{-- Notifications --}}
                         <div class="relative" @click.outside="notifOpen=false">
                             <button class="relative p-2 rounded-xl bg-white border border-slate-200 hover:shadow-sm
@@ -341,7 +341,7 @@
                         {{-- Profile --}}
                         <div class="relative" @click.outside="profileOpen=false">
                             <button
-                                class="ml-2 flex items-center gap-3 rounded-full bg-white border border-slate-200 px-3 py-2 hover:shadow-sm
+                                class="ml-1 flex max-w-[12rem] items-center gap-2 rounded-full bg-white border border-slate-200 px-2.5 py-2 hover:shadow-sm sm:ml-2 sm:max-w-none sm:gap-3 sm:px-3
                                        focus:outline-none focus:ring-4 focus:ring-indigo-100"
                                 @click="notifOpen=false; messageOpen=false; profileOpen=!profileOpen"
                                 aria-label="Open profile menu" type="button">
@@ -350,12 +350,12 @@
                                     onerror="this.onerror=null;this.src='{{ auth()->user()->fallback_avatar_url }}';"
                                     alt="avatar">
 
-                                <div class="leading-tight hidden sm:block text-left">
-                                    <div class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</div>
+                                <div class="leading-tight hidden lg:block text-left">
+                                    <div class="max-w-[10rem] truncate text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</div>
                                     <div class="text-xs text-slate-500 capitalize">{{ auth()->user()->role }}</div>
                                 </div>
 
-                                <svg class="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="currentColor">
+                                <svg class="hidden h-4 w-4 text-slate-500 sm:block" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M7 10l5 5 5-5H7z" />
                                 </svg>
                             </button>
@@ -407,11 +407,11 @@
             </header>
 
             {{-- PAGE CONTENT --}}
-            <main class="flex-1 p-4 sm:p-6" data-page-animate>
+            <main class="flex-1 overflow-x-hidden p-4 sm:p-6" data-page-animate>
                 @yield('page')
             </main>
 
-            <footer class="px-6 py-4 text-xs text-slate-500">
+            <footer class="px-4 py-4 text-xs text-slate-500 sm:px-6">
                 © {{ date('Y') }} Schooli • Admin Panel
             </footer>
         </div>
