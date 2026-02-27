@@ -106,7 +106,8 @@
                         <label class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">
                             <span class="text-sm font-semibold text-slate-700">Initial Status</span>
                             <span class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                <input type="checkbox" name="is_active" value="1" class="h-4 w-4 rounded border-slate-300" {{ old('is_active', '1') ? 'checked' : '' }}>
+                                <input type="checkbox" name="is_active" value="1"
+                                    class="h-4 w-4 rounded border-slate-300" {{ old('is_active', '1') ? 'checked' : '' }}>
                                 Active
                             </span>
                         </label>
@@ -165,8 +166,8 @@
                                     <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Search</h4>
-                                            <input id="q" name="q" type="text" value="{{ $search }}"
-                                                placeholder="Search by name or email"
+                                            <input id="q" name="q" type="text"
+                                                value="{{ $search }}" placeholder="Search by name or email"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         </section>
                                         @if ($hasStatusColumn)
@@ -174,10 +175,13 @@
                                                 <h4 class="text-xl font-bold text-slate-900">Status</h4>
                                                 <select name="status"
                                                     class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                    <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All</option>
-                                                    <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active
+                                                    <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All
                                                     </option>
-                                                    <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>
+                                                    <option value="active" {{ $status === 'active' ? 'selected' : '' }}>
+                                                        Active
+                                                    </option>
+                                                    <option value="inactive"
+                                                        {{ $status === 'inactive' ? 'selected' : '' }}>
                                                         Inactive</option>
                                                 </select>
                                             </section>
@@ -214,10 +218,12 @@
                                                 <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
                                                     <td class="px-3 py-3">
                                                         <div class="flex items-center gap-3">
-                                                            <img src="{{ $teacher->avatar_url }}" alt="{{ $teacher->name }}"
+                                                            <img src="{{ $teacher->avatar_url }}"
+                                                                alt="{{ $teacher->name }}"
                                                                 class="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200">
                                                             <div>
-                                                                <div class="font-semibold text-slate-800">{{ $teacher->name }}
+                                                                <div class="font-semibold text-slate-800">
+                                                                    {{ $teacher->name }}
                                                                 </div>
                                                                 <div class="text-xs text-slate-400">ID
                                                                     #{{ $teacher->formatted_id }}</div>
@@ -235,7 +241,8 @@
                                                         @elseif($hasStatusColumn)
                                                             <span
                                                                 class="inline-flex items-center gap-2 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
-                                                                <span class="h-2 w-2 rounded-full bg-rose-500"></span>Inactive
+                                                                <span
+                                                                    class="h-2 w-2 rounded-full bg-rose-500"></span>Inactive
                                                             </span>
                                                         @else
                                                             <span
@@ -254,7 +261,8 @@
                                                             @if ($hasStatusColumn)
                                                                 <form method="POST"
                                                                     action="{{ route('admin.teachers.status', $teacher) }}"
-                                                                    class="js-status-form" data-teacher="{{ $teacher->name }}"
+                                                                    class="js-status-form"
+                                                                    data-teacher="{{ $teacher->name }}"
                                                                     data-action="{{ $teacher->is_active ? 'set inactive' : 'set active' }}">
                                                                     @csrf
                                                                     @method('PATCH')
@@ -267,7 +275,8 @@
 
                                                             <form method="POST"
                                                                 action="{{ route('admin.teachers.destroy', $teacher) }}"
-                                                                class="js-delete-form" data-teacher="{{ $teacher->name }}">
+                                                                class="js-delete-form"
+                                                                data-teacher="{{ $teacher->name }}">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit"
@@ -280,13 +289,15 @@
                                                         <div x-show="open" x-cloak
                                                             class="fixed inset-0 z-[70] grid place-items-center p-4"
                                                             aria-modal="true" role="dialog">
-                                                            <div class="absolute inset-0 bg-slate-900/50" @click="open = false">
+                                                            <div class="absolute inset-0 bg-slate-900/50"
+                                                                @click="open = false">
                                                             </div>
 
                                                             <div
                                                                 class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
                                                                 <div class="mb-4 flex items-center justify-between">
-                                                                    <h3 class="text-lg font-black text-slate-900">Edit teacher
+                                                                    <h3 class="text-lg font-black text-slate-900">Edit
+                                                                        teacher
                                                                     </h3>
                                                                     <button type="button" @click="open = false"
                                                                         class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
@@ -300,7 +311,8 @@
 
                                                                 <form method="POST"
                                                                     action="{{ route('admin.teachers.update', $teacher) }}"
-                                                                    enctype="multipart/form-data" class="js-edit-form space-y-4"
+                                                                    enctype="multipart/form-data"
+                                                                    class="js-edit-form space-y-4"
                                                                     data-teacher="{{ $teacher->name }}">
                                                                     @csrf
                                                                     @method('PUT')
@@ -309,16 +321,18 @@
                                                                         <label for="edit_name_{{ $teacher->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Full
                                                                             Name</label>
-                                                                        <input id="edit_name_{{ $teacher->id }}" name="name"
-                                                                            type="text" value="{{ $teacher->name }}"
+                                                                        <input id="edit_name_{{ $teacher->id }}"
+                                                                            name="name" type="text"
+                                                                            value="{{ $teacher->name }}"
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
                                                                     <div>
                                                                         <label for="edit_email_{{ $teacher->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Email</label>
-                                                                        <input id="edit_email_{{ $teacher->id }}" name="email"
-                                                                            type="email" value="{{ $teacher->email }}"
+                                                                        <input id="edit_email_{{ $teacher->id }}"
+                                                                            name="email" type="email"
+                                                                            value="{{ $teacher->email }}"
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
@@ -327,9 +341,11 @@
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Avatar
                                                                             Image</label>
                                                                         <input id="edit_avatar_image_{{ $teacher->id }}"
-                                                                            name="avatar_image" type="file" accept="image/*"
+                                                                            name="avatar_image" type="file"
+                                                                            accept="image/*"
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                        <p class="mt-1 text-[11px] text-slate-500">Leave empty
+                                                                        <p class="mt-1 text-[11px] text-slate-500">Leave
+                                                                            empty
                                                                             to keep
                                                                             current avatar.</p>
                                                                     </div>
@@ -351,7 +367,8 @@
                                                                                 Password</label>
                                                                             <input
                                                                                 id="edit_password_confirmation_{{ $teacher->id }}"
-                                                                                name="password_confirmation" type="password"
+                                                                                name="password_confirmation"
+                                                                                type="password"
                                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                         </div>
                                                                     </div>
@@ -363,8 +380,10 @@
                                                                                 class="text-sm font-semibold text-slate-700">Status</span>
                                                                             <span
                                                                                 class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                                                                <input type="checkbox" name="is_active" value="1"
-                                                                                    class="h-4 w-4 rounded border-slate-300" {{ $teacher->is_active ? 'checked' : '' }}>
+                                                                                <input type="checkbox" name="is_active"
+                                                                                    value="1"
+                                                                                    class="h-4 w-4 rounded border-slate-300"
+                                                                                    {{ $teacher->is_active ? 'checked' : '' }}>
                                                                                 Active
                                                                             </span>
                                                                         </label>
@@ -387,7 +406,8 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="5" class="px-3 py-10 text-center text-sm text-slate-500">
+                                                    <td colspan="5"
+                                                        class="px-3 py-10 text-center text-sm text-slate-500">
                                                         No teachers found.
                                                     </td>
                                                 </tr>
@@ -409,14 +429,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             if (typeof Swal === 'undefined') {
                 return;
             }
 
             const confirmSubmit = (selector, buildConfig) => {
                 document.querySelectorAll(selector).forEach((form) => {
-                    form.addEventListener('submit', function (event) {
+                    form.addEventListener('submit', function(event) {
                         if (form.dataset.confirmed === '1') {
                             return;
                         }
@@ -505,6 +525,6 @@
                     showConfirmButton: false
                 });
             @endif
-                });
+        });
     </script>
 @endsection

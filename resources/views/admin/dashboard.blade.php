@@ -3,7 +3,8 @@
 @section('page')
     @php
         $majorRate = ($studentsTotal ?? 0) > 0 ? round((($studentsWithMajor ?? 0) / $studentsTotal) * 100, 1) : 0;
-        $studyTimeRate = ($studentsTotal ?? 0) > 0 ? round((($studentsWithStudyTime ?? 0) / $studentsTotal) * 100, 1) : 0;
+        $studyTimeRate =
+            ($studentsTotal ?? 0) > 0 ? round((($studentsWithStudyTime ?? 0) / $studentsTotal) * 100, 1) : 0;
         $dashboardNow = $dashboardNow ?? now();
         $dashboardAgenda = collect($dashboardAgenda ?? []);
         $fullName = trim((string) (auth()->user()->name ?? 'Admin'));
@@ -18,7 +19,12 @@
         $classLoadChartData = $chartData['classLoad'] ?? ['labels' => [], 'values' => []];
         $subjectHealthChartData = $chartData['subjectHealth'] ?? ['labels' => [], 'values' => []];
         $periodChartData = $chartData['periods'] ?? ['labels' => [], 'values' => []];
-        $attendanceChartData = $chartData['attendance'] ?? ['labels' => [], 'present' => [], 'absent' => [], 'hasData' => false];
+        $attendanceChartData = $chartData['attendance'] ?? [
+            'labels' => [],
+            'present' => [],
+            'absent' => [],
+            'hasData' => false,
+        ];
     @endphp
 
     <div class="dashboard-stage space-y-6">
@@ -27,9 +33,11 @@
             <div class="pointer-events-none absolute -bottom-14 right-20 h-44 w-44 rounded-full bg-cyan-200/25 blur-2xl">
             </div>
 
-            <div class="grid grid-cols-1 relative items-center gap-6 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div
+                class="grid grid-cols-1 relative items-center gap-6 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_280px]">
                 <div>
-                    <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-sm font-semibold text-indigo-100">
+                    <div
+                        class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-sm font-semibold text-indigo-100">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M12 3 3 8v8l9 5 9-5V8l-9-5Z" />
@@ -68,8 +76,8 @@
 
                 <div class="hidden md:flex md:items-center md:justify-end">
                     <div class="dashboard-hero-art">
-                        <svg viewBox="0 0 340 230" class="h-32 w-auto dashboard-logo dashboard-logo--enhanced lg:h-44" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <svg viewBox="0 0 340 230" class="h-32 w-auto dashboard-logo dashboard-logo--enhanced lg:h-44"
+                            fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <defs>
                                 <radialGradient id="adminHdrBlobA" cx="50%" cy="50%" r="50%">
                                     <stop offset="0%" stop-color="rgba(125,211,252,0.45)" />
@@ -368,7 +376,8 @@
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <div class="flex items-center justify-between gap-2">
-                                            <div class="truncate text-sm font-semibold text-slate-900">{{ $name }}</div>
+                                            <div class="truncate text-sm font-semibold text-slate-900">{{ $name }}
+                                            </div>
                                             <div class="text-[11px] text-slate-400">
                                                 {{ $contactMessage->created_at->diffForHumans() }}
                                             </div>
@@ -549,7 +558,8 @@
                             data: trendData.students,
                             borderWidth: 3,
                             borderColor: '#4f46e5',
-                            backgroundColor: createGradient(trendCtx, 'rgba(79,70,229,0.35)', 'rgba(79,70,229,0.02)'),
+                            backgroundColor: createGradient(trendCtx, 'rgba(79,70,229,0.35)',
+                                'rgba(79,70,229,0.02)'),
                             fill: true,
                             tension: 0.35,
                             pointRadius: 3,
@@ -559,7 +569,8 @@
                             data: trendData.teachers,
                             borderWidth: 3,
                             borderColor: '#0ea5e9',
-                            backgroundColor: createGradient(trendCtx, 'rgba(14,165,233,0.28)', 'rgba(14,165,233,0.02)'),
+                            backgroundColor: createGradient(trendCtx, 'rgba(14,165,233,0.28)',
+                                'rgba(14,165,233,0.02)'),
                             fill: true,
                             tension: 0.35,
                             pointRadius: 3,
@@ -639,17 +650,23 @@
                 new Chart(attendanceOverviewCanvas, {
                     type: 'bar',
                     data: {
-                        labels: attendanceData.labels.length ? attendanceData.labels : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                        labels: attendanceData.labels.length ? attendanceData.labels : ['Mon', 'Tue', 'Wed',
+                            'Thu', 'Fri'
+                        ],
                         datasets: [{
                             label: 'Total Present',
-                            data: attendanceData.present.length ? attendanceData.present : [0, 0, 0, 0, 0],
+                            data: attendanceData.present.length ? attendanceData.present : [0, 0, 0,
+                                0, 0
+                            ],
                             backgroundColor: '#facc15',
                             borderRadius: 8,
                             borderSkipped: false,
                             maxBarThickness: 28,
                         }, {
                             label: 'Total Absent',
-                            data: attendanceData.absent.length ? attendanceData.absent : [0, 0, 0, 0, 0],
+                            data: attendanceData.absent.length ? attendanceData.absent : [0, 0, 0,
+                                0, 0
+                            ],
                             backgroundColor: '#7dd3fc',
                             borderRadius: 8,
                             borderSkipped: false,

@@ -37,7 +37,8 @@
             </article>
             <article class="rounded-2xl border border-indigo-100 bg-indigo-50/80 p-4 shadow-sm ring-1 ring-indigo-100">
                 <div class="text-[11px] font-bold uppercase tracking-wide text-indigo-700">Schedule Time</div>
-                <div id="live_schedule_time" class="mt-1 text-lg font-black text-indigo-900">{{ $dashboardNow->format('h:i:s A') }}</div>
+                <div id="live_schedule_time" class="mt-1 text-lg font-black text-indigo-900">
+                    {{ $dashboardNow->format('h:i:s A') }}</div>
                 <div class="text-sm font-semibold text-indigo-700">Server Live Clock</div>
             </article>
             <article class="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 shadow-sm ring-1 ring-emerald-100">
@@ -52,7 +53,8 @@
             </article>
         </section>
 
-        <section class="study-reveal study-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
+        <section
+            class="study-reveal study-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
             style="--sd: 2;">
             <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                 <div class="flex items-center justify-between gap-3">
@@ -67,34 +69,33 @@
                     </button>
                 </div>
 
-                <div x-show="filterOpen" x-cloak x-transition.opacity
-                    class="fixed inset-0 z-[80] bg-slate-900/40" @click="filterOpen = false"></div>
+                <div x-show="filterOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[80] bg-slate-900/40"
+                    @click="filterOpen = false"></div>
 
                 <div class="grid gap-4">
-                    <aside x-show="filterOpen" x-cloak
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="translate-x-full"
-                        x-transition:enter-end="translate-x-0"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="translate-x-0"
+                    <aside x-show="filterOpen" x-cloak x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+                        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0"
                         x-transition:leave-end="translate-x-full"
                         class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
                         <div class="flex h-full flex-col">
                             <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                                 <h3 class="text-3xl font-black text-slate-900">Filters</h3>
                                 <div class="flex items-center gap-4">
-                                    <a href="{{ route('admin.student-study.index') }}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                                    <a href="{{ route('admin.student-study.index') }}"
+                                        class="text-sm font-semibold text-slate-500 hover:text-slate-700">
                                         Clear All
                                     </a>
                                     <button type="button" @click="filterOpen = false"
-                                        class="text-2xl font-bold leading-none text-slate-700 hover:text-slate-900" aria-label="Close filters">
+                                        class="text-2xl font-bold leading-none text-slate-700 hover:text-slate-900"
+                                        aria-label="Close filters">
                                         &times;
                                     </button>
                                 </div>
                             </div>
 
-                            <form method="GET" action="{{ route('admin.student-study.index') }}" class="flex min-h-0 flex-1 flex-col"
-                                @submit="filterOpen = false">
+                            <form method="GET" action="{{ route('admin.student-study.index') }}"
+                                class="flex min-h-0 flex-1 flex-col" @submit="filterOpen = false">
                                 <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                                     <section class="space-y-2">
                                         <h4 class="text-xl font-bold text-slate-900">Search</h4>
@@ -106,9 +107,11 @@
                                         <h4 class="text-xl font-bold text-slate-900">Class</h4>
                                         <select name="class_id"
                                             class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                            <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes</option>
+                                            <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes
+                                            </option>
                                             @foreach ($classes as $classOption)
-                                                <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                                <option value="{{ $classOption->id }}"
+                                                    {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
                                                     {{ $classOption->display_name }}
                                                 </option>
                                             @endforeach
@@ -118,9 +121,11 @@
                                         <h4 class="text-xl font-bold text-slate-900">Subject</h4>
                                         <select name="subject_id"
                                             class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                            <option value="all" {{ $subjectId === 'all' ? 'selected' : '' }}>All Subjects</option>
+                                            <option value="all" {{ $subjectId === 'all' ? 'selected' : '' }}>All
+                                                Subjects</option>
                                             @foreach ($subjects as $subjectOption)
-                                                <option value="{{ $subjectOption->id }}" {{ $subjectId === (string) $subjectOption->id ? 'selected' : '' }}>
+                                                <option value="{{ $subjectOption->id }}"
+                                                    {{ $subjectId === (string) $subjectOption->id ? 'selected' : '' }}>
                                                     {{ $subjectOption->name }}
                                                 </option>
                                             @endforeach
@@ -130,9 +135,11 @@
                                         <h4 class="text-xl font-bold text-slate-900">Period</h4>
                                         <select name="period"
                                             class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                            <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Periods</option>
+                                            <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Periods
+                                            </option>
                                             @foreach ($periodOptions as $periodKey => $periodLabel)
-                                                <option value="{{ $periodKey }}" {{ $period === $periodKey ? 'selected' : '' }}>
+                                                <option value="{{ $periodKey }}"
+                                                    {{ $period === $periodKey ? 'selected' : '' }}>
                                                     {{ $periodLabel }}
                                                 </option>
                                             @endforeach
@@ -164,22 +171,26 @@
                         @endphp
                         <div class="mb-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
                             @if ($search !== '')
-                                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
+                                <span
+                                    class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
                                     Search: {{ $search }}
                                 </span>
                             @endif
                             @if ($selectedClassLabel)
-                                <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-700">
+                                <span
+                                    class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-700">
                                     Class: {{ $selectedClassLabel }}
                                 </span>
                             @endif
                             @if ($selectedSubjectLabel)
-                                <span class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-indigo-700">
+                                <span
+                                    class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-indigo-700">
                                     Subject: {{ $selectedSubjectLabel }}
                                 </span>
                             @endif
                             @if ($period !== 'all')
-                                <span class="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-violet-700">
+                                <span
+                                    class="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-violet-700">
                                     Period: {{ $periodOptions[$period] ?? ucfirst($period) }}
                                 </span>
                             @endif
@@ -215,8 +226,12 @@
                                                     $classLabel = 'Unassigned';
                                                 }
                                                 $classRoom = trim((string) ($row->class_room ?? ''));
-                                                $studentCreatedAt = $row->student_created_at ? \Carbon\Carbon::parse($row->student_created_at) : null;
-                                                $teacherCreatedAt = $row->teacher_created_at ? \Carbon\Carbon::parse($row->teacher_created_at) : null;
+                                                $studentCreatedAt = $row->student_created_at
+                                                    ? \Carbon\Carbon::parse($row->student_created_at)
+                                                    : null;
+                                                $teacherCreatedAt = $row->teacher_created_at
+                                                    ? \Carbon\Carbon::parse($row->teacher_created_at)
+                                                    : null;
 
                                                 $dayLabels = [
                                                     'all' => 'All Days',
@@ -229,29 +244,68 @@
                                                     'sunday' => 'Sunday',
                                                 ];
 
-                                                $classPeriodKey = strtolower(trim((string) ($row->class_study_period ?? '')));
-                                                $subjectPeriodKey = strtolower(trim((string) ($row->subject_study_period ?? '')));
-                                                $classPeriodLabel = $classPeriodKey !== '' ? ($periodOptions[$classPeriodKey] ?? ucfirst($classPeriodKey)) : null;
-                                                $subjectPeriodLabel = $subjectPeriodKey !== '' ? ($periodOptions[$subjectPeriodKey] ?? ucfirst($subjectPeriodKey)) : null;
+                                                $classPeriodKey = strtolower(
+                                                    trim((string) ($row->class_study_period ?? '')),
+                                                );
+                                                $subjectPeriodKey = strtolower(
+                                                    trim((string) ($row->subject_study_period ?? '')),
+                                                );
+                                                $classPeriodLabel =
+                                                    $classPeriodKey !== ''
+                                                        ? $periodOptions[$classPeriodKey] ?? ucfirst($classPeriodKey)
+                                                        : null;
+                                                $subjectPeriodLabel =
+                                                    $subjectPeriodKey !== ''
+                                                        ? $periodOptions[$subjectPeriodKey] ??
+                                                            ucfirst($subjectPeriodKey)
+                                                        : null;
 
                                                 $classDayKey = strtolower(trim((string) ($row->class_study_day ?? '')));
-                                                $subjectDayKey = strtolower(trim((string) ($row->subject_study_day ?? '')));
-                                                $classDayLabel = $classDayKey !== '' ? ($dayLabels[$classDayKey] ?? ucfirst($classDayKey)) : null;
-                                                $subjectDayLabel = $subjectDayKey !== '' ? ($dayLabels[$subjectDayKey] ?? ucfirst($subjectDayKey)) : null;
+                                                $subjectDayKey = strtolower(
+                                                    trim((string) ($row->subject_study_day ?? '')),
+                                                );
+                                                $classDayLabel =
+                                                    $classDayKey !== ''
+                                                        ? $dayLabels[$classDayKey] ?? ucfirst($classDayKey)
+                                                        : null;
+                                                $subjectDayLabel =
+                                                    $subjectDayKey !== ''
+                                                        ? $dayLabels[$subjectDayKey] ?? ucfirst($subjectDayKey)
+                                                        : null;
 
-                                                $classStart = substr((string) ($row->class_study_start_time ?? ''), 0, 5);
+                                                $classStart = substr(
+                                                    (string) ($row->class_study_start_time ?? ''),
+                                                    0,
+                                                    5,
+                                                );
                                                 $classEnd = substr((string) ($row->class_study_end_time ?? ''), 0, 5);
-                                                $subjectStart = substr((string) ($row->subject_study_start_time ?? ''), 0, 5);
-                                                $subjectEnd = substr((string) ($row->subject_study_end_time ?? ''), 0, 5);
+                                                $subjectStart = substr(
+                                                    (string) ($row->subject_study_start_time ?? ''),
+                                                    0,
+                                                    5,
+                                                );
+                                                $subjectEnd = substr(
+                                                    (string) ($row->subject_study_end_time ?? ''),
+                                                    0,
+                                                    5,
+                                                );
 
                                                 $classHasTime = $classStart !== '' && $classEnd !== '';
                                                 $subjectHasTime = $subjectStart !== '' && $subjectEnd !== '';
-                                                $samePeriod = $classPeriodKey === '' || $subjectPeriodKey === '' || $classPeriodKey === $subjectPeriodKey;
-                                                $sameStart = $classHasTime && $subjectHasTime && $classStart === $subjectStart;
-                                                $sameEnd = $classHasTime && $subjectHasTime && $classEnd === $subjectEnd;
+                                                $samePeriod =
+                                                    $classPeriodKey === '' ||
+                                                    $subjectPeriodKey === '' ||
+                                                    $classPeriodKey === $subjectPeriodKey;
+                                                $sameStart =
+                                                    $classHasTime && $subjectHasTime && $classStart === $subjectStart;
+                                                $sameEnd =
+                                                    $classHasTime && $subjectHasTime && $classEnd === $subjectEnd;
                                                 $dayCompatible = true;
                                                 if ($classDayKey !== '' && $subjectDayKey !== '') {
-                                                    $dayCompatible = $classDayKey === $subjectDayKey || $classDayKey === 'all' || $subjectDayKey === 'all';
+                                                    $dayCompatible =
+                                                        $classDayKey === $subjectDayKey ||
+                                                        $classDayKey === 'all' ||
+                                                        $subjectDayKey === 'all';
                                                 }
 
                                                 if (!$classHasTime || !$subjectHasTime) {
@@ -261,7 +315,8 @@
                                                 } elseif ($samePeriod && $sameStart && $sameEnd && $dayCompatible) {
                                                     $scheduleStatus = 'matched';
                                                     $scheduleLabel = 'Matched';
-                                                    $scheduleClass = 'border-emerald-200 bg-emerald-50 text-emerald-700';
+                                                    $scheduleClass =
+                                                        'border-emerald-200 bg-emerald-50 text-emerald-700';
                                                 } else {
                                                     $scheduleStatus = 'mismatch';
                                                     $scheduleLabel = 'Mismatch';
@@ -269,7 +324,9 @@
                                                 }
 
                                                 $studentId = (int) ($row->student_id ?? 0);
-                                                $selectedMajorSubjects = collect($majorSubjectsByStudent[$studentId] ?? []);
+                                                $selectedMajorSubjects = collect(
+                                                    $majorSubjectsByStudent[$studentId] ?? [],
+                                                );
                                                 if ($selectedMajorSubjects->isEmpty() && !empty($row->subject_name)) {
                                                     $selectedMajorSubjects = collect([
                                                         [
@@ -297,39 +354,67 @@
                                             @endphp
                                             <tr class="align-top transition hover:bg-slate-50/80 odd:bg-slate-50/30">
                                                 <td class="px-3 py-3">
-                                                    <div class="font-semibold text-slate-800">{{ $row->student_name }}</div>
-                                                    <div class="text-xs text-slate-500">{{ $row->student_email ?: '-' }}</div>
-                                                    <div class="text-xs text-slate-400">ID #{{ str_pad((string) $row->student_id, 7, '0', STR_PAD_LEFT) }}</div>
+                                                    <div class="font-semibold text-slate-800">{{ $row->student_name }}
+                                                    </div>
+                                                    <div class="text-xs text-slate-500">{{ $row->student_email ?: '-' }}
+                                                    </div>
+                                                    <div class="text-xs text-slate-400">ID
+                                                        #{{ str_pad((string) $row->student_id, 7, '0', STR_PAD_LEFT) }}
+                                                    </div>
                                                 </td>
                                                 <td class="px-3 py-3 text-slate-600">
                                                     <div class="font-medium text-slate-700">{{ $classLabel }}</div>
-                                                    <div class="text-xs text-slate-400">{{ $classRoom !== '' ? 'Room: ' . $classRoom : 'Room: -' }}</div>
+                                                    <div class="text-xs text-slate-400">
+                                                        {{ $classRoom !== '' ? 'Room: ' . $classRoom : 'Room: -' }}</div>
                                                 </td>
                                                 <td class="px-3 py-3 text-slate-600">
                                                     @if ($selectedStudyTimes->isNotEmpty())
                                                         @php
                                                             $firstSlot = $selectedStudyTimes->first();
-                                                            $slotDayKey = strtolower(trim((string) ($firstSlot['day_of_week'] ?? 'all')));
-                                                            $slotPeriodKey = strtolower(trim((string) ($firstSlot['period'] ?? '')));
-                                                            $slotDayLabel = $dayLabels[$slotDayKey] ?? ucfirst($slotDayKey ?: 'all');
-                                                            $slotPeriodLabel = $slotPeriodKey !== '' ? ($periodOptions[$slotPeriodKey] ?? ucfirst($slotPeriodKey)) : null;
-                                                            $slotStart = substr((string) ($firstSlot['start_time'] ?? ''), 0, 5);
-                                                            $slotEnd = substr((string) ($firstSlot['end_time'] ?? ''), 0, 5);
+                                                            $slotDayKey = strtolower(
+                                                                trim((string) ($firstSlot['day_of_week'] ?? 'all')),
+                                                            );
+                                                            $slotPeriodKey = strtolower(
+                                                                trim((string) ($firstSlot['period'] ?? '')),
+                                                            );
+                                                            $slotDayLabel =
+                                                                $dayLabels[$slotDayKey] ??
+                                                                ucfirst($slotDayKey ?: 'all');
+                                                            $slotPeriodLabel =
+                                                                $slotPeriodKey !== ''
+                                                                    ? $periodOptions[$slotPeriodKey] ??
+                                                                        ucfirst($slotPeriodKey)
+                                                                    : null;
+                                                            $slotStart = substr(
+                                                                (string) ($firstSlot['start_time'] ?? ''),
+                                                                0,
+                                                                5,
+                                                            );
+                                                            $slotEnd = substr(
+                                                                (string) ($firstSlot['end_time'] ?? ''),
+                                                                0,
+                                                                5,
+                                                            );
                                                         @endphp
-                                                        <div class="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm">
+                                                        <div
+                                                            class="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm">
                                                             <div class="flex flex-wrap gap-1.5">
-                                                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                                                                <span
+                                                                    class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
                                                                     {{ $slotDayLabel }}
                                                                 </span>
                                                                 @if ($slotPeriodLabel)
-                                                                    <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                                                                    <span
+                                                                        class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
                                                                         {{ $slotPeriodLabel }}
                                                                     </span>
                                                                 @endif
                                                             </div>
                                                             <div class="mt-1 text-sm font-semibold text-slate-700">
                                                                 @if ($slotStart !== '' && $slotEnd !== '')
-                                                                    {{ \Carbon\Carbon::parse($slotStart)->format('h:i A') }} -> {{ \Carbon\Carbon::parse($slotEnd)->format('h:i A') }}
+                                                                    {{ \Carbon\Carbon::parse($slotStart)->format('h:i A') }}
+                                                                    ->
+                                                                    {{ \Carbon\Carbon::parse($slotEnd)->format('h:i A') }}
                                                                 @elseif ($slotStart !== '')
                                                                     {{ \Carbon\Carbon::parse($slotStart)->format('h:i A') }}
                                                                 @else
@@ -339,25 +424,58 @@
                                                         </div>
                                                         @if ($selectedStudyTimes->count() > 1)
                                                             <details class="mt-2 group">
-                                                                <summary class="cursor-pointer text-[11px] font-semibold text-indigo-600 hover:text-indigo-700">
-                                                                    +{{ $selectedStudyTimes->count() - 1 }} more study time(s)
+                                                                <summary
+                                                                    class="cursor-pointer text-[11px] font-semibold text-indigo-600 hover:text-indigo-700">
+                                                                    +{{ $selectedStudyTimes->count() - 1 }} more study
+                                                                    time(s)
                                                                 </summary>
                                                                 <div class="mt-2 space-y-1.5">
                                                                     @foreach ($selectedStudyTimes->slice(1, 4) as $extraSlot)
                                                                         @php
-                                                                            $extraDayKey = strtolower(trim((string) ($extraSlot['day_of_week'] ?? 'all')));
-                                                                            $extraPeriodKey = strtolower(trim((string) ($extraSlot['period'] ?? '')));
-                                                                            $extraDayLabel = $dayLabels[$extraDayKey] ?? ucfirst($extraDayKey ?: 'all');
-                                                                            $extraPeriodLabel = $extraPeriodKey !== '' ? ($periodOptions[$extraPeriodKey] ?? ucfirst($extraPeriodKey)) : null;
-                                                                            $extraStart = substr((string) ($extraSlot['start_time'] ?? ''), 0, 5);
-                                                                            $extraEnd = substr((string) ($extraSlot['end_time'] ?? ''), 0, 5);
+                                                                            $extraDayKey = strtolower(
+                                                                                trim(
+                                                                                    (string) ($extraSlot[
+                                                                                        'day_of_week'
+                                                                                    ] ?? 'all'),
+                                                                                ),
+                                                                            );
+                                                                            $extraPeriodKey = strtolower(
+                                                                                trim(
+                                                                                    (string) ($extraSlot['period'] ??
+                                                                                        ''),
+                                                                                ),
+                                                                            );
+                                                                            $extraDayLabel =
+                                                                                $dayLabels[$extraDayKey] ??
+                                                                                ucfirst($extraDayKey ?: 'all');
+                                                                            $extraPeriodLabel =
+                                                                                $extraPeriodKey !== ''
+                                                                                    ? $periodOptions[$extraPeriodKey] ??
+                                                                                        ucfirst($extraPeriodKey)
+                                                                                    : null;
+                                                                            $extraStart = substr(
+                                                                                (string) ($extraSlot['start_time'] ??
+                                                                                    ''),
+                                                                                0,
+                                                                                5,
+                                                                            );
+                                                                            $extraEnd = substr(
+                                                                                (string) ($extraSlot['end_time'] ?? ''),
+                                                                                0,
+                                                                                5,
+                                                                            );
                                                                         @endphp
-                                                                        <div class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-600">
+                                                                        <div
+                                                                            class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-600">
                                                                             {{ $extraDayLabel }}{{ $extraPeriodLabel ? ' | ' . $extraPeriodLabel : '' }}
                                                                             @if ($extraStart !== '' && $extraEnd !== '')
-                                                                                | {{ \Carbon\Carbon::parse($extraStart)->format('h:i A') }} -> {{ \Carbon\Carbon::parse($extraEnd)->format('h:i A') }}
+                                                                                |
+                                                                                {{ \Carbon\Carbon::parse($extraStart)->format('h:i A') }}
+                                                                                ->
+                                                                                {{ \Carbon\Carbon::parse($extraEnd)->format('h:i A') }}
                                                                             @elseif ($extraStart !== '')
-                                                                                | {{ \Carbon\Carbon::parse($extraStart)->format('h:i A') }}
+                                                                                |
+                                                                                {{ \Carbon\Carbon::parse($extraStart)->format('h:i A') }}
                                                                             @endif
                                                                         </div>
                                                                     @endforeach
@@ -373,21 +491,29 @@
                                                         @php
                                                             $firstSubject = $selectedMajorSubjects->first();
                                                         @endphp
-                                                        <div class="rounded-xl border border-indigo-100 bg-indigo-50/70 px-2.5 py-2 shadow-sm">
-                                                            <div class="text-sm font-semibold text-indigo-700">{{ $firstSubject['name'] ?? '-' }}</div>
-                                                            <div class="text-xs text-indigo-500">{{ $firstSubject['code'] ?? '-' }}</div>
+                                                        <div
+                                                            class="rounded-xl border border-indigo-100 bg-indigo-50/70 px-2.5 py-2 shadow-sm">
+                                                            <div class="text-sm font-semibold text-indigo-700">
+                                                                {{ $firstSubject['name'] ?? '-' }}</div>
+                                                            <div class="text-xs text-indigo-500">
+                                                                {{ $firstSubject['code'] ?? '-' }}</div>
                                                         </div>
                                                         @if ($selectedMajorSubjects->count() > 1)
                                                             <details class="mt-2 group">
-                                                                <summary class="cursor-pointer text-[11px] font-semibold text-indigo-600 hover:text-indigo-700">
-                                                                    +{{ $selectedMajorSubjects->count() - 1 }} more major subject(s)
+                                                                <summary
+                                                                    class="cursor-pointer text-[11px] font-semibold text-indigo-600 hover:text-indigo-700">
+                                                                    +{{ $selectedMajorSubjects->count() - 1 }} more major
+                                                                    subject(s)
                                                                 </summary>
                                                                 <div class="mt-2 space-y-1.5">
                                                                     @foreach ($selectedMajorSubjects->slice(1, 5) as $subjectItem)
-                                                                        <div class="rounded-lg border border-indigo-100 bg-indigo-50/40 px-2 py-1 text-[11px] text-indigo-700">
-                                                                            <span class="font-semibold">{{ $subjectItem['name'] ?? '-' }}</span>
+                                                                        <div
+                                                                            class="rounded-lg border border-indigo-100 bg-indigo-50/40 px-2 py-1 text-[11px] text-indigo-700">
+                                                                            <span
+                                                                                class="font-semibold">{{ $subjectItem['name'] ?? '-' }}</span>
                                                                             @if (!empty($subjectItem['code']))
-                                                                                <span class="text-indigo-500">({{ $subjectItem['code'] }})</span>
+                                                                                <span
+                                                                                    class="text-indigo-500">({{ $subjectItem['code'] }})</span>
                                                                             @endif
                                                                         </div>
                                                                     @endforeach
@@ -401,19 +527,22 @@
                                                 <td class="px-3 py-3 text-slate-600">
                                                     <div class="flex flex-wrap gap-1.5">
                                                         @if ($subjectDayLabel)
-                                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
                                                                 {{ $subjectDayLabel }}
                                                             </span>
                                                         @endif
                                                         @if ($subjectPeriodLabel)
-                                                            <span class="inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
                                                                 {{ $subjectPeriodLabel }}
                                                             </span>
                                                         @endif
                                                     </div>
                                                     @if ($row->subject_study_start_time && $row->subject_study_end_time)
                                                         <div class="mt-1 whitespace-nowrap font-semibold text-slate-700">
-                                                            {{ \Carbon\Carbon::parse($row->subject_study_start_time)->format('h:i A') }} ->
+                                                            {{ \Carbon\Carbon::parse($row->subject_study_start_time)->format('h:i A') }}
+                                                            ->
                                                             {{ \Carbon\Carbon::parse($row->subject_study_end_time)->format('h:i A') }}
                                                         </div>
                                                     @elseif ($row->subject_study_start_time)
@@ -426,26 +555,41 @@
                                                 </td>
                                                 <td class="px-3 py-3">
                                                     <div class="flex flex-wrap items-center gap-1.5">
-                                                        <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $scheduleClass }}">
+                                                        <span
+                                                            class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $scheduleClass }}">
                                                             {{ $scheduleLabel }}
                                                         </span>
                                                         @if ($selectedStudyTimes->count() > 1)
-                                                            <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600">
                                                                 {{ $selectedStudyTimes->count() }} slots
                                                             </span>
                                                         @endif
                                                     </div>
                                                     @if ($scheduleStatus === 'mismatch')
-                                                        <div class="mt-1 text-[11px] text-amber-700">Class time and subject time are different.</div>
+                                                        <div class="mt-1 text-[11px] text-amber-700">Class time and subject
+                                                            time are different.</div>
                                                     @endif
 
                                                     @if ($selectedStudyTimes->isNotEmpty())
                                                         @php
                                                             $previewSlot = $selectedStudyTimes->first();
-                                                            $previewDayKey = strtolower(trim((string) ($previewSlot['day_of_week'] ?? 'all')));
-                                                            $previewDayLabel = $dayLabels[$previewDayKey] ?? ucfirst($previewDayKey ?: 'all');
-                                                            $previewStart = substr((string) ($previewSlot['start_time'] ?? ''), 0, 5);
-                                                            $previewEnd = substr((string) ($previewSlot['end_time'] ?? ''), 0, 5);
+                                                            $previewDayKey = strtolower(
+                                                                trim((string) ($previewSlot['day_of_week'] ?? 'all')),
+                                                            );
+                                                            $previewDayLabel =
+                                                                $dayLabels[$previewDayKey] ??
+                                                                ucfirst($previewDayKey ?: 'all');
+                                                            $previewStart = substr(
+                                                                (string) ($previewSlot['start_time'] ?? ''),
+                                                                0,
+                                                                5,
+                                                            );
+                                                            $previewEnd = substr(
+                                                                (string) ($previewSlot['end_time'] ?? ''),
+                                                                0,
+                                                                5,
+                                                            );
                                                             $dayToWeekIndex = [
                                                                 'sunday' => 0,
                                                                 'monday' => 1,
@@ -456,20 +600,37 @@
                                                                 'saturday' => 6,
                                                             ];
                                                             $previewBaseDate = \Carbon\Carbon::today();
-                                                            if ($previewDayKey === 'all' || !isset($dayToWeekIndex[$previewDayKey])) {
+                                                            if (
+                                                                $previewDayKey === 'all' ||
+                                                                !isset($dayToWeekIndex[$previewDayKey])
+                                                            ) {
                                                                 $previewDate = $previewBaseDate->copy();
                                                             } else {
-                                                                $previewTargetWeekday = (int) $dayToWeekIndex[$previewDayKey];
-                                                                $previewDaysUntil = ($previewTargetWeekday - $previewBaseDate->dayOfWeek + 7) % 7;
-                                                                $previewDate = $previewBaseDate->copy()->addDays($previewDaysUntil);
+                                                                $previewTargetWeekday =
+                                                                    (int) $dayToWeekIndex[$previewDayKey];
+                                                                $previewDaysUntil =
+                                                                    ($previewTargetWeekday -
+                                                                        $previewBaseDate->dayOfWeek +
+                                                                        7) %
+                                                                    7;
+                                                                $previewDate = $previewBaseDate
+                                                                    ->copy()
+                                                                    ->addDays($previewDaysUntil);
                                                             }
                                                         @endphp
-                                                        <div class="mt-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 shadow-sm">
-                                                            <div class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Next Schedule</div>
-                                                            <div class="text-xs font-semibold text-slate-800">{{ $previewDate->format('D, M d, Y') }} ({{ $previewDayLabel }})</div>
+                                                        <div
+                                                            class="mt-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 shadow-sm">
+                                                            <div
+                                                                class="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                                                                Next Schedule</div>
+                                                            <div class="text-xs font-semibold text-slate-800">
+                                                                {{ $previewDate->format('D, M d, Y') }}
+                                                                ({{ $previewDayLabel }})</div>
                                                             <div class="mt-1 text-xs font-semibold text-indigo-700">
                                                                 @if ($previewStart !== '' && $previewEnd !== '')
-                                                                    {{ \Carbon\Carbon::parse($previewStart)->format('h:i A') }} -> {{ \Carbon\Carbon::parse($previewEnd)->format('h:i A') }}
+                                                                    {{ \Carbon\Carbon::parse($previewStart)->format('h:i A') }}
+                                                                    ->
+                                                                    {{ \Carbon\Carbon::parse($previewEnd)->format('h:i A') }}
                                                                 @elseif ($previewStart !== '')
                                                                     {{ \Carbon\Carbon::parse($previewStart)->format('h:i A') }}
                                                                 @else
@@ -480,31 +641,63 @@
 
                                                         @if ($selectedStudyTimes->count() > 1)
                                                             <details class="mt-2 group">
-                                                                <summary class="cursor-pointer text-[11px] font-semibold text-indigo-600 hover:text-indigo-700">
+                                                                <summary
+                                                                    class="cursor-pointer text-[11px] font-semibold text-indigo-600 hover:text-indigo-700">
                                                                     View all schedules
                                                                 </summary>
                                                                 <div class="mt-2 space-y-1.5">
                                                                     @foreach ($selectedStudyTimes->slice(1, 4) as $slot)
                                                                         @php
-                                                                            $slotDayKey = strtolower(trim((string) ($slot['day_of_week'] ?? 'all')));
-                                                                            $slotDayLabel = $dayLabels[$slotDayKey] ?? ucfirst($slotDayKey ?: 'all');
-                                                                            $slotStart = substr((string) ($slot['start_time'] ?? ''), 0, 5);
-                                                                            $slotEnd = substr((string) ($slot['end_time'] ?? ''), 0, 5);
+                                                                            $slotDayKey = strtolower(
+                                                                                trim(
+                                                                                    (string) ($slot['day_of_week'] ??
+                                                                                        'all'),
+                                                                                ),
+                                                                            );
+                                                                            $slotDayLabel =
+                                                                                $dayLabels[$slotDayKey] ??
+                                                                                ucfirst($slotDayKey ?: 'all');
+                                                                            $slotStart = substr(
+                                                                                (string) ($slot['start_time'] ?? ''),
+                                                                                0,
+                                                                                5,
+                                                                            );
+                                                                            $slotEnd = substr(
+                                                                                (string) ($slot['end_time'] ?? ''),
+                                                                                0,
+                                                                                5,
+                                                                            );
                                                                             $scheduleBaseDate = \Carbon\Carbon::today();
-                                                                            if ($slotDayKey === 'all' || !isset($dayToWeekIndex[$slotDayKey])) {
+                                                                            if (
+                                                                                $slotDayKey === 'all' ||
+                                                                                !isset($dayToWeekIndex[$slotDayKey])
+                                                                            ) {
                                                                                 $nextScheduleDate = $scheduleBaseDate->copy();
                                                                             } else {
-                                                                                $targetWeekday = (int) $dayToWeekIndex[$slotDayKey];
-                                                                                $daysUntil = ($targetWeekday - $scheduleBaseDate->dayOfWeek + 7) % 7;
-                                                                                $nextScheduleDate = $scheduleBaseDate->copy()->addDays($daysUntil);
+                                                                                $targetWeekday =
+                                                                                    (int) $dayToWeekIndex[$slotDayKey];
+                                                                                $daysUntil =
+                                                                                    ($targetWeekday -
+                                                                                        $scheduleBaseDate->dayOfWeek +
+                                                                                        7) %
+                                                                                    7;
+                                                                                $nextScheduleDate = $scheduleBaseDate
+                                                                                    ->copy()
+                                                                                    ->addDays($daysUntil);
                                                                             }
                                                                         @endphp
-                                                                        <div class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-600">
-                                                                            {{ $nextScheduleDate->format('D, M d, Y') }} | {{ $slotDayLabel }}
+                                                                        <div
+                                                                            class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-600">
+                                                                            {{ $nextScheduleDate->format('D, M d, Y') }} |
+                                                                            {{ $slotDayLabel }}
                                                                             @if ($slotStart !== '' && $slotEnd !== '')
-                                                                                | {{ \Carbon\Carbon::parse($slotStart)->format('h:i A') }} -> {{ \Carbon\Carbon::parse($slotEnd)->format('h:i A') }}
+                                                                                |
+                                                                                {{ \Carbon\Carbon::parse($slotStart)->format('h:i A') }}
+                                                                                ->
+                                                                                {{ \Carbon\Carbon::parse($slotEnd)->format('h:i A') }}
                                                                             @elseif ($slotStart !== '')
-                                                                                | {{ \Carbon\Carbon::parse($slotStart)->format('h:i A') }}
+                                                                                |
+                                                                                {{ \Carbon\Carbon::parse($slotStart)->format('h:i A') }}
                                                                             @endif
                                                                         </div>
                                                                     @endforeach
@@ -514,24 +707,32 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-3 py-3 text-slate-600">
-                                                    <div class="font-medium text-slate-700">{{ $row->teacher_name ?: 'Unassigned' }}</div>
-                                                    <div class="text-xs text-slate-400">{{ $row->teacher_email ?: '-' }}</div>
+                                                    <div class="font-medium text-slate-700">
+                                                        {{ $row->teacher_name ?: 'Unassigned' }}</div>
+                                                    <div class="text-xs text-slate-400">{{ $row->teacher_email ?: '-' }}
+                                                    </div>
                                                 </td>
                                                 <td class="px-3 py-3 text-slate-500">
                                                     <div>
-                                                        <div class="text-[11px] font-bold uppercase tracking-wide text-slate-400">Student</div>
+                                                        <div
+                                                            class="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                                                            Student</div>
                                                         @if ($studentCreatedAt)
                                                             <div>{{ $studentCreatedAt->format('M d, Y h:i A') }}</div>
-                                                            <div class="text-xs text-slate-400">{{ $studentCreatedAt->diffForHumans() }}</div>
+                                                            <div class="text-xs text-slate-400">
+                                                                {{ $studentCreatedAt->diffForHumans() }}</div>
                                                         @else
                                                             <div>-</div>
                                                         @endif
                                                     </div>
                                                     <div class="mt-2 border-t border-dashed border-slate-200 pt-2">
-                                                        <div class="text-[11px] font-bold uppercase tracking-wide text-slate-400">Teacher</div>
+                                                        <div
+                                                            class="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                                                            Teacher</div>
                                                         @if ($teacherCreatedAt)
                                                             <div>{{ $teacherCreatedAt->format('M d, Y h:i A') }}</div>
-                                                            <div class="text-xs text-slate-400">{{ $teacherCreatedAt->diffForHumans() }}</div>
+                                                            <div class="text-xs text-slate-400">
+                                                                {{ $teacherCreatedAt->diffForHumans() }}</div>
                                                         @else
                                                             <div>-</div>
                                                         @endif
@@ -560,7 +761,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const clockElement = document.getElementById('live_schedule_time');
             if (!clockElement) {
                 return;

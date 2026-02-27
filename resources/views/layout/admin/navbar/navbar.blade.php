@@ -200,7 +200,7 @@
                     </button>
 
                     {{-- Search --}}
-                    <div class="order-3 w-full min-w-[170px] md:order-none md:w-auto md:flex-1 md:min-w-0">
+                   <div class="flex-1 min-w-0">
                         <div class="relative max-w-xl">
                             <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -210,7 +210,7 @@
                             </span>
                             <input type="text" placeholder="Search"
                                 class="w-full rounded-full bg-white border border-slate-200 pl-11 pr-4 py-2.5 text-sm
-                                       outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-200" />
+                                    outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-200" />
                         </div>
                     </div>
 

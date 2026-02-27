@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Student\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:student'])
@@ -7,7 +8,7 @@ Route::middleware(['auth', 'role:student'])
     ->name('student.')
     ->group(function () {
 
-        Route::view('/dashboard', 'student.dashboard')->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::view('/subjects', 'student.subjects')->name('subjects.index');
         Route::view('/attendance', 'student.attendance')->name('attendance.index');
         Route::view('/grades', 'student.grades')->name('grades.index');

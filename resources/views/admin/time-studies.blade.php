@@ -119,7 +119,8 @@
                                         <select name="class_slots[{{ $slotIndex }}][day_of_week]"
                                             class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             @foreach ($dayOptions as $dayKey => $dayLabel)
-                                                <option value="{{ $dayKey }}" {{ $rowDay === $dayKey ? 'selected' : '' }}>
+                                                <option value="{{ $dayKey }}"
+                                                    {{ $rowDay === $dayKey ? 'selected' : '' }}>
                                                     {{ $dayLabel }}
                                                 </option>
                                             @endforeach
@@ -134,7 +135,8 @@
                                         <select name="class_slots[{{ $slotIndex }}][period]"
                                             class="js-class-period-select w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             @foreach ($periodOptions as $periodKey => $periodLabel)
-                                                <option value="{{ $periodKey }}" {{ $rowPeriod === $periodKey ? 'selected' : '' }}>
+                                                <option value="{{ $periodKey }}"
+                                                    {{ $rowPeriod === $periodKey ? 'selected' : '' }}>
                                                     {{ $periodLabel }}
                                                 </option>
                                             @endforeach
@@ -157,8 +159,8 @@
 
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">End</label>
-                                        <input type="text" name="class_slots[{{ $slotIndex }}][end_time]" value="{{ $rowEnd }}"
-                                            required placeholder="09:00 AM or 21:00"
+                                        <input type="text" name="class_slots[{{ $slotIndex }}][end_time]"
+                                            value="{{ $rowEnd }}" required placeholder="09:00 AM or 21:00"
                                             class="js-class-time-input js-class-end-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
                                         @error('class_slots.' . $slotIndex . '.end_time')
@@ -202,7 +204,8 @@
                                     <select name="class_slots[__INDEX__][period]"
                                         class="js-class-period-select w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         @foreach ($periodOptions as $periodKey => $periodLabel)
-                                            <option value="{{ $periodKey }}" {{ $periodKey === 'morning' ? 'selected' : '' }}>
+                                            <option value="{{ $periodKey }}"
+                                                {{ $periodKey === 'morning' ? 'selected' : '' }}>
                                                 {{ $periodLabel }}
                                             </option>
                                         @endforeach
@@ -256,7 +259,8 @@
                         <select id="subject_form_class_id" name="subject_class_id"
                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             @foreach ($classes as $classOption)
-                                <option value="{{ $classOption->id }}" {{ $subjectFormClassId === (string) $classOption->id ? 'selected' : '' }}>
+                                <option value="{{ $classOption->id }}"
+                                    {{ $subjectFormClassId === (string) $classOption->id ? 'selected' : '' }}>
                                     {{ $classOption->display_name }}
                                 </option>
                             @endforeach
@@ -310,7 +314,8 @@
                                             class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             <option value="">Unassigned</option>
                                             @foreach ($teachers as $teacherOption)
-                                                <option value="{{ $teacherOption->id }}" {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                <option value="{{ $teacherOption->id }}"
+                                                    {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
                                                     {{ $teacherOption->name }}
                                                 </option>
                                             @endforeach
@@ -417,8 +422,8 @@
 
                             <button type="button" @click="filterOpen = true"
                                 class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
                                 </svg>
                                 Filters
@@ -460,7 +465,8 @@
                                     <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Search</h4>
-                                            <input id="q" name="q" type="text" value="{{ $search }}"
+                                            <input id="q" name="q" type="text"
+                                                value="{{ $search }}"
                                                 placeholder="Search class, teacher, subject, period, or time"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         </section>
@@ -469,10 +475,12 @@
                                             <h4 class="text-xl font-bold text-slate-900">Period</h4>
                                             <select name="period"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All Periods
+                                                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>All
+                                                    Periods
                                                 </option>
                                                 @foreach ($periodOptions as $periodKey => $periodLabel)
-                                                    <option value="{{ $periodKey }}" {{ $period === $periodKey ? 'selected' : '' }}>
+                                                    <option value="{{ $periodKey }}"
+                                                        {{ $period === $periodKey ? 'selected' : '' }}>
                                                         {{ $periodLabel }}
                                                     </option>
                                                 @endforeach
@@ -484,7 +492,8 @@
                                             <select name="day"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                 @foreach ($dayOptions as $dayKey => $dayLabel)
-                                                    <option value="{{ $dayKey }}" {{ $day === $dayKey ? 'selected' : '' }}>
+                                                    <option value="{{ $dayKey }}"
+                                                        {{ $day === $dayKey ? 'selected' : '' }}>
                                                         {{ $dayLabel }}
                                                     </option>
                                                 @endforeach
@@ -495,10 +504,12 @@
                                             <h4 class="text-xl font-bold text-slate-900">Class</h4>
                                             <select id="filter_class_id" name="class_id"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes
+                                                <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All
+                                                    Classes
                                                 </option>
                                                 @foreach ($classes as $classOption)
-                                                    <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                                    <option value="{{ $classOption->id }}"
+                                                        {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
                                                         {{ $classOption->display_name }}
                                                     </option>
                                                 @endforeach
@@ -510,10 +521,12 @@
                                             <select id="filter_subject_id" name="subject_id"
                                                 data-selected="{{ $subjectId }}"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="all" {{ $subjectId === 'all' ? 'selected' : '' }}>All Subjects
+                                                <option value="all" {{ $subjectId === 'all' ? 'selected' : '' }}>All
+                                                    Subjects
                                                 </option>
                                                 @foreach ($subjects as $subjectOption)
-                                                    <option value="{{ $subjectOption->id }}" {{ $subjectId === (string) $subjectOption->id ? 'selected' : '' }}>
+                                                    <option value="{{ $subjectOption->id }}"
+                                                        {{ $subjectId === (string) $subjectOption->id ? 'selected' : '' }}>
                                                         {{ $subjectOption->name }}
                                                     </option>
                                                 @endforeach
@@ -524,10 +537,12 @@
                                             <h4 class="text-xl font-bold text-slate-900">Teacher</h4>
                                             <select name="teacher_id"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="all" {{ $teacherId === 'all' ? 'selected' : '' }}>All Teachers
+                                                <option value="all" {{ $teacherId === 'all' ? 'selected' : '' }}>All
+                                                    Teachers
                                                 </option>
                                                 @foreach ($teachers as $teacherOption)
-                                                    <option value="{{ $teacherOption->id }}" {{ $teacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                    <option value="{{ $teacherOption->id }}"
+                                                        {{ $teacherId === (string) $teacherOption->id ? 'selected' : '' }}>
                                                         {{ $teacherOption->name }}
                                                     </option>
                                                 @endforeach
@@ -539,7 +554,8 @@
                                             <select name="per_page"
                                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                 @foreach ($perPageOptions as $option)
-                                                    <option value="{{ $option }}" {{ (int) $perPage === (int) $option ? 'selected' : '' }}>
+                                                    <option value="{{ $option }}"
+                                                        {{ (int) $perPage === (int) $option ? 'selected' : '' }}>
                                                         {{ $option }} items
                                                     </option>
                                                 @endforeach
@@ -592,7 +608,9 @@
 
                                                         <td class="px-3 py-3 align-top text-slate-700">
                                                             @php
-                                                                $slotDay = strtolower((string) ($slot->day_of_week ?? 'all'));
+                                                                $slotDay = strtolower(
+                                                                    (string) ($slot->day_of_week ?? 'all'),
+                                                                );
                                                             @endphp
                                                             <span
                                                                 class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
@@ -649,9 +667,11 @@
                                                                 <div
                                                                     class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
                                                                     <div class="mb-4 flex items-center justify-between">
-                                                                        <h3 class="text-lg font-black text-slate-900">Edit Class
+                                                                        <h3 class="text-lg font-black text-slate-900">Edit
+                                                                            Class
                                                                             Time</h3>
-                                                                        <button type="button" @click="openClassEdit = false"
+                                                                        <button type="button"
+                                                                            @click="openClassEdit = false"
                                                                             class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                                                                             <svg class="h-5 w-5" viewBox="0 0 24 24"
                                                                                 fill="currentColor">
@@ -674,7 +694,8 @@
                                                                             <select name="school_class_id"
                                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                 @foreach ($classes as $classOption)
-                                                                                    <option value="{{ $classOption->id }}" {{ (int) $slot->school_class_id === (int) $classOption->id ? 'selected' : '' }}>
+                                                                                    <option value="{{ $classOption->id }}"
+                                                                                        {{ (int) $slot->school_class_id === (int) $classOption->id ? 'selected' : '' }}>
                                                                                         {{ $classOption->display_name }}
                                                                                     </option>
                                                                                 @endforeach
@@ -688,7 +709,9 @@
                                                                                 <select name="day_of_week"
                                                                                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                     @foreach ($dayOptions as $dayKey => $dayLabel)
-                                                                                        <option value="{{ $dayKey }}" {{ strtolower((string) ($slot->day_of_week ?? 'all')) === $dayKey ? 'selected' : '' }}>
+                                                                                        <option
+                                                                                            value="{{ $dayKey }}"
+                                                                                            {{ strtolower((string) ($slot->day_of_week ?? 'all')) === $dayKey ? 'selected' : '' }}>
                                                                                             {{ $dayLabel }}
                                                                                         </option>
                                                                                     @endforeach
@@ -701,7 +724,9 @@
                                                                                 <select name="period"
                                                                                     class="js-edit-class-period w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                     @foreach ($periodOptions as $periodKey => $periodLabel)
-                                                                                        <option value="{{ $periodKey }}" {{ strtolower((string) $slot->period) === $periodKey ? 'selected' : '' }}>
+                                                                                        <option
+                                                                                            value="{{ $periodKey }}"
+                                                                                            {{ strtolower((string) $slot->period) === $periodKey ? 'selected' : '' }}>
                                                                                             {{ $periodLabel }}
                                                                                         </option>
                                                                                     @endforeach
@@ -728,7 +753,8 @@
                                                                         </div>
 
                                                                         <div class="flex justify-end gap-2 pt-2">
-                                                                            <button type="button" @click="openClassEdit = false"
+                                                                            <button type="button"
+                                                                                @click="openClassEdit = false"
                                                                                 class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
                                                                                 Cancel
                                                                             </button>
@@ -744,7 +770,8 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="7" class="px-3 py-10 text-center text-sm text-slate-500">
+                                                        <td colspan="7"
+                                                            class="px-3 py-10 text-center text-sm text-slate-500">
                                                             No class study times found.
                                                         </td>
                                                     </tr>
@@ -770,22 +797,42 @@
                                             <tbody class="divide-y divide-slate-100 bg-white">
                                                 @forelse ($subjectTimes as $slot)
                                                     @php
-                                                        $slotClassId = (string) (($slot->school_class_id ?? null) ?: ($slot->subject?->school_class_id ?? ''));
+                                                        $slotClassId =
+                                                            (string) ($slot->school_class_id ?? null ?:
+                                                            $slot->subject?->school_class_id ?? '');
                                                         $slotClassTimeId = '';
                                                         $slotDay = strtolower((string) ($slot->day_of_week ?? 'all'));
                                                         $slotPeriod = strtolower((string) $slot->period);
-                                                        $slotStart = \Illuminate\Support\Str::substr((string) $slot->start_time, 0, 5);
-                                                        $slotEnd = \Illuminate\Support\Str::substr((string) $slot->end_time, 0, 5);
+                                                        $slotStart = \Illuminate\Support\Str::substr(
+                                                            (string) $slot->start_time,
+                                                            0,
+                                                            5,
+                                                        );
+                                                        $slotEnd = \Illuminate\Support\Str::substr(
+                                                            (string) $slot->end_time,
+                                                            0,
+                                                            5,
+                                                        );
 
-                                                        if ($slotClassId !== '' && isset($classTimeOptionsByClass[$slotClassId])) {
-                                                            foreach ($classTimeOptionsByClass[$slotClassId] as $classTimeOption) {
+                                                        if (
+                                                            $slotClassId !== '' &&
+                                                            isset($classTimeOptionsByClass[$slotClassId])
+                                                        ) {
+                                                            foreach (
+                                                                $classTimeOptionsByClass[$slotClassId]
+                                                                as $classTimeOption
+                                                            ) {
                                                                 if (
-                                                                    ($classTimeOption['day_of_week'] ?? '') === $slotDay &&
-                                                                    ($classTimeOption['period'] ?? '') === $slotPeriod &&
-                                                                    ($classTimeOption['start_time'] ?? '') === $slotStart &&
+                                                                    ($classTimeOption['day_of_week'] ?? '') ===
+                                                                        $slotDay &&
+                                                                    ($classTimeOption['period'] ?? '') ===
+                                                                        $slotPeriod &&
+                                                                    ($classTimeOption['start_time'] ?? '') ===
+                                                                        $slotStart &&
                                                                     ($classTimeOption['end_time'] ?? '') === $slotEnd
                                                                 ) {
-                                                                    $slotClassTimeId = (string) ($classTimeOption['id'] ?? '');
+                                                                    $slotClassTimeId =
+                                                                        (string) ($classTimeOption['id'] ?? '');
                                                                     break;
                                                                 }
                                                             }
@@ -825,7 +872,7 @@
                                                         </td>
 
                                                         <td class="whitespace-nowrap px-3 py-3 align-top text-slate-700">
-                                                            {{ $slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Unassigned' }}
+                                                            {{ $slot->schoolClass?->display_name ?? ($slot->subject?->schoolClass?->display_name ?? 'Unassigned') }}
                                                         </td>
 
                                                         <td class="px-3 py-3 align-top">
@@ -858,9 +905,11 @@
                                                                 <div
                                                                     class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
                                                                     <div class="mb-4 flex items-center justify-between">
-                                                                        <h3 class="text-lg font-black text-slate-900">Edit Subject
+                                                                        <h3 class="text-lg font-black text-slate-900">Edit
+                                                                            Subject
                                                                             Time</h3>
-                                                                        <button type="button" @click="openSubjectEdit = false"
+                                                                        <button type="button"
+                                                                            @click="openSubjectEdit = false"
                                                                             class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                                                                             <svg class="h-5 w-5" viewBox="0 0 24 24"
                                                                                 fill="currentColor">
@@ -884,7 +933,9 @@
                                                                             <select name="subject_class_id"
                                                                                 class="js-subject-edit-class w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                 @foreach ($classes as $classOption)
-                                                                                    <option value="{{ $classOption->id }}" {{ $slotClassId === (string) $classOption->id ? 'selected' : '' }}>
+                                                                                    <option
+                                                                                        value="{{ $classOption->id }}"
+                                                                                        {{ $slotClassId === (string) $classOption->id ? 'selected' : '' }}>
                                                                                         {{ $classOption->display_name }}
                                                                                     </option>
                                                                                 @endforeach
@@ -897,7 +948,8 @@
                                                                             <select name="subject_id"
                                                                                 data-selected="{{ $slot->subject_id }}"
                                                                                 class="js-subject-edit-subject w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                                <option value="">Select a subject</option>
+                                                                                <option value="">Select a subject
+                                                                                </option>
                                                                             </select>
                                                                         </div>
 
@@ -908,7 +960,8 @@
                                                                             <select name="class_time_id"
                                                                                 data-selected="{{ $slotClassTimeId }}"
                                                                                 class="js-subject-edit-class-time w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                                <option value="">Select class time</option>
+                                                                                <option value="">Select class time
+                                                                                </option>
                                                                             </select>
                                                                         </div>
 
@@ -916,11 +969,13 @@
                                                                             <label
                                                                                 class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
                                                                             <select name="teacher_id"
-                                                                                data-selected="{{ (string) (($slot->teacher_id ?? null) ?: ($slot->subject?->teacher_id ?? '')) }}"
+                                                                                data-selected="{{ (string) ($slot->teacher_id ?? null ?: $slot->subject?->teacher_id ?? '') }}"
                                                                                 class="js-subject-edit-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                 <option value="">Unassigned</option>
                                                                                 @foreach ($teachers as $teacherOption)
-                                                                                    <option value="{{ $teacherOption->id }}" {{ (int) (($slot->teacher_id ?? null) ?: ($slot->subject?->teacher_id ?? 0)) === (int) $teacherOption->id ? 'selected' : '' }}>
+                                                                                    <option
+                                                                                        value="{{ $teacherOption->id }}"
+                                                                                        {{ (int) ($slot->teacher_id ?? null ?: $slot->subject?->teacher_id ?? 0) === (int) $teacherOption->id ? 'selected' : '' }}>
                                                                                         {{ $teacherOption->name }}
                                                                                     </option>
                                                                                 @endforeach
@@ -928,7 +983,8 @@
                                                                         </div>
 
                                                                         <div class="flex justify-end gap-2 pt-2">
-                                                                            <button type="button" @click="openSubjectEdit = false"
+                                                                            <button type="button"
+                                                                                @click="openSubjectEdit = false"
                                                                                 class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
                                                                                 Cancel
                                                                             </button>
@@ -944,7 +1000,8 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="7" class="px-3 py-10 text-center text-sm text-slate-500">
+                                                        <td colspan="7"
+                                                            class="px-3 py-10 text-center text-sm text-slate-500">
                                                             No subject study times found.
                                                         </td>
                                                     </tr>
@@ -970,7 +1027,9 @@
                                             <tbody class="divide-y divide-slate-100 bg-white">
                                                 @forelse ($teacherTimes as $slot)
                                                     @php
-                                                        $slotTeacherName = $slot->teacher?->name ?? $slot->subject?->teacher?->name ?? 'Unassigned';
+                                                        $slotTeacherName =
+                                                            $slot->teacher?->name ??
+                                                            ($slot->subject?->teacher?->name ?? 'Unassigned');
                                                         $slotDay = strtolower((string) ($slot->day_of_week ?? 'all'));
                                                     @endphp
 
@@ -989,7 +1048,7 @@
                                                             </div>
                                                         </td>
                                                         <td class="whitespace-nowrap px-3 py-3 align-top text-slate-700">
-                                                            {{ $slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Unassigned' }}
+                                                            {{ $slot->schoolClass?->display_name ?? ($slot->subject?->schoolClass?->display_name ?? 'Unassigned') }}
                                                         </td>
                                                         <td class="px-3 py-3 align-top text-slate-700">
                                                             <span
@@ -1012,7 +1071,8 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="7" class="px-3 py-10 text-center text-sm text-slate-500">
+                                                        <td colspan="7"
+                                                            class="px-3 py-10 text-center text-sm text-slate-500">
                                                             No teacher study times found.
                                                         </td>
                                                     </tr>
@@ -1029,7 +1089,12 @@
                             </div>
 
                             @php
-                                $recentItems = $tab === 'class' ? $recentClassTimes : ($tab === 'subject' ? $recentSubjectTimes : $recentTeacherTimes);
+                                $recentItems =
+                                    $tab === 'class'
+                                        ? $recentClassTimes
+                                        : ($tab === 'subject'
+                                            ? $recentSubjectTimes
+                                            : $recentTeacherTimes);
                             @endphp
 
                             <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
@@ -1056,11 +1121,11 @@
                                                     {{ $recent->subject?->name ?? 'Subject slot' }}
                                                 </div>
                                                 <div class="text-xs text-slate-500">
-                                                    {{ $recent->schoolClass?->display_name ?? $recent->subject?->schoolClass?->display_name ?? 'Unassigned class' }}
+                                                    {{ $recent->schoolClass?->display_name ?? ($recent->subject?->schoolClass?->display_name ?? 'Unassigned class') }}
                                                 </div>
                                             @else
                                                 <div class="font-semibold text-slate-900">
-                                                    {{ $recent->teacher?->name ?? $recent->subject?->teacher?->name ?? 'Unassigned teacher' }}
+                                                    {{ $recent->teacher?->name ?? ($recent->subject?->teacher?->name ?? 'Unassigned teacher') }}
                                                 </div>
                                                 <div class="text-xs text-slate-500">
                                                     {{ $recent->subject?->name ?? 'Subject slot' }}
@@ -1105,7 +1170,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const hasSwal = typeof Swal !== 'undefined';
 
             const subjectOptionsByClass = @json($subjectOptionsByClass);
@@ -1123,7 +1188,8 @@
                 return classSubjects;
             };
 
-            const renderSubjectOptions = (subjectSelect, classId, selectedValue, includeAllOption = false, mode = 'class') => {
+            const renderSubjectOptions = (subjectSelect, classId, selectedValue, includeAllOption = false, mode =
+                'class') => {
                 if (!subjectSelect) return;
 
                 const subjects = getSubjectsForClass(classId, mode);
@@ -1135,9 +1201,9 @@
                 }
 
                 if (subjects.length === 0) {
-                    const emptyMessage = mode === 'all'
-                        ? 'No subjects available'
-                        : 'No subjects in selected class';
+                    const emptyMessage = mode === 'all' ?
+                        'No subjects available' :
+                        'No subjects in selected class';
                     options.push(`<option value="">${emptyMessage}</option>`);
                     subjectSelect.innerHTML = options.join('');
                     return;
@@ -1151,7 +1217,8 @@
                 subjectSelect.innerHTML = options.join('');
             };
 
-            const renderClassTimeOptions = (timeSelect, classId, selectedValue, currentSubjectStudyTimeId = null) => {
+            const renderClassTimeOptions = (timeSelect, classId, selectedValue, currentSubjectStudyTimeId =
+                null) => {
                 if (!timeSelect) return;
 
                 const slots = classTimeOptionsByClass[classId] || [];
@@ -1168,16 +1235,16 @@
 
                 for (const slot of slots) {
                     const ownerId = occupiedSlots[slot.key];
-                    const isCurrentSlot = currentSubjectStudyTimeId !== null
-                        && currentSubjectStudyTimeId !== ''
-                        && String(ownerId) === String(currentSubjectStudyTimeId);
+                    const isCurrentSlot = currentSubjectStudyTimeId !== null &&
+                        currentSubjectStudyTimeId !== '' &&
+                        String(ownerId) === String(currentSubjectStudyTimeId);
                     const isOccupiedByAnotherSubject = Boolean(ownerId) && !isCurrentSlot;
 
                     const selected = String(selectedValue) === String(slot.id) ? ' selected' : '';
                     const disabled = isOccupiedByAnotherSubject ? ' disabled' : '';
-                    const label = isOccupiedByAnotherSubject
-                        ? `${slot.label} (Already used in this class)`
-                        : slot.label;
+                    const label = isOccupiedByAnotherSubject ?
+                        `${slot.label} (Already used in this class)` :
+                        slot.label;
                     options.push(`<option value="${slot.id}"${selected}${disabled}>${label}</option>`);
                 }
 
@@ -1197,7 +1264,8 @@
                 return null;
             };
 
-            const renderTeacherOptions = (teacherSelect, classId, classTimeId, selectedValue, currentSubjectStudyTimeId = null) => {
+            const renderTeacherOptions = (teacherSelect, classId, classTimeId, selectedValue,
+                currentSubjectStudyTimeId = null) => {
                 if (!teacherSelect) return;
 
                 const selectedSlot = getClassSlotById(classId, classTimeId);
@@ -1225,16 +1293,17 @@
                         if (!dayOverlaps(busySlot.day_of_week)) return false;
                         if (!timeOverlaps(busySlot.start_time, busySlot.end_time)) return false;
 
-                        return !(currentSubjectStudyTimeId !== null
-                            && currentSubjectStudyTimeId !== ''
-                            && String(busySlot.subject_study_time_id) === String(currentSubjectStudyTimeId));
+                        return !(currentSubjectStudyTimeId !== null &&
+                            currentSubjectStudyTimeId !== '' &&
+                            String(busySlot.subject_study_time_id) === String(
+                                currentSubjectStudyTimeId));
                     });
 
                     const selected = String(selectedValue) === String(teacher.id) ? ' selected' : '';
                     const disabled = isBusyInAnotherClass ? ' disabled' : '';
-                    const label = isBusyInAnotherClass
-                        ? `${teacher.label} (Busy at this time)`
-                        : teacher.label;
+                    const label = isBusyInAnotherClass ?
+                        `${teacher.label} (Busy at this time)` :
+                        teacher.label;
                     options.push(`<option value="${teacher.id}"${selected}${disabled}>${label}</option>`);
                 }
 
@@ -1285,10 +1354,22 @@
             };
 
             const periodDefaultTimes = {
-                morning: { start: '07:00', end: '10:00' },
-                afternoon: { start: '10:00', end: '13:00' },
-                evening: { start: '13:00', end: '16:00' },
-                night: { start: '17:00', end: '20:00' },
+                morning: {
+                    start: '07:00',
+                    end: '10:00'
+                },
+                afternoon: {
+                    start: '10:00',
+                    end: '13:00'
+                },
+                evening: {
+                    start: '13:00',
+                    end: '16:00'
+                },
+                night: {
+                    start: '17:00',
+                    end: '20:00'
+                },
                 custom: null,
             };
 
@@ -1332,7 +1413,8 @@
                 if (!periodSelect || !startInput || !endInput) return;
 
                 periodSelect.addEventListener('change', () => {
-                    const preset = periodDefaultTimes[String(periodSelect.value || '').toLowerCase()] || null;
+                    const preset = periodDefaultTimes[String(periodSelect.value || '').toLowerCase()] ||
+                        null;
                     if (!preset) return;
 
                     startInput.value = preset.start;
@@ -1346,7 +1428,8 @@
             const addClassSlotBtn = document.getElementById('add_class_slot_btn');
 
             if (classSlotRows && classSlotTemplate && addClassSlotBtn) {
-                let nextIndex = Number(classSlotRows.dataset.nextIndex || classSlotRows.querySelectorAll('.js-class-slot-row').length);
+                let nextIndex = Number(classSlotRows.dataset.nextIndex || classSlotRows.querySelectorAll(
+                    '.js-class-slot-row').length);
 
                 const syncRemoveButtons = () => {
                     const rows = classSlotRows.querySelectorAll('.js-class-slot-row');
@@ -1418,7 +1501,11 @@
 
                     const message = 'Invalid time format. Use 07:30 AM or 19:30.';
                     if (hasSwal) {
-                        Swal.fire({ icon: 'error', title: 'Invalid Time', text: message });
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Time',
+                            text: message
+                        });
                     } else {
                         alert(message);
                     }
@@ -1439,15 +1526,15 @@
                 const teacherSelect = row.querySelector('.js-subject-form-teacher');
                 if (!subjectSelect || !classTimeSelect || !teacherSelect) return;
 
-                const selectedSubject = useDatasetSelection
-                    ? (subjectSelect.dataset.selected || subjectSelect.value || '')
-                    : (subjectSelect.value || '');
-                const selectedClassTime = useDatasetSelection
-                    ? (classTimeSelect.dataset.selected || classTimeSelect.value || '')
-                    : (classTimeSelect.value || '');
-                const selectedTeacher = useDatasetSelection
-                    ? (teacherSelect.dataset.selected || teacherSelect.value || '')
-                    : (teacherSelect.value || '');
+                const selectedSubject = useDatasetSelection ?
+                    (subjectSelect.dataset.selected || subjectSelect.value || '') :
+                    (subjectSelect.value || '');
+                const selectedClassTime = useDatasetSelection ?
+                    (classTimeSelect.dataset.selected || classTimeSelect.value || '') :
+                    (classTimeSelect.value || '');
+                const selectedTeacher = useDatasetSelection ?
+                    (teacherSelect.dataset.selected || teacherSelect.value || '') :
+                    (teacherSelect.value || '');
 
                 renderSubjectOptions(subjectSelect, classId, selectedSubject, false, 'assignable');
                 renderClassTimeOptions(classTimeSelect, classId, selectedClassTime, null);
@@ -1478,7 +1565,8 @@
             };
 
             if (subjectFormClass && subjectSlotRows && subjectSlotTemplate && addSubjectSlotBtn) {
-                let nextIndex = Number(subjectSlotRows.dataset.nextIndex || subjectSlotRows.querySelectorAll('.js-subject-slot-row').length);
+                let nextIndex = Number(subjectSlotRows.dataset.nextIndex || subjectSlotRows.querySelectorAll(
+                    '.js-subject-slot-row').length);
 
                 const syncSubjectSlotRemoveButtons = () => {
                     const rows = subjectSlotRows.querySelectorAll('.js-subject-slot-row');
@@ -1545,18 +1633,24 @@
                 const selectedClassTime = classTimeSelect.dataset.selected || '';
                 const selectedTeacher = teacherSelect.dataset.selected || '';
 
-                renderSubjectOptions(subjectSelect, classSelect.value, selectedSubject, false, 'assignable');
-                renderClassTimeOptions(classTimeSelect, classSelect.value, selectedClassTime, currentSubjectStudyTimeId);
-                renderTeacherOptions(teacherSelect, classSelect.value, selectedClassTime, selectedTeacher, currentSubjectStudyTimeId);
+                renderSubjectOptions(subjectSelect, classSelect.value, selectedSubject, false,
+                    'assignable');
+                renderClassTimeOptions(classTimeSelect, classSelect.value, selectedClassTime,
+                    currentSubjectStudyTimeId);
+                renderTeacherOptions(teacherSelect, classSelect.value, selectedClassTime, selectedTeacher,
+                    currentSubjectStudyTimeId);
 
                 classSelect.addEventListener('change', () => {
                     renderSubjectOptions(subjectSelect, classSelect.value, '', false, 'assignable');
-                    renderClassTimeOptions(classTimeSelect, classSelect.value, '', currentSubjectStudyTimeId);
-                    renderTeacherOptions(teacherSelect, classSelect.value, '', '', currentSubjectStudyTimeId);
+                    renderClassTimeOptions(classTimeSelect, classSelect.value, '',
+                        currentSubjectStudyTimeId);
+                    renderTeacherOptions(teacherSelect, classSelect.value, '', '',
+                        currentSubjectStudyTimeId);
                 });
 
                 classTimeSelect.addEventListener('change', () => {
-                    renderTeacherOptions(teacherSelect, classSelect.value, classTimeSelect.value, teacherSelect.value, currentSubjectStudyTimeId);
+                    renderTeacherOptions(teacherSelect, classSelect.value, classTimeSelect.value,
+                        teacherSelect.value, currentSubjectStudyTimeId);
                 });
             });
 
@@ -1578,7 +1672,7 @@
 
             const confirmSubmit = (selector, buildConfig) => {
                 document.querySelectorAll(selector).forEach((form) => {
-                    form.addEventListener('submit', function (event) {
+                    form.addEventListener('submit', function(event) {
                         if (form.dataset.confirmed === '1') return;
 
                         event.preventDefault();
@@ -1635,9 +1729,17 @@
             }
 
             @if (session('error'))
-                Swal.fire({ icon: 'error', title: 'Error', text: @json(session('error')) });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: @json(session('error'))
+                });
             @elseif (session('warning'))
-                Swal.fire({ icon: 'warning', title: 'Warning', text: @json(session('warning')) });
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: @json(session('warning'))
+                });
             @elseif (session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -1647,6 +1749,6 @@
                     showConfirmButton: false
                 });
             @endif
-                                                                                });
+        });
     </script>
 @endsection

@@ -214,6 +214,26 @@ class DashboardController extends Controller
             'todaySchedules' => count($todayTimeline),
         ];
 
+        $todayTypeCounts = collect($todayTimeline)
+            ->groupBy('type')
+            ->map(fn($items) => count($items))
+            ->all();
+
+        $chartData = [
+            'weekly' => [
+                'labels' => $weeklySummary->pluck('label')->values()->all(),
+                'classes' => $weeklySummary->pluck('class_count')->map(fn($value) => (int) $value)->values()->all(),
+                'subjects' => $weeklySummary->pluck('subject_count')->map(fn($value) => (int) $value)->values()->all(),
+            ],
+            'todayMix' => [
+                'labels' => ['Class', 'Subject'],
+                'values' => [
+                    (int) ($todayTypeCounts['class'] ?? 0),
+                    (int) ($todayTypeCounts['subject'] ?? 0),
+                ],
+            ],
+        ];
+
         return view('teacher.dashboard', [
             'todayKey' => $todayKey,
             'dayLabels' => $dayLabels,
@@ -222,6 +242,7 @@ class DashboardController extends Controller
             'todayTimeline' => $todayTimeline,
             'weeklySummary' => $weeklySummary,
             'maxWeeklyTotal' => max(1, (int) $weeklySummary->max('total')),
+            'chartData' => $chartData,
         ]);
     }
 }

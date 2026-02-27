@@ -134,7 +134,8 @@
                                                     </div>
                                                 </td>
                                                 <td class="px-3 py-3">
-                                                    <div class="font-semibold text-slate-800">{{ $message->subject }}</div>
+                                                    <div class="font-semibold text-slate-800">{{ $message->subject }}
+                                                    </div>
                                                 </td>
                                                 <td class="px-3 py-3 text-slate-600">
                                                     {{ \Illuminate\Support\Str::limit($message->message, 120) }}
@@ -148,7 +149,8 @@
                                                     @else
                                                         <span
                                                             class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                                                            <span class="status-dot h-2 w-2 rounded-full bg-amber-500"></span>Unread
+                                                            <span
+                                                                class="status-dot h-2 w-2 rounded-full bg-amber-500"></span>Unread
                                                         </span>
                                                     @endif
                                                 </td>
@@ -211,14 +213,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             if (typeof Swal === 'undefined') {
                 return;
             }
 
             const confirmSubmit = (selector, buildConfig) => {
                 document.querySelectorAll(selector).forEach((form) => {
-                    form.addEventListener('submit', function (event) {
+                    form.addEventListener('submit', function(event) {
                         if (form.dataset.confirmed === '1') {
                             return;
                         }
@@ -279,6 +281,6 @@
                     showConfirmButton: false
                 });
             @endif
-            });
+        });
     </script>
 @endsection

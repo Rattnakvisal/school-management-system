@@ -3,6 +3,10 @@
 @section('page')
     @php
         $todayLabel = $dayLabels[$todayKey] ?? ucfirst($todayKey);
+        $chartData = $chartData ?? [
+            'weekly' => ['labels' => [], 'classes' => [], 'subjects' => []],
+            'todayMix' => ['labels' => [], 'values' => []],
+        ];
     @endphp
 
     <div class="dashboard-stage space-y-6">
@@ -100,29 +104,23 @@
                     </a>
                 </div>
 
-                <div class="space-y-3">
-                    @foreach ($weeklySummary as $dayItem)
-                        @php
-                            $barWidth = (int) round(($dayItem['total'] / $maxWeeklyTotal) * 100);
-                        @endphp
-                        <div>
-                            <div class="mb-1 flex items-center justify-between text-xs font-semibold">
-                                <span class="text-slate-700">{{ $dayItem['label'] }}</span>
-                                <span class="text-slate-500">{{ $dayItem['total'] }} slots</span>
-                            </div>
-                            <div class="h-2 rounded-full bg-slate-100">
-                                <div class="h-2 rounded-full bg-indigo-500" style="width: {{ $barWidth }}%"></div>
-                            </div>
-                            <div class="mt-1 text-[11px] text-slate-500">
-                                Class: {{ $dayItem['class_count'] }} | Subject: {{ $dayItem['subject_count'] }}
-                            </div>
+                <div class="space-y-4">
+                    <div class="h-52 sm:h-56">
+                        <canvas id="teacherWeeklyChart" class="h-full w-full"></canvas>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-4">
+                        <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Today Slot Mix</div>
+                        <div class="h-44 sm:h-48">
+                            <canvas id="teacherTodayMixChart" class="h-full w-full"></canvas>
                         </div>
-                    @endforeach
+                    </div>
                 </div>
             </section>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const timeEl = document.getElementById('dashboard-live-time');
@@ -133,6 +131,93 @@
             const slots = Array.from(document.querySelectorAll('.js-dash-slot'));
             const dayLabels = @json($dayLabels ?? []);
             const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const dashboardCharts = @json($chartData);
+
+            if (window.Chart) {
+                Chart.defaults.responsive = true;
+                Chart.defaults.maintainAspectRatio = false;
+
+                const weeklyCanvas = document.getElementById('teacherWeeklyChart');
+                if (weeklyCanvas) {
+                    new Chart(weeklyCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: dashboardCharts?.weekly?.labels ?? [],
+                            datasets: [{
+                                    label: 'Class Slots',
+                                    data: dashboardCharts?.weekly?.classes ?? [],
+                                    borderRadius: 8,
+                                    backgroundColor: 'rgba(14, 165, 233, 0.75)'
+                                },
+                                {
+                                    label: 'Subject Slots',
+                                    data: dashboardCharts?.weekly?.subjects ?? [],
+                                    borderRadius: 8,
+                                    backgroundColor: 'rgba(99, 102, 241, 0.75)'
+                                },
+                            ],
+                        },
+                        options: {
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        usePointStyle: true,
+                                        pointStyle: 'circle',
+                                        boxWidth: 8,
+                                    },
+                                },
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        precision: 0,
+                                        stepSize: 1,
+                                    },
+                                    grid: {
+                                        color: 'rgba(148, 163, 184, 0.2)',
+                                    },
+                                },
+                                x: {
+                                    grid: {
+                                        display: false,
+                                    },
+                                },
+                            },
+                        },
+                    });
+                }
+
+                const mixCanvas = document.getElementById('teacherTodayMixChart');
+                if (mixCanvas) {
+                    new Chart(mixCanvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: dashboardCharts?.todayMix?.labels ?? [],
+                            datasets: [{
+                                data: dashboardCharts?.todayMix?.values ?? [],
+                                borderWidth: 0,
+                                backgroundColor: ['rgba(56, 189, 248, 0.9)', 'rgba(99, 102, 241, 0.9)'],
+                                hoverOffset: 6,
+                            }, ],
+                        },
+                        options: {
+                            cutout: '65%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        usePointStyle: true,
+                                        pointStyle: 'circle',
+                                        boxWidth: 8,
+                                    },
+                                },
+                            },
+                        },
+                    });
+                }
+            }
 
             const toMinutes = (value) => {
                 const parts = String(value || '').split(':');

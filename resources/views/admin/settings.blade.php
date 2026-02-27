@@ -6,9 +6,12 @@
             subtitle="Manage your account profile and security settings.">
             <x-slot:stats>
                 <span class="admin-page-stat">Students: {{ number_format($stats['students'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--sky">Teachers: {{ number_format($stats['teachers'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Classes: {{ number_format($stats['classes'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--amber">Subjects: {{ number_format($stats['subjects'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--sky">Teachers:
+                    {{ number_format($stats['teachers'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--emerald">Classes:
+                    {{ number_format($stats['classes'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--amber">Subjects:
+                    {{ number_format($stats['subjects'] ?? 0) }}</span>
             </x-slot:stats>
             <x-slot:actions>
                 <a href="{{ route('admin.dashboard') }}"
@@ -42,10 +45,12 @@
         @endif
 
         <div class="grid gap-6 xl:grid-cols-12">
-            <section class="reveal float-card rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
+            <section
+                class="reveal float-card rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
                 style="--sd: 3;">
                 <div class="mb-5 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                    <img class="h-20 w-20 rounded-2xl border border-white/60 object-cover shadow-sm" src="{{ $admin->avatar_url }}"
+                    <img class="h-20 w-20 rounded-2xl border border-white/60 object-cover shadow-sm"
+                        src="{{ $admin->avatar_url }}"
                         onerror="this.onerror=null;this.src='{{ $admin->fallback_avatar_url }}';" alt="avatar">
                     <div class="min-w-0">
                         <div class="truncate text-xl font-black text-slate-900">{{ $admin->name }}</div>
@@ -90,24 +95,29 @@
                 </form>
             </section>
 
-            <section class="reveal float-card rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
+            <section
+                class="reveal float-card rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
                 style="--sd: 4;">
                 <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <article class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
                         <div class="text-xs font-semibold text-slate-500">Class Slots</div>
-                        <div class="mt-1 text-lg font-black text-slate-900">{{ number_format($stats['classSlots'] ?? 0) }}</div>
+                        <div class="mt-1 text-lg font-black text-slate-900">{{ number_format($stats['classSlots'] ?? 0) }}
+                        </div>
                     </article>
                     <article class="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-3">
                         <div class="text-xs font-semibold text-indigo-600">Subject Slots</div>
-                        <div class="mt-1 text-lg font-black text-indigo-800">{{ number_format($stats['subjectSlots'] ?? 0) }}</div>
+                        <div class="mt-1 text-lg font-black text-indigo-800">
+                            {{ number_format($stats['subjectSlots'] ?? 0) }}</div>
                     </article>
                     <article class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3">
                         <div class="text-xs font-semibold text-amber-600">Unread Messages</div>
-                        <div class="mt-1 text-lg font-black text-amber-800">{{ number_format($stats['unreadMessages'] ?? 0) }}</div>
+                        <div class="mt-1 text-lg font-black text-amber-800">
+                            {{ number_format($stats['unreadMessages'] ?? 0) }}</div>
                     </article>
                     <article class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3">
                         <div class="text-xs font-semibold text-emerald-600">Unread Notifications</div>
-                        <div class="mt-1 text-lg font-black text-emerald-800">{{ number_format($stats['unreadNotifications'] ?? 0) }}</div>
+                        <div class="mt-1 text-lg font-black text-emerald-800">
+                            {{ number_format($stats['unreadNotifications'] ?? 0) }}</div>
                     </article>
                 </div>
 

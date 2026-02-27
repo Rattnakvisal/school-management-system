@@ -91,12 +91,14 @@
 
                     @if ($hasClassColumn)
                         <div>
-                            <label for="school_class_id" class="mb-1 block text-xs font-semibold text-slate-600">Home Class (Optional)</label>
+                            <label for="school_class_id" class="mb-1 block text-xs font-semibold text-slate-600">Home Class
+                                (Optional)</label>
                             <select id="school_class_id" name="school_class_id"
                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                 <option value="">Unassigned</option>
                                 @foreach ($classes as $classOption)
-                                    <option value="{{ $classOption->id }}" {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
+                                    <option value="{{ $classOption->id }}"
+                                        {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
                                         {{ $classOption->display_name }}
                                     </option>
                                 @endforeach
@@ -110,7 +112,10 @@
                             <div>
                                 @php
                                     $createSelectedMajorSubjectIds = old('major_subject_ids');
-                                    if (!is_array($createSelectedMajorSubjectIds) || count($createSelectedMajorSubjectIds) === 0) {
+                                    if (
+                                        !is_array($createSelectedMajorSubjectIds) ||
+                                        count($createSelectedMajorSubjectIds) === 0
+                                    ) {
                                         $legacyMajorId = old('major_subject_id');
                                         $createSelectedMajorSubjectIds = $legacyMajorId ? [$legacyMajorId] : [];
                                     }
@@ -129,7 +134,8 @@
                                     <option value="">Select major subjects</option>
                                 </select>
                                 <div id="major_subject_checkbox_list"
-                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3"></div>
+                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                                </div>
                                 <p class="mt-1 text-[11px] text-slate-500">You can select multiple major subjects.</p>
                                 @error('major_subject_ids')
                                     <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
@@ -147,7 +153,10 @@
                             <div>
                                 @php
                                     $createSelectedStudyTimeIds = old('class_study_time_ids');
-                                    if (!is_array($createSelectedStudyTimeIds) || count($createSelectedStudyTimeIds) === 0) {
+                                    if (
+                                        !is_array($createSelectedStudyTimeIds) ||
+                                        count($createSelectedStudyTimeIds) === 0
+                                    ) {
                                         $legacySelectedId = old('class_study_time_id');
                                         $createSelectedStudyTimeIds = $legacySelectedId ? [$legacySelectedId] : [];
                                     }
@@ -158,11 +167,13 @@
                                         ->all();
                                 @endphp
                                 <div class="mb-1 flex items-center justify-between gap-2">
-                                    <label for="class_study_time_id" class="block text-xs font-semibold text-slate-600">Study
+                                    <label for="class_study_time_id"
+                                        class="block text-xs font-semibold text-slate-600">Study
                                         Time</label>
                                     <a id="manage_study_time_inline"
                                         href="{{ route('admin.time-studies.index', ['tab' => 'class']) }}"
-                                        data-base-url="{{ route('admin.time-studies.index') }}" target="_blank" rel="noopener"
+                                        data-base-url="{{ route('admin.time-studies.index') }}" target="_blank"
+                                        rel="noopener"
                                         class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
                                         + Add More
                                     </a>
@@ -173,7 +184,8 @@
                                     <option value="">Select class first</option>
                                 </select>
                                 <div id="study_time_checkbox_list"
-                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3"></div>
+                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                                </div>
                                 <p class="mt-1 text-[11px] text-slate-500">You can select multiple study times.</p>
                                 @error('class_study_time_ids')
                                     <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
@@ -219,7 +231,8 @@
                         <label class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">
                             <span class="text-sm font-semibold text-slate-700">Initial Status</span>
                             <span class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                <input type="checkbox" name="is_active" value="1" class="h-4 w-4 rounded border-slate-300" {{ old('is_active', '1') ? 'checked' : '' }}>
+                                <input type="checkbox" name="is_active" value="1"
+                                    class="h-4 w-4 rounded border-slate-300" {{ old('is_active', '1') ? 'checked' : '' }}>
                                 Active
                             </span>
                         </label>
@@ -240,8 +253,8 @@
                         <h2 class="text-lg font-black text-slate-900">Student List</h2>
                         <button type="button" @click="filterOpen = true"
                             class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
                             </svg>
                             Filters
@@ -278,8 +291,8 @@
                                     <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Search</h4>
-                                            <input id="q" name="q" type="text" value="{{ $search }}"
-                                                placeholder="Search by name, email, or class"
+                                            <input id="q" name="q" type="text"
+                                                value="{{ $search }}" placeholder="Search by name, email, or class"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         </section>
                                         @if ($hasClassColumn)
@@ -287,10 +300,12 @@
                                                 <h4 class="text-xl font-bold text-slate-900">Class</h4>
                                                 <select name="class_id"
                                                     class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                    <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All Classes
+                                                    <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>All
+                                                        Classes
                                                     </option>
                                                     @foreach ($classes as $classOption)
-                                                        <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                                        <option value="{{ $classOption->id }}"
+                                                            {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
                                                             {{ $classOption->display_name }}
                                                         </option>
                                                     @endforeach
@@ -304,10 +319,13 @@
                                                 <h4 class="text-xl font-bold text-slate-900">Status</h4>
                                                 <select name="status"
                                                     class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                    <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All</option>
-                                                    <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active
+                                                    <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All
                                                     </option>
-                                                    <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>
+                                                    <option value="active" {{ $status === 'active' ? 'selected' : '' }}>
+                                                        Active
+                                                    </option>
+                                                    <option value="inactive"
+                                                        {{ $status === 'inactive' ? 'selected' : '' }}>
                                                         Inactive</option>
                                                 </select>
                                             </section>
@@ -336,7 +354,8 @@
                                                 <th class="student-col-email px-3 py-3 font-semibold">Email</th>
                                                 <th class="student-col-class px-3 py-3 font-semibold">Class</th>
                                                 @if ($hasMajorSubjectColumn)
-                                                    <th class="student-col-major px-3 py-3 font-semibold">Major Subjects</th>
+                                                    <th class="student-col-major px-3 py-3 font-semibold">Major Subjects
+                                                    </th>
                                                 @endif
                                                 @if ($hasClassStudyTimeColumn)
                                                     <th class="student-col-study px-3 py-3 font-semibold">Study Time</th>
@@ -352,7 +371,8 @@
                                                 <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
                                                     <td class="student-col-student px-3 py-3 align-top">
                                                         <div class="flex items-center gap-3">
-                                                            <img src="{{ $student->avatar_url }}" alt="{{ $student->name }}"
+                                                            <img src="{{ $student->avatar_url }}"
+                                                                alt="{{ $student->name }}"
                                                                 class="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200">
                                                             <div class="min-w-0">
                                                                 <div class="student-name font-semibold text-slate-800">
@@ -364,7 +384,8 @@
                                                         </div>
                                                     </td>
                                                     <td class="student-col-email px-3 py-3 align-top text-slate-600">
-                                                        <div class="student-email text-slate-600">{{ $student->email }}</div>
+                                                        <div class="student-email text-slate-600">{{ $student->email }}
+                                                        </div>
                                                     </td>
                                                     <td class="student-col-class px-3 py-3 align-top text-slate-600">
                                                         @if ($hasClassColumn)
@@ -384,7 +405,11 @@
                                                         <td class="student-col-major px-3 py-3 align-top text-slate-600">
                                                             @php
                                                                 $majorSubjects = collect();
-                                                                if (($hasStudentMajorSubjectsTable ?? false) && $student->relationLoaded('majorSubjects') && $student->majorSubjects->isNotEmpty()) {
+                                                                if (
+                                                                    ($hasStudentMajorSubjectsTable ?? false) &&
+                                                                    $student->relationLoaded('majorSubjects') &&
+                                                                    $student->majorSubjects->isNotEmpty()
+                                                                ) {
                                                                     $majorSubjects = $student->majorSubjects;
                                                                 } elseif ($student->majorSubject) {
                                                                     $majorSubjects = collect([$student->majorSubject]);
@@ -402,7 +427,8 @@
                                                                     @endforeach
 
                                                                     @if ($majorSubjects->count() > 3)
-                                                                        <span class="text-[11px] font-semibold text-slate-500">
+                                                                        <span
+                                                                            class="text-[11px] font-semibold text-slate-500">
                                                                             +{{ $majorSubjects->count() - 3 }} more majors
                                                                         </span>
                                                                     @endif
@@ -416,7 +442,10 @@
                                                         <td class="student-col-study px-3 py-3 align-top text-slate-600">
                                                             @php
                                                                 $studySlots = collect();
-                                                                if ($student->relationLoaded('studyTimes') && $student->studyTimes->isNotEmpty()) {
+                                                                if (
+                                                                    $student->relationLoaded('studyTimes') &&
+                                                                    $student->studyTimes->isNotEmpty()
+                                                                ) {
                                                                     $studySlots = $student->studyTimes;
                                                                 } elseif ($student->classStudyTime) {
                                                                     $studySlots = collect([$student->classStudyTime]);
@@ -426,9 +455,15 @@
                                                                 <div class="flex max-w-full flex-col gap-1">
                                                                     @foreach ($studySlots->take(3) as $slot)
                                                                         @php
-                                                                            $periodKey = strtolower((string) $slot->period);
-                                                                            $periodLabel = $periodLabels[$periodKey] ?? ucfirst($periodKey);
-                                                                            $dayKey = strtolower((string) ($slot->day_of_week ?? 'all'));
+                                                                            $periodKey = strtolower(
+                                                                                (string) $slot->period,
+                                                                            );
+                                                                            $periodLabel =
+                                                                                $periodLabels[$periodKey] ??
+                                                                                ucfirst($periodKey);
+                                                                            $dayKey = strtolower(
+                                                                                (string) ($slot->day_of_week ?? 'all'),
+                                                                            );
                                                                             $dayLabel = match ($dayKey) {
                                                                                 'monday' => 'Monday',
                                                                                 'tuesday' => 'Tuesday',
@@ -442,7 +477,8 @@
                                                                         @endphp
                                                                         <div
                                                                             class="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
-                                                                            <span class="font-bold uppercase tracking-wide text-indigo-700">
+                                                                            <span
+                                                                                class="font-bold uppercase tracking-wide text-indigo-700">
                                                                                 {{ $dayLabel }} | {{ $periodLabel }}
                                                                             </span>
                                                                             <span class="text-indigo-300">|</span>
@@ -456,7 +492,8 @@
                                                                     @endforeach
 
                                                                     @if ($studySlots->count() > 3)
-                                                                        <span class="text-[11px] font-semibold text-slate-500">
+                                                                        <span
+                                                                            class="text-[11px] font-semibold text-slate-500">
                                                                             +{{ $studySlots->count() - 3 }} more times
                                                                         </span>
                                                                     @endif
@@ -476,7 +513,8 @@
                                                         @elseif($hasStatusColumn)
                                                             <span
                                                                 class="inline-flex items-center gap-2 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
-                                                                <span class="h-2 w-2 rounded-full bg-rose-500"></span>Inactive
+                                                                <span
+                                                                    class="h-2 w-2 rounded-full bg-rose-500"></span>Inactive
                                                             </span>
                                                         @else
                                                             <span
@@ -497,7 +535,8 @@
                                                             @if ($hasStatusColumn)
                                                                 <form method="POST"
                                                                     action="{{ route('admin.students.status', $student) }}"
-                                                                    class="js-status-form" data-student="{{ $student->name }}"
+                                                                    class="js-status-form"
+                                                                    data-student="{{ $student->name }}"
                                                                     data-action="{{ $student->is_active ? 'set inactive' : 'set active' }}">
                                                                     @csrf
                                                                     @method('PATCH')
@@ -510,7 +549,8 @@
 
                                                             <form method="POST"
                                                                 action="{{ route('admin.students.destroy', $student) }}"
-                                                                class="js-delete-form" data-student="{{ $student->name }}">
+                                                                class="js-delete-form"
+                                                                data-student="{{ $student->name }}">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit"
@@ -523,13 +563,15 @@
                                                         <div x-show="open" x-cloak
                                                             class="fixed inset-0 z-[70] grid place-items-center p-4"
                                                             aria-modal="true" role="dialog">
-                                                            <div class="absolute inset-0 bg-slate-900/50" @click="open = false">
+                                                            <div class="absolute inset-0 bg-slate-900/50"
+                                                                @click="open = false">
                                                             </div>
 
                                                             <div
                                                                 class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
                                                                 <div class="mb-4 flex items-center justify-between">
-                                                                    <h3 class="text-lg font-black text-slate-900">Edit Student
+                                                                    <h3 class="text-lg font-black text-slate-900">Edit
+                                                                        Student
                                                                     </h3>
                                                                     <button type="button" @click="open = false"
                                                                         class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
@@ -543,7 +585,8 @@
 
                                                                 <form method="POST"
                                                                     action="{{ route('admin.students.update', $student) }}"
-                                                                    enctype="multipart/form-data" class="js-edit-form space-y-4"
+                                                                    enctype="multipart/form-data"
+                                                                    class="js-edit-form space-y-4"
                                                                     data-student="{{ $student->name }}">
                                                                     @csrf
                                                                     @method('PUT')
@@ -552,29 +595,36 @@
                                                                         <label for="edit_name_{{ $student->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Full
                                                                             Name</label>
-                                                                        <input id="edit_name_{{ $student->id }}" name="name"
-                                                                            type="text" value="{{ $student->name }}"
+                                                                        <input id="edit_name_{{ $student->id }}"
+                                                                            name="name" type="text"
+                                                                            value="{{ $student->name }}"
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
                                                                     <div>
                                                                         <label for="edit_email_{{ $student->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Email</label>
-                                                                        <input id="edit_email_{{ $student->id }}" name="email"
-                                                                            type="email" value="{{ $student->email }}"
+                                                                        <input id="edit_email_{{ $student->id }}"
+                                                                            name="email" type="email"
+                                                                            value="{{ $student->email }}"
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
                                                                     <div>
                                                                         <label for="edit_role_{{ $student->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
-                                                                        <select id="edit_role_{{ $student->id }}" name="role"
+                                                                        <select id="edit_role_{{ $student->id }}"
+                                                                            name="role"
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                            <option value="student" {{ $student->role === 'student' ? 'selected' : '' }}>
+                                                                            <option value="student"
+                                                                                {{ $student->role === 'student' ? 'selected' : '' }}>
                                                                                 Student</option>
-                                                                            <option value="teacher" {{ $student->role === 'teacher' ? 'selected' : '' }}>
+                                                                            <option value="teacher"
+                                                                                {{ $student->role === 'teacher' ? 'selected' : '' }}>
                                                                                 Teacher</option>
-                                                                            <option value="admin" {{ $student->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                                                            <option value="admin"
+                                                                                {{ $student->role === 'admin' ? 'selected' : '' }}>
+                                                                                Admin</option>
                                                                         </select>
                                                                         <p class="mt-1 text-[11px] text-slate-500">
                                                                             Changing role from student will remove this user
@@ -584,14 +634,18 @@
 
                                                                     @if ($hasClassColumn)
                                                                         <div>
-                                                                            <label for="edit_school_class_id_{{ $student->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Home Class (Optional)</label>
-                                                                            <select id="edit_school_class_id_{{ $student->id }}"
+                                                                            <label
+                                                                                for="edit_school_class_id_{{ $student->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Home
+                                                                                Class (Optional)</label>
+                                                                            <select
+                                                                                id="edit_school_class_id_{{ $student->id }}"
                                                                                 name="school_class_id"
                                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                                 <option value="">Unassigned</option>
                                                                                 @foreach ($classes as $classOption)
-                                                                                    <option value="{{ $classOption->id }}" {{ (string) $student->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
+                                                                                    <option value="{{ $classOption->id }}"
+                                                                                        {{ (string) $student->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
                                                                                         {{ $classOption->display_name }}
                                                                                     </option>
                                                                                 @endforeach
@@ -602,29 +656,51 @@
                                                                             <div>
                                                                                 @php
                                                                                     $editSelectedMajorSubjectIds = [];
-                                                                                    if (($hasStudentMajorSubjectsTable ?? false) && $student->relationLoaded('majorSubjects') && $student->majorSubjects->isNotEmpty()) {
+                                                                                    if (
+                                                                                        ($hasStudentMajorSubjectsTable ??
+                                                                                            false) &&
+                                                                                        $student->relationLoaded(
+                                                                                            'majorSubjects',
+                                                                                        ) &&
+                                                                                        $student->majorSubjects->isNotEmpty()
+                                                                                    ) {
                                                                                         $editSelectedMajorSubjectIds = $student->majorSubjects
                                                                                             ->pluck('id')
-                                                                                            ->map(fn($value) => (string) $value)
+                                                                                            ->map(
+                                                                                                fn(
+                                                                                                    $value,
+                                                                                                ) => (string) $value,
+                                                                                            )
                                                                                             ->values()
                                                                                             ->all();
-                                                                                    } elseif ($student->major_subject_id) {
-                                                                                        $editSelectedMajorSubjectIds = [(string) $student->major_subject_id];
+                                                                                    } elseif (
+                                                                                        $student->major_subject_id
+                                                                                    ) {
+                                                                                        $editSelectedMajorSubjectIds = [
+                                                                                            (string) $student->major_subject_id,
+                                                                                        ];
                                                                                     }
                                                                                 @endphp
-                                                                                <label for="edit_major_subject_id_{{ $student->id }}"
+                                                                                <label
+                                                                                    for="edit_major_subject_id_{{ $student->id }}"
                                                                                     class="mb-1 block text-xs font-semibold text-slate-600">Major
                                                                                     Subjects</label>
-                                                                                <select id="edit_major_subject_id_{{ $student->id }}"
+                                                                                <select
+                                                                                    id="edit_major_subject_id_{{ $student->id }}"
                                                                                     name="major_subject_ids[]"
                                                                                     data-selected-list='@json($editSelectedMajorSubjectIds)'
                                                                                     data-checkbox-target="edit_major_subject_checkbox_list_{{ $student->id }}"
-                                                                                    multiple size="5" class="hidden">
-                                                                                    <option value="">Select major subjects</option>
+                                                                                    multiple size="5"
+                                                                                    class="hidden">
+                                                                                    <option value="">Select major
+                                                                                        subjects</option>
                                                                                 </select>
                                                                                 <div id="edit_major_subject_checkbox_list_{{ $student->id }}"
-                                                                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3"></div>
-                                                                                <p class="mt-1 text-[11px] text-slate-500">You can select multiple major subjects.</p>
+                                                                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                                                                                </div>
+                                                                                <p class="mt-1 text-[11px] text-slate-500">
+                                                                                    You can select multiple major subjects.
+                                                                                </p>
                                                                             </div>
                                                                         @endif
 
@@ -632,29 +708,48 @@
                                                                             <div>
                                                                                 @php
                                                                                     $editSelectedStudyTimeIds = [];
-                                                                                    if ($student->relationLoaded('studyTimes') && $student->studyTimes->isNotEmpty()) {
+                                                                                    if (
+                                                                                        $student->relationLoaded(
+                                                                                            'studyTimes',
+                                                                                        ) &&
+                                                                                        $student->studyTimes->isNotEmpty()
+                                                                                    ) {
                                                                                         $editSelectedStudyTimeIds = $student->studyTimes
                                                                                             ->pluck('id')
-                                                                                            ->map(fn($value) => (string) $value)
+                                                                                            ->map(
+                                                                                                fn(
+                                                                                                    $value,
+                                                                                                ) => (string) $value,
+                                                                                            )
                                                                                             ->values()
                                                                                             ->all();
-                                                                                    } elseif ($student->class_study_time_id) {
-                                                                                        $editSelectedStudyTimeIds = [(string) $student->class_study_time_id];
+                                                                                    } elseif (
+                                                                                        $student->class_study_time_id
+                                                                                    ) {
+                                                                                        $editSelectedStudyTimeIds = [
+                                                                                            (string) $student->class_study_time_id,
+                                                                                        ];
                                                                                     }
                                                                                 @endphp
-                                                                                <label for="edit_class_study_time_id_{{ $student->id }}"
+                                                                                <label
+                                                                                    for="edit_class_study_time_id_{{ $student->id }}"
                                                                                     class="mb-1 block text-xs font-semibold text-slate-600">Study
                                                                                     Time</label>
-                                                                                <select id="edit_class_study_time_id_{{ $student->id }}"
+                                                                                <select
+                                                                                    id="edit_class_study_time_id_{{ $student->id }}"
                                                                                     name="class_study_time_ids[]"
                                                                                     data-selected-list='@json($editSelectedStudyTimeIds)'
                                                                                     data-checkbox-target="edit_study_time_checkbox_list_{{ $student->id }}"
-                                                                                    multiple size="4" class="hidden">
-                                                                                    <option value="">Select class first</option>
+                                                                                    multiple size="4"
+                                                                                    class="hidden">
+                                                                                    <option value="">Select class
+                                                                                        first</option>
                                                                                 </select>
                                                                                 <div id="edit_study_time_checkbox_list_{{ $student->id }}"
-                                                                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3"></div>
-                                                                                <p class="mt-1 text-[11px] text-slate-500">You can select multiple study times.</p>
+                                                                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                                                                                </div>
+                                                                                <p class="mt-1 text-[11px] text-slate-500">
+                                                                                    You can select multiple study times.</p>
                                                                             </div>
                                                                         @endif
                                                                     @endif
@@ -664,9 +759,11 @@
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Avatar
                                                                             Image</label>
                                                                         <input id="edit_avatar_image_{{ $student->id }}"
-                                                                            name="avatar_image" type="file" accept="image/*"
+                                                                            name="avatar_image" type="file"
+                                                                            accept="image/*"
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                        <p class="mt-1 text-[11px] text-slate-500">Leave empty
+                                                                        <p class="mt-1 text-[11px] text-slate-500">Leave
+                                                                            empty
                                                                             to keep
                                                                             current avatar.</p>
                                                                     </div>
@@ -688,7 +785,8 @@
                                                                                 Password</label>
                                                                             <input
                                                                                 id="edit_password_confirmation_{{ $student->id }}"
-                                                                                name="password_confirmation" type="password"
+                                                                                name="password_confirmation"
+                                                                                type="password"
                                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                         </div>
                                                                     </div>
@@ -700,8 +798,10 @@
                                                                                 class="text-sm font-semibold text-slate-700">Status</span>
                                                                             <span
                                                                                 class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                                                                <input type="checkbox" name="is_active" value="1"
-                                                                                    class="h-4 w-4 rounded border-slate-300" {{ $student->is_active ? 'checked' : '' }}>
+                                                                                <input type="checkbox" name="is_active"
+                                                                                    value="1"
+                                                                                    class="h-4 w-4 rounded border-slate-300"
+                                                                                    {{ $student->is_active ? 'checked' : '' }}>
                                                                                 Active
                                                                             </span>
                                                                         </label>
@@ -747,7 +847,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const hasSwal = typeof Swal !== 'undefined';
             const subjectsByClass = @json($subjectsByClass ?? []);
             const studyTimesByClass = @json($studyTimesByClass ?? []);
@@ -840,11 +940,13 @@
                 }
 
                 container.innerHTML = '';
-                const options = Array.from(select.options || []).filter((option) => String(option.value || '') !== '');
+                const options = Array.from(select.options || []).filter((option) => String(option.value ||
+                    '') !== '');
                 if (options.length === 0) {
                     const placeholder = document.createElement('p');
                     placeholder.className = 'text-xs font-medium text-slate-500';
-                    placeholder.textContent = String(select.options?.[0]?.textContent || 'No options available');
+                    placeholder.textContent = String(select.options?.[0]?.textContent ||
+                    'No options available');
                     container.appendChild(placeholder);
                     return;
                 }
@@ -859,10 +961,13 @@
                     input.value = String(option.value || '');
                     input.checked = option.selected;
                     input.disabled = !!select.disabled;
-                    input.className = 'mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500';
+                    input.className =
+                        'mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500';
                     input.addEventListener('change', () => {
                         option.selected = input.checked;
-                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        select.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
                     });
 
                     const text = document.createElement('span');
@@ -883,9 +988,10 @@
             const normalizeTime = (value) => String(value || '').slice(0, 5);
 
             const slotsShareBaseTime = (classSlot, subjectSlot) => {
-                return String(classSlot.period || '').toLowerCase() === String(subjectSlot.period || '').toLowerCase()
-                    && normalizeTime(classSlot.start_time) === normalizeTime(subjectSlot.start_time)
-                    && normalizeTime(classSlot.end_time) === normalizeTime(subjectSlot.end_time);
+                return String(classSlot.period || '').toLowerCase() === String(subjectSlot.period || '')
+                    .toLowerCase() &&
+                    normalizeTime(classSlot.start_time) === normalizeTime(subjectSlot.start_time) &&
+                    normalizeTime(classSlot.end_time) === normalizeTime(subjectSlot.end_time);
             };
 
             const slotDaysAreCompatible = (classSlot, subjectSlot) => {
@@ -896,8 +1002,8 @@
 
             const classSlotMatchesSubjectSchedule = (classSlot, subjectSlots) => {
                 return subjectSlots.some((subjectSlot) => {
-                    return slotsShareBaseTime(classSlot, subjectSlot)
-                        && slotDaysAreCompatible(classSlot, subjectSlot);
+                    return slotsShareBaseTime(classSlot, subjectSlot) &&
+                        slotDaysAreCompatible(classSlot, subjectSlot);
                 });
             };
 
@@ -933,7 +1039,8 @@
                     group.forEach((slot) => {
                         rows.push({
                             ...slot,
-                            school_class_id: Number(slot?.school_class_id || classId || 0)
+                            school_class_id: Number(slot?.school_class_id ||
+                                classId || 0)
                         });
                     });
                 });
@@ -947,7 +1054,8 @@
                 }
 
                 const key = String(classId || '');
-                const subjects = key !== '' && Array.isArray(subjectsByClass?.[key]) ? subjectsByClass[key] : [];
+                const subjects = key !== '' && Array.isArray(subjectsByClass?.[key]) ? subjectsByClass[key] :
+            [];
                 let placeholder = 'Select class first';
                 if (subjects.length > 0 && key !== '') {
                     placeholder = 'Select major subjects';
@@ -972,7 +1080,8 @@
                 renderSelectAsCheckboxes(select);
             };
 
-            const renderStudyTimes = (select, classId, selectedIds = [], subjectIds = [], requireSubjectMatch = false, autoSelectAll = false) => {
+            const renderStudyTimes = (select, classId, selectedIds = [], subjectIds = [], requireSubjectMatch =
+                false, autoSelectAll = false) => {
                 if (!select) {
                     return;
                 }
@@ -982,13 +1091,14 @@
                 const selectedSubjectIds = parseSelectedIds(subjectIds);
 
                 if (requireSubjectMatch && selectedSubjectIds.length === 0) {
-                    slots = key ? allStudyTimes.filter((item) => String(item.school_class_id || '') === key) : [];
+                    slots = key ? allStudyTimes.filter((item) => String(item.school_class_id || '') === key) :
+                    [];
                 } else if (selectedSubjectIds.length > 0) {
                     const allowedStudyTimeIds = new Set();
                     selectedSubjectIds.forEach((subjectKey) => {
-                        const idsForSubject = key !== ''
-                            ? classStudyTimeIdsByClassSubject?.[key]?.[String(subjectKey)]
-                            : classStudyTimeIdsBySubjectAll[String(subjectKey)];
+                        const idsForSubject = key !== '' ?
+                            classStudyTimeIdsByClassSubject?.[key]?.[String(subjectKey)] :
+                            classStudyTimeIdsBySubjectAll[String(subjectKey)];
                         if (Array.isArray(idsForSubject)) {
                             idsForSubject.forEach((id) => allowedStudyTimeIds.add(String(id)));
                         }
@@ -997,17 +1107,20 @@
                     if (allowedStudyTimeIds.size > 0) {
                         slots = allStudyTimes.filter((item) => {
                             const matchesAllowedStudyTime = allowedStudyTimeIds.has(String(item.id));
-                            const matchesClass = key === '' || String(item.school_class_id || '') === key;
+                            const matchesClass = key === '' || String(item.school_class_id || '') ===
+                                key;
                             return matchesAllowedStudyTime && matchesClass;
                         });
                     } else {
                         const subjectSlots = selectedSubjectIds.flatMap((subjectKey) => {
                             if (key !== '') {
-                                const slotsForSubject = subjectStudySlotsByClassSubject?.[key]?.[String(subjectKey)];
+                                const slotsForSubject = subjectStudySlotsByClassSubject?.[key]?.[String(
+                                    subjectKey)];
                                 return Array.isArray(slotsForSubject) ? slotsForSubject : [];
                             }
 
-                            return Object.values(subjectStudySlotsByClassSubject || {}).flatMap((subjectMap) => {
+                            return Object.values(subjectStudySlotsByClassSubject || {}).flatMap((
+                                subjectMap) => {
                                 const slotsForSubject = subjectMap?.[String(subjectKey)];
                                 return Array.isArray(slotsForSubject) ? slotsForSubject : [];
                             });
@@ -1042,11 +1155,15 @@
                     const option = document.createElement('option');
                     option.value = String(item.id);
                     const periodKey = String(item.period || '').toLowerCase();
-                    const period = periodLabels[periodKey] || (periodKey ? (periodKey.charAt(0).toUpperCase() + periodKey.slice(1)) : 'Custom');
+                    const period = periodLabels[periodKey] || (periodKey ? (periodKey.charAt(0)
+                        .toUpperCase() + periodKey.slice(1)) : 'Custom');
                     const dayKey = String(item.day_of_week || 'all').toLowerCase();
-                    const dayLabel = dayLabels[dayKey] || (dayKey ? (dayKey.charAt(0).toUpperCase() + dayKey.slice(1)) : 'All Days');
-                    const slotClassLabel = classLabelById[String(item.school_class_id || '')] || 'Class';
-                    option.textContent = `${slotClassLabel} | ${dayLabel} | ${period}: ${to12Hour(item.start_time)} -> ${to12Hour(item.end_time)}`;
+                    const dayLabel = dayLabels[dayKey] || (dayKey ? (dayKey.charAt(0).toUpperCase() +
+                        dayKey.slice(1)) : 'All Days');
+                    const slotClassLabel = classLabelById[String(item.school_class_id || '')] ||
+                    'Class';
+                    option.textContent =
+                        `${slotClassLabel} | ${dayLabel} | ${period}: ${to12Hour(item.start_time)} -> ${to12Hour(item.end_time)}`;
                     if (selectedSet.has(String(item.id))) {
                         option.selected = true;
                     }
@@ -1072,24 +1189,26 @@
 
                 const apply = (useCurrentSelection = true) => {
                     const classId = classSelect.value || '';
-                    const majorSelected = useCurrentSelection
-                        ? (() => {
+                    const majorSelected = useCurrentSelection ?
+                        (() => {
                             const fromCurrentSelection = selectedIdsFromSelect(majorSelect);
                             if (fromCurrentSelection.length > 0) {
                                 return fromCurrentSelection;
                             }
-                            return parseSelectedIds(majorSelect?.dataset.selectedList || majorSelect?.dataset.selected || '');
-                        })()
-                        : [];
-                    const studySelected = useCurrentSelection
-                        ? (() => {
+                            return parseSelectedIds(majorSelect?.dataset.selectedList || majorSelect
+                                ?.dataset.selected || '');
+                        })() :
+                        [];
+                    const studySelected = useCurrentSelection ?
+                        (() => {
                             const fromCurrentSelection = selectedIdsFromSelect(studyTimeSelect);
                             if (fromCurrentSelection.length > 0) {
                                 return fromCurrentSelection;
                             }
-                            return parseSelectedIds(studyTimeSelect?.dataset.selectedList || studyTimeSelect?.dataset.selected || '');
-                        })()
-                        : [];
+                            return parseSelectedIds(studyTimeSelect?.dataset.selectedList ||
+                                studyTimeSelect?.dataset.selected || '');
+                        })() :
+                        [];
 
                     if (majorSelect) {
                         renderMajorSubjects(majorSelect, classId, majorSelected);
@@ -1099,12 +1218,13 @@
 
                     if (studyTimeSelect) {
                         const requireSubjectMatch = !!majorSelect;
-                        const selectedSubjectIds = majorSelect
-                            ? (() => {
+                        const selectedSubjectIds = majorSelect ?
+                            (() => {
                                 const selectedValues = selectedIdsFromSelect(majorSelect);
-                                return selectedValues.length > 0 ? selectedValues : parseSelectedIds(majorSelected);
-                            })()
-                            : [];
+                                return selectedValues.length > 0 ? selectedValues : parseSelectedIds(
+                                    majorSelected);
+                            })() :
+                            [];
                         renderStudyTimes(
                             studyTimeSelect,
                             classId,
@@ -1124,7 +1244,8 @@
                 if (majorSelect && studyTimeSelect) {
                     majorSelect.addEventListener('change', () => {
                         const selectedMajorIds = selectedIdsFromSelect(majorSelect);
-                        renderStudyTimes(studyTimeSelect, classSelect.value || '', [], selectedMajorIds, true, true);
+                        renderStudyTimes(studyTimeSelect, classSelect.value || '', [], selectedMajorIds,
+                            true, true);
                     });
                 }
             };
@@ -1225,7 +1346,7 @@
                 }
 
                 document.querySelectorAll(selector).forEach((form) => {
-                    form.addEventListener('submit', function (event) {
+                    form.addEventListener('submit', function(event) {
                         if (form.dataset.confirmed === '1') {
                             return;
                         }
@@ -1325,7 +1446,7 @@
                         showConfirmButton: false
                     });
                 @endif
-                                }
+            }
         });
     </script>
 @endsection
