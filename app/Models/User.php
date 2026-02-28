@@ -111,6 +111,11 @@ class User extends Authenticatable
         return $this->hasMany(StudentAttendance::class, 'teacher_id');
     }
 
+    public function lawRequests(): HasMany
+    {
+        return $this->hasMany(TeacherLawRequest::class, 'teacher_id');
+    }
+
     public function getAvatarUrlAttribute(): string
     {
         $avatar = trim((string) $this->avatar);

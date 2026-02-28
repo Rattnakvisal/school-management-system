@@ -209,16 +209,16 @@
         </section>
 
         <section class="grid gap-6 xl:grid-cols-12">
-            <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
+            <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
                 style="--d: 7;">
-                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h2 class="text-base font-bold text-slate-900">Students</h2>
-                    <span class="text-xs text-slate-500">Active vs Inactive</span>
+                    <span class="dashboard-card-meta text-xs text-slate-500">Active vs Inactive</span>
                 </div>
-                <div class="h-56 sm:h-64 md:h-72 lg:h-[280px]">
+                <div class="dashboard-chart-box h-56 sm:h-64 md:h-72 lg:h-[280px]">
                     <canvas id="studentsSnapshotChart" class="w-full h-full"></canvas>
                 </div>
-                <div class="mt-3 grid grid-cols-2 gap-3 text-center">
+                <div class="dashboard-summary-grid mt-3 grid grid-cols-2 gap-3 text-center">
                     <div class="rounded-xl border border-sky-100 bg-sky-50 px-3 py-2">
                         <div class="text-xs font-semibold text-slate-500">Active</div>
                         <div class="text-lg font-black text-slate-900">{{ number_format($studentsActive ?? 0) }}</div>
@@ -232,13 +232,13 @@
                 </div>
             </article>
 
-            <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
+            <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--d: 8;">
-                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h2 class="text-base font-bold text-slate-900">Attendance</h2>
-                    <span class="text-xs text-slate-500">Last 5 Days</span>
+                    <span class="dashboard-card-meta text-xs text-slate-500">Last 5 Days</span>
                 </div>
-                <div class="h-64 sm:h-72 md:h-80 lg:h-[320px]">
+                <div class="dashboard-chart-box dashboard-chart-box--tall h-64 sm:h-72 md:h-80 lg:h-[320px]">
                     <canvas id="attendanceOverviewChart" class="w-full h-full"></canvas>
                 </div>
                 @if (!($chartData['attendance']['hasData'] ?? false))
@@ -250,69 +250,69 @@
         </section>
 
         <section class="grid gap-6 xl:grid-cols-12">
-            <div class="space-y-6 xl:col-span-8">
-                <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+            <div class="space-y-6 min-w-0 xl:col-span-8">
+                <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
                     style="--d: 9;">
-                    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
                         <h2 class="text-base font-bold text-slate-900">Enrollment Trend (Last 6 Months)</h2>
-                        <span class="text-xs text-slate-500">Students vs Teachers</span>
+                        <span class="dashboard-card-meta text-xs text-slate-500">Students vs Teachers</span>
                     </div>
-                    <div class="h-64 sm:h-72 md:h-80 lg:h-[320px]">
+                    <div class="dashboard-chart-box dashboard-chart-box--tall h-64 sm:h-72 md:h-80 lg:h-[320px]">
                         <canvas id="enrollmentTrendChart" class="w-full h-full"></canvas>
                     </div>
                 </article>
 
                 <div class="grid gap-6 lg:grid-cols-2">
-                    <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+                    <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
                         style="--d: 10;">
-                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-bold text-slate-900">System Composition</h2>
-                            <span class="text-xs text-slate-500">Population split</span>
+                            <span class="dashboard-card-meta text-xs text-slate-500">Population split</span>
                         </div>
-                        <div class="h-56 sm:h-64 md:h-72 lg:h-[280px]">
+                        <div class="dashboard-chart-box h-56 sm:h-64 md:h-72 lg:h-[280px]">
                             <canvas id="compositionChart" class="w-full h-full"></canvas>
                         </div>
                     </article>
 
-                    <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+                    <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
                         style="--d: 11;">
-                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-bold text-slate-900">Study Period Distribution</h2>
-                            <span class="text-xs text-slate-500">Morning, night, and more</span>
+                            <span class="dashboard-card-meta text-xs text-slate-500">Morning, night, and more</span>
                         </div>
-                        <div class="h-56 sm:h-64 md:h-72 lg:h-[280px]">
+                        <div class="dashboard-chart-box h-56 sm:h-64 md:h-72 lg:h-[280px]">
                             <canvas id="periodChart" class="w-full h-full"></canvas>
                         </div>
                     </article>
                 </div>
 
                 <div class="grid gap-6 lg:grid-cols-2">
-                    <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+                    <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
                         style="--d: 12;">
-                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-bold text-slate-900">Top Class Load</h2>
-                            <span class="text-xs text-slate-500">Students per class</span>
+                            <span class="dashboard-card-meta text-xs text-slate-500">Students per class</span>
                         </div>
-                        <div class="h-56 sm:h-72 md:h-[300px] lg:h-[300px]">
+                        <div class="dashboard-chart-box dashboard-chart-box--medium h-56 sm:h-72 md:h-[300px] lg:h-[300px]">
                             <canvas id="classLoadChart" class="w-full h-full"></canvas>
                         </div>
                     </article>
 
-                    <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+                    <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
                         style="--d: 13;">
-                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-bold text-slate-900">Subject Health</h2>
-                            <span class="text-xs text-slate-500">Status and assignment</span>
+                            <span class="dashboard-card-meta text-xs text-slate-500">Status and assignment</span>
                         </div>
-                        <div class="h-56 sm:h-72 md:h-[300px] lg:h-[300px]">
+                        <div class="dashboard-chart-box dashboard-chart-box--medium h-56 sm:h-72 md:h-[300px] lg:h-[300px]">
                             <canvas id="subjectHealthChart" class="w-full h-full"></canvas>
                         </div>
                     </article>
                 </div>
             </div>
 
-            <div class="space-y-6 xl:col-span-4">
-                <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+            <div class="space-y-6 min-w-0 xl:col-span-4">
+                <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
                     style="--d: 14;">
                     <h2 class="text-base font-bold text-slate-900">Study Profile</h2>
                     <p class="mt-1 text-xs text-slate-500">How well students are mapped to major subjects and study times.
@@ -346,9 +346,9 @@
                     </div>
                 </article>
 
-                <article class="dash-reveal dash-hover rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+                <article class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
                     style="--d: 15;">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <h2 class="text-base font-bold text-slate-900">Latest Messages</h2>
                         <a href="{{ route('admin.contacts.index') }}" class="text-xs font-semibold text-slate-400">View
                             all</a>
@@ -400,7 +400,7 @@
                 </article>
 
                 <article
-                    class="dash-reveal dash-hover rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-5 shadow-sm ring-1 ring-indigo-100/60"
+                    class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-5 shadow-sm ring-1 ring-indigo-100/60"
                     style="--d: 16;">
                     <div class="mb-4 flex items-start justify-between gap-2">
                         <div>
@@ -509,6 +509,21 @@
             };
 
             const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const isCompactViewport = window.matchMedia('(max-width: 640px)').matches;
+            const dashboardLegend = (desktop = 'top', mobile = 'bottom') => ({
+                position: isCompactViewport ? mobile : desktop,
+                labels: {
+                    boxWidth: isCompactViewport ? 10 : 12,
+                    usePointStyle: true,
+                    padding: isCompactViewport ? 10 : 14,
+                    font: {
+                        size: isCompactViewport ? 11 : 12,
+                    },
+                },
+            });
+            const dashboardLayoutPadding = isCompactViewport
+                ? { left: 4, right: 4, top: 2, bottom: 0 }
+                : { left: 0, right: 0, top: 0, bottom: 0 };
             const chartDelay = (ctx, baseDelay = 0, step = 75) => {
                 if (ctx.type !== 'data' || ctx.mode !== 'default') {
                     return 0;
@@ -586,14 +601,11 @@
                             mode: 'index',
                             intersect: false,
                         },
+                        layout: {
+                            padding: dashboardLayoutPadding,
+                        },
                         plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    boxWidth: 12,
-                                    usePointStyle: true,
-                                }
-                            }
+                            legend: dashboardLegend('top', 'bottom'),
                         },
                         scales: {
                             y: {
@@ -632,14 +644,11 @@
                         maintainAspectRatio: false,
                         animation: buildStaggeredAnimation(150, 70, 980),
                         cutout: '68%',
+                        layout: {
+                            padding: dashboardLayoutPadding,
+                        },
                         plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    boxWidth: 12,
-                                    usePointStyle: true,
-                                }
-                            }
+                            legend: dashboardLegend('top', 'bottom'),
                         }
                     }
                 });
@@ -678,14 +687,11 @@
                         maintainAspectRatio: false,
                         animation: buildStaggeredAnimation(170, 65, 980),
                         animations: buildAxisAnimations(170),
+                        layout: {
+                            padding: dashboardLayoutPadding,
+                        },
                         plugins: {
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    boxWidth: 12,
-                                    usePointStyle: true,
-                                }
-                            }
+                            legend: dashboardLegend('top', 'bottom'),
                         },
                         scales: {
                             y: {
@@ -724,14 +730,11 @@
                         maintainAspectRatio: false,
                         animation: buildStaggeredAnimation(180, 80, 1020),
                         cutout: '62%',
+                        layout: {
+                            padding: dashboardLayoutPadding,
+                        },
                         plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    boxWidth: 12,
-                                    usePointStyle: true,
-                                }
-                            }
+                            legend: dashboardLegend('bottom', 'bottom'),
                         }
                     }
                 });
@@ -759,14 +762,11 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         animation: buildStaggeredAnimation(220, 70, 1000),
+                        layout: {
+                            padding: dashboardLayoutPadding,
+                        },
                         plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    boxWidth: 12,
-                                    usePointStyle: true,
-                                }
-                            }
+                            legend: dashboardLegend('bottom', 'bottom'),
                         },
                         scales: {
                             r: {

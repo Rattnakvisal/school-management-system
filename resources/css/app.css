@@ -277,6 +277,29 @@
         box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
     }
 
+    .dashboard-stage .dashboard-card {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .dashboard-stage .dashboard-card-header {
+        align-items: flex-start;
+    }
+
+    .dashboard-stage .dashboard-card-meta {
+        max-width: 100%;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .dashboard-stage .dashboard-chart-box {
+        min-width: 0;
+    }
+
+    .dashboard-stage .dashboard-chart-box canvas {
+        max-width: 100% !important;
+    }
+
     .dashboard-stage .dash-ring {
         opacity: 0;
         animation: dash-pop 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -599,6 +622,43 @@
 
     .admin-page-subtitle {
         color: var(--text-soft);
+    }
+
+    .admin-page-header__main {
+        position: relative;
+        z-index: 1;
+    }
+
+    .admin-page-header__intro {
+        min-width: 0;
+        flex: 1 1 20rem;
+    }
+
+    .admin-page-header__title-row {
+        align-items: flex-start;
+    }
+
+    .admin-page-header__stats {
+        width: 100%;
+        margin-top: 0.25rem;
+        justify-content: flex-start;
+    }
+
+    .admin-page-header__stats .admin-page-stat {
+        max-width: 100%;
+    }
+
+    @media (min-width: 1440px) {
+        .admin-page-header__main {
+            flex-wrap: nowrap;
+        }
+
+        .admin-page-header__stats {
+            width: auto;
+            max-width: min(100%, 46rem);
+            margin-left: auto;
+            justify-content: flex-end;
+        }
     }
 
     .teacher-page-header {
@@ -1324,6 +1384,43 @@
         .teacher-settings-stage .teacher-settings-panel {
             border-radius: 1.25rem;
         }
+
+        .dashboard-stage .dashboard-card {
+            padding: 1rem;
+        }
+
+        .dashboard-stage .dashboard-card-meta {
+            text-align: left;
+        }
+    }
+
+    @media (max-width: 1280px) {
+
+        .study-stage .admin-page-header__main,
+        .study-time-stage .admin-page-header__main {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .study-stage .admin-page-header__intro,
+        .study-time-stage .admin-page-header__intro {
+            flex: 0 1 auto;
+            width: 100%;
+        }
+
+        .study-stage .admin-page-header__stats,
+        .study-time-stage .admin-page-header__stats {
+            width: 100%;
+            max-width: none;
+            margin-left: 0;
+            justify-content: flex-start;
+        }
+
+        .study-stage .admin-page-title,
+        .study-time-stage .admin-page-title {
+            font-size: clamp(1.85rem, 5.8vw, 2.35rem);
+        }
     }
 
     @media (max-width: 640px) {
@@ -1333,6 +1430,45 @@
             margin-left: 0;
             width: 100%;
             justify-content: flex-start;
+        }
+
+        .dashboard-stage .dashboard-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dashboard-stage .dashboard-chart-box {
+            height: 220px !important;
+        }
+
+        .dashboard-stage .dashboard-chart-box--tall {
+            height: 250px !important;
+        }
+
+        .dashboard-stage .dashboard-chart-box--medium {
+            height: 240px !important;
+        }
+
+        .dashboard-stage .dashboard-summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .study-stage .admin-page-header,
+        .study-time-stage .admin-page-header {
+            padding: 1rem;
+        }
+
+        .study-stage .admin-page-header__title-row,
+        .study-time-stage .admin-page-header__title-row {
+            gap: 0.65rem;
+        }
+
+        .study-stage .admin-page-stat,
+        .study-time-stage .admin-page-stat {
+            white-space: normal;
+            line-height: 1.2;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.72rem;
         }
     }
 }

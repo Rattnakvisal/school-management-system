@@ -14,9 +14,9 @@
 @endphp
 
 <section class="{{ $sectionClass }}" style="--sd: {{ $delay }};">
-    <div class="flex flex-wrap items-start justify-between gap-5">
-        <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-3">
+    <div class="admin-page-header__main flex flex-wrap items-start justify-between gap-5">
+        <div class="admin-page-header__intro min-w-0 flex-1">
+            <div class="admin-page-header__title-row flex items-center gap-3">
                 <span class="admin-page-header__icon" aria-hidden="true">
                     @switch($iconName)
                         @case('students')
@@ -108,7 +108,7 @@
                     @if ($eyebrow !== '')
                         <div class="admin-page-header__eyebrow">{{ $eyebrow }}</div>
                     @endif
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">{{ $title }}</h1>
+                    <h1 class="admin-page-title text-2xl font-black tracking-tight sm:text-3xl">{{ $title }}</h1>
                 </div>
             </div>
 
@@ -124,7 +124,7 @@
         </div>
 
         @isset($stats)
-            <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-semibold">
+            <div class="admin-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold sm:gap-3">
                 {{ $stats }}
             </div>
         @endisset

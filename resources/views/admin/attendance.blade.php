@@ -18,6 +18,12 @@
                 <span class="admin-page-stat admin-page-stat--amber">Late:
                     {{ number_format($stats['late'] ?? 0) }}</span>
             </x-slot:stats>
+            <x-slot:actions>
+                <a href="{{ route('admin.attendance.teachers.index') }}"
+                    class="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">
+                    Open Teacher Attendance Check
+                </a>
+            </x-slot:actions>
         </x-admin.page-header>
 
         @if (!$hasAttendanceTable)

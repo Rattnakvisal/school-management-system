@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\StudentStudyController;
 use App\Http\Controllers\Admin\TimeStudyController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\TeacherAttendanceController;
 use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,8 @@ Route::middleware(['auth', 'admin'])
         Route::put('/time-studies/subjects/{subjectStudyTime}', [TimeStudyController::class, 'updateSubject'])->name('time-studies.subjects.update');
         Route::delete('/time-studies/subjects/{subjectStudyTime}', [TimeStudyController::class, 'destroySubject'])->name('time-studies.subjects.destroy');
         Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('/attendance/teachers', [TeacherAttendanceController::class, 'index'])->name('attendance.teachers.index');
+        Route::post('/attendance/teachers', [TeacherAttendanceController::class, 'store'])->name('attendance.teachers.store');
         Route::view('/exams', 'admin.exams')->name('exams.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
