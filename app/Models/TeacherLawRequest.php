@@ -11,6 +11,7 @@ class TeacherLawRequest extends Model
         'teacher_id',
         'law_type',
         'subject',
+        'subject_time',
         'requested_for',
         'reason',
         'status',

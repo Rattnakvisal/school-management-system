@@ -2,8 +2,7 @@
 
 @section('page')
     <div class="teacher-classes-stage space-y-6">
-        <section class="teacher-classes-reveal admin-page-header teacher-page-header"
-            style="--sd: 1;">
+        <section class="teacher-classes-reveal admin-page-header teacher-page-header" style="--sd: 1;">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h1 class="admin-page-title text-3xl font-black tracking-tight">My Classes</h1>
@@ -24,7 +23,8 @@
             </div>
         </section>
 
-        <section class="teacher-classes-reveal teacher-classes-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+        <section
+            class="teacher-classes-reveal teacher-classes-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
             style="--sd: 2;">
             <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                 <div class="flex items-center justify-between gap-3">
@@ -77,10 +77,12 @@
                                         <h4 class="text-xl font-bold text-slate-900">Room</h4>
                                         <select id="room" name="room"
                                             class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                            <option value="all" {{ ($room ?? 'all') === 'all' ? 'selected' : '' }}>All Rooms
+                                            <option value="all" {{ ($room ?? 'all') === 'all' ? 'selected' : '' }}>All
+                                                Rooms
                                             </option>
-                                            @foreach (($roomOptions ?? collect()) as $roomOption)
-                                                <option value="{{ $roomOption }}" {{ ($room ?? 'all') === (string) $roomOption ? 'selected' : '' }}>
+                                            @foreach ($roomOptions ?? collect() as $roomOption)
+                                                <option value="{{ $roomOption }}"
+                                                    {{ ($room ?? 'all') === (string) $roomOption ? 'selected' : '' }}>
                                                     {{ $roomOption }}
                                                 </option>
                                             @endforeach
@@ -92,12 +94,17 @@
                                             class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             <option value="all" {{ ($period ?? 'all') === 'all' ? 'selected' : '' }}>All
                                                 Periods</option>
-                                            <option value="morning" {{ ($period ?? 'all') === 'morning' ? 'selected' : '' }}>
+                                            <option value="morning"
+                                                {{ ($period ?? 'all') === 'morning' ? 'selected' : '' }}>
                                                 Morning</option>
-                                            <option value="afternoon" {{ ($period ?? 'all') === 'afternoon' ? 'selected' : '' }}>Afternoon</option>
-                                            <option value="evening" {{ ($period ?? 'all') === 'evening' ? 'selected' : '' }}>
+                                            <option value="afternoon"
+                                                {{ ($period ?? 'all') === 'afternoon' ? 'selected' : '' }}>Afternoon
+                                            </option>
+                                            <option value="evening"
+                                                {{ ($period ?? 'all') === 'evening' ? 'selected' : '' }}>
                                                 Evening</option>
-                                            <option value="night" {{ ($period ?? 'all') === 'night' ? 'selected' : '' }}>Night
+                                            <option value="night" {{ ($period ?? 'all') === 'night' ? 'selected' : '' }}>
+                                                Night
                                             </option>
                                             <option value="custom" {{ ($period ?? 'all') === 'custom' ? 'selected' : '' }}>
                                                 Custom</option>
@@ -107,10 +114,15 @@
                                         <h4 class="text-xl font-bold text-slate-900">Schedule</h4>
                                         <select id="schedule" name="schedule"
                                             class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                            <option value="all" {{ ($schedule ?? 'all') === 'all' ? 'selected' : '' }}>All
+                                            <option value="all" {{ ($schedule ?? 'all') === 'all' ? 'selected' : '' }}>
+                                                All
                                                 Schedules</option>
-                                            <option value="with_schedule" {{ ($schedule ?? 'all') === 'with_schedule' ? 'selected' : '' }}>With Schedule</option>
-                                            <option value="without_schedule" {{ ($schedule ?? 'all') === 'without_schedule' ? 'selected' : '' }}>Without Schedule</option>
+                                            <option value="with_schedule"
+                                                {{ ($schedule ?? 'all') === 'with_schedule' ? 'selected' : '' }}>With
+                                                Schedule</option>
+                                            <option value="without_schedule"
+                                                {{ ($schedule ?? 'all') === 'without_schedule' ? 'selected' : '' }}>Without
+                                                Schedule</option>
                                         </select>
                                     </section>
                                 </div>
@@ -143,13 +155,15 @@
                                         @forelse ($classes as $schoolClass)
                                             <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
                                                 <td class="px-3 py-3">
-                                                    <div class="font-semibold text-slate-900">{{ $schoolClass->display_name }}
+                                                    <div class="font-semibold text-slate-900">
+                                                        {{ $schoolClass->display_name }}
                                                     </div>
                                                     <div class="text-xs text-slate-500">
                                                         Capacity: {{ $schoolClass->capacity ?: 'N/A' }}
                                                     </div>
                                                 </td>
-                                                <td class="px-3 py-3 text-slate-700">{{ $schoolClass->room ?: 'N/A' }}</td>
+                                                <td class="px-3 py-3 text-slate-700">{{ $schoolClass->room ?: 'N/A' }}
+                                                </td>
                                                 <td class="px-3 py-3 text-slate-700">
                                                     {{ number_format($schoolClass->students_count ?? 0) }}</td>
                                                 <td class="px-3 py-3">
@@ -169,7 +183,8 @@
                                                         @forelse ($schoolClass->studySchedules as $slot)
                                                             @php
                                                                 $periodKey = strtolower((string) $slot->period);
-                                                                $periodLabel = $periodLabels[$periodKey] ?? ucfirst($periodKey);
+                                                                $periodLabel =
+                                                                    $periodLabels[$periodKey] ?? ucfirst($periodKey);
                                                             @endphp
                                                             <span
                                                                 class="inline-flex items-center gap-1.5 rounded-lg border border-sky-100 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
@@ -195,7 +210,8 @@
                                                     <div x-show="open" x-cloak
                                                         class="fixed inset-0 z-[70] grid place-items-center p-4"
                                                         aria-modal="true" role="dialog">
-                                                        <div class="absolute inset-0 bg-slate-900/50" @click="open = false">
+                                                        <div class="absolute inset-0 bg-slate-900/50"
+                                                            @click="open = false">
                                                         </div>
 
                                                         <div
@@ -217,20 +233,23 @@
                                                             <div class="grid gap-4 sm:grid-cols-3">
                                                                 <div
                                                                     class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                                                                    <div class="text-xs font-semibold text-slate-500">Room</div>
+                                                                    <div class="text-xs font-semibold text-slate-500">Room
+                                                                    </div>
                                                                     <div class="mt-1 text-sm font-semibold text-slate-900">
                                                                         {{ $schoolClass->room ?: 'N/A' }}</div>
                                                                 </div>
                                                                 <div
                                                                     class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                                                                    <div class="text-xs font-semibold text-slate-500">Capacity
+                                                                    <div class="text-xs font-semibold text-slate-500">
+                                                                        Capacity
                                                                     </div>
                                                                     <div class="mt-1 text-sm font-semibold text-slate-900">
                                                                         {{ $schoolClass->capacity ?: 'N/A' }}</div>
                                                                 </div>
                                                                 <div
                                                                     class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                                                                    <div class="text-xs font-semibold text-slate-500">Students
+                                                                    <div class="text-xs font-semibold text-slate-500">
+                                                                        Students
                                                                     </div>
                                                                     <div class="mt-1 text-sm font-semibold text-slate-900">
                                                                         {{ number_format($schoolClass->students_count ?? 0) }}
@@ -239,7 +258,8 @@
                                                             </div>
 
                                                             <div class="mt-4">
-                                                                <h4 class="text-sm font-black text-slate-900">Subjects You Teach
+                                                                <h4 class="text-sm font-black text-slate-900">Subjects You
+                                                                    Teach
                                                                 </h4>
                                                                 <div class="mt-2 flex flex-wrap gap-2">
                                                                     @forelse ($schoolClass->subjects as $subject)
@@ -260,8 +280,12 @@
                                                                 <div class="mt-2 space-y-2">
                                                                     @forelse ($schoolClass->studySchedules as $slot)
                                                                         @php
-                                                                            $periodKey = strtolower((string) $slot->period);
-                                                                            $periodLabel = $periodLabels[$periodKey] ?? ucfirst($periodKey);
+                                                                            $periodKey = strtolower(
+                                                                                (string) $slot->period,
+                                                                            );
+                                                                            $periodLabel =
+                                                                                $periodLabels[$periodKey] ??
+                                                                                ucfirst($periodKey);
                                                                         @endphp
                                                                         <div
                                                                             class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
@@ -300,6 +324,8 @@
                         <div class="mt-5">
                             {{ $classes->links() }}
                         </div>
+                    </div>
+                </div>
         </section>
     </div>
 @endsection

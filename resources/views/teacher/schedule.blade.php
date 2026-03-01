@@ -338,7 +338,7 @@
             const dayLabels = @json($dayOptions ?? []);
             const selectedDay = String(@json($selectedDay ?? 'all')).toLowerCase();
             const weekDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-            const validDayKeys = new Set(weekDays);
+            const validDayKeys = new Set(weekDays);     
 
             const toSeconds = (value) => {
                 const parts = String(value || '').split(':');

@@ -30,28 +30,28 @@
         </section>
 
         @if (session('success'))
-            <div class="teacher-time-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
+            <div class="js-inline-flash teacher-time-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
                 style="--sd: 2;">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('warning'))
-            <div class="teacher-time-reveal rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700"
+            <div class="js-inline-flash teacher-time-reveal rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700"
                 style="--sd: 2;">
                 {{ session('warning') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="teacher-time-reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+            <div class="js-inline-flash teacher-time-reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
                 style="--sd: 2;">
                 {{ session('error') }}
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="teacher-time-reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            <div class="js-inline-flash teacher-time-reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
                 style="--sd: 2;">
                 {{ $errors->first() }}
             </div>
@@ -155,7 +155,8 @@
             </aside>
 
             @if (!$hasAttendanceTable)
-                <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+                <div
+                    class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
                     Attendance table is missing. Run `php artisan migrate` to enable attendance check.
                 </div>
             @endif
@@ -163,7 +164,8 @@
             @if (($classes ?? collect())->count() > 0)
                 <div class="mt-5">
                     <h3 class="text-sm font-black text-slate-900">Classes Grid</h3>
-                    <p class="mt-1 text-xs text-slate-500">Click a class to load users table with class times and subjects.</p>
+                    <p class="mt-1 text-xs text-slate-500">Click a class to load users table with class times and subjects.
+                    </p>
                     <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                         @foreach ($classes as $classOption)
                             @php
@@ -182,10 +184,20 @@
                                 $activeRingClass = $isActiveClass
                                     ? ($isSaved
                                         ? ' ring-2 ring-emerald-300'
-                                        : ($isPending ? ' ring-2 ring-red-300' : ' ring-2 ring-slate-300'))
+                                        : ($isPending
+                                            ? ' ring-2 ring-red-300'
+                                            : ' ring-2 ring-slate-300'))
                                     : '';
-                                $titleClass = $isSaved ? 'text-emerald-900' : ($isPending ? 'text-red-900' : 'text-slate-900');
-                                $roomClass = $isSaved ? 'text-emerald-700' : ($isPending ? 'text-red-700' : 'text-slate-500');
+                                $titleClass = $isSaved
+                                    ? 'text-emerald-900'
+                                    : ($isPending
+                                        ? 'text-red-900'
+                                        : 'text-slate-900');
+                                $roomClass = $isSaved
+                                    ? 'text-emerald-700'
+                                    : ($isPending
+                                        ? 'text-red-700'
+                                        : 'text-slate-500');
                                 $badgeClass = $isSaved
                                     ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
                                     : ($isPending
@@ -194,8 +206,14 @@
                                 $statusLabel = $isSaved ? 'Saved' : ($isPending ? 'Check Attendance' : 'No Students');
                                 $slotPreview = collect($classOption->studySchedules ?? [])->take(2);
                                 $subjectPreview = collect($classOption->subjects ?? [])->take(2);
-                                $moreSlots = max(0, (int) (($classOption->class_slots_count ?? 0) - $slotPreview->count()));
-                                $moreSubjects = max(0, (int) (($classOption->taught_subjects_count ?? 0) - $subjectPreview->count()));
+                                $moreSlots = max(
+                                    0,
+                                    (int) (($classOption->class_slots_count ?? 0) - $slotPreview->count()),
+                                );
+                                $moreSubjects = max(
+                                    0,
+                                    (int) (($classOption->taught_subjects_count ?? 0) - $subjectPreview->count()),
+                                );
                             @endphp
                             <a href="{{ route('teacher.attendance.index', ['class_id' => $classOption->id, 'date' => $selectedDate]) }}"
                                 class="rounded-2xl border px-4 py-3 transition {{ $cardColorClass }}{{ $activeRingClass }}">
@@ -221,16 +239,19 @@
                                         class="rounded-full border px-2 py-0.5 {{ $isSaved ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : ($isPending ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-white text-slate-600') }}">
                                         Checked: {{ number_format($checkedCount) }}/{{ number_format($studentsCount) }}
                                     </span>
-                                    <span class="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700">
+                                    <span
+                                        class="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700">
                                         Subjects: {{ number_format($classOption->taught_subjects_count ?? 0) }}
                                     </span>
-                                    <span class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
+                                    <span
+                                        class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
                                         Times: {{ number_format($classOption->class_slots_count ?? 0) }}
                                     </span>
                                 </div>
 
                                 <div class="mt-3 space-y-1.5">
-                                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Class Times</div>
+                                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Class Times
+                                    </div>
                                     @if ($slotPreview->isEmpty())
                                         <div class="text-[11px] font-semibold text-slate-400">No class times</div>
                                     @else
@@ -239,21 +260,29 @@
                                                 @php
                                                     $periodKey = strtolower((string) ($slot->period ?? 'custom'));
                                                     $periodLabel = $periodLabels[$periodKey] ?? ucfirst($periodKey);
-                                                    $startText = $slot->start_time ? \Carbon\Carbon::parse($slot->start_time)->format('h:i A') : '--';
-                                                    $endText = $slot->end_time ? \Carbon\Carbon::parse($slot->end_time)->format('h:i A') : '--';
+                                                    $startText = $slot->start_time
+                                                        ? \Carbon\Carbon::parse($slot->start_time)->format('h:i A')
+                                                        : '--';
+                                                    $endText = $slot->end_time
+                                                        ? \Carbon\Carbon::parse($slot->end_time)->format('h:i A')
+                                                        : '--';
                                                     $slotText = $periodLabel . ' ' . $startText . '->' . $endText;
                                                     if (($hasClassDayColumn ?? false) && isset($slot->day_of_week)) {
-                                                        $slotDayKey = strtolower((string) ($slot->day_of_week ?? 'all'));
+                                                        $slotDayKey = strtolower(
+                                                            (string) ($slot->day_of_week ?? 'all'),
+                                                        );
                                                         $slotDayLabel = $dayLabels[$slotDayKey] ?? ucfirst($slotDayKey);
                                                         $slotText = $slotDayLabel . ' | ' . $slotText;
                                                     }
                                                 @endphp
-                                                <span class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+                                                <span
+                                                    class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700">
                                                     {{ $slotText }}
                                                 </span>
                                             @endforeach
                                             @if ($moreSlots > 0)
-                                                <span class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                                                <span
+                                                    class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
                                                     +{{ $moreSlots }} more
                                                 </span>
                                             @endif
@@ -262,18 +291,21 @@
                                 </div>
 
                                 <div class="mt-3 space-y-1.5">
-                                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Subjects</div>
+                                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Subjects
+                                    </div>
                                     @if ($subjectPreview->isEmpty())
                                         <div class="text-[11px] font-semibold text-slate-400">No subjects</div>
                                     @else
                                         <div class="flex flex-wrap gap-1.5">
                                             @foreach ($subjectPreview as $subject)
-                                                <span class="rounded-lg border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">
+                                                <span
+                                                    class="rounded-lg border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">
                                                     {{ $subject->name }}
                                                 </span>
                                             @endforeach
                                             @if ($moreSubjects > 0)
-                                                <span class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                                                <span
+                                                    class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
                                                     +{{ $moreSubjects }} more
                                                 </span>
                                             @endif
@@ -296,7 +328,7 @@
             @else
                 @php
                     $selectedClassStatus = $classAttendanceStatus[(int) ($classId ?? 0)] ?? null;
-                    $isSelectedClassSaved = (($selectedClassStatus['state'] ?? '') === 'saved');
+                    $isSelectedClassSaved = ($selectedClassStatus['state'] ?? '') === 'saved';
                 @endphp
                 <form method="POST" action="{{ route('teacher.attendance.store') }}" class="mt-5 space-y-4">
                     @csrf
@@ -309,11 +341,13 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
-                            <button type="button" data-set-all-status="present" {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                            <button type="button" data-set-all-status="present"
+                                {{ $isSelectedClassSaved ? 'disabled' : '' }}
                                 class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">
                                 Set All Present
                             </button>
-                            <button type="button" data-set-all-status="absent" {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                            <button type="button" data-set-all-status="absent"
+                                {{ $isSelectedClassSaved ? 'disabled' : '' }}
                                 class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50">
                                 Set All Absent
                             </button>
@@ -329,8 +363,10 @@
                         </p>
                     @endif
                     <p class="text-xs font-semibold text-slate-500">
-                        Saving attendance for <span class="text-slate-700">{{ $selectedClass?->display_name ?? 'N/A' }}</span>
-                        on <span class="text-slate-700">{{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}</span>.
+                        Saving attendance for <span
+                            class="text-slate-700">{{ $selectedClass?->display_name ?? 'N/A' }}</span>
+                        on <span
+                            class="text-slate-700">{{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}</span>.
                     </p>
 
                     <div class="overflow-hidden rounded-2xl border border-slate-200">
@@ -338,21 +374,28 @@
                             <table class="w-full min-w-[1080px] text-left text-sm">
                                 <thead
                                     class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                                <tr>
-                                    <th class="px-3 py-3 font-semibold">Users</th>
-                                    <th class="px-3 py-3 font-semibold">Email</th>
-                                    <th class="px-3 py-3 font-semibold">Current ({{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }})</th>
-                                    <th class="px-3 py-3 font-semibold">Check Status</th>
-                                    <th class="px-3 py-3 font-semibold">Remark</th>
-                                </tr>
-                            </thead>
+                                    <tr>
+                                        <th class="px-3 py-3 font-semibold">Users</th>
+                                        <th class="px-3 py-3 font-semibold">Email</th>
+                                        <th class="px-3 py-3 font-semibold">Current
+                                            ({{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }})</th>
+                                        <th class="px-3 py-3 font-semibold">Check Status</th>
+                                        <th class="px-3 py-3 font-semibold">Remark</th>
+                                    </tr>
+                                </thead>
                                 <tbody class="divide-y divide-slate-100 bg-white">
                                     @forelse ($students as $student)
                                         @php
                                             $record = $attendanceByStudent->get($student->id);
                                             $currentStatus = strtolower((string) ($record?->status ?? ''));
-                                            $selectedStatus = old('attendance.' . $student->id . '.status', $currentStatus !== '' ? $currentStatus : 'present');
-                                            $remarkValue = old('attendance.' . $student->id . '.remark', (string) ($record?->remark ?? ''));
+                                            $selectedStatus = old(
+                                                'attendance.' . $student->id . '.status',
+                                                $currentStatus !== '' ? $currentStatus : 'present',
+                                            );
+                                            $remarkValue = old(
+                                                'attendance.' . $student->id . '.remark',
+                                                (string) ($record?->remark ?? ''),
+                                            );
                                         @endphp
                                         <tr class="js-attendance-row align-top hover:bg-slate-50/80"
                                             data-student-name="{{ $student->name }}">
@@ -375,16 +418,33 @@
                                                 @endif
                                             </td>
                                             <td class="px-3 py-3">
-                                                <select name="attendance[{{ $student->id }}][status]"
-                                                    {{ $isSelectedClassSaved ? 'disabled' : '' }}
-                                                    class="js-student-status w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500">
-                                                    @foreach ($statusLabels as $statusKey => $statusLabel)
-                                                        <option value="{{ $statusKey }}"
-                                                            {{ $selectedStatus === $statusKey ? 'selected' : '' }}>
-                                                            {{ $statusLabel }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
+                                                <div class="space-y-2">
+                                                    <select name="attendance[{{ $student->id }}][status]"
+                                                        {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                                                        class="js-student-status sr-only" tabindex="-1"
+                                                        aria-hidden="true">
+                                                        @foreach ($statusLabels as $statusKey => $statusLabel)
+                                                            <option value="{{ $statusKey }}"
+                                                                {{ $selectedStatus === $statusKey ? 'selected' : '' }}>
+                                                                {{ $statusLabel }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div class="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                                                        @foreach ($statusLabels as $statusKey => $statusLabel)
+                                                            @php
+                                                                $isActiveStatus = $selectedStatus === $statusKey;
+                                                            @endphp
+                                                            <button type="button"
+                                                                data-status-option="{{ $statusKey }}"
+                                                                {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                                                                aria-pressed="{{ $isActiveStatus ? 'true' : 'false' }}"
+                                                                class="js-status-box rounded-lg border px-2 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 {{ $isActiveStatus ? 'border-indigo-300 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-indigo-700' }}">
+                                                                {{ $statusLabel }}
+                                                            </button>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td class="px-3 py-3">
                                                 <input type="text" name="attendance[{{ $student->id }}][remark]"
@@ -409,114 +469,54 @@
         </section>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const statusFields = Array.from(document.querySelectorAll('.js-student-status'));
-            const statusCards = Array.from(document.querySelectorAll('.js-attendance-card'));
-            const statusCountTargets = Array.from(document.querySelectorAll('[data-count-for]'));
-            const tableRows = Array.from(document.querySelectorAll('.js-attendance-row'));
-            const cardTitle = document.getElementById('attendance-card-title');
-            const cardCount = document.getElementById('attendance-card-count');
-            const cardList = document.getElementById('attendance-card-list');
-            const cardEmpty = document.getElementById('attendance-card-empty');
-            let activeStatus = 'all';
+            if (typeof Swal === 'undefined') return;
 
-            const updateCardActiveStyles = () => {
-                statusCards.forEach((card) => {
-                    const cardStatus = String(card.dataset.statusCard || 'all');
-                    if (cardStatus === activeStatus) {
-                        card.classList.add('ring-2', 'ring-indigo-300');
-                    } else {
-                        card.classList.remove('ring-2', 'ring-indigo-300');
-                    }
+            const alerts = [];
+            @if (session('success'))
+                alerts.push({
+                    icon: 'success',
+                    title: 'Success',
+                    text: @json(session('success'))
                 });
-            };
-
-            const buildBuckets = () => {
-                const buckets = {
-                    all: [],
-                    present: [],
-                    absent: [],
-                    late: [],
-                    excused: [],
-                };
-
-                tableRows.forEach((row) => {
-                    const name = String(row.dataset.studentName || '').trim();
-                    const statusSelect = row.querySelector('.js-student-status');
-                    const status = String(statusSelect?.value || '').toLowerCase();
-                    if (name !== '') {
-                        buckets.all.push(name);
-                        if (Array.isArray(buckets[status])) {
-                            buckets[status].push(name);
-                        }
-                    }
+            @endif
+            @if (session('warning'))
+                alerts.push({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: @json(session('warning'))
                 });
-
-                return buckets;
-            };
-
-            const renderStudentListFromStatus = () => {
-                if (!cardTitle || !cardCount || !cardList || !cardEmpty) return;
-                const buckets = buildBuckets();
-                const names = buckets[activeStatus] || [];
-
-                statusCountTargets.forEach((target) => {
-                    const statusKey = String(target.getAttribute('data-count-for') || 'all');
-                    target.textContent = String((buckets[statusKey] || []).length);
+            @endif
+            @if (session('error'))
+                alerts.push({
+                    icon: 'error',
+                    title: 'Error',
+                    text: @json(session('error'))
                 });
-
-                const activeCard = statusCards.find((card) => String(card.dataset.statusCard || '') === activeStatus);
-                const title = String(activeCard?.dataset.statusLabel || 'Students');
-
-                cardTitle.textContent = title;
-                cardCount.textContent = `${names.length} student(s)`;
-                cardList.innerHTML = '';
-
-                if (names.length === 0) {
-                    cardEmpty.classList.remove('hidden');
-                    return;
-                }
-
-                cardEmpty.classList.add('hidden');
-                names.forEach((name, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700';
-                    li.textContent = `${index + 1}. ${name}`;
-                    cardList.appendChild(li);
+            @endif
+            @if ($errors->any())
+                alerts.push({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: @json($errors->first())
                 });
-            };
+            @endif
 
-            statusCards.forEach((card) => {
-                card.addEventListener('click', () => {
-                    activeStatus = String(card.dataset.statusCard || 'all');
-                    updateCardActiveStyles();
-                    renderStudentListFromStatus();
-                });
+            if (alerts.length === 0) return;
+
+            document.querySelectorAll('.js-inline-flash').forEach((element) => {
+                element.classList.add('hidden');
             });
 
-            statusFields.forEach((field) => {
-                field.addEventListener('change', renderStudentListFromStatus);
-            });
-
-            document.querySelectorAll('[data-set-all-status]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    const status = String(button.getAttribute('data-set-all-status') || '');
-                    if (!status) return;
-
-                    statusFields.forEach((field) => {
-                        const option = field.querySelector(`option[value="${status}"]`);
-                        if (option) {
-                            field.value = status;
-                        }
-                    });
-
-                    renderStudentListFromStatus();
-                });
-            });
-
-            updateCardActiveStyles();
-            renderStudentListFromStatus();
+            alerts.reduce((chain, config) => {
+                return chain.then(() => Swal.fire({
+                    ...config,
+                    confirmButtonColor: '#4f46e5',
+                }));
+            }, Promise.resolve());
         });
     </script>
+    <script src="../js/Teacher/Attendence.js"></script>
 @endsection
