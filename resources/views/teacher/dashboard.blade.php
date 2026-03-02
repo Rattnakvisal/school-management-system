@@ -42,7 +42,7 @@
         <div class="grid gap-6 xl:grid-cols-12">
             <section class="dash-reveal dash-hover rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7"
                 style="--d: 2;">
-                <div class="mb-4 flex items-center justify-between">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h2 class="text-lg font-black text-slate-900">Today's Schedule</h2>
                     <div class="flex items-center gap-2">
                         <span id="dashboard-live-time"
@@ -96,7 +96,7 @@
 
             <section class="dash-reveal dash-hover rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5"
                 style="--d: 3;">
-                <div class="mb-4 flex items-center justify-between">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h2 class="text-lg font-black text-slate-900">Weekly Schedule</h2>
                     <a href="{{ route('teacher.schedule.index') }}"
                         class="text-xs font-semibold text-indigo-600 hover:text-indigo-500">

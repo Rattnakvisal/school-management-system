@@ -246,8 +246,7 @@
 
             {{-- TOPBAR --}}
             <header class="sticky top-0 z-30 bg-slate-100/80 backdrop-blur border-b border-slate-200">
-                <div
-                    class="min-h-16 px-4 sm:px-4 lg:px-4 flex flex-wrap items-center gap-2 sm:gap-3 md:flex-nowrap">
+                <div class="min-h-16 px-4 sm:px-4 lg:px-4 flex flex-wrap items-center gap-2 sm:gap-3 md:flex-nowrap">
 
                     {{-- Mobile menu button --}}
                     <button

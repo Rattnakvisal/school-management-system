@@ -27,7 +27,7 @@
             class="teacher-classes-reveal teacher-classes-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
             style="--sd: 2;">
             <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
-                <div class="flex items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
                     <h2 class="text-lg font-black text-slate-900">Class List</h2>
                     <button type="button" @click="filterOpen = true"
                         class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
@@ -215,8 +215,8 @@
                                                         </div>
 
                                                         <div
-                                                            class="relative z-10 w-full max-w-2xl rounded-3xl bg-white p-5 shadow-2xl">
-                                                            <div class="mb-4 flex items-center justify-between">
+                                                            class="relative z-10 w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:max-h-[85vh]">
+                                                            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                                                                 <h3 class="text-lg font-black text-slate-900">
                                                                     Class Detail: {{ $schoolClass->display_name }}
                                                                 </h3>
@@ -288,7 +288,7 @@
                                                                                 ucfirst($periodKey);
                                                                         @endphp
                                                                         <div
-                                                                            class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                                                                            class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
                                                                             <span
                                                                                 class="font-semibold text-slate-800">{{ $periodLabel }}</span>
                                                                             <span class="font-semibold text-slate-600">

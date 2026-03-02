@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\SchoolClass;
 use App\Models\StudentAttendance;
 use App\Models\Subject;
@@ -237,6 +238,30 @@ class AttendanceController extends Controller
             }
         }
 
+        $attendanceAlertNotifications = Notification::query()
+            ->where('type', 'teacher_attendance_checked')
+            ->where('is_read', false)
+            ->where('message', 'like', '%[teacher_id:' . $teacherId . ']%')
+            ->latest()
+            ->take(5)
+            ->get(['id', 'title', 'message']);
+
+        $attendanceAlerts = $attendanceAlertNotifications
+            ->map(function ($notification) {
+                return [
+                    'title' => trim((string) ($notification->title ?? 'Attendance Checked')),
+                    'text' => $this->cleanTeacherNotificationText((string) ($notification->message ?? '')),
+                ];
+            })
+            ->values()
+            ->all();
+
+        if ($attendanceAlertNotifications->isNotEmpty()) {
+            Notification::query()
+                ->whereIn('id', $attendanceAlertNotifications->pluck('id')->all())
+                ->update(['is_read' => true]);
+        }
+
         return view('teacher.attendance', [
             'classes' => $classes,
             'classId' => $selectedClassId !== null ? (string) $selectedClassId : '',
@@ -247,6 +272,7 @@ class AttendanceController extends Controller
             'attendanceByStudent' => $attendanceByStudent,
             'statusLabels' => $allowedStatuses,
             'summary' => $summary,
+            'attendanceAlerts' => $attendanceAlerts,
             'hasAttendanceTable' => $hasAttendanceTable,
             'classAttendanceStatus' => $classAttendanceStatus,
             'hasClassDayColumn' => $hasClassDayColumn,
@@ -409,5 +435,13 @@ class AttendanceController extends Controller
             'late' => 'Late',
             'excused' => 'Excused',
         ];
+    }
+
+    private function cleanTeacherNotificationText(string $rawText): string
+    {
+        $text = trim($rawText);
+        $text = preg_replace('/\[teacher_id:\d+\]\s*/', '', $text);
+
+        return trim((string) $text);
     }
 }

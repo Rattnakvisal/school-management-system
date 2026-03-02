@@ -59,12 +59,37 @@ class LawRequestController extends Controller
             })
             ->toArray();
 
+        $approvalAlertNotifications = Notification::query()
+            ->where('type', 'teacher_law_request_approved')
+            ->where('is_read', false)
+            ->where('message', 'like', '%[teacher_id:' . $teacherId . ']%')
+            ->latest()
+            ->take(5)
+            ->get(['id', 'title', 'message']);
+
+        $approvalAlerts = $approvalAlertNotifications
+            ->map(function ($notification) {
+                return [
+                    'title' => trim((string) ($notification->title ?? 'Law request approved')),
+                    'text' => $this->cleanTeacherNotificationText((string) ($notification->message ?? '')),
+                ];
+            })
+            ->values()
+            ->all();
+
+        if ($approvalAlertNotifications->isNotEmpty()) {
+            Notification::query()
+                ->whereIn('id', $approvalAlertNotifications->pluck('id')->all())
+                ->update(['is_read' => true]);
+        }
+
         return view('teacher.law-requests', [
             'lawTypes' => $lawTypes,
             'lawRequests' => $lawRequests,
             'subjectOptions' => $subjectOptions,
             'subjectTimeOptionsBySubject' => $subjectTimeMap,
             'editingRequest' => $editingRequest,
+            'approvalAlerts' => $approvalAlerts,
             'formDefaults' => [
                 'law_type' => $defaultLawType,
                 'subject_id' => $defaultSubjectId,
@@ -93,12 +118,20 @@ class LawRequestController extends Controller
         if ($resolved['subject_time'] !== '') {
             $notificationSubject .= ' @ ' . $resolved['subject_time'];
         }
+        $requestedForDate = trim((string) ($resolved['payload']['requested_for'] ?? ''));
+        $notificationDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $requestedForDate)
+            ? $requestedForDate
+            : now()->toDateString();
 
         Notification::query()->create([
             'type' => 'teacher_law_request',
             'title' => 'New teacher law request',
-            'message' => ($teacher?->name ?? 'Teacher') . ' submitted a law request: ' . $notificationSubject,
-            'url' => route('teacher.law-requests.index'),
+            'message' => ($teacher?->name ?? 'Teacher')
+                . ' submitted a law request for '
+                . Carbon::parse($notificationDate)->format('M d, Y')
+                . ': '
+                . $notificationSubject,
+            'url' => route('admin.attendance.teachers.index', ['date' => $notificationDate]),
             'is_read' => false,
         ]);
 
@@ -551,6 +584,14 @@ class LawRequestController extends Controller
         return rtrim(substr($clean, 0, $max));
     }
 
+    private function cleanTeacherNotificationText(string $rawText): string
+    {
+        $text = trim($rawText);
+        $text = preg_replace('/\[teacher_id:\d+\]\s*/', '', $text);
+
+        return trim((string) $text);
+    }
+
     private function lawTypes(): array
     {
         return [
@@ -562,4 +603,3 @@ class LawRequestController extends Controller
         ];
     }
 }
-

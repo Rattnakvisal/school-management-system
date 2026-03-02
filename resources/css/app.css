@@ -1371,6 +1371,17 @@
             font-size: clamp(1.55rem, 5vw, 2rem);
         }
 
+        .teacher-page-header__actions {
+            margin-left: 0;
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .teacher-settings-stage .teacher-settings-cta {
+            width: 100%;
+            justify-content: center;
+        }
+
         .stage .overflow-x-auto {
             padding: 0.2rem;
             border-radius: 0.85rem;
@@ -1391,6 +1402,15 @@
 
         .dashboard-stage .dashboard-card-meta {
             text-align: left;
+        }
+
+        .teacher-classes-stage .max-h-\[560px\],
+        .teacher-time-stage .max-h-\[560px\],
+        .teacher-time-stage .max-h-\[620px\],
+        .teacher-settings-stage .max-h-\[360px\],
+        .teacher-settings-stage .max-h-\[560px\],
+        .teacher-settings-stage .max-h-\[620px\] {
+            -webkit-overflow-scrolling: touch;
         }
     }
 
@@ -1430,6 +1450,23 @@
             margin-left: 0;
             width: 100%;
             justify-content: flex-start;
+        }
+
+        .teacher-time-stage .admin-page-stat,
+        .teacher-classes-stage .admin-page-stat,
+        .teacher-settings-stage .admin-page-stat {
+            max-width: 100%;
+            white-space: normal;
+            line-height: 1.2;
+        }
+
+        .teacher-time-stage table,
+        .teacher-classes-stage table {
+            min-width: 860px;
+        }
+
+        .teacher-settings-stage table {
+            min-width: 720px;
         }
 
         .dashboard-stage .dashboard-card-header {

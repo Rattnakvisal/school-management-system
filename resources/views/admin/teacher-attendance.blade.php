@@ -16,6 +16,8 @@
                     {{ number_format($stats['late'] ?? 0) }}</span>
                 <span class="admin-page-stat admin-page-stat--cyan">Not Marked:
                     {{ number_format($stats['not_marked'] ?? 0) }}</span>
+                <span class="admin-page-stat admin-page-stat--indigo">Law Requests:
+                    {{ number_format($stats['law_requests'] ?? 0) }}</span>
             </x-slot:stats>
             <x-slot:actions>
                 <a href="{{ route('admin.attendance.index') }}"
@@ -57,6 +59,17 @@
             <div class="attendence-reveal rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700"
                 style="--sd: 2;">
                 Teacher attendance table is missing. Run <code>php artisan migrate</code> to enable this page.
+            </div>
+        @endif
+
+        @if (($lawRequestSummary['pending'] ?? 0) > 0)
+            <div class="attendence-reveal rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-700"
+                style="--sd: 2;">
+                Law requests found for {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}:
+                {{ number_format($lawRequestSummary['total'] ?? 0) }} teacher(s)
+                (Approved: {{ number_format($lawRequestSummary['approved'] ?? 0) }},
+                Pending: {{ number_format($lawRequestSummary['pending'] ?? 0) }}).
+                Attendance will auto-save as <strong>Excused</strong> only for <strong>Approved</strong> requests.
             </div>
         @endif
 
@@ -151,6 +164,12 @@
                 @csrf
                 <input type="hidden" name="attendance_date" value="{{ $date }}">
 
+                @if (!($hasUnlockedTeachers ?? true) && ($teachers ?? collect())->isNotEmpty())
+                    <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+                        Attendance saved successfully for this date. Status cannot be changed again.
+                    </div>
+                @endif
+
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="text-sm font-semibold text-slate-600">
                         Teacher rows: {{ number_format(($teachers ?? collect())->count()) }}
@@ -158,15 +177,17 @@
 
                     <div class="flex flex-wrap items-center gap-2">
                         <button type="button" data-set-all-status="present"
-                            class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100">
+                            {{ !($hasUnlockedTeachers ?? true) ? 'disabled' : '' }}
+                            class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">
                             Set All Present
                         </button>
                         <button type="button" data-set-all-status="absent"
-                            class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100">
+                            {{ !($hasUnlockedTeachers ?? true) ? 'disabled' : '' }}
+                            class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50">
                             Set All Absent
                         </button>
-                        <button type="submit"
-                            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500">
+                        <button type="submit" {{ !$hasTeacherAttendanceTable || !($hasUnlockedTeachers ?? true) ? 'disabled' : '' }}
+                            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50">
                             Save Teacher Attendance
                         </button>
                     </div>
@@ -178,7 +199,8 @@
                             <thead
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
-                                    <th class="w-[300px] px-3 py-3 font-semibold">Teacher</th>
+                                    <th class="w-[260px] px-3 py-3 font-semibold">Teacher</th>
+                                    <th class="w-[280px] px-3 py-3 font-semibold">Law Request</th>
                                     <th class="w-[150px] px-3 py-3 font-semibold">Current Status</th>
                                     <th class="w-[210px] px-3 py-3 font-semibold">Check Status</th>
                                     <th class="w-[300px] px-3 py-3 font-semibold">Remark</th>
@@ -190,13 +212,45 @@
                                     @php
                                         $record = $attendanceByTeacher->get((int) $teacher->id);
                                         $currentStatus = strtolower((string) ($record?->status ?? ''));
+                                        $isLocked = $record !== null;
+                                        $lawRequest = ($lawRequestsByTeacher ?? collect())->get((int) $teacher->id);
+                                        $lawStatus = strtolower((string) ($lawRequest?->status ?? ''));
+                                        $isLawApproved = $lawStatus === 'approved';
+                                        $isLawPending = $lawStatus === 'pending';
+                                        $hasActiveLawRequest = $lawRequest && ($isLawPending || $isLawApproved);
+                                        $lawTypeLabel = $lawRequest
+                                            ? ucfirst(str_replace('_', ' ', (string) ($lawRequest->law_type ?? 'request')))
+                                            : '';
+                                        $lawStatusClass = match ($lawStatus) {
+                                            'approved' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                            'pending' => 'border-amber-200 bg-amber-50 text-amber-700',
+                                            default => 'border-slate-200 bg-slate-50 text-slate-700',
+                                        };
+                                        $lawRequestSubject = trim((string) ($lawRequest->subject ?? ''));
+                                        $lawRequestSubjectTime = trim((string) ($lawRequest->subject_time ?? ''));
+                                        if ($lawRequestSubjectTime === '' && str_contains($lawRequestSubject, '|')) {
+                                            [$parsedSubject, $parsedTime] = array_pad(array_map('trim', explode('|', $lawRequestSubject, 2)), 2, '');
+                                            $lawRequestSubject = $parsedSubject;
+                                            $lawRequestSubjectTime = $parsedTime;
+                                        }
+                                        $defaultLawRemark = '';
+                                        if ($hasActiveLawRequest) {
+                                            $defaultLawRemark = 'Law Request (' . $lawTypeLabel . ')';
+                                            if ($lawRequestSubject !== '') {
+                                                $defaultLawRemark .= ': ' . $lawRequestSubject;
+                                            }
+                                            if ($lawRequestSubjectTime !== '') {
+                                                $defaultLawRemark .= ' @ ' . $lawRequestSubjectTime;
+                                            }
+                                            $defaultLawRemark = mb_substr($defaultLawRemark, 0, 170);
+                                        }
                                         $selectedStatus = old(
                                             'attendance.' . $teacher->id . '.status',
-                                            $currentStatus !== '' ? $currentStatus : 'present',
+                                            $currentStatus !== '' ? $currentStatus : ($isLawApproved ? 'excused' : 'present'),
                                         );
                                         $remarkValue = old(
                                             'attendance.' . $teacher->id . '.remark',
-                                            (string) ($record?->remark ?? ''),
+                                            (string) ($record?->remark ?? $defaultLawRemark),
                                         );
                                         $statusClass = match ($currentStatus) {
                                             'present' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
@@ -214,6 +268,45 @@
                                             <div class="text-xs text-slate-400">ID #{{ str_pad((string) ($teacher->id ?? 0), 7, '0', STR_PAD_LEFT) }}</div>
                                         </td>
                                         <td class="px-3 py-3">
+                                            @if ($hasActiveLawRequest)
+                                                <div class="space-y-1.5">
+                                                    <div class="flex flex-wrap items-center gap-1.5">
+                                                        <span
+                                                            class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $lawStatusClass }}">
+                                                            {{ ucfirst($lawStatus) }}
+                                                        </span>
+                                                        <span
+                                                            class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                                                            {{ $lawTypeLabel }}
+                                                        </span>
+                                                    </div>
+                                                    @if ($lawRequestSubject !== '')
+                                                        <div class="text-xs font-semibold text-slate-700">{{ $lawRequestSubject }}</div>
+                                                    @endif
+                                                    @if ($lawRequestSubjectTime !== '')
+                                                        <div class="text-xs text-indigo-600">{{ $lawRequestSubjectTime }}</div>
+                                                    @endif
+                                                    @if (!empty($lawRequest?->reason))
+                                                        <div class="text-xs text-slate-500 line-clamp-2">{{ $lawRequest->reason }}</div>
+                                                    @endif
+                                                    @if ($isLawPending)
+                                                        <div class="pt-1">
+                                                            <button type="submit"
+                                                                formaction="{{ route('admin.attendance.teachers.law-requests.approve', $lawRequest) }}"
+                                                                formmethod="POST" formnovalidate
+                                                                class="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
+                                                                Approve
+                                                            </button>
+                                                        </div>
+                                                    @elseif ($isLawApproved)
+                                                        <div class="pt-1 text-[11px] font-semibold text-emerald-700">Approved for attendance</div>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-xs text-slate-400">No request</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-3">
                                             @if ($currentStatus !== '' && isset($statusLabels[$currentStatus]))
                                                 <span
                                                     class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">
@@ -228,7 +321,8 @@
                                         </td>
                                         <td class="px-3 py-3">
                                             <select name="attendance[{{ $teacher->id }}][status]"
-                                                class="js-teacher-status w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                {{ $isLocked ? 'disabled' : '' }}
+                                                class="js-teacher-status w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500">
                                                 @foreach ($statusLabels as $statusKey => $statusLabel)
                                                     @continue($statusKey === 'all')
                                                     <option value="{{ $statusKey }}"
@@ -240,9 +334,12 @@
                                         </td>
                                         <td class="px-3 py-3">
                                             <input type="text" name="attendance[{{ $teacher->id }}][remark]"
-                                                value="{{ $remarkValue }}" maxlength="255"
-                                                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                value="{{ $remarkValue }}" maxlength="255" {{ $isLocked ? 'disabled' : '' }}
+                                                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
                                                 placeholder="Optional note">
+                                            @if ($isLocked)
+                                                <div class="mt-1 text-[11px] font-semibold text-emerald-700">Saved and locked</div>
+                                            @endif
                                         </td>
                                         <td class="px-3 py-3 text-slate-600">
                                             @if ($checkedAt)
@@ -257,7 +354,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-3 py-10 text-center text-sm text-slate-500">
+                                        <td colspan="6" class="px-3 py-10 text-center text-sm text-slate-500">
                                             No teachers found for selected filters.
                                         </td>
                                     </tr>
@@ -279,6 +376,9 @@
                     if (!status) return;
 
                     statusFields.forEach((field) => {
+                        if (field.disabled) {
+                            return;
+                        }
                         const option = field.querySelector(`option[value="${status}"]`);
                         if (option) {
                             field.value = status;

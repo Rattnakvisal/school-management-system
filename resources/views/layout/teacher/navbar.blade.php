@@ -10,7 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-full bg-slate-100 text-slate-800">
+<body class="min-h-full overflow-x-hidden bg-slate-100 text-slate-800">
     <div x-data="teacherShell()" x-init="init()" @keydown.escape.window="closeAll()" class="min-h-screen">
 
         {{-- MOBILE OVERLAY --}}
@@ -22,7 +22,7 @@
                       transition-all duration-300 lg:translate-x-0 h-screen flex flex-col transform"
             :class="[
                 mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-                collapsed ? 'w-20' : 'w-72'
+                sidebarCollapsed ? 'w-72 lg:w-20' : 'w-72'
             ]"
             aria-label="Sidebar">
 
@@ -36,7 +36,7 @@
                     </div>
 
                     {{-- Brand text (hide when collapsed) --}}
-                    <div class="min-w-0" x-show="!collapsed" x-transition>
+                    <div class="min-w-0" x-show="!sidebarCollapsed" x-transition>
                         <div class="text-lg font-extrabold tracking-tight text-slate-900 truncate">Schooli</div>
                         <div class="text-xs text-slate-500 -mt-0.5 truncate">Teacher Panel</div>
                     </div>
@@ -48,16 +48,16 @@
                         class="hidden lg:inline-flex items-center justify-center p-2 rounded-xl hover:bg-slate-100
                                focus:outline-none focus:ring-4 focus:ring-indigo-100"
                         @click="toggleSidebar()"
-                        :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+                        :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
 
                         {{-- Collapse icon --}}
-                        <svg x-show="!collapsed" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"
+                        <svg x-show="!sidebarCollapsed" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path d="M4 6h16v2H4V6Zm0 5h10v2H4v-2Zm0 5h16v2H4v-2Z" />
                         </svg>
 
                         {{-- Expand icon --}}
-                        <svg x-show="collapsed" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"
+                        <svg x-show="sidebarCollapsed" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path d="M4 6h10v2H4V6Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z" />
                         </svg>
@@ -99,7 +99,7 @@
                         class="relative group flex items-center rounded-2xl py-3 text-sm font-semibold transition
                                focus:outline-none focus:ring-4 focus:ring-indigo-100
                                {{ $l['active'] ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}"
-                        :class="collapsed ? 'px-3 justify-center' : 'px-4 gap-3'">
+                        :class="sidebarCollapsed ? 'px-3 justify-center' : 'px-4 gap-3'">
 
                         {{-- Active indicator bar --}}
                         <span class="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full
@@ -193,13 +193,13 @@
                         </span>
 
                         {{-- Label (hide when collapsed) --}}
-                        <span class="flex-1 truncate" x-show="!collapsed">{{ $l['label'] }}</span>
+                        <span class="flex-1 truncate" x-show="!sidebarCollapsed">{{ $l['label'] }}</span>
                     </a>
                 @endforeach
             </nav>
 
             {{-- Footer card (hide when collapsed) --}}
-            <div class="p-4 border-t border-slate-100 shrink-0" x-show="!collapsed" x-transition>
+            <div class="p-4 border-t border-slate-100 shrink-0" x-show="!sidebarCollapsed" x-transition>
                 <div class="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white shadow-lg">
                     <div class="text-sm font-semibold">Teacher Mode</div>
                     <div class="text-xs text-white/80 mt-1">Manage classes, attendance and student grades.</div>
@@ -208,7 +208,7 @@
         </aside>
 
         {{-- MAIN AREA --}}
-        <div class="min-h-screen flex flex-col" :class="collapsed ? 'lg:pl-20' : 'lg:pl-72'">
+        <div class="min-h-screen flex flex-col" :class="sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'">
 
             {{-- TOPBAR --}}
             <header class="sticky top-0 z-30 bg-slate-100/80 backdrop-blur border-b border-slate-200">
@@ -223,7 +223,7 @@
                     </button>
 
                     {{-- Search --}}
-                    <div class="flex-1 min-w-0">
+                    <div class="hidden min-w-0 flex-1 sm:block">
                         <div class="relative max-w-xl">
                             <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -292,7 +292,7 @@
                         {{-- Profile --}}
                         <div class="relative" @click.outside="profileOpen=false">
                             <button
-                                class="ml-2 flex items-center gap-3 rounded-full bg-white border border-slate-200 px-3 py-2 hover:shadow-sm
+                                class="flex items-center gap-3 rounded-full bg-white border border-slate-200 px-3 py-2 hover:shadow-sm sm:ml-2
                                        focus:outline-none focus:ring-4 focus:ring-indigo-100"
                                 @click="notifOpen=false; profileOpen=!profileOpen" aria-label="Open profile menu" type="button">
                                 <img class="h-8 w-8 rounded-full object-cover"
@@ -369,14 +369,22 @@
             return {
                 mobileOpen: false,
                 collapsed: false,
+                isDesktop: false,
 
                 notifOpen: false,
                 profileOpen: false,
 
+                get sidebarCollapsed() {
+                    return this.isDesktop && this.collapsed;
+                },
+
                 init() {
-                    // close drawer when switching to desktop
+                    // close drawer when switching to desktop and keep collapse desktop-only
                     const mq = window.matchMedia('(min-width: 1024px)');
-                    const handler = () => { if (mq.matches) this.mobileOpen = false; };
+                    const handler = () => {
+                        this.isDesktop = mq.matches;
+                        if (mq.matches) this.mobileOpen = false;
+                    };
                     handler();
                     mq.addEventListener?.('change', handler);
 
@@ -391,6 +399,7 @@
                 },
 
                 toggleSidebar() {
+                    if (!this.isDesktop) return;
                     this.collapsed = !this.collapsed;
                     localStorage.setItem('teacher_sidebar_collapsed', this.collapsed ? '1' : '0');
                 }

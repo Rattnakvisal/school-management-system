@@ -59,7 +59,7 @@
             style="--sd: 2;" x-data="{ filterOpen: false, tab: 'teach' }">
             <div class="space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-1">
+                    <div class="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-1">
                         <button type="button" @click="tab = 'class'"
                             :class="tab === 'class' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-800'"
                             class="rounded-lg px-4 py-2 text-sm font-semibold transition">

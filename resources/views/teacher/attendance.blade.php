@@ -475,6 +475,13 @@
             if (typeof Swal === 'undefined') return;
 
             const alerts = [];
+            @foreach (($attendanceAlerts ?? []) as $attendanceAlert)
+                alerts.push({
+                    icon: 'success',
+                    title: @json((string) ($attendanceAlert['title'] ?? 'Attendance Checked')),
+                    text: @json((string) ($attendanceAlert['text'] ?? 'Your attendance has been checked.'))
+                });
+            @endforeach
             @if (session('success'))
                 alerts.push({
                     icon: 'success',
