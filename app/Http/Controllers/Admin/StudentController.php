@@ -168,7 +168,8 @@ class StudentController extends Controller
                 : null;
         }
 
-        $student = User::create($payload);
+        $student = new User($payload);
+        $student->save();
         $this->syncStudentMajorSubjects(
             $student,
             $payload['role'] === 'student' ? $selectedMajorSubjectIds : []

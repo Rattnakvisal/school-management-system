@@ -123,7 +123,7 @@ class LawRequestController extends Controller
             ? $requestedForDate
             : now()->toDateString();
 
-        Notification::query()->create([
+        $notification = new Notification([
             'type' => 'teacher_law_request',
             'title' => 'New teacher law request',
             'message' => ($teacher?->name ?? 'Teacher')
@@ -134,6 +134,7 @@ class LawRequestController extends Controller
             'url' => route('admin.attendance.teachers.index', ['date' => $notificationDate]),
             'is_read' => false,
         ]);
+        $notification->save();
 
         return redirect()
             ->route('teacher.law-requests.index')

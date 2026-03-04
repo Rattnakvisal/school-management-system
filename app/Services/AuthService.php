@@ -18,7 +18,7 @@ class AuthService
     // ==========================
     public function register(array $data): User
     {
-        return User::create([
+        $user = new User([
             'name'     => $data['name'],
             'email'    => $data['email'],
             'email_verified_at' => $data['email_verified_at'] ?? null,
@@ -26,6 +26,9 @@ class AuthService
             'role'     => $data['role'] ?? 'student',
             'is_active' => $data['is_active'] ?? true,
         ]);
+        $user->save();
+
+        return $user;
     }
 
     // ==========================
@@ -73,7 +76,7 @@ class AuthService
             };
 
             if (!$user) {
-                $user = User::create([
+                $user = new User([
                     'name'      => $gName ?: $gEmail,
                     'email'     => $gEmail,
                     'password'  => Hash::make(Str::random(32)), // random unusable password
@@ -82,6 +85,7 @@ class AuthService
                     'provider'  => 'google',
                     'avatar'    => $avatarForStorage,
                 ]);
+                $user->save();
             } else {
                 // Preserve existing role - only update other profile fields
                 $user->forceFill([
@@ -143,7 +147,8 @@ class AuthService
         ];
 
         try {
-            $created = Notification::create($data);
+            $created = new Notification($data);
+            $created->save();
             if (!$created || !$created->id || (empty($created->title) && empty($created->message))) {
                 // ensure timestamps
                 $now = now();

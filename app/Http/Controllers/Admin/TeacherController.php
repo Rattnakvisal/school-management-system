@@ -77,7 +77,8 @@ class TeacherController extends Controller
             $payload['is_active'] = $request->boolean('is_active', true);
         }
 
-        User::create($payload);
+        $teacher = new User($payload);
+        $teacher->save();
 
         $redirect = redirect()
             ->route('admin.teachers.index')

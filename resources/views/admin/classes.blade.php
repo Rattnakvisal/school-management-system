@@ -140,7 +140,7 @@
                         </button>
                     </div>
 
-                    <div x-show="filterOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[80] bg-slate-900/40"
+                    <div x-show="filterOpen" x-cloak x-transition.opacity class="fixed inset-0 z-80 bg-slate-900/40"
                         @click="filterOpen = false"></div>
 
                     <div class="grid gap-4">
@@ -148,7 +148,7 @@
                             x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
                             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0"
                             x-transition:leave-end="translate-x-full"
-                            class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
+                            class="fixed inset-y-0 right-0 z-81 w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
                             <div class="flex h-full flex-col">
                                 <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                                     <h3 class="text-3xl font-black text-slate-900">Filters</h3>
@@ -228,8 +228,8 @@
 
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                                <div class="max-h-[700px] overflow-auto">
-                                    <table class="w-full min-w-[1050px] text-left text-sm">
+                                <div class="max-h-175 overflow-auto">
+                                    <table class="w-full min-w-262.5 text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
@@ -245,8 +245,19 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-100 bg-white">
-                                            @forelse ($classes as $schoolClass)
+                                            @php
+                                                /** @var iterable<int, \App\Models\SchoolClass> $classRows */
+                                                $classRows = $classes instanceof \Illuminate\Pagination\AbstractPaginator
+                                                    ? $classes->getCollection()->all()
+                                                    : (is_iterable($classes) ? $classes : []);
+                                            @endphp
+                                            @forelse ($classRows as $schoolClass)
                                                 <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
+                                                    @php
+                                                        if (!($schoolClass instanceof \App\Models\SchoolClass)) {
+                                                            continue;
+                                                        }
+                                                    @endphp
                                                     <td class="px-3 py-3">
                                                         <div class="font-semibold text-slate-800">
                                                             {{ $schoolClass->display_name }}</div>
@@ -260,6 +271,7 @@
                                                         @if ($schoolClass->studySchedules->isNotEmpty())
                                                             <div class="flex max-w-sm flex-wrap gap-1.5">
                                                                 @foreach ($schoolClass->studySchedules as $scheduleRow)
+                                                                    @php /** @var \App\Models\ClassStudyTime $scheduleRow */ @endphp
                                                                     <div
                                                                         class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
                                                                         <span
@@ -358,7 +370,7 @@
                                                         </div>
 
                                                         <div x-show="open" x-cloak
-                                                            class="fixed inset-0 z-[70] grid place-items-center p-4"
+                                                            class="fixed inset-0 z-70 grid place-items-center p-4"
                                                             aria-modal="true" role="dialog">
                                                             <div class="absolute inset-0 bg-slate-900/50"
                                                                 @click="open = false"></div>

@@ -299,13 +299,14 @@ class TeacherAttendanceController extends Controller
                 $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
                 $teacherTag = '[teacher_id:' . $teacherId . '] ';
 
-                Notification::query()->create([
+                $notification = new Notification([
                     'type' => 'teacher_attendance_checked',
                     'title' => 'Teacher attendance checked',
                     'message' => $teacherTag . 'Your attendance was checked for ' . $displayDate . ': ' . $statusLabel . '.',
                     'url' => route('teacher.attendance.index', ['date' => $attendanceDate]),
                     'is_read' => false,
                 ]);
+                $notification->save();
             }
         }
 
@@ -380,7 +381,7 @@ class TeacherAttendanceController extends Controller
             );
         }
 
-        Notification::query()->create([
+        $notification = new Notification([
             'type' => 'teacher_law_request_approved',
             'title' => 'Law request approved',
             'message' => $teacherTag
@@ -390,6 +391,7 @@ class TeacherAttendanceController extends Controller
             'url' => route('teacher.law-requests.index'),
             'is_read' => false,
         ]);
+        $notification->save();
 
         $dateParam = trim((string) $request->input('date', (string) $request->input('attendance_date', '')));
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateParam)) {
