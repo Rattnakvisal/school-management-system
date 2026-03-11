@@ -21,75 +21,127 @@
         ];
     @endphp
 
-    <div class="space-y-6">
-        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-sky-500 p-6 text-white shadow-lg">
-            <div class="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-white/10 blur-2xl"></div>
-            <div class="pointer-events-none absolute -bottom-20 left-1/2 h-52 w-52 rounded-full bg-cyan-200/20 blur-3xl"></div>
+    <div class="dashboard-stage space-y-6">
+        <section class="student-hero relative overflow-hidden rounded-3xl p-6 text-white shadow-lg sm:p-7"
+            style="--d: 1; background: linear-gradient(120deg, #312e81 0%, #4f46e5 42%, #0ea5e9 100%);">
+            <div
+                class="student-hero__orb student-hero__orb--a pointer-events-none absolute -right-10 -top-14 h-44 w-44 rounded-full bg-white/20 blur-2xl">
+            </div>
+            <div
+                class="student-hero__orb student-hero__orb--b pointer-events-none absolute -bottom-14 left-[46%] h-32 w-32 rounded-full bg-white/15 blur-2xl">
+            </div>
+            <div
+                class="student-hero__orb student-hero__orb--c pointer-events-none absolute left-[21%] top-[14%] h-20 w-20 rounded-full bg-white/10 blur-xl">
+            </div>
 
-            <div class="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_220px]">
-                <div>
-                    <div class="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold">
+            <div class="student-hero__grid relative z-10 grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_150px_220px]">
+                <div class="student-hero__content min-w-0">
+                    <div
+                        class="student-hero__badge inline-flex items-center rounded-full border border-white/35 bg-white/15 px-3 py-1 text-xs font-extrabold tracking-wide">
                         Student Dashboard
                     </div>
-                    <h1 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{{ $greeting }} {{ $firstName }}</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-indigo-100">
-                        Class: <span class="font-semibold text-white">{{ $studentClass }}</span>
+                    <h1 class="student-hero__title mt-3 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
+                        {{ $greeting }} {{ $firstName }}
+                    </h1>
+                    <p class="student-hero__subtitle mt-2 max-w-2xl text-sm text-indigo-100">
+                        Class: <span>{{ $studentClass }}</span>
                         @if ($classRoom !== '')
                             | Room {{ $classRoom }}
                         @endif
                     </p>
-                    <div class="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold">
-                        <span class="rounded-full border border-white/25 bg-white/10 px-3 py-1.5">
+                    <div class="student-hero__chips mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold">
+                        <span class="student-hero__chip rounded-full border border-white/30 bg-white/15 px-3 py-1.5">
                             Today: {{ $todayLabel }}
                         </span>
-                        <span class="rounded-full border border-white/25 bg-white/10 px-3 py-1.5">
+                        <span class="student-hero__chip rounded-full border border-white/30 bg-white/15 px-3 py-1.5">
                             Sessions: {{ number_format($todayTimelineCount ?? 0) }}
                         </span>
-                        <span class="rounded-full border border-white/25 bg-white/10 px-3 py-1.5">
+                        <span class="student-hero__chip rounded-full border border-white/30 bg-white/15 px-3 py-1.5">
                             Attendance: {{ number_format((float) ($attendanceRate ?? 0), 1) }}%
                         </span>
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-white/25 bg-white/10 p-4 backdrop-blur">
-                    <div class="text-xs font-semibold uppercase tracking-wide text-indigo-100">Progress Snapshot</div>
-                    <div class="mt-3 text-3xl font-black text-white">{{ number_format((float) ($attendanceRate ?? 0), 1) }}%</div>
-                    <div class="mt-1 text-xs text-indigo-100">Attendance score</div>
-                    <div class="mt-4 h-2 overflow-hidden rounded-full bg-white/20">
-                        <div class="h-full rounded-full bg-white" style="width: {{ max(0, min(100, (float) ($attendanceRate ?? 0))) }}%"></div>
+                <div class="student-hero__robot-panel mx-auto w-full max-w-[10rem] rounded-2xl border border-white/30 bg-white/10 p-2 backdrop-blur"
+                    aria-hidden="true">
+                    <svg class="student-hero__robot" viewBox="0 0 180 220" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse class="robot-shadow" cx="90" cy="206" rx="44" ry="10" />
+                        <g class="robot-float">
+                            <line class="robot-antenna-line" x1="90" y1="27" x2="90" y2="42" />
+                            <circle class="robot-antenna-dot" cx="90" cy="22" r="6" />
+
+                            <rect class="robot-head" x="50" y="42" width="80" height="58" rx="18" />
+                            <rect class="robot-face" x="63" y="54" width="54" height="26" rx="10" />
+                            <circle class="robot-eye robot-eye--left" cx="79" cy="67" r="5.4" />
+                            <circle class="robot-eye robot-eye--right" cx="101" cy="67" r="5.4" />
+                            <rect class="robot-mouth" x="76" y="83" width="28" height="5" rx="2.5" />
+
+                            <rect class="robot-arm robot-arm--left" x="36" y="112" width="14" height="45" rx="7" />
+                            <rect class="robot-arm robot-arm--right" x="130" y="110" width="14" height="45" rx="7" />
+                            <rect class="robot-body" x="58" y="101" width="64" height="73" rx="18" />
+                            <rect class="robot-body-screen" x="73" y="118" width="34" height="24" rx="8" />
+                            <circle class="robot-core" cx="90" cy="151" r="8" />
+
+                            <rect class="robot-leg" x="73" y="172" width="14" height="28" rx="6" />
+                            <rect class="robot-leg" x="93" y="172" width="14" height="28" rx="6" />
+                            <ellipse class="robot-foot" cx="80" cy="201" rx="12" ry="5.5" />
+                            <ellipse class="robot-foot" cx="100" cy="201" rx="12" ry="5.5" />
+                        </g>
+                        <g class="robot-signal">
+                            <circle cx="129" cy="38" r="3" />
+                            <circle cx="137" cy="32" r="2" />
+                            <circle cx="145" cy="26" r="1.5" />
+                        </g>
+                    </svg>
+                    <div class="student-hero__robot-label mt-1 text-center text-[11px] font-bold uppercase tracking-wider text-indigo-100">
+                        Study Bot Online
+                    </div>
+                </div>
+
+                <div class="student-hero__progress rounded-2xl border border-white/25 bg-white/10 p-4 backdrop-blur">
+                    <div class="student-hero__progress-label text-xs font-semibold uppercase tracking-wide text-indigo-100">
+                        Progress Snapshot
+                    </div>
+                    <div class="student-hero__progress-value mt-3 text-3xl font-black text-white">
+                        {{ number_format((float) ($attendanceRate ?? 0), 1) }}%
+                    </div>
+                    <div class="student-hero__progress-hint mt-1 text-xs text-indigo-100">Attendance score</div>
+                    <div class="student-hero__progress-track mt-4 h-2 overflow-hidden rounded-full bg-white/20">
+                        <div class="student-hero__progress-fill"
+                            style="width: {{ max(0, min(100, (float) ($attendanceRate ?? 0))) }}%"></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <article class="rounded-3xl border border-indigo-100 bg-white p-5 shadow-sm">
+        <section class="dash-reveal grid gap-4 sm:grid-cols-2 xl:grid-cols-4" style="--d: 2;">
+            <article class="dash-hover rounded-3xl border border-indigo-100 bg-white p-5 shadow-sm">
                 <div class="text-xs font-semibold uppercase tracking-wide text-indigo-600">Class Subjects</div>
                 <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format($subjectsTotal ?? 0) }}</div>
                 <div class="mt-1 text-xs text-slate-500">Available in your class</div>
             </article>
 
-            <article class="rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm">
+            <article class="dash-hover rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm">
                 <div class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Major Subjects</div>
                 <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format($majorSubjectsCount ?? 0) }}</div>
                 <div class="mt-1 text-xs text-slate-500">Selected for focus</div>
             </article>
 
-            <article class="rounded-3xl border border-sky-100 bg-white p-5 shadow-sm">
+            <article class="dash-hover rounded-3xl border border-sky-100 bg-white p-5 shadow-sm">
                 <div class="text-xs font-semibold uppercase tracking-wide text-sky-600">Attendance</div>
                 <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format((float) ($attendanceRate ?? 0), 1) }}%</div>
                 <div class="mt-1 text-xs text-slate-500">{{ number_format($attendanceThisMonth ?? 0) }} records this month</div>
             </article>
 
-            <article class="rounded-3xl border border-amber-100 bg-white p-5 shadow-sm">
+            <article class="dash-hover rounded-3xl border border-amber-100 bg-white p-5 shadow-sm">
                 <div class="text-xs font-semibold uppercase tracking-wide text-amber-600">Study Slots</div>
                 <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format($studySlotCount ?? 0) }}</div>
                 <div class="mt-1 text-xs text-slate-500">Assigned schedule blocks</div>
             </article>
         </section>
 
-        <section class="grid gap-6 xl:grid-cols-12">
-            <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7">
+        <section class="dash-reveal grid gap-6 xl:grid-cols-12" style="--d: 3;">
+            <article class="dash-hover rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7">
                 <div class="mb-4 flex items-center justify-between gap-2">
                     <h2 class="text-base font-bold text-slate-900">Today Schedule</h2>
                     <span class="text-xs text-slate-500">{{ $todayLabel }}</span>
@@ -118,7 +170,7 @@
                 @endif
             </article>
 
-            <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5">
+            <article class="dash-hover rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5">
                 <h2 class="text-base font-bold text-slate-900">Attendance Overview</h2>
                 <div class="mt-4 h-56 sm:h-60">
                     <canvas id="studentAttendanceChart" class="h-full w-full"></canvas>
@@ -162,15 +214,15 @@
             </article>
         </section>
 
-        <section class="grid gap-6 xl:grid-cols-12">
-            <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5">
+        <section class="dash-reveal grid gap-6 xl:grid-cols-12" style="--d: 4;">
+            <article class="dash-hover rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5">
                 <h2 class="text-base font-bold text-slate-900">Weekly Load</h2>
                 <div class="mt-4 h-56 sm:h-60">
                     <canvas id="studentWeeklyChart" class="h-full w-full"></canvas>
                 </div>
             </article>
 
-            <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7">
+            <article class="dash-hover rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7">
                 <div class="mb-5 rounded-2xl border border-slate-100 bg-slate-50 p-3">
                     <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Subject Mix</div>
                     <div class="h-40 sm:h-44">
