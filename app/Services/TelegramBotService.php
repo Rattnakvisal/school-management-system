@@ -46,7 +46,7 @@ class TelegramBotService
         return (bool) config('services.telegram.verify_ssl', true);
     }
 
-    public function botUrl(string $start = 'study_help'): ?string
+    public function botUrl(string $start = ''): ?string
     {
         $username = $this->botUsername();
         if ($username === '') {

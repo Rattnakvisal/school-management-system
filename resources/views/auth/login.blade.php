@@ -79,9 +79,6 @@
                                            focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
                                         placeholder="you@example.com or 012345678 / +85512345678">
                                 </div>
-                                @error('login')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
                             </div>
 
                             {{-- Password --}}

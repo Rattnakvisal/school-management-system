@@ -1240,14 +1240,15 @@
                                 @if (!empty($telegramBotUrl))
                                     <a href="{{ $telegramBotUrl }}" target="_blank" rel="noopener"
                                         class="inline-flex items-center gap-2 rounded-xl border border-cyan-300 bg-cyan-50 px-5 py-3 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100">
-                                        Telegram Q&A Bot
+                                        Telegram OTP Bot
                                     </a>
                                 @endif
                             </div>
 
                             @if (!empty($telegramBotUrl))
                                 <p class="mt-3 text-xs font-semibold text-cyan-700">
-                                    Need study account help? Click Telegram Q&A Bot and send your details. The bot can answer common questions and forward your message to admin.
+                                    Need OTP login setup? Open Telegram OTP Bot and send:
+                                    <span class="font-semibold">link &lt;your phone number&gt;</span>.
                                 </p>
                             @endif
 
@@ -1332,7 +1333,7 @@
                                     <p class="text-xs font-bold uppercase tracking-wide text-cyan-200">Telegram Bot</p>
                                     <a href="{{ $telegramBotUrl }}" target="_blank" rel="noopener"
                                         class="mt-1 inline-flex text-sm font-semibold text-cyan-100 underline decoration-cyan-200/70 underline-offset-4">
-                                        Open Q&A and Contact Admin
+                                        Open OTP Linking Bot
                                     </a>
                                 </article>
                             @endif

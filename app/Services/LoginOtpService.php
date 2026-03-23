@@ -44,9 +44,7 @@ class LoginOtpService
         if ($chatId === '') {
             return [
                 'ok' => false,
-                'message' => 'Telegram is not linked yet. Open the bot, send /start, then send: link '
-                    . $phoneNumber
-                    . '. If you run localhost, keep this command running in another terminal: php artisan telegram:poll',
+                'message' => $this->telegramLinkHint($phoneNumber),
             ];
         }
 
@@ -168,5 +166,19 @@ class LoginOtpService
         } catch (\Throwable $e) {
             report($e);
         }
+    }
+
+    private function telegramLinkHint(string $phoneNumber): string
+    {
+        $lines = [
+            'Telegram is not linked yet.',
+            'Open the bot and send: link ' . $phoneNumber,
+        ];
+
+        if (app()->environment('local')) {
+            $lines[] = 'If you run localhost, keep this command running in another terminal: php artisan telegram:poll';
+        }
+
+        return implode("\n", $lines);
     }
 }

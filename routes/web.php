@@ -31,7 +31,7 @@ Route::get('/', function () {
         'teachersTotal' => $teachersTotal,
         'dashboardRoute' => $dashboardRoute,
         'telegramBotUrl' => ($telegramUsername = trim((string) config('services.telegram.bot_username'))) !== ''
-            ? 'https://t.me/' . $telegramUsername . '?start=study_help'
+            ? 'https://t.me/' . $telegramUsername
             : null,
     ]);
 })->name('home');
