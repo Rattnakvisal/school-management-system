@@ -92,48 +92,86 @@ class AuthService
     // ==========================
     public function handleGoogleUser($googleUser): User
     {
-        $gId     = method_exists($googleUser, 'getId') ? $googleUser->getId() : ($googleUser->id ?? null);
-        $gEmail  = method_exists($googleUser, 'getEmail') ? $googleUser->getEmail() : ($googleUser->email ?? null);
+        $gIdRaw  = method_exists($googleUser, 'getId') ? $googleUser->getId() : ($googleUser->id ?? null);
+        $gEmailRaw  = method_exists($googleUser, 'getEmail') ? $googleUser->getEmail() : ($googleUser->email ?? null);
         $gName   = method_exists($googleUser, 'getName') ? $googleUser->getName() : ($googleUser->name ?? null);
         $gAvatar = method_exists($googleUser, 'getAvatar') ? $googleUser->getAvatar() : ($googleUser->avatar ?? null);
         $avatarForStorage = $this->normalizeGoogleAvatar($gAvatar);
+        $gId = trim((string) ($gIdRaw ?? ''));
+        $gId = $gId !== '' ? $gId : null;
+        $gEmail = trim((string) ($gEmailRaw ?? ''));
+        $normalizedEmail = mb_strtolower($gEmail);
 
-        if (empty($gEmail)) {
+        if ($normalizedEmail === '') {
             throw new \RuntimeException('Google account did not provide an email address.');
         }
 
-        return DB::transaction(function () use ($gId, $gEmail, $gName, $avatarForStorage) {
-            $user = User::where('google_id', $gId)
-                ->orWhere('email', $gEmail)
+        return DB::transaction(function () use ($gId, $gEmail, $normalizedEmail, $gName, $avatarForStorage) {
+            $userByGoogle = null;
+            if ($gId !== null) {
+                $userByGoogle = User::query()
+                    ->where('google_id', $gId)
+                    ->lockForUpdate()
+                    ->first();
+            }
+
+            $userByEmail = User::query()
+                ->whereRaw('LOWER(TRIM(email)) = ?', [$normalizedEmail])
                 ->lockForUpdate()
                 ->first();
 
+            if (
+                $userByGoogle !== null
+                && $userByEmail !== null
+                && (int) $userByGoogle->id !== (int) $userByEmail->id
+            ) {
+                throw new \RuntimeException(
+                    'This Google account is linked to another user. Please contact administrator.'
+                );
+            }
+
+            $user = $userByGoogle ?? $userByEmail;
+
             // Determine role for new accounts. Do NOT overwrite an existing user's role.
-            $defaultRole = config('auth.google_default_role', 'student');
+            $defaultRole = (string) config('services.google.default_role', config('auth.google_default_role', 'student'));
             $role = match (true) {
-                str_ends_with($gEmail, '@admin.school.com')   => 'admin',
-                str_ends_with($gEmail, '@teacher.school.com') => 'teacher',
+                str_ends_with($normalizedEmail, '@admin.school.com')   => 'admin',
+                str_ends_with($normalizedEmail, '@teacher.school.com') => 'teacher',
                 default => $defaultRole,
             };
 
             if (!$user) {
+                $allowAutoCreate = (bool) config('services.google.allow_auto_create', false);
+                if (!$allowAutoCreate) {
+                    throw new \RuntimeException(
+                        'No account found for this Google email. Please contact administrator.'
+                    );
+                }
+
                 $user = new User([
-                    'name'      => $gName ?: $gEmail,
-                    'email'     => $gEmail,
+                    'name'      => $gName ?: $normalizedEmail,
+                    'email'     => $normalizedEmail,
                     'password'  => Hash::make(Str::random(32)), // random unusable password
                     'role'      => $role,
                     'google_id' => $gId,
                     'provider'  => 'google',
                     'avatar'    => $avatarForStorage,
+                    'email_verified_at' => now(),
                 ]);
                 $user->save();
             } else {
                 // Preserve existing role - only update other profile fields
+                $updatedEmail = trim((string) ($user->email ?? ''));
+                if ($updatedEmail === '') {
+                    $updatedEmail = $normalizedEmail;
+                }
+
                 $user->forceFill([
                     'google_id' => $user->google_id ?: $gId,
                     'provider'  => 'google',
                     'avatar'    => $avatarForStorage ?: $user->avatar,
-                    'name'      => $user->name ?: ($gName ?: $gEmail),
+                    'name'      => $user->name ?: ($gName ?: $normalizedEmail),
+                    'email'     => $updatedEmail,
                 ])->save();
             }
             return $user;

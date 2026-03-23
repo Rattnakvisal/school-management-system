@@ -97,7 +97,12 @@ class GoogleController extends Controller
         } catch (\Throwable $e) {
             Log::error('Google login failed: ' . $e->getMessage(), ['exception' => $e]);
 
-            $message = config('app.debug') ? 'Google login failed: ' . $e->getMessage() : 'Google login failed. Please try again.';
+            $runtimeMessage = trim($e->getMessage());
+            $message = $e instanceof \RuntimeException && $runtimeMessage !== ''
+                ? $runtimeMessage
+                : (config('app.debug')
+                    ? 'Google login failed: ' . $e->getMessage()
+                    : 'Google login failed. Please try again.');
 
             return redirect()->route('login')
                 ->with('error', $message);

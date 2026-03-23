@@ -41,6 +41,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
         'verify_ssl' => env('GOOGLE_VERIFY_SSL', true),
         'ca_bundle' => env('GOOGLE_CA_BUNDLE', env('CURL_CA_BUNDLE')),
+        'allow_auto_create' => env('GOOGLE_ALLOW_AUTO_CREATE', false),
+        'default_role' => env('GOOGLE_DEFAULT_ROLE', 'student'),
     ],
 
     'facebook' => [
