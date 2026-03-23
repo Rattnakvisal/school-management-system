@@ -36,15 +36,59 @@
             </div>
         @endif
 
+        @php
+            $showCreateFormOnLoad = old('_form') === 'create_class';
+        @endphp
+
         <div class="grid gap-6 xl:grid-cols-12">
-            <section
+            <section x-data="{
+                createOpen: @js($showCreateFormOnLoad),
+                isDesktop: false,
+                init() {
+                    const media = window.matchMedia('(min-width: 1280px)');
+                    const update = () => {
+                        this.isDesktop = media.matches;
+                        if (this.isDesktop) {
+                            this.createOpen = true;
+                        } else if (!@js($showCreateFormOnLoad)) {
+                            this.createOpen = false;
+                        }
+                    };
+
+                    update();
+
+                    if (typeof media.addEventListener === 'function') {
+                        media.addEventListener('change', update);
+                    } else if (typeof media.addListener === 'function') {
+                        media.addListener(update);
+                    }
+                }
+            }" x-init="init()"
                 class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
                 style="--sd: 3;">
-                <h2 class="text-lg font-black text-slate-900">Create Class</h2>
-                <p class="mt-1 text-xs text-slate-500">Define a classroom for students and subject assignment.</p>
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-black text-slate-900">Create Class</h2>
+                        <p class="mt-1 text-xs text-slate-500">Define a classroom for students and subject assignment.</p>
+                    </div>
+                    <button type="button" @click="createOpen = !createOpen"
+                        :aria-expanded="(createOpen || isDesktop).toString()" aria-controls="create-class-form-panel"
+                        class="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm hover:bg-indigo-100 xl:hidden">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14" x-show="!(createOpen || isDesktop)"></path>
+                            <path d="M5 12h14" x-show="createOpen || isDesktop"></path>
+                        </svg>
+                        <span x-show="!(createOpen || isDesktop)">Create Class</span>
+                        <span x-show="createOpen || isDesktop">Hide Form</span>
+                    </button>
+                </div>
 
-                <form method="POST" action="{{ route('admin.classes.store') }}" class="js-create-form mt-5 space-y-4">
+                <form id="create-class-form-panel" method="POST" action="{{ route('admin.classes.store') }}"
+                    class="js-create-form mt-5 space-y-4" x-show="createOpen || isDesktop" x-cloak
+                    x-transition.opacity.duration.150ms>
                     @csrf
+                    <input type="hidden" name="_form" value="create_class">
 
                     <div>
                         <label for="name" class="mb-1 block text-xs font-semibold text-slate-600">Class Name</label>

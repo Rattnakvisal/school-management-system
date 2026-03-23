@@ -47,15 +47,56 @@
             </div>
         @endif
 
+        @php
+            $showCreateFormOnLoad = in_array(old('_form'), ['create_class_time', 'create_subject_time'], true);
+        @endphp
+
         <div class="grid gap-6 xl:grid-cols-12">
 
             <!-- LEFT: Create Times (same card style as Student create card) -->
-            <section
+            <section x-data="{
+                createOpen: @js($showCreateFormOnLoad),
+                isDesktop: false,
+                init() {
+                    const media = window.matchMedia('(min-width: 1280px)');
+                    const update = () => {
+                        this.isDesktop = media.matches;
+                        if (this.isDesktop) {
+                            this.createOpen = true;
+                        } else if (!@js($showCreateFormOnLoad)) {
+                            this.createOpen = false;
+                        }
+                    };
+
+                    update();
+
+                    if (typeof media.addEventListener === 'function') {
+                        media.addEventListener('change', update);
+                    } else if (typeof media.addListener === 'function') {
+                        media.addListener(update);
+                    }
+                }
+            }" x-init="init()"
                 class="study-time-reveal study-time-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
                 style="--sd: 3;">
 
-                <h2 class="text-lg font-black text-slate-900">Add Time Slot</h2>
-                <p class="mt-1 text-xs text-slate-500">Create study schedules for classes and subjects.</p>
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-black text-slate-900">Add Time Slot</h2>
+                        <p class="mt-1 text-xs text-slate-500">Create study schedules for classes and subjects.</p>
+                    </div>
+                    <button type="button" @click="createOpen = !createOpen"
+                        :aria-expanded="(createOpen || isDesktop).toString()" aria-controls="time-study-create-panel"
+                        class="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm hover:bg-indigo-100 xl:hidden">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14" x-show="!(createOpen || isDesktop)"></path>
+                            <path d="M5 12h14" x-show="createOpen || isDesktop"></path>
+                        </svg>
+                        <span x-show="!(createOpen || isDesktop)">Add Time Slot</span>
+                        <span x-show="createOpen || isDesktop">Hide Form</span>
+                    </button>
+                </div>
 
                 @php
                     $classFormDayOfWeek = old('day_of_week', 'all');
@@ -83,10 +124,13 @@
                     }
                 @endphp
 
-                <!-- Class Study Time -->
-                <form method="POST" action="{{ route('admin.time-studies.classes.store') }}" id="class_time_create_form"
-                    class="js-create-form mt-5 space-y-4">
-                    @csrf
+                <div id="time-study-create-panel" x-show="createOpen || isDesktop" x-cloak
+                    x-transition.opacity.duration.150ms>
+                    <!-- Class Study Time -->
+                    <form method="POST" action="{{ route('admin.time-studies.classes.store') }}"
+                        id="class_time_create_form" class="js-create-form mt-5 space-y-4">
+                        @csrf
+                        <input type="hidden" name="_form" value="create_class_time">
 
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-black text-slate-900">Class Study Time</h3>
@@ -238,16 +282,17 @@
                         </div>
                     </template>
 
-                    <button type="submit"
-                        class="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500">
-                        Add Class Time
-                    </button>
-                </form>
+                        <button type="submit"
+                            class="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500">
+                            Add Class Time
+                        </button>
+                    </form>
 
-                <!-- Subject Study Time -->
-                <form method="POST" action="{{ route('admin.time-studies.subjects.store') }}"
-                    class="js-create-form mt-6 space-y-4 border-t border-slate-200 pt-6">
-                    @csrf
+                    <!-- Subject Study Time -->
+                    <form method="POST" action="{{ route('admin.time-studies.subjects.store') }}"
+                        class="js-create-form mt-6 space-y-4 border-t border-slate-200 pt-6">
+                        @csrf
+                        <input type="hidden" name="_form" value="create_subject_time">
 
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-black text-slate-900">Subject Study Time</h3>
@@ -383,11 +428,12 @@
                         </div>
                     </template>
 
-                    <button type="submit"
-                        class="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
-                        Add Subject Times From Class
-                    </button>
-                </form>
+                        <button type="submit"
+                            class="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
+                            Add Subject Times From Class
+                        </button>
+                    </form>
+                </div>
             </section>
 
             <!-- RIGHT: List + Filters (same style as Student list card) -->
