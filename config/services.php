@@ -40,6 +40,7 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
         'verify_ssl' => env('GOOGLE_VERIFY_SSL', true),
+        'ca_bundle' => env('GOOGLE_CA_BUNDLE', env('CURL_CA_BUNDLE')),
     ],
 
     'facebook' => [

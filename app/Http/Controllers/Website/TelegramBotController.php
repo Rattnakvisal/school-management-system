@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\TelegramBotService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class TelegramBotController extends Controller
 {
@@ -57,6 +59,19 @@ class TelegramBotController extends Controller
         $lastName = trim((string) data_get($message, 'from.last_name', ''));
         $username = trim((string) data_get($message, 'from.username', ''));
         $fromId = (string) data_get($message, 'from.id', '');
+        $sharedPhone = trim((string) data_get($message, 'contact.phone_number', ''));
+
+        if ($this->handlePhoneLinkCommand($telegram, $text, $chatId, $username)) {
+            return response()->json(['ok' => true]);
+        }
+
+        if ($sharedPhone !== '' && $this->linkTelegramByPhone($telegram, $sharedPhone, $chatId, $username, true)) {
+            return response()->json(['ok' => true]);
+        }
+
+        if ($this->handleRawPhoneLink($telegram, $text, $chatId, $username)) {
+            return response()->json(['ok' => true]);
+        }
 
         if ($text === '' || str_starts_with($text, '/start')) {
             $telegram->sendMessage($chatId, $this->startFullContentText($firstName), $this->faqInlineKeyboard());
@@ -114,6 +129,195 @@ class TelegramBotController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    private function handlePhoneLinkCommand(TelegramBotService $telegram, string $text, string $chatId, string $username): bool
+    {
+        $normalized = strtolower(trim($text));
+        if (
+            $normalized === ''
+            || (!str_starts_with($normalized, '/link') && !str_starts_with($normalized, 'link'))
+        ) {
+            return false;
+        }
+
+        $parts = preg_split('/\s+/', trim($text), 2) ?: [];
+        $phone = trim((string) ($parts[1] ?? ''));
+
+        if ($phone === '') {
+            $telegram->sendMessage(
+                $chatId,
+                "To link your account, send: link <your phone number>\nExample: link +85512345678",
+                $this->mainKeyboard()
+            );
+            return true;
+        }
+
+        return $this->linkTelegramByPhone($telegram, $phone, $chatId, $username);
+    }
+
+    private function handleRawPhoneLink(TelegramBotService $telegram, string $text, string $chatId, string $username): bool
+    {
+        if (!$this->looksLikePhoneText($text)) {
+            return false;
+        }
+
+        return $this->linkTelegramByPhone($telegram, trim($text), $chatId, $username);
+    }
+
+    private function linkTelegramByPhone(
+        TelegramBotService $telegram,
+        string $phone,
+        string $chatId,
+        string $username,
+        bool $fromContactShare = false
+    ): bool {
+        if (!$this->telegramLinkingEnabled()) {
+            $telegram->sendMessage(
+                $chatId,
+                'Telegram linking is not available yet. Please ask admin to run migrations.',
+                $this->mainKeyboard()
+            );
+            return true;
+        }
+
+        $user = $this->findUserByPhone($phone);
+        if (!$user) {
+            $message = $fromContactShare
+                ? 'No student/teacher account found with this contact phone number.'
+                : 'No student/teacher account found for that phone number.';
+
+            $telegram->sendMessage($chatId, $message, $this->mainKeyboard());
+            return true;
+        }
+
+        User::query()
+            ->where('id', '!=', $user->id)
+            ->where('telegram_chat_id', $chatId)
+            ->update([
+                'telegram_chat_id' => null,
+                'telegram_username' => null,
+                'telegram_linked_at' => null,
+            ]);
+
+        $alreadyLinked = (string) ($user->telegram_chat_id ?? '') === $chatId;
+
+        $user->telegram_chat_id = $chatId;
+        $user->telegram_username = $username !== '' ? $username : null;
+        $user->telegram_linked_at = now();
+        $user->save();
+
+        $statusText = $alreadyLinked ? 'already linked' : 'linked successfully';
+        $telegram->sendMessage(
+            $chatId,
+            "Telegram {$statusText} for {$user->name} (" . $this->maskPhone((string) $user->phone_number) . ").\n"
+                . "You will receive login OTP here in real time.",
+            $this->mainKeyboard()
+        );
+
+        return true;
+    }
+
+    private function findUserByPhone(string $phone): ?User
+    {
+        $targetTokens = $this->phoneLookupTokens($phone);
+        if ($targetTokens === []) {
+            return null;
+        }
+
+        $users = User::query()
+            ->whereIn('role', ['student', 'teacher'])
+            ->whereNotNull('phone_number')
+            ->get();
+
+        foreach ($users as $user) {
+            if ($this->phoneNumbersMatch($targetTokens, (string) ($user->phone_number ?? ''))) {
+                return $user;
+            }
+        }
+
+        return null;
+    }
+
+    private function telegramLinkingEnabled(): bool
+    {
+        return Schema::hasColumn('users', 'telegram_chat_id')
+            && Schema::hasColumn('users', 'telegram_username')
+            && Schema::hasColumn('users', 'telegram_linked_at')
+            && Schema::hasColumn('users', 'phone_number');
+    }
+
+    private function normalizePhoneDigits(string $phone): string
+    {
+        return preg_replace('/\D+/', '', $phone) ?? '';
+    }
+
+    private function looksLikePhoneText(string $text): bool
+    {
+        $trimmed = trim($text);
+        if ($trimmed === '' || preg_match('/\s/', $trimmed)) {
+            return false;
+        }
+
+        $digits = $this->normalizePhoneDigits($trimmed);
+        if ($digits === '') {
+            return false;
+        }
+
+        $length = strlen($digits);
+        return $length >= 8 && $length <= 15;
+    }
+
+    private function phoneNumbersMatch(array $targetTokens, string $candidatePhone): bool
+    {
+        $candidateTokens = $this->phoneLookupTokens($candidatePhone);
+        if ($candidateTokens === []) {
+            return false;
+        }
+
+        return array_intersect($targetTokens, $candidateTokens) !== [];
+    }
+
+    private function phoneLookupTokens(string $phone): array
+    {
+        $digits = $this->normalizePhoneDigits($phone);
+        if ($digits === '') {
+            return [];
+        }
+
+        $tokens = [$digits];
+        $khCore = $this->cambodiaCoreDigits($digits);
+        if ($khCore !== null) {
+            $tokens[] = '0' . $khCore;
+            $tokens[] = '855' . $khCore;
+        }
+
+        return array_values(array_unique(array_filter($tokens, fn(string $token): bool => $token !== '')));
+    }
+
+    private function cambodiaCoreDigits(string $digits): ?string
+    {
+        if (str_starts_with($digits, '855')) {
+            $core = ltrim(substr($digits, 3), '0');
+            return $core !== '' ? $core : null;
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $core = ltrim(substr($digits, 1), '0');
+            return $core !== '' ? $core : null;
+        }
+
+        return null;
+    }
+
+    private function maskPhone(string $phone): string
+    {
+        $digits = $this->normalizePhoneDigits($phone);
+        if ($digits === '') {
+            return 'phone not set';
+        }
+
+        return '******' . substr($digits, -4);
+    }
+
     private function welcomeText(string $firstName): string
     {
         $name = $firstName !== '' ? $firstName : 'Student';
@@ -144,6 +348,9 @@ class TelegramBotController extends Controller
             "",
             "5. How to contact admin?",
             "A: Send your message with name + class + question. Bot forwards to admin Telegram.",
+            "",
+            "6. How to link Telegram for login OTP?",
+            "A: Send: link <your phone number>. Example: link +85512345678",
             "",
             "You can tap Q&A buttons below or type your question anytime.",
         ]);

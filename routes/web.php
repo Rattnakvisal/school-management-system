@@ -54,6 +54,9 @@ Route::middleware('guest')->group(function () {
     Route::controller(AuthController::class)->group(function () {
         Route::get('/login', 'showLogin')->name('login');
         Route::post('/login', 'login')->name('login.submit');
+        Route::get('/login/otp', 'showLoginOtpForm')->name('login.otp.form');
+        Route::post('/login/otp', 'verifyLoginOtp')->name('login.otp.verify');
+        Route::post('/login/otp/resend', 'resendLoginOtp')->name('login.otp.resend');
     });
 
     /*

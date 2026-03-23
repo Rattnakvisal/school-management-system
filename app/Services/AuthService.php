@@ -34,16 +34,57 @@ class AuthService
     // ==========================
     // LOGIN
     // ==========================
-    public function login(array $credentials, bool $remember = false): User|false
+    public function loginWithIdentifier(string $identifier, string $password, bool $remember = false): User|false
     {
-        if (!Auth::attempt($credentials, $remember)) {
+        $identifier = trim($identifier);
+        if ($identifier === '' || $password === '') {
             return false;
         }
+
+        $userId = null;
+
+        $user = User::query()
+            ->where(function ($query) use ($identifier) {
+                $query->where('email', $identifier)
+                    ->orWhere('phone_number', $identifier);
+            })
+            ->first(['id', 'password']);
+
+        if ($user) {
+            $userId = (int) $user->id;
+        }
+
+        if ($userId === null) {
+            $targetTokens = $this->phoneLookupTokens($identifier);
+            if ($targetTokens !== []) {
+                $users = User::query()
+                    ->whereNotNull('phone_number')
+                    ->get(['id', 'phone_number']);
+
+                foreach ($users as $candidate) {
+                    if ($this->phoneNumbersMatch($targetTokens, (string) ($candidate->phone_number ?? ''))) {
+                        $userId = (int) $candidate->id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($userId === null || $userId <= 0) {
+            return false;
+        }
+
+        $user = User::query()->find($userId);
+        if (!$user || !Hash::check($password, (string) $user->password)) {
+            return false;
+        }
+
+        Auth::guard('web')->login($user, $remember);
 
         // Security best practice after login
         request()->session()->regenerate();
 
-        return Auth::user();
+        return $user;
     }
 
     // ==========================
@@ -209,5 +250,52 @@ class AuthService
             report($e);
             return 255; // Conservative fallback to prevent SQLSTATE[22001].
         }
+    }
+
+    private function normalizePhoneDigits(string $value): string
+    {
+        return preg_replace('/\D+/', '', $value) ?? '';
+    }
+
+    private function phoneNumbersMatch(array $targetTokens, string $candidatePhone): bool
+    {
+        $candidateTokens = $this->phoneLookupTokens($candidatePhone);
+        if ($candidateTokens === []) {
+            return false;
+        }
+
+        return array_intersect($targetTokens, $candidateTokens) !== [];
+    }
+
+    private function phoneLookupTokens(string $value): array
+    {
+        $digits = $this->normalizePhoneDigits($value);
+        if ($digits === '') {
+            return [];
+        }
+
+        $tokens = [$digits];
+        $khCore = $this->cambodiaCoreDigits($digits);
+        if ($khCore !== null) {
+            $tokens[] = '0' . $khCore;
+            $tokens[] = '855' . $khCore;
+        }
+
+        return array_values(array_unique(array_filter($tokens, fn(string $token): bool => $token !== '')));
+    }
+
+    private function cambodiaCoreDigits(string $digits): ?string
+    {
+        if (str_starts_with($digits, '855')) {
+            $core = ltrim(substr($digits, 3), '0');
+            return $core !== '' ? $core : null;
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $core = ltrim(substr($digits, 1), '0');
+            return $core !== '' ? $core : null;
+        }
+
+        return null;
     }
 }

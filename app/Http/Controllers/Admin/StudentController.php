@@ -29,6 +29,7 @@ class StudentController extends Controller
         $hasStudentMajorSubjectsTable = $this->hasStudentMajorSubjectsTable();
         $hasClassStudyTimeColumn = $this->hasClassStudyTimeColumn();
         $hasStudentStudyTimesTable = $this->hasStudentStudyTimesTable();
+        $hasPhoneColumn = $this->hasPhoneColumn();
         $classId = $hasClassColumn && ctype_digit($classIdRaw) ? (int) $classIdRaw : null;
 
         $studentQuery = User::query()
@@ -48,10 +49,14 @@ class StudentController extends Controller
                     $query->with('studyTimes');
                 }
             })
-            ->when($search !== '', function ($query) use ($search, $hasClassColumn, $hasMajorSubjectColumn, $hasStudentMajorSubjectsTable) {
-                $query->where(function ($inner) use ($search, $hasClassColumn, $hasMajorSubjectColumn, $hasStudentMajorSubjectsTable) {
+            ->when($search !== '', function ($query) use ($search, $hasClassColumn, $hasMajorSubjectColumn, $hasStudentMajorSubjectsTable, $hasPhoneColumn) {
+                $query->where(function ($inner) use ($search, $hasClassColumn, $hasMajorSubjectColumn, $hasStudentMajorSubjectsTable, $hasPhoneColumn) {
                     $inner->where('name', 'like', '%' . $search . '%')
                         ->orWhere('email', 'like', '%' . $search . '%');
+
+                    if ($hasPhoneColumn) {
+                        $inner->orWhere('phone_number', 'like', '%' . $search . '%');
+                    }
 
                     if ($hasClassColumn) {
                         $inner->orWhereHas('schoolClass', function ($classQuery) use ($search) {
@@ -125,6 +130,7 @@ class StudentController extends Controller
             'hasMajorSubjectColumn' => $hasMajorSubjectColumn,
             'hasStudentMajorSubjectsTable' => $hasStudentMajorSubjectsTable,
             'hasClassStudyTimeColumn' => $hasClassStudyTimeColumn,
+            'hasPhoneColumn' => $hasPhoneColumn,
         ]);
     }
 
@@ -145,6 +151,10 @@ class StudentController extends Controller
             'provider' => null,
             'google_id' => null,
         ];
+
+        if ($this->hasPhoneColumn()) {
+            $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
 
         if ($this->hasStatusColumn()) {
             $payload['is_active'] = $request->boolean('is_active', true);
@@ -204,6 +214,10 @@ class StudentController extends Controller
             'email' => $validated['email'],
             'role' => (string) ($validated['role'] ?? $student->role),
         ];
+
+        if ($this->hasPhoneColumn()) {
+            $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
 
         if ($avatarResult['path'] !== $student->avatar) {
             $payload['avatar'] = $avatarResult['path'];
@@ -302,6 +316,11 @@ class StudentController extends Controller
         return Schema::hasColumn('users', 'school_class_id');
     }
 
+    private function hasPhoneColumn(): bool
+    {
+        return Schema::hasColumn('users', 'phone_number');
+    }
+
     private function hasMajorSubjectColumn(): bool
     {
         return Schema::hasColumn('users', 'major_subject_id');
@@ -343,6 +362,10 @@ class StudentController extends Controller
             'role' => ['required', Rule::in($this->allowedRoles())],
             'is_active' => ['nullable', 'boolean'],
         ];
+
+        if ($this->hasPhoneColumn()) {
+            $rules['phone_number'] = ['nullable', 'string', 'max:30'];
+        }
 
         $hasClassColumn = $this->hasClassColumn();
         $hasMajorSubjectColumn = $this->hasMajorSubjectColumn();

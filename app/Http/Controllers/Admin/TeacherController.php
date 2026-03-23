@@ -17,13 +17,18 @@ class TeacherController extends Controller
         $search = trim((string) $request->query('q', ''));
         $status = (string) $request->query('status', 'all');
         $hasStatusColumn = $this->hasStatusColumn();
+        $hasPhoneColumn = $this->hasPhoneColumn();
 
         $teacherQuery = User::query()
             ->where('role', 'teacher')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($inner) use ($search) {
+            ->when($search !== '', function ($query) use ($search, $hasPhoneColumn) {
+                $query->where(function ($inner) use ($search, $hasPhoneColumn) {
                     $inner->where('name', 'like', '%' . $search . '%')
                         ->orWhere('email', 'like', '%' . $search . '%');
+
+                    if ($hasPhoneColumn) {
+                        $inner->orWhere('phone_number', 'like', '%' . $search . '%');
+                    }
                 });
             });
 
@@ -49,17 +54,24 @@ class TeacherController extends Controller
             'status' => in_array($status, ['all', 'active', 'inactive'], true) ? $status : 'all',
             'stats' => $stats,
             'hasStatusColumn' => $hasStatusColumn,
+            'hasPhoneColumn' => $hasPhoneColumn,
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)],
             'is_active' => ['nullable', 'boolean'],
-        ]);
+        ];
+
+        if ($this->hasPhoneColumn()) {
+            $rules['phone_number'] = ['nullable', 'string', 'max:30'];
+        }
+
+        $validated = $request->validate($rules);
 
         $avatarResult = $this->resolveAvatarUpload($request);
 
@@ -72,6 +84,10 @@ class TeacherController extends Controller
             'provider' => null,
             'google_id' => null,
         ];
+
+        if ($this->hasPhoneColumn()) {
+            $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
 
         if ($this->hasStatusColumn()) {
             $payload['is_active'] = $request->boolean('is_active', true);
@@ -95,12 +111,18 @@ class TeacherController extends Controller
     {
         $teacher = $this->teacherOrFail($teacher);
 
-        $validated = $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $teacher->id],
             'password' => ['nullable', 'confirmed', Password::min(8)],
             'is_active' => ['nullable', 'boolean'],
-        ]);
+        ];
+
+        if ($this->hasPhoneColumn()) {
+            $rules['phone_number'] = ['nullable', 'string', 'max:30'];
+        }
+
+        $validated = $request->validate($rules);
 
         $avatarResult = $this->resolveAvatarUpload($request, $teacher);
 
@@ -108,6 +130,10 @@ class TeacherController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
         ];
+
+        if ($this->hasPhoneColumn()) {
+            $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
 
         if ($avatarResult['path'] !== $teacher->avatar) {
             $payload['avatar'] = $avatarResult['path'];
@@ -173,6 +199,11 @@ class TeacherController extends Controller
     private function hasStatusColumn(): bool
     {
         return Schema::hasColumn('users', 'is_active');
+    }
+
+    private function hasPhoneColumn(): bool
+    {
+        return Schema::hasColumn('users', 'phone_number');
     }
 
     private function uploadAvatarImage(Request $request, ?User $teacher = null): ?string

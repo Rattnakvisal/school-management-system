@@ -72,6 +72,19 @@
                         @enderror
                     </div>
 
+                    @if ($hasPhoneColumn ?? false)
+                        <div>
+                            <label for="phone_number" class="mb-1 block text-xs font-semibold text-slate-600">Phone
+                                Number</label>
+                            <input id="phone_number" name="phone_number" type="text" value="{{ old('phone_number') }}"
+                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                placeholder="+855 12 345 678">
+                            @error('phone_number')
+                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
+
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label for="password" class="mb-1 block text-xs font-semibold text-slate-600">Password</label>
@@ -167,7 +180,7 @@
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Search</h4>
                                             <input id="q" name="q" type="text"
-                                                value="{{ $search }}" placeholder="Search by name or email"
+                                                value="{{ $search }}" placeholder="Search by name, email, or phone"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         </section>
                                         @if ($hasStatusColumn)
@@ -202,12 +215,15 @@
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                                 <div class="max-h-[700px] overflow-auto">
-                                    <table class="w-full min-w-[920px] text-left text-sm">
+                                    <table class="w-full min-w-[1040px] text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
                                                 <th class="px-3 py-3 font-semibold">teacher</th>
                                                 <th class="px-3 py-3 font-semibold">Email</th>
+                                                @if ($hasPhoneColumn ?? false)
+                                                    <th class="px-3 py-3 font-semibold">Phone Number</th>
+                                                @endif
                                                 <th class="px-3 py-3 font-semibold">Status</th>
                                                 <th class="px-3 py-3 font-semibold">Created</th>
                                                 <th class="px-3 py-3 font-semibold text-right">Actions</th>
@@ -231,6 +247,11 @@
                                                         </div>
                                                     </td>
                                                     <td class="px-3 py-3 text-slate-600">{{ $teacher->email }}</td>
+                                                    @if ($hasPhoneColumn ?? false)
+                                                        <td class="px-3 py-3 text-slate-600">
+                                                            {{ $teacher->phone_number ?: '-' }}
+                                                        </td>
+                                                    @endif
                                                     <td class="px-3 py-3">
                                                         @if ($hasStatusColumn && $teacher->is_active)
                                                             <span
@@ -336,6 +357,21 @@
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
+                                                                    @if ($hasPhoneColumn ?? false)
+                                                                        <div>
+                                                                            <label
+                                                                                for="edit_phone_number_{{ $teacher->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Phone
+                                                                                Number</label>
+                                                                            <input
+                                                                                id="edit_phone_number_{{ $teacher->id }}"
+                                                                                name="phone_number" type="text"
+                                                                                value="{{ $teacher->phone_number }}"
+                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                                                placeholder="+855 12 345 678">
+                                                                        </div>
+                                                                    @endif
+
                                                                     <div>
                                                                         <label for="edit_avatar_image_{{ $teacher->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Avatar
@@ -406,7 +442,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="5"
+                                                    <td colspan="{{ ($hasPhoneColumn ?? false) ? 6 : 5 }}"
                                                         class="px-3 py-10 text-center text-sm text-slate-500">
                                                         No teachers found.
                                                     </td>

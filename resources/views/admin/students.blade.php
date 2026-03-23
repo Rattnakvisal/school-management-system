@@ -75,6 +75,19 @@
                         @enderror
                     </div>
 
+                    @if ($hasPhoneColumn ?? false)
+                        <div>
+                            <label for="phone_number" class="mb-1 block text-xs font-semibold text-slate-600">Phone
+                                Number</label>
+                            <input id="phone_number" name="phone_number" type="text" value="{{ old('phone_number') }}"
+                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                placeholder="+855 12 345 678">
+                            @error('phone_number')
+                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
+
                     <div>
                         <label for="role" class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
                         <select id="role" name="role"
@@ -292,7 +305,7 @@
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Search</h4>
                                             <input id="q" name="q" type="text"
-                                                value="{{ $search }}" placeholder="Search by name, email, or class"
+                                                value="{{ $search }}" placeholder="Search by name, email, phone, or class"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         </section>
                                         @if ($hasClassColumn)
@@ -346,12 +359,16 @@
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                                 <div class="max-h-[700px] overflow-auto">
-                                    <table class="student-table w-full min-w-[1180px] text-left text-sm">
+                                    <table class="student-table w-full min-w-[1300px] text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
                                                 <th class="student-col-student px-3 py-3 font-semibold">Student</th>
                                                 <th class="student-col-email px-3 py-3 font-semibold">Email</th>
+                                                @if ($hasPhoneColumn ?? false)
+                                                    <th class="student-col-phone px-3 py-3 font-semibold">Phone Number
+                                                    </th>
+                                                @endif
                                                 <th class="student-col-class px-3 py-3 font-semibold">Class</th>
                                                 @if ($hasMajorSubjectColumn)
                                                     <th class="student-col-major px-3 py-3 font-semibold">Major Subjects
@@ -387,6 +404,11 @@
                                                         <div class="student-email text-slate-600">{{ $student->email }}
                                                         </div>
                                                     </td>
+                                                    @if ($hasPhoneColumn ?? false)
+                                                        <td class="student-col-phone px-3 py-3 align-top text-slate-600">
+                                                            {{ $student->phone_number ?: '-' }}
+                                                        </td>
+                                                    @endif
                                                     <td class="student-col-class px-3 py-3 align-top text-slate-600">
                                                         @if ($hasClassColumn)
                                                             @if ($student->schoolClass)
@@ -610,6 +632,21 @@
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
+                                                                    @if ($hasPhoneColumn ?? false)
+                                                                        <div>
+                                                                            <label
+                                                                                for="edit_phone_number_{{ $student->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Phone
+                                                                                Number</label>
+                                                                            <input
+                                                                                id="edit_phone_number_{{ $student->id }}"
+                                                                                name="phone_number" type="text"
+                                                                                value="{{ $student->phone_number }}"
+                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                                                placeholder="+855 12 345 678">
+                                                                        </div>
+                                                                    @endif
+
                                                                     <div>
                                                                         <label for="edit_role_{{ $student->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
@@ -824,7 +861,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="{{ 6 + ($hasMajorSubjectColumn ? 1 : 0) + ($hasClassStudyTimeColumn ? 1 : 0) }}"
+                                                    <td colspan="{{ 6 + (($hasPhoneColumn ?? false) ? 1 : 0) + ($hasMajorSubjectColumn ? 1 : 0) + ($hasClassStudyTimeColumn ? 1 : 0) }}"
                                                         class="px-3 py-10 text-center text-sm text-slate-500">
                                                         No students found.
                                                     </td>

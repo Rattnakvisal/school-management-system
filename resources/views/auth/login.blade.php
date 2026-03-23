@@ -34,7 +34,7 @@
                             </div>
                             <h1 class="mt-2 text-2xl font-bold text-slate-900">Welcome Back!</h1>
                             <p class="mt-1 text-sm text-slate-500">
-                                Login with email/password or continue with Google.
+                                Login with email or phone/password, or continue with Google.
                             </p>
                         </div>
 
@@ -65,20 +65,21 @@
                         <form method="POST" action="{{ route('login.submit') }}" class="mt-7 space-y-5">
                             @csrf
 
-                            {{-- Email --}}
+                            {{-- Email or Phone --}}
                             <div>
-                                <label for="email"
+                                <label for="login"
                                     class="block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                    Email ID
+                                    Email or Phone
                                 </label>
                                 <div class="mt-2">
-                                    <input id="email" type="email" name="email" value="{{ old('email') }}" required
-                                        autofocus autocomplete="email"
+                                    <input id="login" type="text" name="login"
+                                        value="{{ old('login', old('email')) }}" required autofocus
+                                        autocomplete="username"
                                         class="w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-3 text-slate-900 shadow-sm outline-none
                                            focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                                        placeholder="you@example.com">
+                                        placeholder="you@example.com or 012345678 / +85512345678">
                                 </div>
-                                @error('email')
+                                @error('login')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -137,6 +138,22 @@
                                     {{ old('remember') ? 'checked' : '' }}>
                                 <span class="text-sm text-slate-600">Remember me</span>
                             </div>
+
+                            @php
+                                $telegramUsername = trim((string) config('services.telegram.bot_username', ''));
+                            @endphp
+                            @if ($telegramUsername !== '')
+                                <p class="text-xs text-slate-500">
+                                    Student/Teacher OTP login: first link Telegram by sending
+                                    <span class="font-semibold">link &lt;your phone number&gt;</span>
+                                    (example: <span class="font-semibold">012345678</span> or
+                                    <span class="font-semibold">+85512345678</span>)
+                                    to <a href="{{ 'https://t.me/' . $telegramUsername }}" target="_blank"
+                                        rel="noopener" class="font-semibold text-indigo-600 hover:underline">
+                                        {{ '@' . $telegramUsername }}
+                                    </a>.
+                                </p>
+                            @endif
 
                             {{-- Submit --}}
                             <button type="submit"

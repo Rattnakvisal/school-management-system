@@ -25,6 +25,10 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone_number',
+        'telegram_chat_id',
+        'telegram_username',
+        'telegram_linked_at',
         'email_verified_at',
         'password',
         'role',
@@ -56,6 +60,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'telegram_linked_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
             'school_class_id' => 'integer',
