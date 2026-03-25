@@ -7,6 +7,49 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Run with Docker
+
+1. Build and start containers:
+
+```bash
+docker compose up -d --build
+```
+
+2. Run migrations:
+
+```bash
+docker compose exec app php artisan migrate
+```
+
+3. Open the app:
+
+`http://localhost:8000`
+
+### Optional: run Vite in Docker (HMR)
+
+```bash
+docker compose --profile frontend up -d vite
+```
+
+Then use `http://localhost:5173` for Vite dev server access.
+
+### Optional: change exposed ports
+
+Create or update a `.env` file in the project root (Docker Compose reads it) and set:
+
+```bash
+APP_PORT=8000
+FORWARD_DB_PORT=3307
+VITE_PORT=5173
+```
+
+### Services
+
+- App (PHP-FPM): `app`
+- Nginx: `web` (port `8000`)
+- MySQL: `db` (default host port `3307`, internal `3306`)
+- Vite (optional): `vite` (port `5173`)
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
