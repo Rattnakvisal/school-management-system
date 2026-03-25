@@ -1,102 +1,167 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# School Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 12 school management platform with role-based dashboards for:
 
-## Run with Docker
+- Admin
+- Teacher
+- Student
 
-1. Build and start containers:
+Main auth flows:
+
+- Email/password login
+- Login OTP flow
+- Google OAuth login
+
+## Tech Stack
+
+- PHP 8.4 (Docker `app` service)
+- Laravel 12
+- MySQL 8
+- Nginx
+- Vite
+
+## Current Docker Setup (Important)
+
+The current `docker-compose.yml` is configured so:
+
+- `web` is exposed on `http://localhost:8000`
+- `app` (Laravel/PHP-FPM) connects to **host MySQL** at:
+  - `DB_HOST=host.docker.internal`
+  - `DB_PORT=3308`
+
+This is intentional so the app can use your existing MySQL data/users on port `3308`.
+
+The `db` service still exists, but it is **not exposed to host port** by default.
+
+## Quick Start
+
+1. Install dependencies (if needed):
+
+```bash
+composer install
+npm install
+```
+
+2. Build frontend assets:
+
+```bash
+npm run build
+```
+
+3. Start Docker services:
 
 ```bash
 docker compose up -d --build
 ```
 
-2. Run migrations:
+4. Generate app key (only first setup):
+
+```bash
+docker compose exec app php artisan key:generate
+```
+
+5. Open:
+
+```text
+http://localhost:8000
+```
+
+## Database Commands
+
+Run migrations:
 
 ```bash
 docker compose exec app php artisan migrate
 ```
 
-3. Open the app:
-
-`http://localhost:8000`
-
-### Optional: run Vite in Docker (HMR)
+Run seeders:
 
 ```bash
-docker compose --profile frontend up -d vite
+docker compose exec app php artisan db:seed
 ```
 
-Then use `http://localhost:5173` for Vite dev server access.
-
-### Optional: change exposed ports
-
-Create or update a `.env` file in the project root (Docker Compose reads it) and set:
+Check migration status:
 
 ```bash
-APP_PORT=8000
-FORWARD_DB_PORT=3307
-VITE_PORT=5173
+docker compose exec app php artisan migrate:status
 ```
 
-### Services
+## Default Admin Seeder
 
-- App (PHP-FPM): `app`
-- Nginx: `web` (port `8000`)
-- MySQL: `db` (default host port `3307`, internal `3306`)
-- Vite (optional): `vite` (port `5173`)
+`DatabaseSeeder` creates/updates an admin user:
 
-## About Laravel
+- Email: `visalchunrathanak@gmail.com`
+- Password: `Wq_76wZtR2aPRmq`
+- Role: `admin`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Role Routes
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Admin: `/admin/*`
+- Teacher: `/teacher/*`
+- Student: `/student/*`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Public routes include home `/`, login `/login`, Google auth, contact, and Telegram webhook.
 
-## Learning Laravel
+## Useful Docker Commands
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Start services:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+docker compose up -d
+```
 
-## Laravel Sponsors
+Restart only app:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+docker compose up -d --force-recreate app
+```
 
-### Premium Partners
+Restart nginx:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+docker compose restart web
+```
 
-## Contributing
+View logs:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+docker compose logs -f app
+docker compose logs -f web
+docker compose logs -f db
+```
 
-## Code of Conduct
+Stop services:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+docker compose down
+```
 
-## Security Vulnerabilities
+## Troubleshooting
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Login fails even though users exist
 
-## License
+Verify app DB connectivity:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+docker compose exec app php artisan migrate:status
+```
+
+Check user count:
+
+```bash
+docker compose exec app php artisan tinker --execute="echo \App\Models\User::count();"
+```
+
+### `502 Bad Gateway` on `localhost:8000`
+
+Restart `web` (nginx) after recreating `app`:
+
+```bash
+docker compose restart web
+```
+
+### `ERR_INVALID_HTTP_RESPONSE` on `localhost:3308`
+
+This is expected in a browser. MySQL is not HTTP.
+Use a SQL client (SQLyog, DBeaver, Workbench) for DB port connections.
+
