@@ -141,7 +141,7 @@
                             @endphp
                             @if ($telegramUsername !== '')
                                 <p class="text-xs text-slate-500">
-                                    Student/Teacher OTP login: first link Telegram by sending
+                                    Google login and phone-number login require OTP. First link Telegram by sending
                                     <span class="font-semibold">link &lt;your phone number&gt;</span>
                                     (example: <span class="font-semibold">012345678</span> or
                                     <span class="font-semibold">+85512345678</span>)

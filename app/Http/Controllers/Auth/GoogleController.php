@@ -70,7 +70,7 @@ class GoogleController extends Controller
                     ->with('error', 'Your account is inactive. Please contact administrator.');
             }
 
-            if ($this->loginOtpService->requiresOtp($user)) {
+            if ($this->loginOtpService->requiresOtp($user, 'google')) {
                 $challenge = $this->loginOtpService->issueAndSend($user);
                 if (!$challenge['ok']) {
                     Auth::guard('web')->logout();

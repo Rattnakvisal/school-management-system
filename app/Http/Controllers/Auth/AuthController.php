@@ -60,7 +60,11 @@ class AuthController extends Controller
                 ->withInput($request->only('login'));
         }
 
-        if ($this->loginOtpService->requiresOtp($user)) {
+        if ($this->loginOtpService->requiresOtp(
+            $user,
+            'password',
+            (string) $validated['login']
+        )) {
             $challenge = $this->loginOtpService->issueAndSend($user);
             if (!$challenge['ok']) {
                 Auth::guard('web')->logout();

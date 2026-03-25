@@ -13,20 +13,23 @@ class LoginOtpService
         protected TelegramBotService $telegramBotService
     ) {}
 
-    public function requiresOtp(User $user): bool
+    public function requiresOtp(User $user, ?string $loginMethod = null, ?string $loginIdentifier = null): bool
     {
+        $method = strtolower(trim((string) ($loginMethod ?? '')));
+
+        if ($method === 'google') {
+            return true;
+        }
+
+        if ($method === 'password' && $this->looksLikePhoneIdentifier((string) ($loginIdentifier ?? ''))) {
+            return true;
+        }
+
         return in_array((string) $user->role, ['teacher', 'student'], true);
     }
 
     public function issueAndSend(User $user): array
     {
-        if (!$this->requiresOtp($user)) {
-            return [
-                'ok' => true,
-                'message' => null,
-            ];
-        }
-
         $phoneNumber = trim((string) ($user->phone_number ?? ''));
         if ($phoneNumber === '') {
             return [
@@ -180,5 +183,20 @@ class LoginOtpService
         }
 
         return implode("\n", $lines);
+    }
+
+    private function looksLikePhoneIdentifier(string $value): bool
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return false;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+        return strlen($digits) >= 7;
     }
 }
