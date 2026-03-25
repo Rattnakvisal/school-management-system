@@ -1237,20 +1237,7 @@
                                     class="inline-flex rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
                                     Send Message
                                 </button>
-                                @if (!empty($telegramBotUrl))
-                                    <a href="{{ $telegramBotUrl }}" target="_blank" rel="noopener"
-                                        class="inline-flex items-center gap-2 rounded-xl border border-cyan-300 bg-cyan-50 px-5 py-3 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100">
-                                        Telegram OTP Bot
-                                    </a>
-                                @endif
                             </div>
-
-                            @if (!empty($telegramBotUrl))
-                                <p class="mt-3 text-xs font-semibold text-cyan-700">
-                                    Need OTP login setup? Open Telegram OTP Bot and send:
-                                    <span class="font-semibold">link &lt;your phone number&gt;</span>.
-                                </p>
-                            @endif
 
                             @if ($errors->any())
                                 <p class="mt-3 text-xs font-semibold text-red-600">Please check the contact form and try
@@ -1319,24 +1306,6 @@
                                 <p class="text-xs font-bold uppercase tracking-wide text-cyan-200">Office Hours</p>
                                 <p class="mt-1 text-sm font-semibold text-slate-100">Mon–Fri, 8:00 AM – 5:00 PM</p>
                             </article>
-                            @if (!empty($telegramBotUrl))
-                                <article data-reveal style="--d:.22s"
-                                    class="card-hover rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
-                                    <div
-                                        class="icon-pop mb-2 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-cyan-100">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2">
-                                            <path d="M22 2 11 13" />
-                                            <path d="M22 2 15 22l-4-9-9-4z" />
-                                        </svg>
-                                    </div>
-                                    <p class="text-xs font-bold uppercase tracking-wide text-cyan-200">Telegram Bot</p>
-                                    <a href="{{ $telegramBotUrl }}" target="_blank" rel="noopener"
-                                        class="mt-1 inline-flex text-sm font-semibold text-cyan-100 underline decoration-cyan-200/70 underline-offset-4">
-                                        Open OTP Linking Bot
-                                    </a>
-                                </article>
-                            @endif
                         </div>
 
                         <div class="mt-6 space-y-3">

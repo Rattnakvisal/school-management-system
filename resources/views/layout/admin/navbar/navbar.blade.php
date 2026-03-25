@@ -21,226 +21,70 @@
 
         {{-- SIDEBAR --}}
         <aside
-            class="fixed inset-y-0 left-0 z-50 bg-white border-r border-slate-200 shadow-sm
-                      transition-all duration-300 lg:translate-x-0 h-screen flex flex-col
-                      transform"
+            class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-slate-200 bg-white shadow-sm transition-all duration-300 lg:translate-x-0"
             :class="[
                 mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-                collapsed ? 'w-20' : 'w-72'
+                collapsed ? 'w-24' : 'w-72'
             ]"
             aria-label="Sidebar">
-
             {{-- Header --}}
-            <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200 shrink-0">
+            <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4 shrink-0">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0">
-                    <div class="h-10 w-10 rounded-2xl bg-indigo-600/10 flex items-center justify-center shrink-0">
-                        <svg class="h-6 w-6 text-indigo-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <div
+                        class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm shrink-0">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v9l10 5 10-5V4l-10 5Z" />
                         </svg>
                     </div>
 
-                    {{-- Brand text (hide when collapsed) --}}
-                    <div class="min-w-0" x-show="!collapsed" x-transition>
-                        <div class="text-lg font-extrabold tracking-tight text-slate-900 truncate">Schooli</div>
-                        <div class="text-xs text-slate-500 -mt-0.5 truncate">Admin Panel</div>
+                    <div x-show="!collapsed" x-transition class="min-w-0">
+                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">Schooli</div>
+                        <div class="truncate text-xs text-slate-500">Admin Dashboard</div>
                     </div>
                 </a>
 
                 <div class="flex items-center gap-2">
-                    {{-- Collapse/Expand button (desktop) --}}
+                    {{-- desktop collapse --}}
                     <button type="button"
-                        class="hidden lg:inline-flex items-center justify-center p-2 rounded-xl hover:bg-slate-100
-                               focus:outline-none focus:ring-4 focus:ring-indigo-100"
+                        class="hidden lg:inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100"
                         @click="toggleSidebar()" :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
-
-                        {{-- Collapse icon --}}
-                        <svg x-show="!collapsed" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"
-                            aria-hidden="true">
+                        <svg x-show="!collapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M4 6h16v2H4V6Zm0 5h10v2H4v-2Zm0 5h16v2H4v-2Z" />
                         </svg>
-
-                        {{-- Expand icon --}}
-                        <svg x-show="collapsed" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"
-                            aria-hidden="true">
+                        <svg x-show="collapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M4 6h10v2H4V6Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z" />
                         </svg>
                     </button>
 
-                    {{-- Close button (mobile) --}}
+                    {{-- mobile close --}}
                     <button
-                        class="lg:hidden p-2 rounded-xl hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-indigo-100"
-                        @click="mobileOpen=false" aria-label="Close" type="button">
-                        ✕
+                        class="inline-flex lg:hidden h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-indigo-100"
+                        @click="mobileOpen=false" type="button" aria-label="Close sidebar">
+                        &times;
                     </button>
                 </div>
             </div>
 
-            {{-- Nav --}}
-            <nav class="px-3 py-4 space-y-1 flex-1 overflow-y-auto">
-                @php
-                    $item = fn($route, $label, $icon, $badge = 0) => [
-                        'route' => $route,
-                        'label' => $label,
-                        'icon' => $icon,
-                        'badge' => max((int) $badge, 0),
-                        'active' => request()->routeIs($route),
-                    ];
-
-                    $links = [
-                        $item('admin.dashboard', 'Dashboard', 'home'),
-                        $item('admin.students.index', 'Students', 'users'),
-                        $item('admin.teachers.index', 'Teachers', 'user'),
-                        $item('admin.classes.index', 'Classes', 'grid'),
-                        $item('admin.subjects.index', 'Subjects', 'book'),
-                        $item('admin.time-studies.index', 'Time Studies', 'clock'),
-                        $item('admin.student-study.index', 'Student Study', 'academic'),
-                        $item('admin.attendance.teachers.index', 'Teacher Attendance', 'user-check'),
-                        $item('admin.attendance.index', 'Attendance', 'calendar-check'),
-                        $item('admin.exams.index', 'Exams', 'clipboard'),
-                        $item('admin.contacts.index', 'Contacts', 'mail', $contactUnread ?? 0),
-                        $item('admin.settings', 'Settings', 'cog'),
-                    ];
-                @endphp
-
-                @foreach ($links as $l)
-                    <a href="{{ route($l['route']) }}"
-                        class="group relative flex items-center rounded-2xl py-3 text-sm font-semibold transition
-                               focus:outline-none focus:ring-4 focus:ring-indigo-100
-                               {{ $l['active'] ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}"
-                        :class="collapsed ? 'px-3 justify-center' : 'px-4 gap-3'">
-
-                        {{-- Icon box --}}
-                        <span
-                            class="h-9 w-9 rounded-xl flex items-center justify-center relative shrink-0
-                                     {{ $l['active'] ? 'bg-white/15' : 'bg-slate-100 group-hover:bg-white' }}">
-                            @switch($l['icon'])
-                                @case('home')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 3 2 12h3v9h6v-6h2v6h6v-9h3L12 3Z" />
-                                    </svg>
-                                @break
-
-                                @case('users')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M16 11c1.66 0 3-1.34 3-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.96 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z" />
-                                    </svg>
-                                @break
-
-                                @case('user')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4Zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5Z" />
-                                    </svg>
-                                @break
-
-                                @case('grid')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M3 3h8v8H3V3Zm10 0h8v8h-8V3ZM3 13h8v8H3v-8Zm10 0h8v8h-8v-8Z" />
-                                    </svg>
-                                @break
-
-                                @case('book')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12v-2H6V4h12v16h2V4a2 2 0 0 0-2-2Z" />
-                                    </svg>
-                                @break
-
-                                @case('clock')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2a10 10 0 1 0 10 10A10.01 10.01 0 0 0 12 2Zm1 11h5v-2h-4V6h-2v7Z" />
-                                    </svg>
-                                @break
-
-                                @case('academic')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3Zm0 10.83L4.74 10 12 6.17 19.26 10 12 13.83ZM4 13.2V17c0 1.66 3.58 3 8 3s8-1.34 8-3v-3.8l-8 4.37-8-4.37Z" />
-                                    </svg>
-                                @break
-
-                                @case('check')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M9 16.17 4.83 12 3.41 13.41 9 19l12-12-1.41-1.41L9 16.17Z" />
-                                    </svg>
-                                @break
-
-                                @case('user-check')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4Zm0 2c-3.31 0-8 1.66-8 5v1h10.4a6 6 0 0 1-.36-2c0-1.55.58-2.97 1.53-4H12Z" />
-                                        <path d="m16.5 17 1.6 1.6L21 15.7l-1.1-1.1-1.8 1.8-.5-.5L16.5 17Z" />
-                                    </svg>
-                                @break
-
-                                @case('calendar-check')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M7 2h2v2h6V2h2v2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2Zm12 8H5v8h14v-8Z" />
-                                        <path d="m9.8 14.6 1.6 1.6 2.8-2.8-1.1-1.1-1.7 1.7-.5-.5-1.1 1.1Z" />
-                                    </svg>
-                                @break
-
-                                @case('clipboard')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M16 2H8v2H5v18h14V4h-3V2Zm1 18H7V6h10v14Z" />
-                                    </svg>
-                                @break
-
-                                @case('mail')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 3-8 5L4 7V6l8 5 8-5v1Z" />
-                                    </svg>
-                                @break
-
-                                @default
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
-                                    </svg>
-                            @endswitch
-
-                            {{-- Mail dot --}}
-                            @if ($l['icon'] === 'mail' && ($l['badge'] ?? 0) > 0)
-                                <span
-                                    class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2
-                                    {{ $l['active'] ? 'ring-indigo-600' : 'ring-white' }}"></span>
-                            @endif
-                        </span>
-
-                        {{-- Label (hide when collapsed) --}}
-                        <span class="flex-1 truncate" x-show="!collapsed">{{ $l['label'] }}</span>
-
-                        {{-- Badge (hide when collapsed) --}}
-                        <div x-show="!collapsed">
-                            @if (($l['badge'] ?? 0) > 0)
-                                <span
-                                    class="inline-grid min-w-[22px] place-items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold
-                                           {{ $l['active'] ? 'bg-white text-indigo-700' : 'bg-red-100 text-red-700' }}">
-                                    {{ $l['badge'] > 99 ? '99+' : $l['badge'] }}
-                                </span>
-                            @elseif ($l['active'])
-                                <span class="h-2 w-2 rounded-full bg-white"></span>
-                            @endif
-                        </div>
-                    </a>
-                @endforeach
-            </nav>
-
-            {{-- Footer card (hide when collapsed) --}}
-            <div class="p-4 border-t border-slate-100 shrink-0" x-show="!collapsed" x-transition>
-                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-600 p-4 text-white shadow-lg">
-                    <div class="text-sm font-semibold">You’re on Admin Mode</div>
-                    <div class="text-xs text-white/80 mt-1">Manage students, teachers and classes.</div>
+            {{-- Navigation --}}
+            <div class="flex-1 overflow-y-auto px-3 py-4">
+                @include('layout.admin.navbar.partials.sidebar-navigation', [
+                    'contactUnread' => $contactUnread ?? 0,
+                ])
+            </div>
+            {{-- Footer --}}
+            <div class="border-t border-slate-100 p-4 shrink-0" x-show="!collapsed" x-transition>
+                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 text-white shadow-lg">
+                    <div class="text-sm font-bold">Admin Panel</div>
+                    <div class="mt-1 text-xs text-white/80">
+                        Manage students, teachers, classes, and attendance easily.
+                    </div>
                     <a href="#"
-                        class="mt-3 inline-flex items-center justify-center rounded-2xl bg-white/15 px-3 py-2 text-xs font-semibold hover:bg-white/20">
-                        Quick Guide
+                        class="mt-3 inline-flex items-center rounded-xl bg-white/15 px-3 py-2 text-xs font-semibold hover:bg-white/20">
+                        Open Guide
                     </a>
                 </div>
             </div>
         </aside>
-
         {{-- MAIN AREA --}}
         <div class="min-h-screen flex flex-col overflow-x-hidden" :class="collapsed ? 'lg:pl-20' : 'lg:pl-72'">
 
@@ -494,7 +338,7 @@
             </main>
 
             <footer class="px-4 py-4 text-xs text-slate-500 sm:px-6">
-                © {{ date('Y') }} Schooli • Admin Panel
+                &copy; {{ date('Y') }} Schooli &bull; Admin Panel
             </footer>
         </div>
     </div>
@@ -541,3 +385,4 @@
 </body>
 
 </html>
+

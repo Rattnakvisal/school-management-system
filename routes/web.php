@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -30,11 +31,24 @@ Route::get('/', function () {
         'studentsTotal' => $studentsTotal,
         'teachersTotal' => $teachersTotal,
         'dashboardRoute' => $dashboardRoute,
-        'telegramBotUrl' => ($telegramUsername = trim((string) config('services.telegram.bot_username'))) !== ''
-            ? 'https://t.me/' . $telegramUsername
-            : null,
     ]);
 })->name('home');
+
+Route::get('/storage/{path}', function (string $path) {
+    $path = ltrim(str_replace('\\', '/', $path), '/');
+
+    if ($path === '' || str_contains($path, '..')) {
+        abort(404);
+    }
+
+    $disk = Storage::disk('public');
+
+    if (!$disk->exists($path)) {
+        abort(404);
+    }
+
+    return $disk->response($path);
+})->where('path', '.*')->name('public.storage');
 
 Route::post('/contact', [WebsiteContactMessageController::class, 'store'])->name('contact.store');
 Route::post('/telegram/webhook/{secret?}', [WebsiteTelegramBotController::class, 'webhook'])->name('telegram.webhook');

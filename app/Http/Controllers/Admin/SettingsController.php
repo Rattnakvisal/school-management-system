@@ -11,6 +11,8 @@ use App\Models\Subject;
 use App\Models\SubjectStudyTime;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
@@ -41,17 +43,35 @@ class SettingsController extends Controller
         $admin = $request->user();
 
         $validated = $request->validateWithBag('profileUpdate', [
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:120'],
+            'last_name' => ['nullable', 'string', 'max:120'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($admin->id)],
+            'phone_number' => ['nullable', 'string', 'max:30'],
             'avatar' => ['nullable', 'file', 'image', 'max:4096'],
+            'remove_avatar' => ['nullable', 'boolean'],
         ]);
 
-        $admin->name = (string) $validated['name'];
+        $firstName = trim((string) ($validated['first_name'] ?? ''));
+        $lastName = trim((string) ($validated['last_name'] ?? ''));
+
+        $admin->name = trim($firstName . ' ' . $lastName);
         $admin->email = (string) $validated['email'];
+        $admin->phone_number = trim((string) ($validated['phone_number'] ?? '')) ?: null;
+
+        $currentAvatar = $admin->avatar;
+
+        if ($request->boolean('remove_avatar')) {
+            $this->deleteStoredAvatar($currentAvatar);
+            $admin->avatar = null;
+            $currentAvatar = null;
+        }
 
         if ($request->hasFile('avatar')) {
             $avatarPath = $request->file('avatar')->store('avatars/admins', 'public');
             if ($avatarPath !== false) {
+                if ($currentAvatar && $currentAvatar !== $avatarPath) {
+                    $this->deleteStoredAvatar($currentAvatar);
+                }
                 $admin->avatar = $avatarPath;
             }
         }
@@ -61,6 +81,42 @@ class SettingsController extends Controller
         return redirect()
             ->route('admin.settings')
             ->with('success', 'Profile updated successfully.');
+    }
+
+    private function deleteStoredAvatar(?string $avatar): void
+    {
+        if (!$this->isLocalStorageAvatar($avatar)) {
+            return;
+        }
+
+        $path = $this->normalizePublicPath((string) $avatar);
+        if ($path !== '' && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    private function isLocalStorageAvatar(?string $avatar): bool
+    {
+        if (!$avatar) {
+            return false;
+        }
+
+        return !Str::startsWith($avatar, ['http://', 'https://', '//', 'data:image/']);
+    }
+
+    private function normalizePublicPath(string $path): string
+    {
+        $normalized = ltrim($path, '/');
+
+        if (Str::startsWith($normalized, 'storage/')) {
+            return Str::after($normalized, 'storage/');
+        }
+
+        if (Str::startsWith($normalized, 'public/')) {
+            return Str::after($normalized, 'public/');
+        }
+
+        return $normalized;
     }
 
     public function updatePassword(Request $request)
