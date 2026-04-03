@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\AdminUserReportExport;
 use App\Http\Controllers\Controller;
 use App\Models\ClassStudyTime;
 use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\SubjectStudyTime;
 use App\Models\User;
+use App\Support\Reports\AdminUserReportFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -15,84 +19,27 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        $search = trim((string) $request->query('q', ''));
-        $status = (string) $request->query('status', 'all');
-        $classIdRaw = (string) $request->query('class_id', 'all');
-        $hasStatusColumn = $this->hasStatusColumn();
-        $hasClassColumn = $this->hasClassColumn();
-        $hasMajorSubjectColumn = $this->hasMajorSubjectColumn();
-        $hasStudentMajorSubjectsTable = $this->hasStudentMajorSubjectsTable();
-        $hasClassStudyTimeColumn = $this->hasClassStudyTimeColumn();
-        $hasStudentStudyTimesTable = $this->hasStudentStudyTimesTable();
-        $hasPhoneColumn = $this->hasPhoneColumn();
-        $classId = $hasClassColumn && ctype_digit($classIdRaw) ? (int) $classIdRaw : null;
-
-        $studentQuery = User::query()
-            ->where('role', 'student')
-            ->when($hasClassColumn, function ($query) {
-                $query->with('schoolClass');
-            })
-            ->when($hasMajorSubjectColumn, function ($query) {
-                $query->with('majorSubject');
-            })
-            ->when($hasMajorSubjectColumn && $hasStudentMajorSubjectsTable, function ($query) {
-                $query->with('majorSubjects.schoolClass');
-            })
-            ->when($hasClassStudyTimeColumn, function ($query) use ($hasStudentStudyTimesTable) {
-                $query->with('classStudyTime');
-                if ($hasStudentStudyTimesTable) {
-                    $query->with('studyTimes');
-                }
-            })
-            ->when($search !== '', function ($query) use ($search, $hasClassColumn, $hasMajorSubjectColumn, $hasStudentMajorSubjectsTable, $hasPhoneColumn) {
-                $query->where(function ($inner) use ($search, $hasClassColumn, $hasMajorSubjectColumn, $hasStudentMajorSubjectsTable, $hasPhoneColumn) {
-                    $inner->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%');
-
-                    if ($hasPhoneColumn) {
-                        $inner->orWhere('phone_number', 'like', '%' . $search . '%');
-                    }
-
-                    if ($hasClassColumn) {
-                        $inner->orWhereHas('schoolClass', function ($classQuery) use ($search) {
-                            $classQuery->where('name', 'like', '%' . $search . '%')
-                                ->orWhere('section', 'like', '%' . $search . '%');
-                        });
-                    }
-
-                    if ($hasMajorSubjectColumn) {
-                        $inner->orWhereHas('majorSubject', function ($subjectQuery) use ($search) {
-                            $subjectQuery->where('name', 'like', '%' . $search . '%')
-                                ->orWhere('code', 'like', '%' . $search . '%');
-                        });
-
-                        if ($hasStudentMajorSubjectsTable) {
-                            $inner->orWhereHas('majorSubjects', function ($subjectQuery) use ($search) {
-                                $subjectQuery->where('name', 'like', '%' . $search . '%')
-                                    ->orWhere('code', 'like', '%' . $search . '%');
-                            });
-                        }
-                    }
-                });
-            });
-
-        if ($hasClassColumn && $classId !== null) {
-            $studentQuery->where('school_class_id', $classId);
-        }
-
-        if ($hasStatusColumn && in_array($status, ['active', 'inactive'], true)) {
-            $studentQuery->where('is_active', $status === 'active');
-        }
-
-        $students = $studentQuery
+        $filters = $this->studentFilters($request);
+        $students = $this->filteredStudentQuery($filters)
             ->latest()
             ->paginate(10)
             ->withQueryString();
+
+        $hasStatusColumn = $filters['hasStatusColumn'];
+        $hasClassColumn = $filters['hasClassColumn'];
+        $hasMajorSubjectColumn = $filters['hasMajorSubjectColumn'];
+        $hasStudentMajorSubjectsTable = $filters['hasStudentMajorSubjectsTable'];
+        $hasClassStudyTimeColumn = $filters['hasClassStudyTimeColumn'];
+        $hasPhoneColumn = $filters['hasPhoneColumn'];
+        $classId = $filters['classId'];
+        $search = $filters['search'];
+        $status = $filters['status'];
 
         $baseStatsQuery = User::query()->where('role', 'student');
         $stats = [
@@ -132,6 +79,37 @@ class StudentController extends Controller
             'hasClassStudyTimeColumn' => $hasClassStudyTimeColumn,
             'hasPhoneColumn' => $hasPhoneColumn,
         ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $report = $this->buildStudentReportPayload($request);
+
+        return Pdf::loadView('admin.reports.users-pdf', [
+            ...$report,
+            'generatedAt' => now()->format('F j, Y g:i A'),
+        ])
+            ->setPaper('a4', count($report['headings']) > 6 ? 'landscape' : 'portrait')
+            ->download('students-report-' . now()->format('Ymd-His') . '.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $report = $this->buildStudentReportPayload($request);
+
+        return Excel::download(
+            new AdminUserReportExport(
+                $report['title'],
+                $report['subtitle'],
+                $report['sheet_name'],
+                $report['accent'],
+                $report['headings'],
+                $report['rows'],
+                $report['cards'],
+                $report['filters'],
+            ),
+            'students-report-' . now()->format('Ymd-His') . '.xlsx'
+        );
     }
 
     public function store(Request $request)
@@ -304,6 +282,124 @@ class StudentController extends Controller
     {
         abort_unless($student->role === 'student', 404);
         return $student;
+    }
+
+    private function buildStudentReportPayload(Request $request): array
+    {
+        $filters = $this->studentFilters($request);
+        $students = $this->filteredStudentQuery($filters)
+            ->latest()
+            ->get();
+
+        $selectedClass = null;
+        if ($filters['hasClassColumn'] && $filters['classId'] !== null) {
+            $selectedClass = SchoolClass::query()->find($filters['classId']);
+        }
+
+        return app(AdminUserReportFactory::class)->makeStudents($students, [
+            'hasPhoneColumn' => $filters['hasPhoneColumn'],
+            'hasStatusColumn' => $filters['hasStatusColumn'],
+            'hasClassColumn' => $filters['hasClassColumn'],
+            'hasMajorSubjectColumn' => $filters['hasMajorSubjectColumn'],
+            'hasClassStudyTimeColumn' => $filters['hasClassStudyTimeColumn'],
+            'filters' => [
+                'Search' => $filters['search'] !== '' ? $filters['search'] : 'Any student',
+                'Status' => $filters['hasStatusColumn'] ? ucfirst($filters['status']) : 'All',
+                'Class' => $filters['hasClassColumn']
+                    ? ($selectedClass?->display_name ?? 'All classes')
+                    : 'Not available',
+            ],
+        ]);
+    }
+
+    private function studentFilters(Request $request): array
+    {
+        $hasStatusColumn = $this->hasStatusColumn();
+        $hasClassColumn = $this->hasClassColumn();
+        $hasMajorSubjectColumn = $this->hasMajorSubjectColumn();
+        $hasStudentMajorSubjectsTable = $this->hasStudentMajorSubjectsTable();
+        $hasClassStudyTimeColumn = $this->hasClassStudyTimeColumn();
+        $hasStudentStudyTimesTable = $this->hasStudentStudyTimesTable();
+        $hasPhoneColumn = $this->hasPhoneColumn();
+        $status = (string) $request->query('status', 'all');
+        $classIdRaw = (string) $request->query('class_id', 'all');
+
+        return [
+            'search' => trim((string) $request->query('q', '')),
+            'status' => in_array($status, ['all', 'active', 'inactive'], true) ? $status : 'all',
+            'classId' => $hasClassColumn && ctype_digit($classIdRaw) ? (int) $classIdRaw : null,
+            'hasStatusColumn' => $hasStatusColumn,
+            'hasClassColumn' => $hasClassColumn,
+            'hasMajorSubjectColumn' => $hasMajorSubjectColumn,
+            'hasStudentMajorSubjectsTable' => $hasStudentMajorSubjectsTable,
+            'hasClassStudyTimeColumn' => $hasClassStudyTimeColumn,
+            'hasStudentStudyTimesTable' => $hasStudentStudyTimesTable,
+            'hasPhoneColumn' => $hasPhoneColumn,
+        ];
+    }
+
+    private function filteredStudentQuery(array $filters): Builder
+    {
+        $studentQuery = User::query()
+            ->where('role', 'student')
+            ->when($filters['hasClassColumn'], function ($query) {
+                $query->with('schoolClass');
+            })
+            ->when($filters['hasMajorSubjectColumn'], function ($query) {
+                $query->with('majorSubject');
+            })
+            ->when($filters['hasMajorSubjectColumn'] && $filters['hasStudentMajorSubjectsTable'], function ($query) {
+                $query->with('majorSubjects.schoolClass');
+            })
+            ->when($filters['hasClassStudyTimeColumn'], function ($query) use ($filters) {
+                $query->with('classStudyTime');
+                if ($filters['hasStudentStudyTimesTable']) {
+                    $query->with('studyTimes');
+                }
+            })
+            ->when($filters['search'] !== '', function ($query) use ($filters) {
+                $search = $filters['search'];
+
+                $query->where(function ($inner) use ($search, $filters) {
+                    $inner->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+
+                    if ($filters['hasPhoneColumn']) {
+                        $inner->orWhere('phone_number', 'like', '%' . $search . '%');
+                    }
+
+                    if ($filters['hasClassColumn']) {
+                        $inner->orWhereHas('schoolClass', function ($classQuery) use ($search) {
+                            $classQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('section', 'like', '%' . $search . '%');
+                        });
+                    }
+
+                    if ($filters['hasMajorSubjectColumn']) {
+                        $inner->orWhereHas('majorSubject', function ($subjectQuery) use ($search) {
+                            $subjectQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('code', 'like', '%' . $search . '%');
+                        });
+
+                        if ($filters['hasStudentMajorSubjectsTable']) {
+                            $inner->orWhereHas('majorSubjects', function ($subjectQuery) use ($search) {
+                                $subjectQuery->where('name', 'like', '%' . $search . '%')
+                                    ->orWhere('code', 'like', '%' . $search . '%');
+                            });
+                        }
+                    }
+                });
+            });
+
+        if ($filters['hasClassColumn'] && $filters['classId'] !== null) {
+            $studentQuery->where('school_class_id', $filters['classId']);
+        }
+
+        if ($filters['hasStatusColumn'] && in_array($filters['status'], ['active', 'inactive'], true)) {
+            $studentQuery->where('is_active', $filters['status'] === 'active');
+        }
+
+        return $studentQuery;
     }
 
     private function hasStatusColumn(): bool

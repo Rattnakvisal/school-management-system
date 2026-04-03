@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Schema;
 
 class TelegramBotController extends Controller
 {
+    private const TELEGRAM_OTP_ROLES = ['admin', 'teacher', 'student'];
+
     public function webhook(Request $request, TelegramBotService $telegram, ?string $secret = null)
     {
         $configuredSecret = $telegram->webhookSecret();
@@ -139,8 +141,8 @@ class TelegramBotController extends Controller
         $user = $this->findUserByPhone($phone);
         if (!$user) {
             $message = $fromContactShare
-                ? 'No student/teacher account found with this contact phone number.'
-                : 'No student/teacher account found for that phone number.';
+                ? 'No admin/student/teacher account found with this contact phone number.'
+                : 'No admin/student/teacher account found for that phone number.';
 
             $telegram->sendMessage($chatId, $message, $this->mainKeyboard());
             return true;
@@ -181,7 +183,7 @@ class TelegramBotController extends Controller
         }
 
         $users = User::query()
-            ->whereIn('role', ['student', 'teacher'])
+            ->whereIn('role', self::TELEGRAM_OTP_ROLES)
             ->whereNotNull('phone_number')
             ->get();
 

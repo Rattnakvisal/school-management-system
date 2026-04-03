@@ -179,17 +179,55 @@
             <section
                 class="teacher-reveal teacher-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--sd: 4;">
+                @php
+                    $teacherExportQuery = array_filter(
+                        [
+                            'q' => $search,
+                            'status' => $status !== 'all' ? $status : null,
+                        ],
+                        fn($value) => $value !== null && $value !== ''
+                    );
+                @endphp
                 <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
-                    <div class="flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-black text-slate-900">teacher List</h2>
-                        <button type="button" @click="filterOpen = true"
-                            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
-                            </svg>
-                            Filters
-                        </button>
+                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <h2 class="text-lg font-black text-slate-900">Teacher List</h2>
+                            <p class="mt-1 text-xs font-medium text-slate-500">Download the current teacher view as a
+                                polished PDF report or a styled Excel workbook.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{{ route('admin.teachers.export.pdf', $teacherExportQuery) }}"
+                                class="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-100">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <path d="M14 2v6h6"></path>
+                                    <path d="M9 15h6"></path>
+                                    <path d="M9 11h2"></path>
+                                    <path d="M9 19h6"></path>
+                                </svg>
+                                PDF Report
+                            </a>
+                            <a href="{{ route('admin.teachers.export.excel', $teacherExportQuery) }}"
+                                class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-100">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <path d="M14 2v6h6"></path>
+                                    <path d="m9 15 6-6"></path>
+                                    <path d="m15 15-6-6"></path>
+                                </svg>
+                                Excel Report
+                            </a>
+                            <button type="button" @click="filterOpen = true"
+                                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
+                                </svg>
+                                Filters
+                            </button>
+                        </div>
                     </div>
 
                     <div x-show="filterOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[80] bg-slate-900/40"

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginOtpService
 {
+    private const OTP_ROLES = ['admin', 'teacher', 'student'];
+
     public function __construct(
         protected TelegramBotService $telegramBotService
     ) {}
@@ -25,7 +27,7 @@ class LoginOtpService
             return true;
         }
 
-        return in_array((string) $user->role, ['teacher', 'student'], true);
+        return in_array((string) $user->role, self::OTP_ROLES, true);
     }
 
     public function issueAndSend(User $user): array

@@ -2,44 +2,33 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\AdminUserReportExport;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Reports\AdminUserReportFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TeacherController extends Controller
 {
     public function index(Request $request)
     {
-        $search = trim((string) $request->query('q', ''));
-        $status = (string) $request->query('status', 'all');
-        $hasStatusColumn = $this->hasStatusColumn();
-        $hasPhoneColumn = $this->hasPhoneColumn();
-
-        $teacherQuery = User::query()
-            ->where('role', 'teacher')
-            ->when($search !== '', function ($query) use ($search, $hasPhoneColumn) {
-                $query->where(function ($inner) use ($search, $hasPhoneColumn) {
-                    $inner->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%');
-
-                    if ($hasPhoneColumn) {
-                        $inner->orWhere('phone_number', 'like', '%' . $search . '%');
-                    }
-                });
-            });
-
-        if ($hasStatusColumn && in_array($status, ['active', 'inactive'], true)) {
-            $teacherQuery->where('is_active', $status === 'active');
-        }
-
-        $teachers = $teacherQuery
+        $filters = $this->teacherFilters($request);
+        $teachers = $this->filteredTeacherQuery($filters)
             ->latest()
             ->paginate(10)
             ->withQueryString();
+
+        $search = $filters['search'];
+        $status = $filters['status'];
+        $hasStatusColumn = $filters['hasStatusColumn'];
+        $hasPhoneColumn = $filters['hasPhoneColumn'];
 
         $baseStatsQuery = User::query()->where('role', 'teacher');
         $stats = [
@@ -56,6 +45,37 @@ class TeacherController extends Controller
             'hasStatusColumn' => $hasStatusColumn,
             'hasPhoneColumn' => $hasPhoneColumn,
         ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $report = $this->buildTeacherReportPayload($request);
+
+        return Pdf::loadView('admin.reports.users-pdf', [
+            ...$report,
+            'generatedAt' => now()->format('F j, Y g:i A'),
+        ])
+            ->setPaper('a4', count($report['headings']) > 6 ? 'landscape' : 'portrait')
+            ->download('teachers-report-' . now()->format('Ymd-His') . '.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $report = $this->buildTeacherReportPayload($request);
+
+        return Excel::download(
+            new AdminUserReportExport(
+                $report['title'],
+                $report['subtitle'],
+                $report['sheet_name'],
+                $report['accent'],
+                $report['headings'],
+                $report['rows'],
+                $report['cards'],
+                $report['filters'],
+            ),
+            'teachers-report-' . now()->format('Ymd-His') . '.xlsx'
+        );
     }
 
     public function store(Request $request)
@@ -194,6 +214,59 @@ class TeacherController extends Controller
     {
         abort_unless($teacher->role === 'teacher', 404);
         return $teacher;
+    }
+
+    private function buildTeacherReportPayload(Request $request): array
+    {
+        $filters = $this->teacherFilters($request);
+        $teachers = $this->filteredTeacherQuery($filters)
+            ->latest()
+            ->get();
+
+        return app(AdminUserReportFactory::class)->makeTeachers($teachers, [
+            'hasPhoneColumn' => $filters['hasPhoneColumn'],
+            'hasStatusColumn' => $filters['hasStatusColumn'],
+            'filters' => [
+                'Search' => $filters['search'] !== '' ? $filters['search'] : 'Any teacher',
+                'Status' => $filters['hasStatusColumn'] ? ucfirst($filters['status']) : 'All',
+            ],
+        ]);
+    }
+
+    private function teacherFilters(Request $request): array
+    {
+        $status = (string) $request->query('status', 'all');
+
+        return [
+            'search' => trim((string) $request->query('q', '')),
+            'status' => in_array($status, ['all', 'active', 'inactive'], true) ? $status : 'all',
+            'hasStatusColumn' => $this->hasStatusColumn(),
+            'hasPhoneColumn' => $this->hasPhoneColumn(),
+        ];
+    }
+
+    private function filteredTeacherQuery(array $filters): Builder
+    {
+        $teacherQuery = User::query()
+            ->where('role', 'teacher')
+            ->when($filters['search'] !== '', function ($query) use ($filters) {
+                $search = $filters['search'];
+
+                $query->where(function ($inner) use ($search, $filters) {
+                    $inner->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+
+                    if ($filters['hasPhoneColumn']) {
+                        $inner->orWhere('phone_number', 'like', '%' . $search . '%');
+                    }
+                });
+            });
+
+        if ($filters['hasStatusColumn'] && in_array($filters['status'], ['active', 'inactive'], true)) {
+            $teacherQuery->where('is_active', $filters['status'] === 'active');
+        }
+
+        return $teacherQuery;
     }
 
     private function hasStatusColumn(): bool
