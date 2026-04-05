@@ -23,46 +23,44 @@
             @click="mobileOpen=false" aria-hidden="true"></div>
 
         {{-- SIDEBAR --}}
-        <aside class="fixed inset-y-0 left-0 z-50 bg-white border-r border-slate-200 shadow-sm
-                      transition-all duration-300 lg:translate-x-0 h-screen flex flex-col transform"
+        <aside class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-slate-200 bg-white shadow-sm transition-all duration-300 lg:translate-x-0 transform"
             :class="[
                 mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-                sidebarCollapsed ? 'w-72 lg:w-20' : 'w-72'
+                sidebarCollapsed ? 'w-24' : 'w-72'
             ]"
             aria-label="Sidebar">
 
             {{-- Header --}}
-            <div class="h-16 flex items-center justify-between px-4 border-b border-slate-200 shrink-0">
+            <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4 shrink-0">
                 <a href="{{ route('teacher.dashboard') }}" class="flex items-center gap-3 min-w-0">
-                    <div class="h-10 w-10 rounded-2xl bg-indigo-600/10 flex items-center justify-center shrink-0">
-                        <svg class="h-6 w-6 text-indigo-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm shrink-0">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v9l10 5 10-5V4l-10 5Z" />
                         </svg>
                     </div>
 
                     {{-- Brand text (hide when collapsed) --}}
                     <div class="min-w-0" x-show="!sidebarCollapsed" x-transition>
-                        <div class="text-lg font-extrabold tracking-tight text-slate-900 truncate">Schooli</div>
-                        <div class="text-xs text-slate-500 -mt-0.5 truncate">Teacher Panel</div>
+                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">Schooli</div>
+                        <div class="truncate text-xs text-slate-500">Teacher Panel</div>
                     </div>
                 </a>
 
                 <div class="flex items-center gap-2">
                     {{-- Collapse/Expand button (desktop) --}}
                     <button type="button"
-                        class="hidden lg:inline-flex items-center justify-center p-2 rounded-xl hover:bg-slate-100
-                               focus:outline-none focus:ring-4 focus:ring-indigo-100"
+                        class="hidden lg:inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100"
                         @click="toggleSidebar()"
                         :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
 
                         {{-- Collapse icon --}}
-                        <svg x-show="!sidebarCollapsed" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"
+                        <svg x-show="!sidebarCollapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path d="M4 6h16v2H4V6Zm0 5h10v2H4v-2Zm0 5h16v2H4v-2Z" />
                         </svg>
 
                         {{-- Expand icon --}}
-                        <svg x-show="sidebarCollapsed" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"
+                        <svg x-show="sidebarCollapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"
                             aria-hidden="true">
                             <path d="M4 6h10v2H4V6Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z" />
                         </svg>
@@ -77,7 +75,7 @@
             </div>
 
             {{-- Nav --}}
-            <nav class="px-3 py-4 space-y-1 flex-1 overflow-y-auto">
+            <nav class="space-y-4 px-3 py-4 flex-1 overflow-y-auto">
                 @php
                     $item = fn($route, $label, $icon) => [
                         'route' => $route,
@@ -86,128 +84,151 @@
                         'active' => request()->routeIs($route),
                     ];
 
-                    $links = [
-                        $item('teacher.dashboard', 'Dashboard', 'home'),
-                        $item('teacher.classes.index', 'My Classes', 'grid'),
-                        $item('teacher.schedule.index', 'Schedule', 'clock'),
-                        $item('teacher.attendance.index', 'Attendance', 'check'),
-                        $item('teacher.law-requests.index', 'Law Requests', 'document'),
-                        $item('teacher.assignments.index', 'Assignments', 'clipboard'),
-                        $item('teacher.grades.index', 'Grades', 'book'),
-                        $item('teacher.notices.index', 'Notices', 'bell'),
-                        $item('teacher.settings', 'Settings', 'cog'),
+                    $sections = [
+                        [
+                            'title' => 'Main',
+                            'items' => [
+                                $item('teacher.dashboard', 'Dashboard', 'home'),
+                            ],
+                        ],
+                        [
+                            'title' => 'Learning',
+                            'items' => [
+                                $item('teacher.classes.index', 'My Classes', 'grid'),
+                                $item('teacher.schedule.index', 'Schedule', 'clock'),
+                                $item('teacher.attendance.index', 'Attendance', 'check'),
+                            ],
+                        ],
+                        [
+                            'title' => 'Requests',
+                            'items' => [
+                                $item('teacher.law-requests.index', 'Law Requests', 'document'),
+                                $item('teacher.assignments.index', 'Assignments', 'clipboard'),
+                                $item('teacher.grades.index', 'Grades', 'book'),
+                                $item('teacher.notices.index', 'Notices', 'bell'),
+                            ],
+                        ],
+                        [
+                            'title' => 'System',
+                            'items' => [
+                                $item('teacher.settings', 'Settings', 'cog'),
+                            ],
+                        ],
                     ];
                 @endphp
 
-                @foreach ($links as $l)
-                    <a href="{{ route($l['route']) }}"
-                        class="relative group flex items-center rounded-2xl py-3 text-sm font-semibold transition
-                               focus:outline-none focus:ring-4 focus:ring-indigo-100
-                               {{ $l['active'] ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100' }}"
-                        :class="sidebarCollapsed ? 'px-3 justify-center' : 'px-4 gap-3'">
+                @foreach ($sections as $section)
+                    <div class="space-y-1.5">
+                        <div x-show="!sidebarCollapsed" x-transition class="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                            {{ $section['title'] }}
+                        </div>
 
-                        {{-- Active indicator bar --}}
-                        <span class="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full
-                                     {{ $l['active'] ? 'bg-white/70' : 'bg-transparent group-hover:bg-slate-300' }}"></span>
+                        <div class="space-y-1.5">
+                            @foreach ($section['items'] as $l)
+                                <a href="{{ route($l['route']) }}"
+                                    class="group relative flex items-center rounded-2xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200/60' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}"
+                                    :class="sidebarCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-3 py-3'">
 
-                        {{-- Icon --}}
-                        <span
-                            class="h-9 w-9 rounded-xl flex items-center justify-center relative shrink-0
-                                   {{ $l['active'] ? 'bg-white/15' : 'bg-slate-100 group-hover:bg-white' }}">
+                                    @if ($l['active'])
+                                        <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white"></span>
+                                    @endif
 
-                            @switch($l['icon'])
-                                @case('home')
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 3 2 12h3v9h6v-6h2v6h6v-9h3L12 3Z" />
-                                    </svg>
-                                @break
+                                    <span
+                                        class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                                        @switch($l['icon'])
+                                            @case('home')
+                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M12 3 2 12h3v9h6v-6h2v6h6v-9h3L12 3Z" />
+                                                </svg>
+                                            @break
 
-                                @case('grid')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <rect x="3" y="3" width="7" height="7" />
-                                        <rect x="14" y="3" width="7" height="7" />
-                                        <rect x="14" y="14" width="7" height="7" />
-                                        <rect x="3" y="14" width="7" height="7" />
-                                    </svg>
-                                @break
+                                            @case('grid')
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <rect x="3" y="3" width="7" height="7" />
+                                                    <rect x="14" y="3" width="7" height="7" />
+                                                    <rect x="14" y="14" width="7" height="7" />
+                                                    <rect x="3" y="14" width="7" height="7" />
+                                                </svg>
+                                            @break
 
-                                @case('users')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path d="M17 21v-2a4 4 0 00-3-3.87" />
-                                        <path d="M7 21v-2a4 4 0 013-3.87" />
-                                        <circle cx="12" cy="7" r="4" />
-                                    </svg>
-                                @break
+                                            @case('clock')
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="9" />
+                                                    <path d="M12 7v5l3 3" />
+                                                </svg>
+                                            @break
 
-                                @case('clock')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <circle cx="12" cy="12" r="9" />
-                                        <path d="M12 7v5l3 3" />
-                                    </svg>
-                                @break
+                                            @case('check')
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                            @break
 
-                                @case('check')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                @break
+                                            @case('clipboard')
+                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M16 2H8v2H5v18h14V4h-3V2Zm1 18H7V6h10v14Z" />
+                                                </svg>
+                                            @break
 
-                                @case('clipboard')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <rect x="9" y="2" width="6" height="4" />
-                                        <path d="M4 7h16v15H4z" />
-                                    </svg>
-                                @break
+                                            @case('book')
+                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12v-2H6V4h12v16h2V4a2 2 0 0 0-2-2Z" />
+                                                </svg>
+                                            @break
 
-                                @case('book')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path d="M2 7h20" />
-                                        <path d="M2 7v13h20V7" />
-                                    </svg>
-                                @break
+                                            @case('bell')
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path d="M18 8a6 6 0 00-12 0v5l-2 2h16l-2-2z" />
+                                                    <path d="M13.73 21a2 2 0 01-3.46 0" />
+                                                </svg>
+                                            @break
 
-                                @case('bell')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path d="M18 8a6 6 0 00-12 0v5l-2 2h16l-2-2z" />
-                                        <path d="M13.73 21a2 2 0 01-3.46 0" />
-                                    </svg>
-                                @break
+                                            @case('document')
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                    <path d="M14 2v6h6" />
+                                                    <path d="M8 13h8" />
+                                                    <path d="M8 17h8" />
+                                                </svg>
+                                            @break
 
-                                @case('document')
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                        <path d="M14 2v6h6" />
-                                        <path d="M8 13h8" />
-                                        <path d="M8 17h8" />
-                                    </svg>
-                                @break
+                                            @default
+                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+                                                </svg>
+                                        @endswitch
+                                    </span>
 
-                                @default
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
-                                    </svg>
-                            @endswitch
-                        </span>
+                                    <div x-show="!sidebarCollapsed" x-transition class="min-w-0 flex-1">
+                                        <div class="truncate text-sm font-semibold">{{ $l['label'] }}</div>
+                                    </div>
 
-                        {{-- Label (hide when collapsed) --}}
-                        <span class="flex-1 truncate" x-show="!sidebarCollapsed">{{ $l['label'] }}</span>
-                    </a>
+                                    <div x-show="!sidebarCollapsed">
+                                        @if ($l['active'])
+                                            <span class="h-2.5 w-2.5 rounded-full bg-white"></span>
+                                        @endif
+                                    </div>
+
+                                    <div x-show="sidebarCollapsed"
+                                        class="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg group-hover:block lg:group-hover:block">
+                                        {{ $l['label'] }}
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
                 @endforeach
             </nav>
 
             {{-- Footer card (hide when collapsed) --}}
-            <div class="p-4 border-t border-slate-100 shrink-0" x-show="!sidebarCollapsed" x-transition>
-                <div class="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white shadow-lg">
-                    <div class="text-sm font-semibold">Teacher Mode</div>
-                    <div class="text-xs text-white/80 mt-1">Manage classes, attendance and student grades.</div>
+            <div class="border-t border-slate-100 p-4 shrink-0" x-show="!sidebarCollapsed" x-transition>
+                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 text-white shadow-lg">
+                    <div class="text-sm font-bold">Teacher Mode</div>
+                    <div class="mt-1 text-xs text-white/80">Manage classes, attendance and student grades easily.</div>
+                    <a href="{{ route('teacher.settings') }}"
+                        class="mt-3 inline-flex items-center rounded-xl bg-white/15 px-3 py-2 text-xs font-semibold hover:bg-white/20">
+                        Open Settings
+                    </a>
                 </div>
             </div>
         </aside>
