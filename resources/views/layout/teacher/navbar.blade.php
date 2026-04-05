@@ -11,7 +11,12 @@
 </head>
 
 <body class="min-h-full overflow-x-hidden bg-slate-100 text-slate-800">
-    <div x-data="teacherShell()" x-init="init()" @keydown.escape.window="closeAll()" class="min-h-screen">
+    <div x-data="teacherShell()" x-init="init()" @keydown.escape.window="closeAll()" class="min-h-screen"
+        data-teacher-notification-root
+        data-notification-poll-url="{{ route('teacher.notifications.poll') }}"
+        data-notification-readall-url="{{ route('teacher.notifications.readAll') }}"
+        data-notification-latest-id="{{ (int) (($navNotifs->first()->id ?? 0)) }}"
+        data-notification-unread-count="{{ (int) ($navUnread ?? 0) }}">
 
         {{-- MOBILE OVERLAY --}}
         <div x-show="mobileOpen" x-transition.opacity class="fixed inset-0 z-40 bg-black/40 lg:hidden"
@@ -248,9 +253,10 @@
                                     <path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2Z" />
                                 </svg>
 
-                                @if (($navUnread ?? 0) > 0)
-                                    <span class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 animate-pulse ring-2 ring-white"></span>
-                                @endif
+                                <span id="teacher-notif-badge"
+                                    class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold grid place-items-center ring-2 ring-white {{ ($navUnread ?? 0) > 0 ? '' : 'hidden' }}">
+                                    {{ $navUnread ?? 0 }}
+                                </span>
                             </button>
 
                             <div x-show="notifOpen" x-cloak x-transition.origin.top.right
@@ -261,7 +267,7 @@
                                     <span class="text-xs text-slate-500">Latest</span>
                                 </div>
 
-                                <div class="max-h-80 overflow-auto">
+                                <div id="teacher-notif-list" class="max-h-80 overflow-auto">
                                     @forelse(($navNotifs ?? []) as $n)
                                         <a href="{{ $n->url ?? '#' }}" class="block px-4 py-3 hover:bg-slate-50">
                                             <div class="flex items-start gap-3">
@@ -274,7 +280,7 @@
                                             </div>
                                         </a>
                                     @empty
-                                        <div class="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.</div>
+                                        <div id="teacher-notif-empty" class="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.</div>
                                     @endforelse
                                 </div>
 

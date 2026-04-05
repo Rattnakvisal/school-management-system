@@ -24,6 +24,7 @@ class ClassController extends Controller
         $allowedSchedules = ['all', 'with_schedule', 'without_schedule'];
         $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
         $hasSubjectTeacherColumn = Schema::hasColumn('subject_study_times', 'teacher_id');
+        $hasSubjectDayColumn = Schema::hasColumn('subject_study_times', 'day_of_week');
         $useSlotAssignments = $hasSubjectClassColumn && $hasSubjectTeacherColumn;
 
         if ($useSlotAssignments) {
@@ -54,20 +55,49 @@ class ClassController extends Controller
             ->values();
 
         $classQuery = (clone $baseTeacherClassesQuery)
-            ->with('studySchedules')
             ->withCount('students')
             ->when($room !== '' && strtolower($room) !== 'all', function ($query) use ($room) {
                 $query->where('room', $room);
             })
             ->when(in_array($period, $allowedPeriods, true), function ($query) use ($period) {
-                $query->whereHas('studySchedules', function ($scheduleQuery) use ($period) {
-                    $scheduleQuery->whereRaw('LOWER(period) = ?', [$period]);
-                });
+                if ($useSlotAssignments) {
+                    $query->whereExists(function ($slotQuery) use ($teacherId, $period) {
+                        $slotQuery->select(DB::raw(1))
+                            ->from('subject_study_times as sst')
+                            ->whereColumn('sst.school_class_id', 'school_classes.id')
+                            ->where('sst.teacher_id', $teacherId)
+                            ->whereRaw('LOWER(sst.period) = ?', [$period]);
+                    });
+                } else {
+                    $query->whereHas('studySchedules', function ($scheduleQuery) use ($period) {
+                        $scheduleQuery->whereRaw('LOWER(period) = ?', [$period]);
+                    });
+                }
             })
-            ->when($schedule === 'with_schedule', function ($query) {
+            ->when($schedule === 'with_schedule', function ($query) use ($useSlotAssignments, $teacherId) {
+                if ($useSlotAssignments) {
+                    $query->whereExists(function ($slotQuery) use ($teacherId) {
+                        $slotQuery->select(DB::raw(1))
+                            ->from('subject_study_times as sst')
+                            ->whereColumn('sst.school_class_id', 'school_classes.id')
+                            ->where('sst.teacher_id', $teacherId);
+                    });
+                    return;
+                }
+
                 $query->whereHas('studySchedules');
             })
-            ->when($schedule === 'without_schedule', function ($query) {
+            ->when($schedule === 'without_schedule', function ($query) use ($useSlotAssignments, $teacherId) {
+                if ($useSlotAssignments) {
+                    $query->whereNotExists(function ($slotQuery) use ($teacherId) {
+                        $slotQuery->select(DB::raw(1))
+                            ->from('subject_study_times as sst')
+                            ->whereColumn('sst.school_class_id', 'school_classes.id')
+                            ->where('sst.teacher_id', $teacherId);
+                    });
+                    return;
+                }
+
                 $query->whereDoesntHave('studySchedules');
             })
             ->orderBy('name')
@@ -142,7 +172,37 @@ class ClassController extends Controller
                     ->groupBy(fn($row) => (string) $row->school_class_id);
             }
 
-            $classes->getCollection()->transform(function (SchoolClass $schoolClass) use ($subjectsByClass) {
+            $teacherStudyTimesByClass = collect();
+            if ($classIds->isNotEmpty()) {
+                $slotSelect = ['id', 'subject_id', 'school_class_id', 'period', 'start_time', 'end_time', 'sort_order'];
+                if ($hasSubjectDayColumn) {
+                    $slotSelect[] = 'day_of_week';
+                }
+
+                $teacherStudyTimesByClass = SubjectStudyTime::query()
+                    ->with(['subject:id,name', 'schoolClass:id,name,section'])
+                    ->select($slotSelect)
+                    ->where('teacher_id', $teacherId)
+                    ->whereIn('school_class_id', $classIds->all())
+                    ->orderBy('school_class_id')
+                    ->when($hasSubjectDayColumn, function ($query) {
+                        $query->orderByRaw("CASE day_of_week
+                            WHEN 'monday' THEN 1
+                            WHEN 'tuesday' THEN 2
+                            WHEN 'wednesday' THEN 3
+                            WHEN 'thursday' THEN 4
+                            WHEN 'friday' THEN 5
+                            WHEN 'saturday' THEN 6
+                            WHEN 'sunday' THEN 7
+                            ELSE 8 END");
+                    })
+                    ->orderBy('sort_order')
+                    ->orderBy('start_time')
+                    ->get()
+                    ->groupBy(fn($row) => (string) $row->school_class_id);
+            }
+
+            $classes->getCollection()->transform(function (SchoolClass $schoolClass) use ($subjectsByClass, $teacherStudyTimesByClass) {
                 $assignedSubjects = $subjectsByClass
                     ->get((string) $schoolClass->id, collect())
                     ->values()
@@ -155,6 +215,13 @@ class ClassController extends Controller
 
                 $schoolClass->setRelation('subjects', $assignedSubjects instanceof Collection ? $assignedSubjects : collect());
                 $schoolClass->setAttribute('taught_subjects_count', $assignedSubjects->count());
+
+                $teacherStudySlots = $teacherStudyTimesByClass
+                    ->get((string) $schoolClass->id, collect())
+                    ->values();
+                $schoolClass->setRelation('studySchedules', $teacherStudySlots);
+                $schoolClass->setRelation('teacherStudySchedules', $teacherStudySlots);
+                $schoolClass->setAttribute('class_slots_count', $teacherStudySlots->count());
 
                 return $schoolClass;
             });
@@ -171,6 +238,7 @@ class ClassController extends Controller
             'period' => in_array($period, array_merge(['all'], $allowedPeriods), true) ? $period : 'all',
             'schedule' => in_array($schedule, $allowedSchedules, true) ? $schedule : 'all',
             'roomOptions' => $roomOptions,
+            'hasSubjectDayColumn' => $hasSubjectDayColumn,
             'stats' => [
                 'classes' => $totalClasses,
                 'students' => (int) $totalStudents,
@@ -182,6 +250,16 @@ class ClassController extends Controller
                 'evening' => 'Evening',
                 'night' => 'Night',
                 'custom' => 'Custom',
+            ],
+            'dayLabels' => [
+                'all' => 'All Days',
+                'monday' => 'Monday',
+                'tuesday' => 'Tuesday',
+                'wednesday' => 'Wednesday',
+                'thursday' => 'Thursday',
+                'friday' => 'Friday',
+                'saturday' => 'Saturday',
+                'sunday' => 'Sunday',
             ],
         ]);
     }

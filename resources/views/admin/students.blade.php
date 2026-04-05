@@ -63,9 +63,9 @@
                             this.createOpen = false;
                         }
                     };
-
+            
                     update();
-
+            
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -93,8 +93,8 @@
                     </button>
                 </div>
                 <form id="create-student-form-panel" method="POST" action="{{ route('admin.students.store') }}"
-                    enctype="multipart/form-data" class="js-create-form mt-5 space-y-4"
-                    x-show="createOpen || isDesktop" x-cloak x-transition.opacity.duration.150ms>
+                    enctype="multipart/form-data" class="js-create-form mt-5 space-y-4" x-show="createOpen || isDesktop"
+                    x-cloak x-transition.opacity.duration.150ms>
                     @csrf
                     <input type="hidden" name="_form" value="create_student">
 
@@ -236,7 +236,8 @@
                                 </div>
                                 <select id="class_study_time_id" name="class_study_time_ids[]"
                                     data-selected-list='@json($createSelectedStudyTimeIds)'
-                                    data-checkbox-target="study_time_checkbox_list" multiple size="4" class="hidden">
+                                    data-checkbox-target="study_time_checkbox_list" multiple size="4"
+                                    class="hidden">
                                     <option value="">Select class first</option>
                                 </select>
                                 <div id="study_time_checkbox_list"
@@ -311,42 +312,84 @@
                             'status' => $status !== 'all' ? $status : null,
                             'class_id' => $classId !== 'all' ? $classId : null,
                         ],
-                        fn($value) => $value !== null && $value !== ''
+                        fn($value) => $value !== null && $value !== '',
                     );
                 @endphp
-                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                <div x-data="{ filterOpen: false, exportOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <h2 class="text-lg font-black text-slate-900">Student List</h2>
                             <p class="mt-1 text-xs font-medium text-slate-500">Export the current roster as a polished PDF
                                 or a styled Excel workbook.</p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <a href="{{ route('admin.students.export.pdf', $studentExportQuery) }}"
-                                class="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-100">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <path d="M14 2v6h6"></path>
-                                    <path d="M9 15h6"></path>
-                                    <path d="M9 11h2"></path>
-                                    <path d="M9 19h6"></path>
-                                </svg>
-                                PDF Report
-                            </a>
-                            <a href="{{ route('admin.students.export.excel', $studentExportQuery) }}"
-                                class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-100">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <path d="M14 2v6h6"></path>
-                                    <path d="m9 15 6-6"></path>
-                                    <path d="m15 15-6-6"></path>
-                                </svg>
-                                Excel Report
-                            </a>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="relative" @keydown.escape.window="exportOpen = false">
+                                <button type="button" @click="exportOpen = !exportOpen"
+                                    :aria-expanded="exportOpen.toString()" aria-haspopup="menu"
+                                    class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        aria-hidden="true">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <path d="M14 2v6h6"></path>
+                                        <path d="M9 15h6"></path>
+                                        <path d="M9 11h2"></path>
+                                        <path d="M9 19h6"></path>
+                                    </svg>
+                                    Export
+                                    <svg class="h-4 w-4 transition-transform duration-200"
+                                        :class="{ 'rotate-180': exportOpen }" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" aria-hidden="true">
+                                        <path d="m6 9 6 6 6-6"></path>
+                                    </svg>
+                                </button>
+
+                                <div x-show="exportOpen" x-cloak x-transition.opacity.scale.origin.top.right
+                                    @click.outside="exportOpen = false"
+                                    class="absolute right-0 z-20 mt-3 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-slate-900/5">
+                                    <a href="{{ route('admin.students.export.pdf', $studentExportQuery) }}"
+                                        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-50">
+                                        <span
+                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-700">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <path d="M14 2v6h6"></path>
+                                                <path d="M9 15h6"></path>
+                                                <path d="M9 11h2"></path>
+                                                <path d="M9 19h6"></path>
+                                            </svg>
+                                        </span>
+                                        <span>
+                                            <span class="block">PDF Report</span>
+                                            <span class="block text-xs font-medium text-slate-500">Download as PDF</span>
+                                        </span>
+                                    </a>
+                                    <a href="{{ route('admin.students.export.excel', $studentExportQuery) }}"
+                                        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                                        <span
+                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <path d="M14 2v6h6"></path>
+                                                <path d="m9 15 6-6"></path>
+                                                <path d="m15 15-6-6"></path>
+                                            </svg>
+                                        </span>
+                                        <span>
+                                            <span class="block">Excel Report</span>
+                                            <span class="block text-xs font-medium text-slate-500">Download as
+                                                workbook</span>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
                             <button type="button" @click="filterOpen = true"
-                                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
@@ -370,11 +413,11 @@
                                     <h3 class="text-3xl font-black text-slate-900">Filters</h3>
                                     <div class="flex items-center gap-4">
                                         <a href="{{ route('admin.students.index') }}"
-                                            class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                                            class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800">
                                             Clear All
                                         </a>
                                         <button type="button" @click="filterOpen = false"
-                                            class="text-2xl font-bold leading-none text-slate-700 hover:text-slate-900"
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl font-bold leading-none text-slate-600 shadow-sm transition hover:bg-slate-100 hover:text-slate-900"
                                             aria-label="Close filters">
                                             &times;
                                         </button>
@@ -387,7 +430,8 @@
                                         <section class="space-y-2">
                                             <h4 class="text-xl font-bold text-slate-900">Search</h4>
                                             <input id="q" name="q" type="text"
-                                                value="{{ $search }}" placeholder="Search by name, email, phone, or class"
+                                                value="{{ $search }}"
+                                                placeholder="Search by name, email, phone, or class"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         </section>
                                         @if ($hasClassColumn)
@@ -430,7 +474,7 @@
                                     </div>
                                     <div class="border-t border-slate-200 px-5 py-4">
                                         <button type="submit"
-                                            class="inline-flex w-full items-center justify-center rounded-lg bg-slate-950 px-4 py-3 text-lg font-bold text-white transition hover:bg-slate-800">
+                                            class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-base font-bold text-white shadow-sm transition hover:bg-slate-800">
                                             Apply Filters
                                         </button>
                                     </div>
@@ -448,7 +492,9 @@
                                                 <th class="student-col-student px-3 py-3 font-semibold">Student</th>
                                                 <th class="student-col-email px-3 py-3 font-semibold">Email</th>
                                                 @if ($hasPhoneColumn ?? false)
-                                                    <th class="student-col-phone px-3 py-3 font-semibold">Phone Number
+                                                    <th
+                                                        class="student-col-phone whitespace-nowrap px-3 py-3 font-semibold">
+                                                        Phone Number
                                                     </th>
                                                 @endif
                                                 <th class="student-col-class px-3 py-3 font-semibold">Class</th>
@@ -461,7 +507,8 @@
                                                 @endif
                                                 <th class="student-col-status px-3 py-3 font-semibold">Status</th>
                                                 <th class="student-col-created px-3 py-3 font-semibold">Created</th>
-                                                <th class="student-col-actions px-3 py-3 font-semibold text-right">Actions
+                                                <th class="student-col-actions whitespace-nowrap px-3 py-3 font-semibold">
+                                                    Actions
                                                 </th>
                                             </tr>
                                         </thead>
@@ -487,7 +534,8 @@
                                                         </div>
                                                     </td>
                                                     @if ($hasPhoneColumn ?? false)
-                                                        <td class="student-col-phone px-3 py-3 align-top text-slate-600">
+                                                        <td
+                                                            class="student-col-phone whitespace-nowrap px-3 py-3 align-top tabular-nums text-slate-600">
                                                             {{ $student->phone_number ?: '-' }}
                                                         </td>
                                                     @endif
@@ -943,7 +991,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="{{ 6 + (($hasPhoneColumn ?? false) ? 1 : 0) + ($hasMajorSubjectColumn ? 1 : 0) + ($hasClassStudyTimeColumn ? 1 : 0) }}"
+                                                    <td colspan="{{ 6 + ($hasPhoneColumn ?? false ? 1 : 0) + ($hasMajorSubjectColumn ? 1 : 0) + ($hasClassStudyTimeColumn ? 1 : 0) }}"
                                                         class="px-3 py-10 text-center text-sm text-slate-500">
                                                         No students found.
                                                     </td>
@@ -964,608 +1012,26 @@
         </div>
     </div>
 
+    @php
+        $studentPageData = [
+            'subjectsByClass' => $subjectsByClass,
+            'studyTimesByClass' => $studyTimesByClass,
+            'subjectStudySlotsByClassSubject' => $subjectStudySlotsByClassSubject,
+            'classStudyTimeIdsByClassSubject' => $classStudyTimeIdsByClassSubject,
+            'classStudyTimeIdsBySubjectAll' => $classStudyTimeIdsBySubjectAll,
+            'classLabelById' => $classes
+                ->mapWithKeys(fn($classOption) => [(string) $classOption->id => (string) $classOption->display_name])
+                ->toArray(),
+            'periodLabels' => $periodLabels,
+            'validationErrors' => $errors->all(),
+            'flash' => [
+                'success' => session('success'),
+                'warning' => session('warning'),
+                'error' => session('error'),
+            ],
+        ];
+    @endphp
+    <script id="admin-students-data" type="application/json">{!! json_encode($studentPageData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+    @vite(['resources/js/admin/students.js'])
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const hasSwal = typeof Swal !== 'undefined';
-            const subjectsByClass = @json($subjectsByClass ?? []);
-            const studyTimesByClass = @json($studyTimesByClass ?? []);
-            const subjectStudySlotsByClassSubject = @json($subjectStudySlotsByClassSubject ?? []);
-            const classStudyTimeIdsByClassSubject = @json($classStudyTimeIdsByClassSubject ?? []);
-            const classStudyTimeIdsBySubjectAll = @json($classStudyTimeIdsBySubjectAll ?? []);
-            const classLabelById = @json(($classes ?? collect())->mapWithKeys(fn($classOption) => [(string) $classOption->id => (string) $classOption->display_name])->toArray());
-            const periodLabels = @json($periodLabels ?? []);
-
-            const to12Hour = (value) => {
-                if (!value) {
-                    return '';
-                }
-                const [hourRaw, minuteRaw] = String(value).split(':');
-                const hour = Number(hourRaw || 0);
-                const minute = String(minuteRaw || '00').padStart(2, '0');
-                const suffix = hour >= 12 ? 'PM' : 'AM';
-                const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-                return `${hour12.toString().padStart(2, '0')}:${minute} ${suffix}`;
-            };
-
-            const resetSelect = (select, placeholder) => {
-                if (!select) {
-                    return;
-                }
-
-                select.innerHTML = '';
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = placeholder;
-                select.appendChild(option);
-            };
-
-            const dayLabels = {
-                all: 'All Days',
-                monday: 'Monday',
-                tuesday: 'Tuesday',
-                wednesday: 'Wednesday',
-                thursday: 'Thursday',
-                friday: 'Friday',
-                saturday: 'Saturday',
-                sunday: 'Sunday'
-            };
-
-            const parseSelectedIds = (rawValue) => {
-                if (Array.isArray(rawValue)) {
-                    return rawValue.map((item) => String(item)).filter((item) => item !== '');
-                }
-
-                const text = String(rawValue || '').trim();
-                if (text === '') {
-                    return [];
-                }
-
-                try {
-                    const parsed = JSON.parse(text);
-                    if (Array.isArray(parsed)) {
-                        return parsed.map((item) => String(item)).filter((item) => item !== '');
-                    }
-                } catch (error) {
-                    // Fallback below handles legacy comma-separated values.
-                }
-
-                return text.split(',').map((item) => item.trim()).filter((item) => item !== '');
-            };
-
-            const selectedIdsFromSelect = (select) => {
-                if (!select) {
-                    return [];
-                }
-
-                return Array.from(select.selectedOptions || [])
-                    .map((option) => String(option.value || ''))
-                    .filter((value) => value !== '');
-            };
-
-            const renderSelectAsCheckboxes = (select) => {
-                if (!select) {
-                    return;
-                }
-
-                const targetId = String(select.dataset.checkboxTarget || '').trim();
-                if (targetId === '') {
-                    return;
-                }
-
-                const container = document.getElementById(targetId);
-                if (!container) {
-                    return;
-                }
-
-                container.innerHTML = '';
-                const options = Array.from(select.options || []).filter((option) => String(option.value ||
-                    '') !== '');
-                if (options.length === 0) {
-                    const placeholder = document.createElement('p');
-                    placeholder.className = 'text-xs font-medium text-slate-500';
-                    placeholder.textContent = String(select.options?.[0]?.textContent ||
-                    'No options available');
-                    container.appendChild(placeholder);
-                    return;
-                }
-
-                options.forEach((option, index) => {
-                    const label = document.createElement('label');
-                    label.className =
-                        'flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-700 transition hover:bg-slate-50';
-
-                    const input = document.createElement('input');
-                    input.type = 'checkbox';
-                    input.value = String(option.value || '');
-                    input.checked = option.selected;
-                    input.disabled = !!select.disabled;
-                    input.className =
-                        'mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500';
-                    input.addEventListener('change', () => {
-                        option.selected = input.checked;
-                        select.dispatchEvent(new Event('change', {
-                            bubbles: true
-                        }));
-                    });
-
-                    const text = document.createElement('span');
-                    text.className = 'leading-5';
-                    text.textContent = String(option.textContent || `Option ${index + 1}`);
-
-                    label.appendChild(input);
-                    label.appendChild(text);
-                    container.appendChild(label);
-                });
-            };
-
-            const normalizeDay = (dayOfWeek) => {
-                const day = String(dayOfWeek || '').toLowerCase().trim();
-                return day !== '' ? day : 'all';
-            };
-
-            const normalizeTime = (value) => String(value || '').slice(0, 5);
-
-            const slotsShareBaseTime = (classSlot, subjectSlot) => {
-                return String(classSlot.period || '').toLowerCase() === String(subjectSlot.period || '')
-                    .toLowerCase() &&
-                    normalizeTime(classSlot.start_time) === normalizeTime(subjectSlot.start_time) &&
-                    normalizeTime(classSlot.end_time) === normalizeTime(subjectSlot.end_time);
-            };
-
-            const slotDaysAreCompatible = (classSlot, subjectSlot) => {
-                const classDay = normalizeDay(classSlot.day_of_week);
-                const subjectDay = normalizeDay(subjectSlot.day_of_week);
-                return classDay === subjectDay || classDay === 'all' || subjectDay === 'all';
-            };
-
-            const classSlotMatchesSubjectSchedule = (classSlot, subjectSlots) => {
-                return subjectSlots.some((subjectSlot) => {
-                    return slotsShareBaseTime(classSlot, subjectSlot) &&
-                        slotDaysAreCompatible(classSlot, subjectSlot);
-                });
-            };
-
-            const allSubjects = (() => {
-                const seen = new Set();
-                const rows = [];
-
-                Object.values(subjectsByClass || {}).forEach((group) => {
-                    if (!Array.isArray(group)) {
-                        return;
-                    }
-
-                    group.forEach((item) => {
-                        const id = String(item?.id || '');
-                        if (id === '' || seen.has(id)) {
-                            return;
-                        }
-                        seen.add(id);
-                        rows.push(item);
-                    });
-                });
-
-                return rows.sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || '')));
-            })();
-
-            const allStudyTimes = (() => {
-                const rows = [];
-                Object.entries(studyTimesByClass || {}).forEach(([classId, group]) => {
-                    if (!Array.isArray(group)) {
-                        return;
-                    }
-
-                    group.forEach((slot) => {
-                        rows.push({
-                            ...slot,
-                            school_class_id: Number(slot?.school_class_id ||
-                                classId || 0)
-                        });
-                    });
-                });
-
-                return rows;
-            })();
-
-            const renderMajorSubjects = (select, classId, selectedIds = []) => {
-                if (!select) {
-                    return;
-                }
-
-                const key = String(classId || '');
-                const subjects = key !== '' && Array.isArray(subjectsByClass?.[key]) ? subjectsByClass[key] :
-            [];
-                let placeholder = 'Select class first';
-                if (subjects.length > 0 && key !== '') {
-                    placeholder = 'Select major subjects';
-                } else if (subjects.length === 0 && key !== '') {
-                    placeholder = 'No subjects in selected class';
-                }
-                resetSelect(select, placeholder);
-                const selectedSet = new Set(parseSelectedIds(selectedIds));
-
-                subjects.forEach((item) => {
-                    const option = document.createElement('option');
-                    option.value = String(item.id);
-                    const classLabel = classLabelById[String(item.school_class_id || '')] || '';
-                    option.textContent = classLabel ? `${item.name} (${classLabel})` : `${item.name}`;
-                    if (selectedSet.has(String(item.id))) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                });
-
-                select.disabled = key === '' || subjects.length === 0;
-                renderSelectAsCheckboxes(select);
-            };
-
-            const renderStudyTimes = (select, classId, selectedIds = [], subjectIds = [], requireSubjectMatch =
-                false, autoSelectAll = false) => {
-                if (!select) {
-                    return;
-                }
-
-                const key = String(classId || '');
-                let slots = allStudyTimes;
-                const selectedSubjectIds = parseSelectedIds(subjectIds);
-
-                if (requireSubjectMatch && selectedSubjectIds.length === 0) {
-                    slots = key ? allStudyTimes.filter((item) => String(item.school_class_id || '') === key) :
-                    [];
-                } else if (selectedSubjectIds.length > 0) {
-                    const allowedStudyTimeIds = new Set();
-                    selectedSubjectIds.forEach((subjectKey) => {
-                        const idsForSubject = key !== '' ?
-                            classStudyTimeIdsByClassSubject?.[key]?.[String(subjectKey)] :
-                            classStudyTimeIdsBySubjectAll[String(subjectKey)];
-                        if (Array.isArray(idsForSubject)) {
-                            idsForSubject.forEach((id) => allowedStudyTimeIds.add(String(id)));
-                        }
-                    });
-
-                    if (allowedStudyTimeIds.size > 0) {
-                        slots = allStudyTimes.filter((item) => {
-                            const matchesAllowedStudyTime = allowedStudyTimeIds.has(String(item.id));
-                            const matchesClass = key === '' || String(item.school_class_id || '') ===
-                                key;
-                            return matchesAllowedStudyTime && matchesClass;
-                        });
-                    } else {
-                        const subjectSlots = selectedSubjectIds.flatMap((subjectKey) => {
-                            if (key !== '') {
-                                const slotsForSubject = subjectStudySlotsByClassSubject?.[key]?.[String(
-                                    subjectKey)];
-                                return Array.isArray(slotsForSubject) ? slotsForSubject : [];
-                            }
-
-                            return Object.values(subjectStudySlotsByClassSubject || {}).flatMap((
-                                subjectMap) => {
-                                const slotsForSubject = subjectMap?.[String(subjectKey)];
-                                return Array.isArray(slotsForSubject) ? slotsForSubject : [];
-                            });
-                        });
-                        slots = allStudyTimes.filter((item) => {
-                            if (key !== '' && String(item.school_class_id || '') !== key) {
-                                return false;
-                            }
-                            return classSlotMatchesSubjectSchedule(item, subjectSlots);
-                        });
-                    }
-                } else if (key !== '') {
-                    slots = allStudyTimes.filter((item) => String(item.school_class_id || '') === key);
-                } else {
-                    slots = [];
-                }
-
-                let placeholder = 'Select major subjects first';
-                if (requireSubjectMatch && selectedSubjectIds.length === 0 && key === '') {
-                    placeholder = 'Select class first';
-                } else if (slots.length > 0) {
-                    placeholder = 'Select study time';
-                } else if (selectedSubjectIds.length > 0) {
-                    placeholder = 'No study time for selected subjects';
-                } else if (key !== '') {
-                    placeholder = 'No study times in selected class';
-                }
-                resetSelect(select, placeholder);
-                const selectedSet = new Set(parseSelectedIds(selectedIds));
-
-                slots.forEach((item) => {
-                    const option = document.createElement('option');
-                    option.value = String(item.id);
-                    const periodKey = String(item.period || '').toLowerCase();
-                    const period = periodLabels[periodKey] || (periodKey ? (periodKey.charAt(0)
-                        .toUpperCase() + periodKey.slice(1)) : 'Custom');
-                    const dayKey = String(item.day_of_week || 'all').toLowerCase();
-                    const dayLabel = dayLabels[dayKey] || (dayKey ? (dayKey.charAt(0).toUpperCase() +
-                        dayKey.slice(1)) : 'All Days');
-                    const slotClassLabel = classLabelById[String(item.school_class_id || '')] ||
-                    'Class';
-                    option.textContent =
-                        `${slotClassLabel} | ${dayLabel} | ${period}: ${to12Hour(item.start_time)} -> ${to12Hour(item.end_time)}`;
-                    if (selectedSet.has(String(item.id))) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                });
-
-                if (autoSelectAll && slots.length > 0 && selectedSet.size === 0) {
-                    Array.from(select.options).forEach((option) => {
-                        if (String(option.value || '') !== '') {
-                            option.selected = true;
-                        }
-                    });
-                }
-
-                select.disabled = slots.length === 0;
-                renderSelectAsCheckboxes(select);
-            };
-
-            const wireClassDependentFields = (classSelect, majorSelect, studyTimeSelect) => {
-                if (!classSelect) {
-                    return;
-                }
-
-                const apply = (useCurrentSelection = true) => {
-                    const classId = classSelect.value || '';
-                    const majorSelected = useCurrentSelection ?
-                        (() => {
-                            const fromCurrentSelection = selectedIdsFromSelect(majorSelect);
-                            if (fromCurrentSelection.length > 0) {
-                                return fromCurrentSelection;
-                            }
-                            return parseSelectedIds(majorSelect?.dataset.selectedList || majorSelect
-                                ?.dataset.selected || '');
-                        })() :
-                        [];
-                    const studySelected = useCurrentSelection ?
-                        (() => {
-                            const fromCurrentSelection = selectedIdsFromSelect(studyTimeSelect);
-                            if (fromCurrentSelection.length > 0) {
-                                return fromCurrentSelection;
-                            }
-                            return parseSelectedIds(studyTimeSelect?.dataset.selectedList ||
-                                studyTimeSelect?.dataset.selected || '');
-                        })() :
-                        [];
-
-                    if (majorSelect) {
-                        renderMajorSubjects(majorSelect, classId, majorSelected);
-                        majorSelect.dataset.selectedList = '';
-                        majorSelect.dataset.selected = '';
-                    }
-
-                    if (studyTimeSelect) {
-                        const requireSubjectMatch = !!majorSelect;
-                        const selectedSubjectIds = majorSelect ?
-                            (() => {
-                                const selectedValues = selectedIdsFromSelect(majorSelect);
-                                return selectedValues.length > 0 ? selectedValues : parseSelectedIds(
-                                    majorSelected);
-                            })() :
-                            [];
-                        renderStudyTimes(
-                            studyTimeSelect,
-                            classId,
-                            studySelected,
-                            selectedSubjectIds,
-                            requireSubjectMatch,
-                            !useCurrentSelection
-                        );
-                        studyTimeSelect.dataset.selectedList = '';
-                        studyTimeSelect.dataset.selected = '';
-                    }
-                };
-
-                apply(true);
-                classSelect.addEventListener('change', () => apply(false));
-
-                if (majorSelect && studyTimeSelect) {
-                    majorSelect.addEventListener('change', () => {
-                        const selectedMajorIds = selectedIdsFromSelect(majorSelect);
-                        renderStudyTimes(studyTimeSelect, classSelect.value || '', [], selectedMajorIds,
-                            true, true);
-                    });
-                }
-            };
-
-            const manageStudyTimeTop = document.getElementById('manage_study_time_top');
-            const manageStudyTimeInline = document.getElementById('manage_study_time_inline');
-
-            const buildTimeStudiesUrl = (classId = '', subjectId = '') => {
-                const baseUrl = manageStudyTimeTop?.dataset.baseUrl || manageStudyTimeInline?.dataset.baseUrl;
-                if (!baseUrl) {
-                    return '#';
-                }
-
-                const url = new URL(baseUrl, window.location.origin);
-                const selectedClassId = String(classId || '').trim();
-                const selectedSubjectId = String(subjectId || '').trim();
-
-                url.searchParams.set('tab', selectedSubjectId ? 'subject' : 'class');
-                if (selectedClassId) {
-                    url.searchParams.set('class_id', selectedClassId);
-                }
-                if (selectedSubjectId) {
-                    url.searchParams.set('subject_id', selectedSubjectId);
-                }
-
-                return url.toString();
-            };
-
-            const syncManageStudyTimeLinks = () => {
-                const createClassSelect = document.getElementById('school_class_id');
-                const createMajorSelect = document.getElementById('major_subject_id');
-                const selectedMajorIds = selectedIdsFromSelect(createMajorSelect);
-                const href = buildTimeStudiesUrl(createClassSelect?.value || '', selectedMajorIds[0] || '');
-
-                if (manageStudyTimeTop) {
-                    manageStudyTimeTop.href = href;
-                }
-                if (manageStudyTimeInline) {
-                    manageStudyTimeInline.href = href;
-                }
-            };
-
-            wireClassDependentFields(
-                document.getElementById('school_class_id'),
-                document.getElementById('major_subject_id'),
-                document.getElementById('class_study_time_id')
-            );
-
-            syncManageStudyTimeLinks();
-            document.getElementById('school_class_id')?.addEventListener('change', syncManageStudyTimeLinks);
-            document.getElementById('major_subject_id')?.addEventListener('change', syncManageStudyTimeLinks);
-
-            document.querySelectorAll('[id^="edit_school_class_id_"]').forEach((classSelect) => {
-                const suffix = classSelect.id.replace('edit_school_class_id_', '');
-                wireClassDependentFields(
-                    classSelect,
-                    document.getElementById(`edit_major_subject_id_${suffix}`),
-                    document.getElementById(`edit_class_study_time_id_${suffix}`)
-                );
-            });
-
-            const selectedValuesByName = (form, inputName) => {
-                const select = form?.querySelector(`[name="${inputName}"]`);
-                return selectedIdsFromSelect(select);
-            };
-
-            const validateStudentSelections = (form) => {
-                if (!form) {
-                    return null;
-                }
-
-                const role = String(form.querySelector('[name="role"]')?.value || 'student').toLowerCase();
-                if (role !== 'student') {
-                    return null;
-                }
-
-                const classId = String(form.querySelector('[name="school_class_id"]')?.value || '').trim();
-                if (classId === '') {
-                    return null;
-                }
-
-                const selectedMajorIds = selectedValuesByName(form, 'major_subject_ids[]');
-                if (selectedMajorIds.length === 0) {
-                    return 'Select at least one major subject for the selected class.';
-                }
-
-                const selectedStudyTimeIds = selectedValuesByName(form, 'class_study_time_ids[]');
-                if (selectedStudyTimeIds.length === 0) {
-                    return 'Select at least one study time for the selected class.';
-                }
-
-                return null;
-            };
-
-            const confirmSubmit = (selector, buildConfig) => {
-                if (!hasSwal) {
-                    return;
-                }
-
-                document.querySelectorAll(selector).forEach((form) => {
-                    form.addEventListener('submit', function(event) {
-                        if (form.dataset.confirmed === '1') {
-                            return;
-                        }
-
-                        event.preventDefault();
-                        const selectionMessage = validateStudentSelections(form);
-                        if (selectionMessage) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Selection Required',
-                                text: selectionMessage
-                            });
-                            return;
-                        }
-
-                        const config = buildConfig(form);
-
-                        Swal.fire(config).then((result) => {
-                            if (result.isConfirmed) {
-                                form.dataset.confirmed = '1';
-                                form.submit();
-                            }
-                        });
-                    });
-                });
-            };
-
-            confirmSubmit('.js-create-form', () => ({
-                title: 'Create student account?',
-                text: 'A new student user will be saved.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, create',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#4f46e5'
-            }));
-
-            confirmSubmit('.js-edit-form', (form) => ({
-                title: 'Save changes?',
-                text: `Update profile for ${form.dataset.student || 'this student'}.`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, save',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#4f46e5'
-            }));
-
-            confirmSubmit('.js-status-form', (form) => ({
-                title: 'Change student status?',
-                text: `This will ${form.dataset.action || 'change status'} for ${form.dataset.student || 'the student'}.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, continue',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#f59e0b'
-            }));
-
-            confirmSubmit('.js-delete-form', (form) => ({
-                title: 'Delete student?',
-                text: `Delete ${form.dataset.student || 'this student'} permanently. This cannot be undone.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#dc2626'
-            }));
-
-            const validationErrors = @json($errors->all());
-            if (hasSwal && validationErrors.length > 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Error',
-                    text: validationErrors[0]
-                });
-                return;
-            }
-
-            if (hasSwal) {
-                @if (session('error'))
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: @json(session('error'))
-                    });
-                @elseif (session('warning'))
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Warning',
-                        text: @json(session('warning'))
-                    });
-                @elseif (session('success'))
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: @json(session('success')),
-                        timer: 2200,
-                        showConfirmButton: false
-                    });
-                @endif
-            }
-        });
-    </script>
 @endsection

@@ -37,23 +37,23 @@ class LawRequestController extends Controller
 
         $defaultLawType = old('law_type', (string) ($editingRequest?->law_type ?? array_key_first($lawTypes)));
         $defaultSubjectId = old('subject_id', (string) ($selectionDefaults['subject_id'] ?? 'all'));
-        $defaultTimeKey = old('subject_time_key', (string) ($selectionDefaults['subject_time_key'] ?? 'all:all'));
+        $defaultTimeKeys = $this->normalizeSubjectTimeKeys(old('subject_time_keys', $editingRequest ? ($selectionDefaults['subject_time_keys'] ?? []) : []));
         $defaultRequestedFor = old('requested_for', $editingRequest?->requested_for?->toDateString() ?? '');
         $defaultReason = old('reason', (string) ($editingRequest?->reason ?? ''));
 
         if ($defaultSubjectId === '') {
             $defaultSubjectId = 'all';
         }
-        if ($defaultTimeKey === '') {
-            $defaultTimeKey = $defaultSubjectId === 'all' ? 'all:all' : ('all:' . $defaultSubjectId);
-        }
-
         $subjectTimeMap = $subjectTimeOptionsBySubject
             ->map(function ($items) {
                 return collect($items)->map(function ($item) {
                     return [
                         'key' => (string) ($item['key'] ?? ''),
                         'label' => (string) ($item['label'] ?? ''),
+                        'day_of_week' => (string) ($item['day_of_week'] ?? ''),
+                        'period' => (string) ($item['period'] ?? ''),
+                        'start_time' => (string) ($item['start_time'] ?? ''),
+                        'end_time' => (string) ($item['end_time'] ?? ''),
                     ];
                 })->values()->all();
             })
@@ -93,7 +93,7 @@ class LawRequestController extends Controller
             'formDefaults' => [
                 'law_type' => $defaultLawType,
                 'subject_id' => $defaultSubjectId,
-                'subject_time_key' => $defaultTimeKey,
+                'subject_time_keys' => $defaultTimeKeys,
                 'requested_for' => $defaultRequestedFor,
                 'reason' => $defaultReason,
             ],
@@ -114,23 +114,20 @@ class LawRequestController extends Controller
             $resolved['payload']
         ));
 
-        $notificationSubject = $resolved['subject'];
-        if ($resolved['subject_time'] !== '') {
-            $notificationSubject .= ' @ ' . $resolved['subject_time'];
-        }
-        $requestedForDate = trim((string) ($resolved['payload']['requested_for'] ?? ''));
-        $notificationDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $requestedForDate)
-            ? $requestedForDate
+        $notificationDate = $lawRequest->requested_for
+            ? $lawRequest->requested_for->toDateString()
             : now()->toDateString();
+        $requestedForText = $lawRequest->requested_for
+            ? Carbon::parse($lawRequest->requested_for)->format('M d, Y')
+            : '';
+        $notificationSchedule = $this->buildRequestedForScheduleText($lawRequest);
 
         $notification = new Notification([
             'type' => 'teacher_law_request',
             'title' => 'New teacher law request',
             'message' => ($teacher?->name ?? 'Teacher')
-                . ' submitted a law request for '
-                . Carbon::parse($notificationDate)->format('M d, Y')
-                . ': '
-                . $notificationSubject,
+                . ' submitted a law request'
+                . ($notificationSchedule !== '' ? ' for ' . $notificationSchedule : ($requestedForText !== '' ? ' for ' . $requestedForText : '.')),
             'url' => route('admin.attendance.teachers.index', ['date' => $notificationDate]),
             'is_read' => false,
         ]);
@@ -195,30 +192,38 @@ class LawRequestController extends Controller
             ->values()
             ->all();
 
+        $selectedTimeKeys = $this->normalizeSubjectTimeKeys($request->input('subject_time_keys', $request->input('subject_time_key', [])));
+        $request->merge([
+            'subject_time_keys' => $selectedTimeKeys,
+        ]);
+
         $validated = $request->validate([
             'law_type' => ['required', 'string', Rule::in(array_keys($lawTypes))],
             'subject_id' => ['required', 'string', Rule::in($subjectKeys)],
-            'subject_time_key' => ['required', 'string', Rule::in($timeKeys)],
+            'subject_time_keys' => ['required', 'array', 'min:1'],
+            'subject_time_keys.*' => ['required', 'string', Rule::in($timeKeys)],
             'requested_for' => ['nullable', 'date'],
             'reason' => ['required', 'string', 'max:5000'],
         ]);
 
         $selectedSubjectKey = (string) ($validated['subject_id'] ?? '');
-        $selectedTimeKey = (string) ($validated['subject_time_key'] ?? '');
+        $selectedTimeKeys = $this->normalizeSubjectTimeKeys($validated['subject_time_keys'] ?? []);
         $selectedTimeOptions = collect($subjectTimeOptionsBySubject->get($selectedSubjectKey, collect()))->values();
-        $selectedTime = $selectedTimeOptions->first(function ($item) use ($selectedTimeKey) {
-            return (string) ($item['key'] ?? '') === $selectedTimeKey;
-        });
+        $selectedTimeItems = collect($selectedTimeKeys)->map(function ($timeKey) use ($selectedTimeOptions) {
+            return $selectedTimeOptions->first(function ($item) use ($timeKey) {
+                return (string) ($item['key'] ?? '') === $timeKey;
+            });
+        })->filter()->values();
 
-        if (!$selectedTime) {
+        if ($selectedTimeItems->count() !== count($selectedTimeKeys)) {
             throw ValidationException::withMessages([
-                'subject_time_key' => 'Selected subject time is invalid.',
+                'subject_time_keys' => 'Selected subject time is invalid.',
             ]);
         }
 
-        if ($selectedSubjectKey === 'all' && $selectedTimeKey !== 'all:all') {
+        if ($selectedSubjectKey === 'all' && $selectedTimeKeys !== ['all:all']) {
             throw ValidationException::withMessages([
-                'subject_time_key' => 'All Subjects must use All Times.',
+                'subject_time_keys' => 'All Subjects must use All Times.',
             ]);
         }
 
@@ -234,11 +239,15 @@ class LawRequestController extends Controller
             $subjectText = $this->trimText((string) ($selectedSubject->name ?? ''), 150);
         }
 
-        $subjectTimeText = $this->trimText((string) ($selectedTime['label'] ?? ''), 150);
+        $subjectTimeLabels = $selectedTimeItems
+            ->map(function ($item) {
+                return trim((string) ($item['label'] ?? ''));
+            })
+            ->filter(fn($label) => $label !== '')
+            ->values()
+            ->all();
+        $subjectTimeText = implode(', ', $subjectTimeLabels);
         $hasSubjectTimeColumn = Schema::hasColumn('teacher_law_requests', 'subject_time');
-        if (!$hasSubjectTimeColumn && $subjectTimeText !== '') {
-            $subjectText = $this->trimText($subjectText . ' | ' . $subjectTimeText, 150);
-        }
 
         $payload = [
             'law_type' => $validated['law_type'],
@@ -254,6 +263,7 @@ class LawRequestController extends Controller
             'payload' => $payload,
             'subject' => $subjectText,
             'subject_time' => $subjectTimeText,
+            'subject_time_keys' => $selectedTimeKeys,
         ];
     }
 
@@ -262,7 +272,7 @@ class LawRequestController extends Controller
         if (!$lawRequest) {
             return [
                 'subject_id' => 'all',
-                'subject_time_key' => 'all:all',
+                'subject_time_keys' => ['all:all'],
             ];
         }
 
@@ -270,7 +280,7 @@ class LawRequestController extends Controller
         if (strcasecmp($subjectText, 'All Subjects') === 0) {
             return [
                 'subject_id' => 'all',
-                'subject_time_key' => 'all:all',
+                'subject_time_keys' => ['all:all'],
             ];
         }
 
@@ -281,38 +291,29 @@ class LawRequestController extends Controller
         if (!$matchedSubject) {
             return [
                 'subject_id' => 'all',
-                'subject_time_key' => 'all:all',
+                'subject_time_keys' => ['all:all'],
             ];
         }
 
         $subjectId = (string) (int) ($matchedSubject->id ?? 0);
         $options = collect($subjectTimeOptionsBySubject->get($subjectId, collect()))->values();
-        $timeKey = '';
+        $timeKeys = $this->resolveSubjectTimeKeysFromStoredText($subjectTimeText, $options);
 
-        if ($subjectTimeText !== '') {
-            $matchedTime = $options->first(function ($item) use ($subjectTimeText) {
-                return strcasecmp(trim((string) ($item['label'] ?? '')), $subjectTimeText) === 0;
-            });
-            if ($matchedTime) {
-                $timeKey = (string) ($matchedTime['key'] ?? '');
-            }
-        }
-
-        if ($timeKey === '') {
+        if ($timeKeys === []) {
             $subjectAllKey = 'all:' . $subjectId;
             $hasSubjectAll = $options->contains(function ($item) use ($subjectAllKey) {
                 return (string) ($item['key'] ?? '') === $subjectAllKey;
             });
             if ($hasSubjectAll) {
-                $timeKey = $subjectAllKey;
+                $timeKeys = [$subjectAllKey];
             } else {
-                $timeKey = (string) (($options->first()['key'] ?? ''));
+                $timeKeys = [(string) (($options->first()['key'] ?? ''))];
             }
         }
 
         return [
             'subject_id' => $subjectId,
-            'subject_time_key' => $timeKey !== '' ? $timeKey : 'all:all',
+            'subject_time_keys' => array_values(array_filter($timeKeys, fn($key) => $key !== '')),
         ];
     }
 
@@ -328,6 +329,83 @@ class LawRequestController extends Controller
         }
 
         return [$subjectText, $subjectTimeText];
+    }
+
+    private function resolveSubjectTimeKeysFromStoredText(string $subjectTimeText, $subjectTimeOptions): array
+    {
+        $storedValues = $this->splitStoredSubjectTimeValues($subjectTimeText);
+        if ($storedValues === []) {
+            return [];
+        }
+
+        $resolved = [];
+        foreach ($storedValues as $storedValue) {
+            $matchedTime = collect($subjectTimeOptions)->first(function ($item) use ($storedValue) {
+                $label = trim((string) ($item['label'] ?? ''));
+                $key = trim((string) ($item['key'] ?? ''));
+                return strcasecmp($label, $storedValue) === 0 || strcasecmp($key, $storedValue) === 0;
+            });
+
+            if ($matchedTime) {
+                $resolved[] = (string) ($matchedTime['key'] ?? '');
+            }
+        }
+
+        return array_values(array_unique(array_filter($resolved, fn($key) => $key !== '')));
+    }
+
+    private function splitStoredSubjectTimeValues(string $subjectTimeText): array
+    {
+        $clean = trim($subjectTimeText);
+        if ($clean === '') {
+            return [];
+        }
+
+        $parts = preg_split('/\s*,\s*/', $clean);
+        if (!is_array($parts)) {
+            return [$clean];
+        }
+
+        return array_values(array_filter(array_map('trim', $parts), fn($value) => $value !== ''));
+    }
+
+    private function normalizeSubjectTimeKeys(mixed $value): array
+    {
+        if (is_string($value)) {
+            $value = trim($value);
+            if ($value === '') {
+                return [];
+            }
+
+            return [$value];
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(array_map(function ($item) {
+            return trim((string) $item);
+        }, $value), fn($item) => $item !== '')));
+    }
+
+    private function buildRequestedForScheduleText(TeacherLawRequest $lawRequest): string
+    {
+        $requestedForText = $lawRequest->requested_for
+            ? Carbon::parse($lawRequest->requested_for)->format('M d, Y')
+            : '';
+        $subjectTimeText = trim((string) ($lawRequest->subject_time ?? ''));
+
+        if ($subjectTimeText === '' && str_contains(trim((string) ($lawRequest->subject ?? '')), '|')) {
+            [, $subjectTimeText] = array_pad(array_map('trim', explode('|', (string) $lawRequest->subject, 2)), 2, '');
+        }
+
+        $parts = array_filter([
+            $requestedForText !== '' ? $requestedForText : null,
+            $subjectTimeText !== '' ? $subjectTimeText : null,
+        ]);
+
+        return trim(implode(' | ', $parts));
     }
 
     private function teacherSubjectTimes(int $teacherId, $subjectOptions)
@@ -419,6 +497,10 @@ class LawRequestController extends Controller
                     'key' => 'slot:' . (int) $slot->id,
                     'subject_id' => $subjectId,
                     'label' => $slotLabel,
+                    'day_of_week' => (string) ($slot->day_of_week ?? 'all'),
+                    'period' => (string) ($slot->period ?? 'custom'),
+                    'start_time' => (string) ($slot->start_time ?? ''),
+                    'end_time' => (string) ($slot->end_time ?? ''),
                 ]);
             }
         }
@@ -445,6 +527,10 @@ class LawRequestController extends Controller
                     'key' => 'subject:' . $subjectId,
                     'subject_id' => $subjectId,
                     'label' => $fallbackLabel,
+                    'day_of_week' => 'all',
+                    'period' => 'custom',
+                    'start_time' => '',
+                    'end_time' => '',
                 ],
             ]);
         }
@@ -466,6 +552,10 @@ class LawRequestController extends Controller
                     'key' => $allKey,
                     'subject_id' => $subjectId,
                     'label' => 'All Times',
+                    'day_of_week' => 'all',
+                    'period' => 'all',
+                    'start_time' => '',
+                    'end_time' => '',
                 ]])->merge($list)->values();
             }
 

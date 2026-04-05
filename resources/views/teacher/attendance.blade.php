@@ -469,61 +469,18 @@
         </section>
     </div>
 
+    @php
+        $attendancePageData = [
+            'attendanceAlerts' => $attendanceAlerts ?? [],
+            'validationErrors' => $errors->all(),
+            'flash' => [
+                'success' => session('success'),
+                'warning' => session('warning'),
+                'error' => session('error'),
+            ],
+        ];
+    @endphp
+    <script id="teacher-attendance-data" type="application/json">{!! json_encode($attendancePageData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof Swal === 'undefined') return;
-
-            const alerts = [];
-            @foreach (($attendanceAlerts ?? []) as $attendanceAlert)
-                alerts.push({
-                    icon: 'success',
-                    title: @json((string) ($attendanceAlert['title'] ?? 'Attendance Checked')),
-                    text: @json((string) ($attendanceAlert['text'] ?? 'Your attendance has been checked.'))
-                });
-            @endforeach
-            @if (session('success'))
-                alerts.push({
-                    icon: 'success',
-                    title: 'Success',
-                    text: @json(session('success'))
-                });
-            @endif
-            @if (session('warning'))
-                alerts.push({
-                    icon: 'warning',
-                    title: 'Warning',
-                    text: @json(session('warning'))
-                });
-            @endif
-            @if (session('error'))
-                alerts.push({
-                    icon: 'error',
-                    title: 'Error',
-                    text: @json(session('error'))
-                });
-            @endif
-            @if ($errors->any())
-                alerts.push({
-                    icon: 'error',
-                    title: 'Validation Error',
-                    text: @json($errors->first())
-                });
-            @endif
-
-            if (alerts.length === 0) return;
-
-            document.querySelectorAll('.js-inline-flash').forEach((element) => {
-                element.classList.add('hidden');
-            });
-
-            alerts.reduce((chain, config) => {
-                return chain.then(() => Swal.fire({
-                    ...config,
-                    confirmButtonColor: '#4f46e5',
-                }));
-            }, Promise.resolve());
-        });
-    </script>
-    <script src="../js/Teacher/Attendence.js"></script>
+    @vite(['resources/js/Teacher/Attendence.js'])
 @endsection

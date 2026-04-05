@@ -59,9 +59,9 @@
                             this.createOpen = false;
                         }
                     };
-
+            
                     update();
-
+            
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -90,8 +90,8 @@
                 </div>
 
                 <form id="create-teacher-form-panel" method="POST" action="{{ route('admin.teachers.store') }}"
-                    enctype="multipart/form-data" class="js-create-form mt-5 space-y-4"
-                    x-show="createOpen || isDesktop" x-cloak x-transition.opacity.duration.150ms>
+                    enctype="multipart/form-data" class="js-create-form mt-5 space-y-4" x-show="createOpen || isDesktop"
+                    x-cloak x-transition.opacity.duration.150ms>
                     @csrf
                     <input type="hidden" name="_form" value="create_teacher">
 
@@ -185,44 +185,87 @@
                             'q' => $search,
                             'status' => $status !== 'all' ? $status : null,
                         ],
-                        fn($value) => $value !== null && $value !== ''
+                        fn($value) => $value !== null && $value !== '',
                     );
                 @endphp
-                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                <div x-data="{ filterOpen: false, exportOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <h2 class="text-lg font-black text-slate-900">Teacher List</h2>
-                            <p class="mt-1 text-xs font-medium text-slate-500">Download the current teacher view as a
-                                polished PDF report or a styled Excel workbook.</p>
+                            <p class="mt-1 text-xs font-medium text-slate-500">
+                                Manage all teacher accounts, view details, and perform actions like edit
+                            </p>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <a href="{{ route('admin.teachers.export.pdf', $teacherExportQuery) }}"
-                                class="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-100">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <path d="M14 2v6h6"></path>
-                                    <path d="M9 15h6"></path>
-                                    <path d="M9 11h2"></path>
-                                    <path d="M9 19h6"></path>
-                                </svg>
-                                PDF Report
-                            </a>
-                            <a href="{{ route('admin.teachers.export.excel', $teacherExportQuery) }}"
-                                class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-100">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <path d="M14 2v6h6"></path>
-                                    <path d="m9 15 6-6"></path>
-                                    <path d="m15 15-6-6"></path>
-                                </svg>
-                                Excel Report
-                            </a>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="relative" @keydown.escape.window="exportOpen = false">
+                                <button type="button" @click="exportOpen = !exportOpen"
+                                    :aria-expanded="exportOpen.toString()" aria-haspopup="menu"
+                                    class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        aria-hidden="true">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <path d="M14 2v6h6"></path>
+                                        <path d="M9 15h6"></path>
+                                        <path d="M9 11h2"></path>
+                                        <path d="M9 19h6"></path>
+                                    </svg>
+                                    Export
+                                    <svg class="h-4 w-4 transition-transform duration-200"
+                                        :class="{ 'rotate-180': exportOpen }" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" aria-hidden="true">
+                                        <path d="m6 9 6 6 6-6"></path>
+                                    </svg>
+                                </button>
+
+                                <div x-show="exportOpen" x-cloak x-transition.opacity.scale.origin.top.right
+                                    @click.outside="exportOpen = false"
+                                    class="absolute right-0 z-20 mt-3 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-slate-900/5">
+                                    <a href="{{ route('admin.teachers.export.pdf', $teacherExportQuery) }}"
+                                        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-50">
+                                        <span
+                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-700">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <path d="M14 2v6h6"></path>
+                                                <path d="M9 15h6"></path>
+                                                <path d="M9 11h2"></path>
+                                                <path d="M9 19h6"></path>
+                                            </svg>
+                                        </span>
+                                        <span>
+                                            <span class="block">PDF Report</span>
+                                            <span class="block text-xs font-medium text-slate-500">Download as PDF</span>
+                                        </span>
+                                    </a>
+                                    <a href="{{ route('admin.teachers.export.excel', $teacherExportQuery) }}"
+                                        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                                        <span
+                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <path d="M14 2v6h6"></path>
+                                                <path d="m9 15 6-6"></path>
+                                                <path d="m15 15-6-6"></path>
+                                            </svg>
+                                        </span>
+                                        <span>
+                                            <span class="block">Excel Report</span>
+                                            <span class="block text-xs font-medium text-slate-500">Download as
+                                                workbook</span>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
                             <button type="button" @click="filterOpen = true"
-                                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
                                 </svg>
                                 Filters
@@ -244,11 +287,11 @@
                                     <h3 class="text-3xl font-black text-slate-900">Filters</h3>
                                     <div class="flex items-center gap-4">
                                         <a href="{{ route('admin.teachers.index') }}"
-                                            class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+                                            class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800">
                                             Clear All
                                         </a>
                                         <button type="button" @click="filterOpen = false"
-                                            class="text-2xl font-bold leading-none text-slate-700 hover:text-slate-900"
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl font-bold leading-none text-slate-600 shadow-sm transition hover:bg-slate-100 hover:text-slate-900"
                                             aria-label="Close filters">
                                             &times;
                                         </button>
@@ -285,7 +328,7 @@
                                     </div>
                                     <div class="border-t border-slate-200 px-5 py-4">
                                         <button type="submit"
-                                            class="inline-flex w-full items-center justify-center rounded-lg bg-slate-950 px-4 py-3 text-lg font-bold text-white transition hover:bg-slate-800">
+                                            class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-base font-bold text-white shadow-sm transition hover:bg-slate-800">
                                             Apply Filters
                                         </button>
                                     </div>
@@ -303,7 +346,7 @@
                                                 <th class="px-3 py-3 font-semibold">teacher</th>
                                                 <th class="px-3 py-3 font-semibold">Email</th>
                                                 @if ($hasPhoneColumn ?? false)
-                                                    <th class="px-3 py-3 font-semibold">Phone Number</th>
+                                                    <th class="whitespace-nowrap px-3 py-3 font-semibold">Phone Number</th>
                                                 @endif
                                                 <th class="px-3 py-3 font-semibold">Status</th>
                                                 <th class="px-3 py-3 font-semibold">Created</th>
@@ -329,7 +372,8 @@
                                                     </td>
                                                     <td class="px-3 py-3 text-slate-600">{{ $teacher->email }}</td>
                                                     @if ($hasPhoneColumn ?? false)
-                                                        <td class="px-3 py-3 text-slate-600">
+                                                        <td
+                                                            class="whitespace-nowrap px-3 py-3 tabular-nums text-slate-600">
                                                             {{ $teacher->phone_number ?: '-' }}
                                                         </td>
                                                     @endif
@@ -523,7 +567,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="{{ ($hasPhoneColumn ?? false) ? 6 : 5 }}"
+                                                    <td colspan="{{ $hasPhoneColumn ?? false ? 6 : 5 }}"
                                                         class="px-3 py-10 text-center text-sm text-slate-500">
                                                         No teachers found.
                                                     </td>
@@ -544,104 +588,18 @@
         </div>
     </div>
 
+    @php
+        $teacherPageData = [
+            'validationErrors' => $errors->all(),
+            'flash' => [
+                'success' => session('success'),
+                'warning' => session('warning'),
+                'error' => session('error'),
+            ],
+        ];
+    @endphp
+    <script id="admin-teacher-data" type="application/json">{!! json_encode($teacherPageData) !!}</script>
+
+    @vite(['resources/js/admin/teacher.js'])
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof Swal === 'undefined') {
-                return;
-            }
-
-            const confirmSubmit = (selector, buildConfig) => {
-                document.querySelectorAll(selector).forEach((form) => {
-                    form.addEventListener('submit', function(event) {
-                        if (form.dataset.confirmed === '1') {
-                            return;
-                        }
-
-                        event.preventDefault();
-                        const config = buildConfig(form);
-
-                        Swal.fire(config).then((result) => {
-                            if (result.isConfirmed) {
-                                form.dataset.confirmed = '1';
-                                form.submit();
-                            }
-                        });
-                    });
-                });
-            };
-
-            confirmSubmit('.js-create-form', () => ({
-                title: 'Create teacher account?',
-                text: 'A new teacher user will be saved.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, create',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#4f46e5'
-            }));
-
-            confirmSubmit('.js-edit-form', (form) => ({
-                title: 'Save changes?',
-                text: `Update profile for ${form.dataset.teacher || 'this teacher'}.`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, save',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#4f46e5'
-            }));
-
-            confirmSubmit('.js-status-form', (form) => ({
-                title: 'Change teacher status?',
-                text: `This will ${form.dataset.action || 'change status'} for ${form.dataset.teacher || 'the teacher'}.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, continue',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#f59e0b'
-            }));
-
-            confirmSubmit('.js-delete-form', (form) => ({
-                title: 'Delete teacher?',
-                text: `Delete ${form.dataset.teacher || 'this teacher'} permanently. This cannot be undone.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#dc2626'
-            }));
-
-            const validationErrors = @json($errors->all());
-            if (validationErrors.length > 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Error',
-                    text: validationErrors[0]
-                });
-                return;
-            }
-
-            @if (session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: @json(session('error'))
-                });
-            @elseif (session('warning'))
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Warning',
-                    text: @json(session('warning'))
-                });
-            @elseif (session('success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: @json(session('success')),
-                    timer: 2200,
-                    showConfirmButton: false
-                });
-            @endif
-        });
-    </script>
 @endsection

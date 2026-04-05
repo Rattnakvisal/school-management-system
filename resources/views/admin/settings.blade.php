@@ -9,7 +9,8 @@
         $passwordErrors = $errors->passwordUpdate;
     @endphp
 
-    <div class="stage space-y-6">
+    <div id="admin-settings-page" class="stage space-y-6"
+        data-settings-default-tab="{{ $passwordErrors->any() ? 'password' : 'profile' }}">
         <x-admin.page-header reveal-class="reveal" delay="1" icon="settings" title="Admin Settings"
             subtitle="Manage profile details, avatar, and account security.">
             <x-slot:stats>
@@ -276,76 +277,5 @@
         </section>
     </div>
 
-    <script>
-        (function() {
-            const navItems = Array.from(document.querySelectorAll('[data-settings-nav]'));
-            const panels = Array.from(document.querySelectorAll('[data-settings-panel]'));
-
-            if (navItems.length && panels.length) {
-                const activateTab = (tab) => {
-                    navItems.forEach((item) => {
-                        const active = item.dataset.settingsNav === tab;
-                        item.classList.toggle('border-indigo-200', active);
-                        item.classList.toggle('bg-indigo-50', active);
-                        item.classList.toggle('text-indigo-700', active);
-                        item.classList.toggle('text-slate-600', !active);
-                    });
-
-                    panels.forEach((panel) => {
-                        panel.classList.toggle('hidden', panel.dataset.settingsPanel !== tab);
-                    });
-                };
-
-                const defaultTab = '{{ $passwordErrors->any() ? 'password' : 'profile' }}';
-                activateTab(defaultTab);
-
-                navItems.forEach((item) => {
-                    item.addEventListener('click', () => activateTab(item.dataset.settingsNav));
-                });
-            }
-
-            const avatarInput = document.getElementById('admin_avatar_input');
-            const avatarPreview = document.getElementById('admin_avatar_preview');
-            const uploadAvatarBtn = document.getElementById('upload_avatar_btn');
-            const triggerUploadBtn = document.getElementById('trigger_avatar_upload');
-            const deleteAvatarBtn = document.getElementById('delete_avatar_btn');
-            const removeAvatarField = document.getElementById('remove_admin_avatar');
-
-            if (!avatarInput || !avatarPreview || !uploadAvatarBtn || !triggerUploadBtn || !deleteAvatarBtn || !removeAvatarField) {
-                return;
-            }
-
-            let currentObjectUrl = null;
-
-            const openFilePicker = () => avatarInput.click();
-            uploadAvatarBtn.addEventListener('click', openFilePicker);
-            triggerUploadBtn.addEventListener('click', openFilePicker);
-
-            avatarInput.addEventListener('change', () => {
-                const file = avatarInput.files && avatarInput.files[0] ? avatarInput.files[0] : null;
-                if (!file) {
-                    return;
-                }
-
-                if (currentObjectUrl) {
-                    URL.revokeObjectURL(currentObjectUrl);
-                }
-
-                currentObjectUrl = URL.createObjectURL(file);
-                avatarPreview.src = currentObjectUrl;
-                removeAvatarField.value = '0';
-            });
-
-            deleteAvatarBtn.addEventListener('click', () => {
-                if (currentObjectUrl) {
-                    URL.revokeObjectURL(currentObjectUrl);
-                    currentObjectUrl = null;
-                }
-
-                avatarInput.value = '';
-                avatarPreview.src = avatarPreview.dataset.fallback || avatarPreview.src;
-                removeAvatarField.value = '1';
-            });
-        })();
-    </script>
+    @vite(['resources/js/admin/settings.js'])
 @endsection

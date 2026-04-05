@@ -1,5 +1,6 @@
 import "./bootstrap";
 import "./admin/dashboard";
+import "./Teacher/Notifications";
 
 const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",

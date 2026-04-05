@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Teacher\ClassController;
 use App\Http\Controllers\Teacher\DashboardController;
+use App\Http\Controllers\Teacher\NotificationController;
 use App\Http\Controllers\Teacher\ScheduleController;
 use App\Http\Controllers\Teacher\AttendanceController;
 use App\Http\Controllers\Teacher\LawRequestController;
@@ -28,5 +29,6 @@ Route::middleware(['auth', 'role:teacher'])
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
         Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
 
-        Route::post('/notifications/read-all', fn() => back())->name('notifications.readAll');
+        Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
+        Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
     });

@@ -182,12 +182,18 @@
                                                     <div class="flex max-w-sm flex-wrap gap-1.5">
                                                         @forelse ($schoolClass->studySchedules as $slot)
                                                             @php
+                                                                $dayKey = strtolower((string) ($slot->day_of_week ?? 'all'));
+                                                                $dayLabel = $dayLabels[$dayKey] ?? ucfirst($dayKey);
                                                                 $periodKey = strtolower((string) $slot->period);
                                                                 $periodLabel =
                                                                     $periodLabels[$periodKey] ?? ucfirst($periodKey);
                                                             @endphp
                                                             <span
                                                                 class="inline-flex items-center gap-1.5 rounded-lg border border-sky-100 bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
+                                                                @if (!empty($hasSubjectDayColumn))
+                                                                    {{ $dayLabel }}
+                                                                    <span class="text-sky-300">|</span>
+                                                                @endif
                                                                 {{ $periodLabel }}
                                                                 <span class="text-sky-300">|</span>
                                                                 {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
@@ -216,7 +222,8 @@
 
                                                         <div
                                                             class="relative z-10 w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:max-h-[85vh]">
-                                                            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                                                            <div
+                                                                class="mb-4 flex flex-wrap items-center justify-between gap-2">
                                                                 <h3 class="text-lg font-black text-slate-900">
                                                                     Class Detail: {{ $schoolClass->display_name }}
                                                                 </h3>
@@ -275,11 +282,16 @@
                                                             </div>
 
                                                             <div class="mt-4">
-                                                                <h4 class="text-sm font-black text-slate-900">Class Study
-                                                                    Schedule</h4>
+                                                                <h4 class="text-sm font-black text-slate-900">Assigned
+                                                                    Study Times</h4>
                                                                 <div class="mt-2 space-y-2">
                                                                     @forelse ($schoolClass->studySchedules as $slot)
                                                                         @php
+                                                                            $dayKey = strtolower(
+                                                                                (string) ($slot->day_of_week ?? 'all'),
+                                                                            );
+                                                                            $dayLabel =
+                                                                                $dayLabels[$dayKey] ?? ucfirst($dayKey);
                                                                             $periodKey = strtolower(
                                                                                 (string) $slot->period,
                                                                             );
@@ -289,8 +301,12 @@
                                                                         @endphp
                                                                         <div
                                                                             class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
-                                                                            <span
-                                                                                class="font-semibold text-slate-800">{{ $periodLabel }}</span>
+                                                                            <span class="font-semibold text-slate-800">
+                                                                                @if (!empty($hasSubjectDayColumn))
+                                                                                    {{ $dayLabel }} | 
+                                                                                @endif
+                                                                                {{ $periodLabel }}
+                                                                            </span>
                                                                             <span class="font-semibold text-slate-600">
                                                                                 {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
                                                                                 ->
@@ -300,7 +316,7 @@
                                                                     @empty
                                                                         <div
                                                                             class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
-                                                                            No class study schedule configured.
+                                                                            No assigned study times configured.
                                                                         </div>
                                                                     @endforelse
                                                                 </div>
