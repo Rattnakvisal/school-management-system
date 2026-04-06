@@ -30,6 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: [],
             values: [],
         },
+        todayPeriods: {
+            labels: [],
+            values: [],
+        },
     };
     const weeklyData = chartData.weekly || {
         labels: [],
@@ -37,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
         subjects: [],
     };
     const todayMixData = chartData.todayMix || {
+        labels: [],
+        values: [],
+    };
+    const todayPeriodsData = chartData.todayPeriods || {
         labels: [],
         values: [],
     };
@@ -247,6 +255,52 @@ document.addEventListener('DOMContentLoaded', () => {
                             usePointStyle: true,
                             pointStyle: 'circle',
                             boxWidth: 8,
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    const periodCanvas = document.getElementById('teacherPeriodChart');
+    if (periodCanvas) {
+        new Chart(periodCanvas, {
+            type: 'bar',
+                data: {
+                    labels: todayPeriodsData.labels || [],
+                    datasets: [{
+                        label: 'Slots',
+                        data: todayPeriodsData.values || [],
+                        borderRadius: 10,
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.82)',
+                            'rgba(59, 130, 246, 0.82)',
+                            'rgba(99, 102, 241, 0.82)',
+                            'rgba(245, 158, 11, 0.82)',
+                            'rgba(148, 163, 184, 0.82)',
+                        ],
+                    }],
+                },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            stepSize: 1,
+                        },
+                        grid: {
+                            color: 'rgba(148, 163, 184, 0.18)',
+                        },
+                    },
+                    x: {
+                        grid: {
+                            display: false,
                         },
                     },
                 },

@@ -57,7 +57,6 @@
 }
 
 @keyframes student-pulse {
-
     0%,
     100% {
         transform: scale(1);
@@ -156,7 +155,6 @@
 }
 
 @keyframes logo-spark-blink {
-
     0%,
     100% {
         opacity: 0.4;
@@ -234,7 +232,6 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-
         .dashboard-stage .dashboard-person,
         .dashboard-stage .dashboard-person .person-arm {
             animation: none !important;
@@ -254,7 +251,7 @@
         animation: chrome-drop-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    [data-page-animate]>* {
+    [data-page-animate] > * {
         will-change: transform, opacity;
     }
 
@@ -331,7 +328,9 @@
             logo-pop 420ms cubic-bezier(0.2, 0.9, 0.2, 1) 120ms both;
         will-change: transform, opacity;
         cursor: default;
-        transition: transform 220ms ease, filter 220ms ease;
+        transition:
+            transform 220ms ease,
+            filter 220ms ease;
         filter: drop-shadow(0 10px 24px rgba(15, 23, 42, 0.12));
     }
 
@@ -347,9 +346,11 @@
         position: absolute;
         inset: 8% 2% 5%;
         border-radius: 1rem;
-        background: radial-gradient(circle at 72% 34%,
-                rgba(255, 255, 255, 0.26),
-                rgba(255, 255, 255, 0) 62%);
+        background: radial-gradient(
+            circle at 72% 34%,
+            rgba(255, 255, 255, 0.26),
+            rgba(255, 255, 255, 0) 62%
+        );
         filter: blur(1px);
         pointer-events: none;
         z-index: -1;
@@ -559,10 +560,12 @@
         border: 1px solid var(--border);
         border-radius: var(--radius-xl);
         padding: 1.5rem;
-        background: linear-gradient(135deg,
-                #f8fafc 0%,
-                #eef2ff 55%,
-                #f5f3ff 100%);
+        background: linear-gradient(
+            135deg,
+            #f8fafc 0%,
+            #eef2ff 55%,
+            #f5f3ff 100%
+        );
         box-shadow: var(--shadow-sm);
         position: relative;
         overflow: hidden;
@@ -577,9 +580,11 @@
         width: 14rem;
         height: 14rem;
         border-radius: 9999px;
-        background: radial-gradient(circle at 30% 30%,
-                rgba(99, 102, 241, 0.22),
-                transparent 60%);
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(99, 102, 241, 0.22),
+            transparent 60%
+        );
         pointer-events: none;
         filter: blur(1px);
     }
@@ -669,20 +674,24 @@
 
     .teacher-page-header {
         border-color: #d9e2f2;
-        background: linear-gradient(128deg,
-                #f8fafc 0%,
-                #eef2ff 52%,
-                #ecfeff 100%);
+        background: linear-gradient(
+            128deg,
+            #f8fafc 0%,
+            #eef2ff 52%,
+            #ecfeff 100%
+        );
         padding: clamp(1.2rem, 2vw, 1.6rem);
     }
 
     /* Enhanced dashboard header tweaks */
     .dashboard-stage .admin-page-header {
         padding: clamp(1.25rem, 2.2vw, 2rem);
-        background: linear-gradient(90deg,
-                #5b21b6 0%,
-                #6366f1 45%,
-                #06b6d4 100%);
+        background: linear-gradient(
+            90deg,
+            #5b21b6 0%,
+            #6366f1 45%,
+            #06b6d4 100%
+        );
         color: #fff;
         border: 0;
         box-shadow:
@@ -695,9 +704,11 @@
         top: -6rem;
         width: 18rem;
         height: 18rem;
-        background: radial-gradient(circle at 30% 30%,
-                rgba(255, 255, 255, 0.12),
-                transparent 60%);
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(255, 255, 255, 0.12),
+            transparent 60%
+        );
         filter: blur(6px);
     }
 
@@ -767,6 +778,145 @@
         margin-left: auto;
         width: fit-content;
         justify-content: flex-end;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero {
+        border: 0;
+        background: linear-gradient(
+            132deg,
+            #4c1d95 0%,
+            #4338ca 34%,
+            #2563eb 66%,
+            #0891b2 100%
+        );
+        color: #fff;
+        box-shadow:
+            0 18px 40px -28px rgba(15, 23, 42, 0.48),
+            0 10px 24px -16px rgba(37, 99, 235, 0.28);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero::after {
+        right: -7rem;
+        top: -7rem;
+        width: 20rem;
+        height: 20rem;
+        background: radial-gradient(
+            circle at 35% 35%,
+            rgba(255, 255, 255, 0.14),
+            rgba(255, 255, 255, 0) 65%
+        );
+        filter: blur(10px);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .admin-page-title {
+        color: #fff;
+        text-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .admin-page-subtitle {
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .admin-page-stat {
+        border-color: rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(12px);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art {
+        width: min(100%, 19.5rem);
+        margin-left: auto;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__panel {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.16) 0%,
+            rgba(255, 255, 255, 0.08) 100%
+        );
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 18px 40px -24px rgba(15, 23, 42, 0.28);
+        padding: 1rem;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__panel::before {
+        content: "";
+        position: absolute;
+        inset: 12% 12% auto auto;
+        width: 7rem;
+        height: 7rem;
+        border-radius: 9999px;
+        background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.22),
+            rgba(255, 255, 255, 0) 70%
+        );
+        pointer-events: none;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__badge {
+        position: absolute;
+        left: 1rem;
+        top: 1rem;
+        z-index: 1;
+        border-radius: 9999px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        background: rgba(255, 255, 255, 0.16);
+        padding: 0.35rem 0.65rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__frame {
+        position: relative;
+        padding-top: 1rem;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__svg {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__footer {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__foot-card {
+        border-radius: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.65rem 0.75rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__foot-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.72);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__foot-value {
+        margin-top: 0.25rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        line-height: 1.15;
+        color: rgba(255, 255, 255, 0.96);
     }
 
     @media (max-width: 640px) {
@@ -1133,34 +1283,42 @@
         position: relative;
         overflow: hidden;
         background:
-            radial-gradient(130% 120% at 110% -10%,
+            radial-gradient(
+                130% 120% at 110% -10%,
                 rgba(99, 102, 241, 0.08),
-                transparent 58%),
+                transparent 58%
+            ),
             linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
         box-shadow: 0 22px 38px -34px rgba(15, 23, 42, 0.45);
     }
 
     .teacher-settings-stage .teacher-settings-hero {
-        background: linear-gradient(125deg,
-                #eef2ff 0%,
-                #f8fafc 48%,
-                #ecfeff 100%);
+        background: linear-gradient(
+            125deg,
+            #eef2ff 0%,
+            #f8fafc 48%,
+            #ecfeff 100%
+        );
     }
 
     .teacher-settings-stage .teacher-settings-hero::after {
-        background: radial-gradient(circle at 20% 20%,
-                rgba(79, 70, 229, 0.24),
-                transparent 64%);
+        background: radial-gradient(
+            circle at 20% 20%,
+            rgba(79, 70, 229, 0.24),
+            transparent 64%
+        );
     }
 
     .teacher-settings-stage .teacher-settings-profile-head {
         border: 1px solid #dbeafe;
         border-radius: 1rem;
         padding: 0.9rem;
-        background: linear-gradient(120deg,
-                #f0f9ff 0%,
-                #eef2ff 55%,
-                #f8fafc 100%);
+        background: linear-gradient(
+            120deg,
+            #f0f9ff 0%,
+            #eef2ff 55%,
+            #f8fafc 100%
+        );
     }
 
     .teacher-settings-stage .teacher-settings-form-card {
@@ -1191,10 +1349,12 @@
     }
 
     .teacher-settings-stage .teacher-settings-check-form {
-        background: linear-gradient(120deg,
-                rgba(224, 231, 255, 0.55) 0%,
-                rgba(240, 249, 255, 0.88) 45%,
-                rgba(248, 250, 252, 0.9) 100%);
+        background: linear-gradient(
+            120deg,
+            rgba(224, 231, 255, 0.55) 0%,
+            rgba(240, 249, 255, 0.88) 45%,
+            rgba(248, 250, 252, 0.9) 100%
+        );
     }
 
     .teacher-settings-stage .teacher-settings-inline-kpi {
@@ -1421,7 +1581,6 @@
     }
 
     @media (max-width: 1280px) {
-
         .study-stage .admin-page-header__main,
         .study-time-stage .admin-page-header__main {
             flex-direction: column;
@@ -1451,7 +1610,6 @@
     }
 
     @media (max-width: 640px) {
-
         .teacher-page-header__stats,
         .teacher-page-header__actions {
             margin-left: 0;
@@ -1518,7 +1676,6 @@
 }
 
 @keyframes student-hero-gradient-shift {
-
     0%,
     100% {
         background-position: 0% 50%;
@@ -1530,7 +1687,6 @@
 }
 
 @keyframes student-hero-orb-drift {
-
     0%,
     100% {
         transform: translate3d(0, 0, 0) scale(1);
@@ -1542,7 +1698,6 @@
 }
 
 @keyframes student-hero-float {
-
     0%,
     100% {
         transform: translateY(0);
@@ -1554,7 +1709,6 @@
 }
 
 @keyframes student-robot-wave {
-
     0%,
     100% {
         transform: rotate(0deg);
@@ -1574,7 +1728,6 @@
 }
 
 @keyframes student-robot-blink {
-
     0%,
     42%,
     48%,
@@ -1590,7 +1743,6 @@
 }
 
 @keyframes student-robot-signal {
-
     0%,
     100% {
         opacity: 0.25;
@@ -1621,10 +1773,12 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
         padding: clamp(1.1rem, 2.6vw, 1.7rem);
         color: #fff;
-        background: linear-gradient(120deg,
-                #312e81 0%,
-                #4f46e5 42%,
-                #0ea5e9 100%);
+        background: linear-gradient(
+            120deg,
+            #312e81 0%,
+            #4f46e5 42%,
+            #0ea5e9 100%
+        );
         background-size: 160% 160%;
         animation: student-hero-gradient-shift 16s ease-in-out infinite;
         box-shadow:
@@ -1638,10 +1792,12 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
-        background: linear-gradient(110deg,
-                rgba(255, 255, 255, 0.13),
-                rgba(255, 255, 255, 0.02) 50%,
-                rgba(255, 255, 255, 0.08) 100%);
+        background: linear-gradient(
+            110deg,
+            rgba(255, 255, 255, 0.13),
+            rgba(255, 255, 255, 0.02) 50%,
+            rgba(255, 255, 255, 0.08) 100%
+        );
         z-index: -1;
     }
 
@@ -1751,9 +1907,11 @@
         width: min(100%, 10.6rem);
         border-radius: 1.2rem;
         border: 1px solid rgba(255, 255, 255, 0.3);
-        background: linear-gradient(160deg,
-                rgba(255, 255, 255, 0.16),
-                rgba(255, 255, 255, 0.08));
+        background: linear-gradient(
+            160deg,
+            rgba(255, 255, 255, 0.16),
+            rgba(255, 255, 255, 0.08)
+        );
         backdrop-filter: blur(8px);
         padding: 0.4rem 0.5rem 0.55rem;
     }
@@ -1826,10 +1984,12 @@
         position: absolute;
         inset: 0;
         width: 40%;
-        background: linear-gradient(90deg,
-                rgba(255, 255, 255, 0),
-                rgba(255, 255, 255, 0.8),
-                rgba(255, 255, 255, 0));
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0.8),
+            rgba(255, 255, 255, 0)
+        );
         animation: student-progress-sheen 2.8s ease-in-out infinite;
     }
 
@@ -1929,7 +2089,10 @@
     @media (min-width: 1024px) {
         .dashboard-stage .student-hero__grid {
             gap: 0.95rem;
-            grid-template-columns: minmax(0, 1fr) minmax(130px, 168px) minmax(198px, 228px);
+            grid-template-columns: minmax(0, 1fr) minmax(130px, 168px) minmax(
+                    198px,
+                    228px
+                );
         }
 
         .dashboard-stage .student-hero__robot-panel {
@@ -1981,7 +2144,6 @@
    Reduced motion support (keep yours)
 =================================== */
 @media (prefers-reduced-motion: reduce) {
-
     .layout-rail,
     .layout-topbar {
         animation: none !important;

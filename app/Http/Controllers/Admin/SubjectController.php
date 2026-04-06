@@ -25,7 +25,7 @@ class SubjectController extends Controller
         $teacherId = ctype_digit($teacherIdRaw) ? (int) $teacherIdRaw : null;
 
         $subjectQuery = Subject::query()
-            ->with(['schoolClass', 'teacher', 'studySchedules.schoolClass', 'studySchedules.teacher'])
+            ->with(['schoolClass', 'teacher', 'students', 'studySchedules.schoolClass', 'studySchedules.teacher'])
             ->withCount('students')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {

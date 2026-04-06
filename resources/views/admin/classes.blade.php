@@ -38,6 +38,16 @@
 
         @php
             $showCreateFormOnLoad = old('_form') === 'create_class';
+            $dayLabels = [
+                'monday' => 'Monday',
+                'tuesday' => 'Tuesday',
+                'wednesday' => 'Wednesday',
+                'thursday' => 'Thursday',
+                'friday' => 'Friday',
+                'saturday' => 'Saturday',
+                'sunday' => 'Sunday',
+                'all' => 'All Days',
+            ];
         @endphp
 
         <div class="grid gap-6 xl:grid-cols-12">
@@ -272,8 +282,8 @@
 
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                                <div class="max-h-175 overflow-auto">
-                                    <table class="w-full min-w-262.5 text-left text-sm">
+                                <div class="max-h-[700px] overflow-auto">
+                                    <table class="w-full min-w-[1300px] text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
@@ -284,7 +294,7 @@
                                                 <th class="px-3 py-3 font-semibold">Subjects</th>
                                                 <th class="px-3 py-3 font-semibold">Students</th>
                                                 <th class="px-3 py-3 font-semibold">Status</th>
-                                                <th class="px-3 py-3 font-semibold">Created</th>
+                                                <th class="whitespace-nowrap px-3 py-3 font-semibold">Created</th>
                                                 <th class="px-3 py-3 font-semibold text-right">Actions</th>
                                             </tr>
                                         </thead>
@@ -296,7 +306,8 @@
                                                     : (is_iterable($classes) ? $classes : []);
                                             @endphp
                                             @forelse ($classRows as $schoolClass)
-                                                <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false }">
+                                                <tr class="align-top hover:bg-slate-50/80"
+                                                    x-data="{ openEdit: false, detailOpen: false }">
                                                     @php
                                                         if (!($schoolClass instanceof \App\Models\SchoolClass)) {
                                                             continue;
@@ -313,28 +324,79 @@
                                                     </td>
                                                     <td class="px-3 py-3 text-slate-600">
                                                         @if ($schoolClass->studySchedules->isNotEmpty())
-                                                            <div class="flex max-w-sm flex-wrap gap-1.5">
-                                                                @foreach ($schoolClass->studySchedules as $scheduleRow)
-                                                                    @php /** @var \App\Models\ClassStudyTime $scheduleRow */ @endphp
-                                                                    <div
-                                                                        class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
-                                                                        <span
-                                                                            class="font-bold uppercase tracking-wide text-indigo-700">
-                                                                            {{ $periodOptions[$scheduleRow->period] ?? ucfirst($scheduleRow->period) }}
-                                                                        </span>
-                                                                        <span class="text-indigo-300">|</span>
-                                                                        <span
-                                                                            class="whitespace-nowrap font-semibold text-slate-700">
-                                                                            {{ \Carbon\Carbon::parse($scheduleRow->start_time)->format('h:i A') }}
-                                                                            ->
-                                                                            {{ \Carbon\Carbon::parse($scheduleRow->end_time)->format('h:i A') }}
-                                                                        </span>
+                                                            @php
+                                                                $studyScheduleRows = $schoolClass->studySchedules
+                                                                    ->sortBy(function ($scheduleRow) {
+                                                                        $daySortMap = [
+                                                                            'monday' => 1,
+                                                                            'tuesday' => 2,
+                                                                            'wednesday' => 3,
+                                                                            'thursday' => 4,
+                                                                            'friday' => 5,
+                                                                            'saturday' => 6,
+                                                                            'sunday' => 7,
+                                                                            'all' => 8,
+                                                                        ];
+
+                                                                        $dayKey = strtolower((string) ($scheduleRow->day_of_week ?? 'all'));
+
+                                                                        return sprintf(
+                                                                            '%02d-%s-%s',
+                                                                            $daySortMap[$dayKey] ?? 99,
+                                                                            (string) ($scheduleRow->period ?? ''),
+                                                                            (string) ($scheduleRow->start_time ?? '')
+                                                                        );
+                                                                    })
+                                                                    ->values();
+                                                                $previewStudySchedules = $studyScheduleRows->take(3);
+                                                            @endphp
+                                                            <div class="space-y-2">
+                                                                <div class="flex max-w-xl flex-wrap gap-1.5">
+                                                                    @foreach ($previewStudySchedules as $scheduleRow)
+                                                                        @php /** @var \App\Models\ClassStudyTime $scheduleRow */ @endphp
+                                                                        @php
+                                                                            $scheduleDayKey = strtolower(
+                                                                                (string) ($scheduleRow->day_of_week ?? 'all'),
+                                                                            );
+                                                                            $scheduleDayLabel =
+                                                                                $dayLabels[$scheduleDayKey] ??
+                                                                                ucfirst($scheduleDayKey);
+                                                                            $schedulePeriodLabel =
+                                                                                $periodOptions[$scheduleRow->period] ??
+                                                                                ucfirst($scheduleRow->period);
+                                                                            $startTime = \Carbon\Carbon::parse(
+                                                                                $scheduleRow->start_time,
+                                                                            )->format('h:i A');
+                                                                            $endTime = \Carbon\Carbon::parse(
+                                                                                $scheduleRow->end_time,
+                                                                            )->format('h:i A');
+                                                                        @endphp
+                                                                        <div
+                                                                            class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                                                                            <span class="uppercase tracking-wide">
+                                                                                {{ $scheduleDayLabel }}
+                                                                            </span>
+                                                                            <span class="text-emerald-300">|</span>
+                                                                            <span class="font-bold">
+                                                                                {{ $schedulePeriodLabel }}
+                                                                            </span>
+                                                                            <span class="text-emerald-300">|</span>
+                                                                            <span class="whitespace-nowrap text-slate-700">
+                                                                                {{ $startTime }} -> {{ $endTime }}
+                                                                            </span>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                                @if ($studyScheduleRows->count() > $previewStudySchedules->count())
+                                                                    <div class="text-[11px] font-semibold text-slate-400">
+                                                                        +{{ $studyScheduleRows->count() - $previewStudySchedules->count() }}
+                                                                        more slots
                                                                     </div>
-                                                                @endforeach
+                                                                @endif
+                                                                <div class="text-[11px] text-slate-400">
+                                                                    {{ $schoolClass->study_schedules_count }} slots
+                                                                </div>
                                                             </div>
-                                                            <div class="mt-1 text-[11px] text-slate-400">
-                                                                {{ $schoolClass->study_schedules_count }}
-                                                                slots</div>
                                                         @else
                                                             @php
                                                                 $classStartTime =
@@ -378,11 +440,16 @@
                                                             </span>
                                                         @endif
                                                     </td>
-                                                    <td class="px-3 py-3 text-slate-500">
+                                                    <td class="whitespace-nowrap px-3 py-3 text-slate-500">
                                                         {{ $schoolClass->created_at->format('M d, Y') }}</td>
-                                                    <td class="px-3 py-3">
-                                                        <div class="flex flex-wrap items-center justify-end gap-2">
-                                                            <button @click="open = true" type="button"
+                                                    <td class="whitespace-nowrap px-3 py-3">
+                                                        <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
+                                                            <button @click="detailOpen = true" type="button"
+                                                                class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                                                                View Detail
+                                                            </button>
+
+                                                            <button @click="openEdit = true" type="button"
                                                                 class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                 Edit
                                                             </button>
@@ -413,18 +480,146 @@
                                                             </form>
                                                         </div>
 
-                                                        <div x-show="open" x-cloak
+                                                        <div x-show="detailOpen" x-cloak
                                                             class="fixed inset-0 z-70 grid place-items-center p-4"
                                                             aria-modal="true" role="dialog">
                                                             <div class="absolute inset-0 bg-slate-900/50"
-                                                                @click="open = false"></div>
+                                                                @click="detailOpen = false"></div>
+
+                                                            <div
+                                                                class="relative z-10 w-full max-w-3xl rounded-3xl bg-white p-5 shadow-2xl">
+                                                                <div class="mb-4 flex items-start justify-between gap-3">
+                                                                    <div>
+                                                                        <h3 class="text-lg font-black text-slate-900">
+                                                                            Class Detail</h3>
+                                                                        <p class="mt-1 text-sm text-slate-500">
+                                                                            {{ $schoolClass->display_name }} &bull;
+                                                                            {{ $schoolClass->room ?: 'No room assigned' }}
+                                                                        </p>
+                                                                    </div>
+                                                                    <button type="button" @click="detailOpen = false"
+                                                                        class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                                                                        <svg class="h-5 w-5" viewBox="0 0 24 24"
+                                                                            fill="currentColor">
+                                                                            <path
+                                                                                d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+
+                                                                @php
+                                                                    $detailStudyRows = $studyScheduleRows ?? collect();
+                                                                @endphp
+
+                                                                <div class="grid gap-4 md:grid-cols-2">
+                                                                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                                                        <div
+                                                                            class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                                                                            Overview</div>
+                                                                        <div class="mt-3 space-y-3 text-sm">
+                                                                            <div class="flex items-center justify-between gap-3">
+                                                                                <span class="text-slate-500">Class</span>
+                                                                                <span class="font-semibold text-slate-900">{{ $schoolClass->display_name }}</span>
+                                                                            </div>
+                                                                            <div class="flex items-center justify-between gap-3">
+                                                                                <span class="text-slate-500">Room</span>
+                                                                                <span class="font-semibold text-slate-900">{{ $schoolClass->room ?: '-' }}</span>
+                                                                            </div>
+                                                                            <div class="flex items-center justify-between gap-3">
+                                                                                <span class="text-slate-500">Capacity</span>
+                                                                                <span class="font-semibold text-slate-900">{{ $schoolClass->capacity ? number_format($schoolClass->capacity) : '-' }}</span>
+                                                                            </div>
+                                                                            <div class="flex items-center justify-between gap-3">
+                                                                                <span class="text-slate-500">Subjects</span>
+                                                                                <span class="font-semibold text-slate-900">{{ $schoolClass->subjects_count }}</span>
+                                                                            </div>
+                                                                            <div class="flex items-center justify-between gap-3">
+                                                                                <span class="text-slate-500">Students</span>
+                                                                                <span class="font-semibold text-slate-900">{{ $schoolClass->students_count ?? 0 }}</span>
+                                                                            </div>
+                                                                            <div class="flex items-center justify-between gap-3">
+                                                                                <span class="text-slate-500">Status</span>
+                                                                                <span class="font-semibold {{ $schoolClass->is_active ? 'text-emerald-700' : 'text-rose-700' }}">
+                                                                                    {{ $schoolClass->is_active ? 'Active' : 'Inactive' }}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                                                                            <div class="text-xs font-bold uppercase tracking-wide text-slate-500">Description</div>
+                                                                            <p class="mt-2 text-sm leading-6 text-slate-600">
+                                                                                {{ $schoolClass->description ?: 'No description available.' }}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                                                                        <div
+                                                                            class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                                                                            <div>
+                                                                                <div class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                                                                                    Full Schedule</div>
+                                                                                <div class="mt-1 text-sm text-slate-500">
+                                                                                    {{ $detailStudyRows->count() }} slots total
+                                                                                </div>
+                                                                            </div>
+                                                                            <a href="{{ route('admin.time-studies.index', ['tab' => 'class', 'class_id' => $schoolClass->id]) }}"
+                                                                                class="text-xs font-semibold text-indigo-600 hover:text-indigo-500">
+                                                                                Manage times
+                                                                            </a>
+                                                                        </div>
+
+                                                                        <div class="mt-4 max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                                                                            @forelse ($detailStudyRows as $scheduleRow)
+                                                                                @php
+                                                                                    $scheduleDayKey = strtolower(
+                                                                                        (string) ($scheduleRow->day_of_week ?? 'all'),
+                                                                                    );
+                                                                                    $scheduleDayLabel =
+                                                                                        $dayLabels[$scheduleDayKey] ??
+                                                                                        ucfirst($scheduleDayKey);
+                                                                                    $schedulePeriodLabel =
+                                                                                        $periodOptions[$scheduleRow->period] ??
+                                                                                        ucfirst($scheduleRow->period);
+                                                                                    $startTime = \Carbon\Carbon::parse(
+                                                                                        $scheduleRow->start_time,
+                                                                                    )->format('h:i A');
+                                                                                    $endTime = \Carbon\Carbon::parse(
+                                                                                        $scheduleRow->end_time,
+                                                                                    )->format('h:i A');
+                                                                                @endphp
+                                                                                <div
+                                                                                    class="flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
+                                                                                    <span class="uppercase tracking-wide">{{ $scheduleDayLabel }}</span>
+                                                                                    <span class="text-emerald-300">|</span>
+                                                                                    <span>{{ $schedulePeriodLabel }}</span>
+                                                                                    <span class="text-emerald-300">|</span>
+                                                                                    <span class="whitespace-nowrap text-slate-700">
+                                                                                        {{ $startTime }} -> {{ $endTime }}
+                                                                                    </span>
+                                                                                </div>
+                                                                            @empty
+                                                                                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                                                                                    No study schedule configured.
+                                                                                </div>
+                                                                            @endforelse
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div x-show="openEdit" x-cloak
+                                                            class="fixed inset-0 z-70 grid place-items-center p-4"
+                                                            aria-modal="true" role="dialog">
+                                                            <div class="absolute inset-0 bg-slate-900/50"
+                                                                @click="openEdit = false"></div>
 
                                                             <div
                                                                 class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
                                                                 <div class="mb-4 flex items-center justify-between">
                                                                     <h3 class="text-lg font-black text-slate-900">Edit
                                                                         Class</h3>
-                                                                    <button type="button" @click="open = false"
+                                                                    <button type="button" @click="openEdit = false"
                                                                         class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                                                                         <svg class="h-5 w-5" viewBox="0 0 24 24"
                                                                             fill="currentColor">
@@ -518,7 +713,7 @@
                                                                     </label>
 
                                                                     <div class="flex justify-end gap-2 pt-2">
-                                                                        <button type="button" @click="open = false"
+                                                                        <button type="button" @click="openEdit = false"
                                                                             class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
                                                                             Cancel
                                                                         </button>

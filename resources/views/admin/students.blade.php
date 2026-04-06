@@ -506,7 +506,7 @@
                                                     <th class="student-col-study px-3 py-3 font-semibold">Study Time</th>
                                                 @endif
                                                 <th class="student-col-status px-3 py-3 font-semibold">Status</th>
-                                                <th class="student-col-created px-3 py-3 font-semibold">Created</th>
+                                                <th class="student-col-created whitespace-nowrap px-3 py-3 font-semibold">Created</th>
                                                 <th class="student-col-actions whitespace-nowrap px-3 py-3 font-semibold">
                                                     Actions
                                                 </th>
@@ -677,8 +677,8 @@
                                                         <span
                                                             class="whitespace-nowrap">{{ $student->created_at->format('M d, Y') }}</span>
                                                     </td>
-                                                    <td class="student-col-actions px-3 py-3 align-top">
-                                                        <div class="flex flex-wrap items-center justify-end gap-2">
+                                                    <td class="student-col-actions whitespace-nowrap px-3 py-3 align-top">
+                                                        <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                             <button @click="open = true" type="button"
                                                                 class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                 Edit

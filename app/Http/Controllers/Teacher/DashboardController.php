@@ -158,44 +158,100 @@ class DashboardController extends Controller
 
         $todayClassSlots = $classSlots
             ->filter(fn($slot) => $dayMatches($slot->day_of_week ?? 'all', $todayKey))
-            ->map(function ($slot) use ($periodLabels) {
+            ->map(function ($slot) use ($periodLabels, $dayLabels, $todayKey) {
                 $startAt = Carbon::parse($slot->start_time);
                 $endAt = Carbon::parse($slot->end_time);
+                $startSort = (string) $slot->start_time;
+                $endSort = (string) $slot->end_time;
+                $slotDayKey = strtolower((string) ($slot->day_of_week ?? $todayKey));
+                $slotKey = implode('|', [
+                    (int) ($slot->school_class_id ?? 0),
+                    strtolower((string) $slot->period),
+                    $startSort,
+                    $endSort,
+                ]);
 
                 return [
-                    'type' => 'class',
-                    'title' => $slot->schoolClass?->display_name ?? 'Class Schedule',
-                    'subtitle' => 'Class Time',
+                    'slot_key' => $slotKey,
+                    'slot_type' => 'class',
+                    'day_key' => $slotDayKey,
+                    'day_label' => $dayLabels[$slotDayKey] ?? ucfirst($slotDayKey),
+                    'class_name' => $slot->schoolClass?->display_name ?? 'Class Schedule',
+                    'subject_name' => null,
+                    'subject_names' => [],
                     'period' => $periodLabels[strtolower((string) $slot->period)] ?? ucfirst((string) $slot->period),
                     'start' => $startAt->format('h:i A'),
                     'end' => $endAt->format('h:i A'),
                     'start_24' => $startAt->format('H:i:s'),
                     'end_24' => $endAt->format('H:i:s'),
-                    'start_sort' => (string) $slot->start_time,
+                    'start_sort' => $startSort,
+                    'end_sort' => $endSort,
                 ];
             });
 
         $todaySubjectSlots = $subjectSlots
             ->filter(fn($slot) => $dayMatches($slot->day_of_week ?? 'all', $todayKey))
-            ->map(function ($slot) use ($periodLabels) {
+            ->map(function ($slot) use ($periodLabels, $dayLabels, $todayKey) {
                 $startAt = Carbon::parse($slot->start_time);
                 $endAt = Carbon::parse($slot->end_time);
+                $startSort = (string) $slot->start_time;
+                $endSort = (string) $slot->end_time;
+                $slotDayKey = strtolower((string) ($slot->day_of_week ?? $todayKey));
+                $slotKey = implode('|', [
+                    (int) ($slot->school_class_id ?? $slot->subject?->school_class_id ?? 0),
+                    strtolower((string) $slot->period),
+                    $startSort,
+                    $endSort,
+                ]);
 
                 return [
-                    'type' => 'subject',
-                    'title' => $slot->subject?->name ?? 'Subject Schedule',
-                    'subtitle' => $slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Unassigned class',
+                    'slot_key' => $slotKey,
+                    'slot_type' => 'subject',
+                    'day_key' => $slotDayKey,
+                    'day_label' => $dayLabels[$slotDayKey] ?? ucfirst($slotDayKey),
+                    'class_name' => $slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Unassigned class',
+                    'subject_name' => $slot->subject?->name ?? 'Subject Schedule',
+                    'subject_names' => [$slot->subject?->name ?? 'Subject Schedule'],
                     'period' => $periodLabels[strtolower((string) $slot->period)] ?? ucfirst((string) $slot->period),
                     'start' => $startAt->format('h:i A'),
                     'end' => $endAt->format('h:i A'),
                     'start_24' => $startAt->format('H:i:s'),
                     'end_24' => $endAt->format('H:i:s'),
-                    'start_sort' => (string) $slot->start_time,
+                    'start_sort' => $startSort,
+                    'end_sort' => $endSort,
                 ];
             });
 
+        $subjectSlotsByKey = $todaySubjectSlots->groupBy('slot_key');
+
         $todayTimeline = $todayClassSlots
-            ->concat($todaySubjectSlots)
+            ->map(function (array $classSlot) use ($subjectSlotsByKey) {
+                $subjectNames = collect($subjectSlotsByKey->get($classSlot['slot_key'], collect()))
+                    ->pluck('subject_name')
+                    ->filter()
+                    ->unique()
+                    ->values();
+
+                return [
+                    'slot_key' => $classSlot['slot_key'],
+                    'slot_type' => 'combined',
+                    'class_name' => $classSlot['class_name'],
+                    'subject_name' => $subjectNames->first() ?? 'No subject assigned',
+                    'subject_names' => $subjectNames->all(),
+                    'subject_label' => $subjectNames->isNotEmpty()
+                        ? $subjectNames->join(', ')
+                        : 'No subject assigned',
+                    'day_key' => $classSlot['day_key'],
+                    'day_label' => $classSlot['day_label'],
+                    'period' => $classSlot['period'],
+                    'start' => $classSlot['start'],
+                    'end' => $classSlot['end'],
+                    'start_24' => $classSlot['start_24'],
+                    'end_24' => $classSlot['end_24'],
+                    'start_sort' => $classSlot['start_sort'],
+                    'end_sort' => $classSlot['end_sort'],
+                ];
+            })
             ->sortBy('start_sort')
             ->values()
             ->all();
@@ -214,23 +270,42 @@ class DashboardController extends Controller
             'todaySchedules' => count($todayTimeline),
         ];
 
+        $taughtWeeklySummary = $weeklySummary->filter(fn($day) => (int) ($day['total'] ?? 0) > 0)->values();
+        $weeklyChartSummary = $taughtWeeklySummary->isNotEmpty() ? $taughtWeeklySummary : $weeklySummary;
+
         $todayTypeCounts = collect($todayTimeline)
             ->groupBy('type')
             ->map(fn($items) => count($items))
             ->all();
 
+        $todayPeriodCounts = collect($todayTimeline)
+            ->groupBy('period')
+            ->map(fn($items) => count($items))
+            ->all();
+
+        $todayPeriodSummary = collect($periodLabels)->map(function (string $label, string $periodKey) use ($todayPeriodCounts) {
+            return [
+                'label' => $label,
+                'value' => (int) ($todayPeriodCounts[$periodKey] ?? 0),
+            ];
+        })->values();
+
         $chartData = [
             'weekly' => [
-                'labels' => $weeklySummary->pluck('label')->values()->all(),
-                'classes' => $weeklySummary->pluck('class_count')->map(fn($value) => (int) $value)->values()->all(),
-                'subjects' => $weeklySummary->pluck('subject_count')->map(fn($value) => (int) $value)->values()->all(),
+                'labels' => $weeklyChartSummary->pluck('label')->values()->all(),
+                'classes' => $weeklyChartSummary->pluck('class_count')->map(fn($value) => (int) $value)->values()->all(),
+                'subjects' => $weeklyChartSummary->pluck('subject_count')->map(fn($value) => (int) $value)->values()->all(),
             ],
             'todayMix' => [
-                'labels' => ['Class', 'Subject'],
+                'labels' => ['Class Time', 'Subject'],
                 'values' => [
-                    (int) ($todayTypeCounts['class'] ?? 0),
-                    (int) ($todayTypeCounts['subject'] ?? 0),
+                    (int) $todayClassSlots->count(),
+                    (int) $todaySubjectSlots->count(),
                 ],
+            ],
+            'todayPeriods' => [
+                'labels' => $todayPeriodSummary->pluck('label')->values()->all(),
+                'values' => $todayPeriodSummary->pluck('value')->map(fn($value) => (int) $value)->values()->all(),
             ],
         ];
 
@@ -240,8 +315,8 @@ class DashboardController extends Controller
             'periodLabels' => $periodLabels,
             'stats' => $stats,
             'todayTimeline' => $todayTimeline,
-            'weeklySummary' => $weeklySummary,
-            'maxWeeklyTotal' => max(1, (int) $weeklySummary->max('total')),
+            'weeklySummary' => $weeklyChartSummary,
+            'maxWeeklyTotal' => max(1, (int) $weeklyChartSummary->max('total')),
             'chartData' => $chartData,
         ]);
     }

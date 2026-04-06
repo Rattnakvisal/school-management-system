@@ -441,28 +441,42 @@
                 class="study-time-reveal study-time-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--sd: 4;">
 
-                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                <div x-data="{
+                    filterOpen: false,
+                    activeTab: @js(in_array($tab, ['class', 'subject', 'teacher'], true) ? $tab : 'class'),
+                    switchTab(tab) {
+                        this.activeTab = tab;
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('tab', tab);
+                        window.history.replaceState({}, '', url);
+                    }
+                }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
 
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <h2 class="text-lg font-black text-slate-900">
-                            {{ $tab === 'class' ? 'Class List' : ($tab === 'subject' ? 'Subject List' : 'Teacher Study List') }}
+                            <span x-show="activeTab === 'class'" x-cloak>Class List</span>
+                            <span x-show="activeTab === 'subject'" x-cloak>Subject List</span>
+                            <span x-show="activeTab === 'teacher'" x-cloak>Teacher Study List</span>
                         </h2>
 
                         <div class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
                             <div class="max-w-full overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
                                 <div class="inline-flex min-w-max">
-                                    <a href="{{ route('admin.time-studies.index', ['tab' => 'class', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId, 'per_page' => $perPage]) }}"
-                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'class' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                    <button type="button" @click="switchTab('class')"
+                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold"
+                                        :class="activeTab === 'class' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'">
                                         Class Times
-                                    </a>
-                                    <a href="{{ route('admin.time-studies.index', ['tab' => 'subject', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId, 'per_page' => $perPage]) }}"
-                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'subject' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                    </button>
+                                    <button type="button" @click="switchTab('subject')"
+                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold"
+                                        :class="activeTab === 'subject' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'">
                                         Subject Times
-                                    </a>
-                                    <a href="{{ route('admin.time-studies.index', ['tab' => 'teacher', 'q' => $search, 'period' => $period, 'day' => $day, 'class_id' => $classId, 'subject_id' => $subjectId, 'teacher_id' => $teacherId, 'per_page' => $perPage]) }}"
-                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold {{ $tab === 'teacher' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                    </button>
+                                    <button type="button" @click="switchTab('teacher')"
+                                        class="rounded-lg px-3 py-1.5 text-sm font-semibold"
+                                        :class="activeTab === 'teacher' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'">
                                         Teacher Times
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
 
@@ -506,7 +520,7 @@
 
                                 <form method="GET" action="{{ route('admin.time-studies.index') }}"
                                     class="flex min-h-0 flex-1 flex-col" @submit="filterOpen = false">
-                                    <input type="hidden" name="tab" value="{{ $tab }}">
+                                    <input type="hidden" name="tab" :value="activeTab">
 
                                     <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                                         <section class="space-y-2">
@@ -625,7 +639,7 @@
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                                 <div class="max-h-[700px] overflow-auto">
 
-                                    @if ($tab === 'class')
+                                    <div x-show="activeTab === 'class'" x-cloak>
                                         <table class="w-full min-w-[1280px] text-left text-sm">
                                             <thead
                                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -683,8 +697,8 @@
                                                             {{ $slot->sort_order }}
                                                         </td>
 
-                                                        <td class="px-3 py-3 align-top">
-                                                            <div class="flex flex-wrap items-center justify-end gap-2">
+                                                        <td class="whitespace-nowrap px-3 py-3 align-top">
+                                                            <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                                 <button type="button" @click="openClassEdit = true"
                                                                     class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                     Edit
@@ -824,7 +838,9 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
-                                    @elseif ($tab === 'subject')
+                                    </div>
+
+                                    <div x-show="activeTab === 'subject'" x-cloak>
                                         {{-- SUBJECT TABLE --}}
                                         <table class="w-full min-w-[1280px] text-left text-sm">
                                             <thead
@@ -921,8 +937,8 @@
                                                             {{ $slot->schoolClass?->display_name ?? ($slot->subject?->schoolClass?->display_name ?? 'Unassigned') }}
                                                         </td>
 
-                                                        <td class="px-3 py-3 align-top">
-                                                            <div class="flex flex-wrap items-center justify-end gap-2">
+                                                        <td class="whitespace-nowrap px-3 py-3 align-top">
+                                                            <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                                 <button type="button" @click="openSubjectEdit = true"
                                                                     class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                     Edit
@@ -1054,7 +1070,9 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
-                                    @else
+                                    </div>
+
+                                    <div x-show="activeTab === 'teacher'" x-cloak>
                                         {{-- TEACHER TABLE --}}
                                         <table class="w-full min-w-[1280px] text-left text-sm">
                                             <thead
@@ -1125,58 +1143,45 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
-                                    @endif
+                                    </div>
 
                                 </div>
                             </div>
 
                             <div class="mt-5">
-                                {{ $tab === 'class' ? $classTimes->links() : ($tab === 'subject' ? $subjectTimes->links() : $teacherTimes->links()) }}
+                                <div x-show="activeTab === 'class'" x-cloak>
+                                    {{ $classTimes->links() }}
+                                </div>
+                                <div x-show="activeTab === 'subject'" x-cloak>
+                                    {{ $subjectTimes->links() }}
+                                </div>
+                                <div x-show="activeTab === 'teacher'" x-cloak>
+                                    {{ $teacherTimes->links() }}
+                                </div>
                             </div>
-
-                            @php
-                                $recentItems =
-                                    $tab === 'class'
-                                        ? $recentClassTimes
-                                        : ($tab === 'subject'
-                                            ? $recentSubjectTimes
-                                            : $recentTeacherTimes);
-                            @endphp
 
                             <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
                                 <div class="mb-3 flex items-center justify-between gap-2">
                                     <h3 class="text-sm font-black text-slate-900">Recently Added</h3>
                                     <span class="text-xs font-semibold text-slate-500">Latest
-                                        {{ $recentItems->count() }}</span>
+                                        <span x-show="activeTab === 'class'" x-cloak>{{ $recentClassTimes->count() }}</span>
+                                        <span x-show="activeTab === 'subject'" x-cloak>{{ $recentSubjectTimes->count() }}</span>
+                                        <span x-show="activeTab === 'teacher'" x-cloak>{{ $recentTeacherTimes->count() }}</span>
+                                    </span>
                                 </div>
 
                                 <div class="grid gap-3 md:grid-cols-2">
-                                    @forelse ($recentItems as $recent)
+                                    <div x-show="activeTab === 'class'" x-cloak class="contents">
+                                        @forelse ($recentClassTimes as $recent)
                                         @php
                                             $recentDay = strtolower((string) ($recent->day_of_week ?? 'all'));
                                             $recentPeriod = strtolower((string) ($recent->period ?? 'custom'));
                                         @endphp
 
                                         <article class="rounded-xl border border-slate-200 bg-white p-3">
-                                            @if ($tab === 'class')
-                                                <div class="font-semibold text-slate-900">
-                                                    {{ $recent->schoolClass?->display_name ?? 'Class slot' }}
-                                                </div>
-                                            @elseif ($tab === 'subject')
-                                                <div class="font-semibold text-slate-900">
-                                                    {{ $recent->subject?->name ?? 'Subject slot' }}
-                                                </div>
-                                                <div class="text-xs text-slate-500">
-                                                    {{ $recent->schoolClass?->display_name ?? ($recent->subject?->schoolClass?->display_name ?? 'Unassigned class') }}
-                                                </div>
-                                            @else
-                                                <div class="font-semibold text-slate-900">
-                                                    {{ $recent->teacher?->name ?? ($recent->subject?->teacher?->name ?? 'Unassigned teacher') }}
-                                                </div>
-                                                <div class="text-xs text-slate-500">
-                                                    {{ $recent->subject?->name ?? 'Subject slot' }}
-                                                </div>
-                                            @endif
+                                            <div class="font-semibold text-slate-900">
+                                                {{ $recent->schoolClass?->display_name ?? 'Class slot' }}
+                                            </div>
 
                                             <div class="mt-2 flex flex-wrap gap-2 text-xs">
                                                 <span
@@ -1198,12 +1203,99 @@
                                                 Added {{ optional($recent->created_at)->diffForHumans() ?? '-' }}
                                             </div>
                                         </article>
-                                    @empty
-                                        <div
-                                            class="md:col-span-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
-                                            No recent items yet.
-                                        </div>
-                                    @endforelse
+                                        @empty
+                                            <div
+                                                class="md:col-span-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
+                                                No recent items yet.
+                                            </div>
+                                        @endforelse
+                                    </div>
+
+                                    <div x-show="activeTab === 'subject'" x-cloak class="contents">
+                                        @forelse ($recentSubjectTimes as $recent)
+                                            @php
+                                                $recentDay = strtolower((string) ($recent->day_of_week ?? 'all'));
+                                                $recentPeriod = strtolower((string) ($recent->period ?? 'custom'));
+                                            @endphp
+
+                                            <article class="rounded-xl border border-slate-200 bg-white p-3">
+                                                <div class="font-semibold text-slate-900">
+                                                    {{ $recent->subject?->name ?? 'Subject slot' }}
+                                                </div>
+                                                <div class="text-xs text-slate-500">
+                                                    {{ $recent->schoolClass?->display_name ?? ($recent->subject?->schoolClass?->display_name ?? 'Unassigned class') }}
+                                                </div>
+
+                                                <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                                                    <span
+                                                        class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-semibold text-slate-700">
+                                                        {{ $dayOptions[$recentDay] ?? ucfirst($recentDay) }}
+                                                    </span>
+                                                    <span
+                                                        class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 font-semibold uppercase tracking-wide text-indigo-700">
+                                                        {{ $periodOptions[$recentPeriod] ?? ucfirst($recentPeriod) }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="mt-2 text-xs text-slate-600">
+                                                    {{ \Carbon\Carbon::parse($recent->start_time)->format('h:i A') }}
+                                                    -
+                                                    {{ \Carbon\Carbon::parse($recent->end_time)->format('h:i A') }}
+                                                </div>
+                                                <div class="mt-1 text-[11px] text-slate-400">
+                                                    Added {{ optional($recent->created_at)->diffForHumans() ?? '-' }}
+                                                </div>
+                                            </article>
+                                        @empty
+                                            <div
+                                                class="md:col-span-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
+                                                No recent items yet.
+                                            </div>
+                                        @endforelse
+                                    </div>
+
+                                    <div x-show="activeTab === 'teacher'" x-cloak class="contents">
+                                        @forelse ($recentTeacherTimes as $recent)
+                                            @php
+                                                $recentDay = strtolower((string) ($recent->day_of_week ?? 'all'));
+                                                $recentPeriod = strtolower((string) ($recent->period ?? 'custom'));
+                                            @endphp
+
+                                            <article class="rounded-xl border border-slate-200 bg-white p-3">
+                                                <div class="font-semibold text-slate-900">
+                                                    {{ $recent->teacher?->name ?? ($recent->subject?->teacher?->name ?? 'Unassigned teacher') }}
+                                                </div>
+                                                <div class="text-xs text-slate-500">
+                                                    {{ $recent->subject?->name ?? 'Subject slot' }}
+                                                </div>
+
+                                                <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                                                    <span
+                                                        class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-semibold text-slate-700">
+                                                        {{ $dayOptions[$recentDay] ?? ucfirst($recentDay) }}
+                                                    </span>
+                                                    <span
+                                                        class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 font-semibold uppercase tracking-wide text-indigo-700">
+                                                        {{ $periodOptions[$recentPeriod] ?? ucfirst($recentPeriod) }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="mt-2 text-xs text-slate-600">
+                                                    {{ \Carbon\Carbon::parse($recent->start_time)->format('h:i A') }}
+                                                    -
+                                                    {{ \Carbon\Carbon::parse($recent->end_time)->format('h:i A') }}
+                                                </div>
+                                                <div class="mt-1 text-[11px] text-slate-400">
+                                                    Added {{ optional($recent->created_at)->diffForHumans() ?? '-' }}
+                                                </div>
+                                            </article>
+                                        @empty
+                                            <div
+                                                class="md:col-span-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
+                                                No recent items yet.
+                                            </div>
+                                        @endforelse
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -349,7 +349,7 @@
                                                     <th class="whitespace-nowrap px-3 py-3 font-semibold">Phone Number</th>
                                                 @endif
                                                 <th class="px-3 py-3 font-semibold">Status</th>
-                                                <th class="px-3 py-3 font-semibold">Created</th>
+                                                <th class="whitespace-nowrap px-3 py-3 font-semibold">Created</th>
                                                 <th class="px-3 py-3 font-semibold text-right">Actions</th>
                                             </tr>
                                         </thead>
@@ -395,10 +395,10 @@
                                                                 class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">N/A</span>
                                                         @endif
                                                     </td>
-                                                    <td class="px-3 py-3 text-slate-500">
+                                                    <td class="whitespace-nowrap px-3 py-3 text-slate-500">
                                                         {{ $teacher->created_at->format('M d, Y') }}</td>
-                                                    <td class="px-3 py-3">
-                                                        <div class="flex flex-wrap items-center justify-end gap-2">
+                                                    <td class="whitespace-nowrap px-3 py-3">
+                                                        <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                             <button @click="open = true" type="button"
                                                                 class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                 Edit
