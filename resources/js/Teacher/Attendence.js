@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardCount = document.getElementById('attendance-card-count');
     const cardList = document.getElementById('attendance-card-list');
     const cardEmpty = document.getElementById('attendance-card-empty');
+    const submitForm = document.querySelector('.js-attendance-submit-form');
 
     let activeStatus = 'all';
 
@@ -226,6 +227,25 @@ document.addEventListener('DOMContentLoaded', () => {
         window.alert(`${title}\n\n${text}`);
     };
 
+    const showConfirm = (options = {}) => {
+        const config = {
+            icon: options.icon || 'question',
+            title: options.title || 'Are you sure?',
+            text: options.text || '',
+            showCancelButton: true,
+            confirmButtonText: options.confirmButtonText || 'Submit',
+            cancelButtonText: options.cancelButtonText || 'Cancel',
+            confirmButtonColor: options.confirmButtonColor || '#4f46e5',
+            cancelButtonColor: options.cancelButtonColor || '#94a3b8',
+        };
+
+        if (hasSwal) {
+            return window.Swal.fire(config).then((result) => Boolean(result && result.isConfirmed));
+        }
+
+        return Promise.resolve(window.confirm(`${config.title}\n\n${config.text}`));
+    };
+
     const alertQueue = [];
 
     (Array.isArray(pageData.attendanceAlerts) ? pageData.attendanceAlerts : []).forEach((alert) => {
@@ -267,6 +287,30 @@ document.addEventListener('DOMContentLoaded', () => {
             icon: 'error',
             title: 'Validation Error',
             text: pageData.validationErrors[0],
+        });
+    }
+
+    if (submitForm) {
+        submitForm.addEventListener('submit', (event) => {
+            if (submitForm.dataset.confirmed === '1') {
+                submitForm.dataset.confirmed = '0';
+                return;
+            }
+
+            event.preventDefault();
+            showConfirm({
+                title: 'Save attendance?',
+                text: 'This will submit the selected attendance records for the current class and date.',
+                confirmButtonText: 'Yes, submit',
+                cancelButtonText: 'Cancel',
+            }).then((confirmed) => {
+                if (!confirmed) {
+                    return;
+                }
+
+                submitForm.dataset.confirmed = '1';
+                submitForm.submit();
+            });
         });
     }
 

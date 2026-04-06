@@ -58,7 +58,7 @@
         @endif
 
         <section class="teacher-time-reveal teacher-time-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
-            style="--sd: 3;" x-data="{ filterOpen: false }">
+            style="--sd: 3;" x-data="{ filterOpen: false, showClassGrid: {{ ($classId ?? '') === '' ? 'true' : 'false' }} }">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
                     <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-700">
@@ -66,6 +66,9 @@
                     </span>
                     <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-700">
                         Date: {{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}
+                    </span>
+                    <span class="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-sky-700">
+                        Day: {{ $selectedDayLabel ?? 'All Days' }}
                     </span>
                 </div>
 
@@ -102,19 +105,6 @@
                     <form method="GET" action="{{ route('teacher.attendance.index') }}"
                         class="flex min-h-0 flex-1 flex-col" @submit="filterOpen = false">
                         <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
-                            <section class="space-y-2">
-                                <h4 class="text-xl font-bold text-slate-900">Class</h4>
-                                <select name="class_id"
-                                    class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    @foreach ($classes as $classOption)
-                                        <option value="{{ $classOption->id }}"
-                                            {{ ($classId ?? '') === (string) $classOption->id ? 'selected' : '' }}>
-                                            {{ $classOption->display_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </section>
-
                             <section class="space-y-2">
                                 <h4 class="text-xl font-bold text-slate-900">Date</h4>
                                 <input type="date" name="date" value="{{ $selectedDate }}"
@@ -162,309 +152,420 @@
             @endif
 
             @if (($classes ?? collect())->count() > 0)
-                <div class="mt-5">
+                <div class="mt-5" x-show="showClassGrid" x-cloak x-transition.opacity>
                     <h3 class="text-sm font-black text-slate-900">Classes Grid</h3>
-                    <p class="mt-1 text-xs text-slate-500">Click a class to load users table with class times and subjects.
+                    <p class="mt-1 text-xs text-slate-500">Showing only classes taught on
+                        {{ $selectedDayLabel ?? 'this day' }}.
                     </p>
-                    <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                        @foreach ($classes as $classOption)
+                    @php
+                        $periodOrder = [
+                            'morning' => 1,
+                            'afternoon' => 2,
+                            'evening' => 3,
+                            'night' => 4,
+                            'custom' => 5,
+                        ];
+                        $periodBuckets = collect([
+                            'morning' => collect(),
+                            'afternoon' => collect(),
+                            'evening' => collect(),
+                            'night' => collect(),
+                            'custom' => collect(),
+                        ]);
+
+                        foreach ($classes as $classOption) {
+                            $teacherSchedules = collect(
+                                $classOption->teacherStudySchedules ?? ($classOption->studySchedules ?? []),
+                            );
+                            $periodGroups = $teacherSchedules
+                                ->groupBy(function ($slot) {
+                                    return strtolower((string) ($slot->period ?? 'custom'));
+                                })
+                                ->sortBy(function ($group, $periodKey) use ($periodOrder) {
+                                    return $periodOrder[$periodKey] ?? 99;
+                                });
+
+                            foreach ($periodGroups as $periodKey => $periodSlots) {
+                                if (!$periodBuckets->has($periodKey)) {
+                                    $periodBuckets->put($periodKey, collect());
+                                }
+
+                                $periodBuckets->put(
+                                    $periodKey,
+                                    $periodBuckets->get($periodKey)->push([
+                                        'class' => $classOption,
+                                        'period_key' => $periodKey,
+                                        'period_slots' => $periodSlots->values(),
+                                    ]),
+                                );
+                            }
+                        }
+                    @endphp
+
+                    <div class="mt-3 grid gap-5 xl:grid-cols-3">
+                        @foreach ($periodOrder as $periodKey => $periodRank)
                             @php
-                                $isActiveClass = ($classId ?? '') === (string) $classOption->id;
-                                $classStatus = $classAttendanceStatus[(int) ($classOption->id ?? 0)] ?? null;
-                                $attendanceState = (string) ($classStatus['state'] ?? 'pending');
-                                $checkedCount = (int) ($classStatus['checked_count'] ?? 0);
-                                $studentsCount = (int) ($classStatus['students_count'] ?? 0);
-                                $isSaved = $attendanceState === 'saved';
-                                $isPending = $attendanceState === 'pending';
-                                $cardColorClass = $isSaved
-                                    ? 'border-emerald-300 bg-emerald-50 hover:bg-emerald-100/70'
-                                    : ($isPending
-                                        ? 'border-red-300 bg-red-50 hover:bg-red-100/70'
-                                        : 'border-slate-200 bg-slate-50 hover:bg-slate-100');
-                                $activeRingClass = $isActiveClass
-                                    ? ($isSaved
-                                        ? ' ring-2 ring-emerald-300'
-                                        : ($isPending
-                                            ? ' ring-2 ring-red-300'
-                                            : ' ring-2 ring-slate-300'))
-                                    : '';
-                                $titleClass = $isSaved
-                                    ? 'text-emerald-900'
-                                    : ($isPending
-                                        ? 'text-red-900'
-                                        : 'text-slate-900');
-                                $roomClass = $isSaved
-                                    ? 'text-emerald-700'
-                                    : ($isPending
-                                        ? 'text-red-700'
-                                        : 'text-slate-500');
-                                $badgeClass = $isSaved
-                                    ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
-                                    : ($isPending
-                                        ? 'border-red-200 bg-red-100 text-red-700'
-                                        : 'border-slate-200 bg-white text-slate-600');
-                                $statusLabel = $isSaved ? 'Saved' : ($isPending ? 'Check Attendance' : 'No Students');
-                                $slotPreview = collect($classOption->studySchedules ?? [])->take(2);
-                                $subjectPreview = collect($classOption->subjects ?? [])->take(2);
-                                $moreSlots = max(
-                                    0,
-                                    (int) (($classOption->class_slots_count ?? 0) - $slotPreview->count()),
-                                );
-                                $moreSubjects = max(
-                                    0,
-                                    (int) (($classOption->taught_subjects_count ?? 0) - $subjectPreview->count()),
-                                );
+                                $periodCards = collect($periodBuckets->get($periodKey, collect()))->values();
+                                $periodLabel = $periodLabels[$periodKey] ?? ucfirst($periodKey);
                             @endphp
-                            <a href="{{ route('teacher.attendance.index', ['class_id' => $classOption->id, 'date' => $selectedDate]) }}"
-                                class="rounded-2xl border px-4 py-3 transition {{ $cardColorClass }}{{ $activeRingClass }}">
-                                <div class="flex items-start justify-between gap-2">
-                                    <div class="text-sm font-black {{ $titleClass }}">
-                                        {{ $classOption->display_name }}
-                                    </div>
-                                    <span
-                                        class="rounded-full border px-2 py-0.5 text-[11px] font-bold {{ $badgeClass }}">
-                                        {{ $statusLabel }}
-                                    </span>
-                                </div>
-
-                                <div class="mt-1 text-[11px] font-semibold {{ $roomClass }}">
-                                    Room: {{ $classOption->room ?: 'N/A' }}
-                                </div>
-
-                                <div class="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold">
-                                    <span class="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-sky-700">
-                                        Users: {{ number_format($classOption->students_count ?? 0) }}
-                                    </span>
-                                    <span
-                                        class="rounded-full border px-2 py-0.5 {{ $isSaved ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : ($isPending ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-white text-slate-600') }}">
-                                        Checked: {{ number_format($checkedCount) }}/{{ number_format($studentsCount) }}
-                                    </span>
-                                    <span
-                                        class="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700">
-                                        Subjects: {{ number_format($classOption->taught_subjects_count ?? 0) }}
-                                    </span>
-                                    <span
-                                        class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
-                                        Times: {{ number_format($classOption->class_slots_count ?? 0) }}
-                                    </span>
-                                </div>
-
-                                <div class="mt-3 space-y-1.5">
-                                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Class Times
-                                    </div>
-                                    @if ($slotPreview->isEmpty())
-                                        <div class="text-[11px] font-semibold text-slate-400">No class times</div>
-                                    @else
-                                        <div class="flex flex-wrap gap-1.5">
-                                            @foreach ($slotPreview as $slot)
-                                                @php
-                                                    $periodKey = strtolower((string) ($slot->period ?? 'custom'));
-                                                    $periodLabel = $periodLabels[$periodKey] ?? ucfirst($periodKey);
-                                                    $startText = $slot->start_time
-                                                        ? \Carbon\Carbon::parse($slot->start_time)->format('h:i A')
-                                                        : '--';
-                                                    $endText = $slot->end_time
-                                                        ? \Carbon\Carbon::parse($slot->end_time)->format('h:i A')
-                                                        : '--';
-                                                    $slotText = $periodLabel . ' ' . $startText . '->' . $endText;
-                                                    if (($hasClassDayColumn ?? false) && isset($slot->day_of_week)) {
-                                                        $slotDayKey = strtolower(
-                                                            (string) ($slot->day_of_week ?? 'all'),
-                                                        );
-                                                        $slotDayLabel = $dayLabels[$slotDayKey] ?? ucfirst($slotDayKey);
-                                                        $slotText = $slotDayLabel . ' | ' . $slotText;
-                                                    }
-                                                @endphp
-                                                <span
-                                                    class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                                                    {{ $slotText }}
-                                                </span>
-                                            @endforeach
-                                            @if ($moreSlots > 0)
-                                                <span
-                                                    class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                                                    +{{ $moreSlots }} more
-                                                </span>
-                                            @endif
+                            @if ($periodCards->isNotEmpty())
+                                <section
+                                    class="flex h-full flex-col rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <div>
+                                            <h4 class="text-sm font-black text-slate-900">{{ $periodLabel }}</h4>
+                                            <p class="mt-0.5 text-xs text-slate-500">
+                                                Classes taught in the {{ strtolower($periodLabel) }} period on
+                                                {{ $selectedDayLabel ?? 'this day' }}.
+                                            </p>
                                         </div>
-                                    @endif
-                                </div>
-
-                                <div class="mt-3 space-y-1.5">
-                                    <div class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Subjects
+                                        <span
+                                            class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500">
+                                            {{ number_format($periodCards->count()) }} class(es)
+                                        </span>
                                     </div>
-                                    @if ($subjectPreview->isEmpty())
-                                        <div class="text-[11px] font-semibold text-slate-400">No subjects</div>
-                                    @else
-                                        <div class="flex flex-wrap gap-1.5">
-                                            @foreach ($subjectPreview as $subject)
-                                                <span
-                                                    class="rounded-lg border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">
-                                                    {{ $subject->name }}
-                                                </span>
-                                            @endforeach
-                                            @if ($moreSubjects > 0)
-                                                <span
-                                                    class="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                                                    +{{ $moreSubjects }} more
-                                                </span>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            </a>
+
+                                    <div class="mt-3 grid grid-cols-1 gap-4">
+                                        @foreach ($periodCards as $periodCard)
+                                            @php
+                                                $classOption = $periodCard['class'];
+                                                $periodSlots = collect($periodCard['period_slots'] ?? []);
+                                                $isActiveClass = ($classId ?? '') === (string) $classOption->id;
+                                                $classStatus =
+                                                    $classAttendanceStatus[(int) ($classOption->id ?? 0)] ?? null;
+                                                $attendanceState = (string) ($classStatus['state'] ?? 'pending');
+                                                $checkedCount = (int) ($classStatus['checked_count'] ?? 0);
+                                                $studentsCount = (int) ($classStatus['students_count'] ?? 0);
+                                                $isSaved = $attendanceState === 'saved';
+                                                $isPending = $attendanceState === 'pending';
+                                                $cardColorClass = $isSaved
+                                                    ? 'border-emerald-300 bg-emerald-50 hover:bg-emerald-100/70'
+                                                    : ($isPending
+                                                        ? 'border-red-300 bg-red-50 hover:bg-red-100/70'
+                                                        : 'border-slate-200 bg-slate-50 hover:bg-slate-100');
+                                                $activeRingClass = $isActiveClass
+                                                    ? ($isSaved
+                                                        ? ' ring-2 ring-emerald-300'
+                                                        : ($isPending
+                                                            ? ' ring-2 ring-red-300'
+                                                            : ' ring-2 ring-slate-300'))
+                                                    : '';
+                                                $titleClass = $isSaved
+                                                    ? 'text-emerald-900'
+                                                    : ($isPending
+                                                        ? 'text-red-900'
+                                                        : 'text-slate-900');
+                                                $roomClass = $isSaved
+                                                    ? 'text-emerald-700'
+                                                    : ($isPending
+                                                        ? 'text-red-700'
+                                                        : 'text-slate-500');
+                                                $badgeClass = $isSaved
+                                                    ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
+                                                    : ($isPending
+                                                        ? 'border-red-200 bg-red-100 text-red-700'
+                                                        : 'border-slate-200 bg-white text-slate-600');
+                                                $statusLabel = $isSaved
+                                                    ? 'Saved'
+                                                    : ($isPending
+                                                        ? 'Check Attendance'
+                                                        : 'No Students');
+                                                $todaySubjects = $periodSlots
+                                                    ->pluck('subject')
+                                                    ->filter()
+                                                    ->unique('id')
+                                                    ->values();
+                                                $slotPreview = $periodSlots->take(3);
+                                            @endphp
+                                            <a href="{{ route('teacher.attendance.index', ['class_id' => $classOption->id, 'date' => $selectedDate]) }}"
+                                                class="block h-full w-full rounded-2xl border px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-md {{ $cardColorClass }}{{ $activeRingClass }}">
+                                                <div class="flex h-full min-h-[18rem] w-full flex-col">
+                                                    <div class="flex items-start justify-between gap-2">
+                                                        <div class="text-sm font-black {{ $titleClass }}">
+                                                            {{ $classOption->display_name }}
+                                                        </div>
+                                                        <span
+                                                            class="rounded-full border px-2 py-0.5 text-[11px] font-bold {{ $badgeClass }}">
+                                                            {{ $statusLabel }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="mt-1 text-[11px] font-semibold {{ $roomClass }}">
+                                                        Room: {{ $classOption->room ?: 'N/A' }}
+                                                    </div>
+
+                                                    <div class="mt-2 flex flex-wrap gap-1.5 text-[11px] font-semibold">
+                                                        <span
+                                                            class="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-sky-700">
+                                                            Users: {{ number_format($classOption->students_count ?? 0) }}
+                                                        </span>
+                                                        <span
+                                                            class="rounded-full border px-2 py-0.5 {{ $isSaved ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : ($isPending ? 'border-red-200 bg-red-50 text-red-700' : 'border-slate-200 bg-white text-slate-600') }}">
+                                                            Checked:
+                                                            {{ number_format($checkedCount) }}/{{ number_format($studentsCount) }}
+                                                        </span>
+                                                        <span
+                                                            class="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700">
+                                                            Subjects: {{ number_format($todaySubjects->count()) }}
+                                                        </span>
+                                                        <span
+                                                            class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
+                                                            {{ $periodLabel }}:
+                                                            {{ number_format($periodSlots->count()) }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="mt-3 space-y-2">
+                                                        <div
+                                                            class="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                                                            {{ $periodLabel }} Teaching
+                                                        </div>
+                                                        @if ($periodSlots->isEmpty())
+                                                            <div class="text-[11px] font-semibold text-slate-400">No slots
+                                                                for this period</div>
+                                                        @else
+                                                            <div class="space-y-2">
+                                                                @foreach ($slotPreview as $slot)
+                                                                    @php
+                                                                        $subjectName =
+                                                                            (string) ($slot->subject?->name ??
+                                                                                'Assigned Subject');
+                                                                        $startText = $slot->start_time
+                                                                            ? \Carbon\Carbon::parse(
+                                                                                $slot->start_time,
+                                                                            )->format('h:i A')
+                                                                            : '--';
+                                                                        $endText = $slot->end_time
+                                                                            ? \Carbon\Carbon::parse(
+                                                                                $slot->end_time,
+                                                                            )->format('h:i A')
+                                                                            : '--';
+                                                                    @endphp
+                                                                    <div
+                                                                        class="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs">
+                                                                        <span
+                                                                            class="min-w-0 truncate font-semibold text-slate-800">
+                                                                            {{ $subjectName }}
+                                                                        </span>
+                                                                        <span
+                                                                            class="shrink-0 font-semibold text-slate-600">
+                                                                            {{ $startText }} -> {{ $endText }}
+                                                                        </span>
+                                                                    </div>
+                                                                @endforeach
+                                                                @if ($periodSlots->count() > $slotPreview->count())
+                                                                    <div class="text-[10px] font-semibold text-slate-500">
+                                                                        +{{ $periodSlots->count() - $slotPreview->count() }}
+                                                                        more slot(s)
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </section>
+                            @endif
                         @endforeach
                     </div>
                 </div>
             @endif
 
             @if (($classId ?? '') === '')
-                <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
-                    <div class="text-sm font-black text-slate-800">No class selected yet</div>
-                    <div class="mt-1 text-sm text-slate-500">
-                        Click a class card above to show users table and check attendance.
-                    </div>
-                </div>
             @else
                 @php
                     $selectedClassStatus = $classAttendanceStatus[(int) ($classId ?? 0)] ?? null;
                     $isSelectedClassSaved = ($selectedClassStatus['state'] ?? '') === 'saved';
                 @endphp
-                <form method="POST" action="{{ route('teacher.attendance.store') }}" class="mt-5 space-y-4">
-                    @csrf
-                    <input type="hidden" name="school_class_id" value="{{ $classId }}">
-                    <input type="hidden" name="attendance_date" value="{{ $selectedDate }}">
+                <div class="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 bg-slate-50/80 px-4 py-4 sm:px-5">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <div class="text-sm font-black text-slate-900">Attendance Table</div>
+                                <div class="mt-1 text-xs text-slate-500">
+                                    Mark attendance for {{ $selectedClass?->display_name ?? 'this class' }} on
+                                    {{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}.
+                                </div>
+                            </div>
 
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div class="text-sm font-semibold text-slate-600">
-                            User rows: {{ number_format($students->count()) }}
+                            <a href="{{ route(
+                                'teacher.attendance.index',
+                                array_filter(
+                                    [
+                                        'date' => $selectedDate,
+                                        'q' => $search ?: null,
+                                        'status' => ($statusFilter ?? 'all') !== 'all' ? $statusFilter : null,
+                                    ],
+                                    fn($value) => !is_null($value) && $value !== '',
+                                ),
+                            ) }}"
+                                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                                Back Class
+                            </a>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button type="button" data-set-all-status="present"
-                                {{ $isSelectedClassSaved ? 'disabled' : '' }}
-                                class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">
-                                Set All Present
-                            </button>
-                            <button type="button" data-set-all-status="absent"
-                                {{ $isSelectedClassSaved ? 'disabled' : '' }}
-                                class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50">
-                                Set All Absent
-                            </button>
-                            <button type="submit" {{ !$hasAttendanceTable || $isSelectedClassSaved ? 'disabled' : '' }}
-                                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50">
-                                Save Attendance
-                            </button>
+                        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold">
+                            <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-600">
+                                User rows: {{ number_format($students->count()) }}
+                            </span>
+                            <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-700">
+                                Day: {{ $selectedDayLabel ?? 'All Days' }}
+                            </span>
+                            <span
+                                class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700">
+                                Selected class: {{ $selectedClass?->display_name ?? 'N/A' }}
+                            </span>
                         </div>
                     </div>
-                    @if ($isSelectedClassSaved)
-                        <p class="text-xs font-semibold text-emerald-700">
-                            Attendance saved successfully. Check status cannot be changed.
-                        </p>
-                    @endif
-                    <p class="text-xs font-semibold text-slate-500">
-                        Saving attendance for <span
-                            class="text-slate-700">{{ $selectedClass?->display_name ?? 'N/A' }}</span>
-                        on <span
-                            class="text-slate-700">{{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}</span>.
-                    </p>
 
-                    <div class="overflow-hidden rounded-2xl border border-slate-200">
-                        <div class="max-h-[560px] overflow-auto">
-                            <table class="w-full min-w-[1080px] text-left text-sm">
-                                <thead
-                                    class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                                    <tr>
-                                        <th class="px-3 py-3 font-semibold">Users</th>
-                                        <th class="px-3 py-3 font-semibold">Email</th>
-                                        <th class="px-3 py-3 font-semibold">Current
-                                            ({{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }})</th>
-                                        <th class="px-3 py-3 font-semibold">Check Status</th>
-                                        <th class="px-3 py-3 font-semibold">Remark</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100 bg-white">
-                                    @forelse ($students as $student)
-                                        @php
-                                            $record = $attendanceByStudent->get($student->id);
-                                            $currentStatus = strtolower((string) ($record?->status ?? ''));
-                                            $selectedStatus = old(
-                                                'attendance.' . $student->id . '.status',
-                                                $currentStatus !== '' ? $currentStatus : 'present',
-                                            );
-                                            $remarkValue = old(
-                                                'attendance.' . $student->id . '.remark',
-                                                (string) ($record?->remark ?? ''),
-                                            );
-                                        @endphp
-                                        <tr class="js-attendance-row align-top hover:bg-slate-50/80"
-                                            data-student-name="{{ $student->name }}">
-                                            <td class="px-3 py-3">
-                                                <div class="font-semibold text-slate-900">{{ $student->name }}</div>
-                                                <div class="text-xs text-slate-500">ID #{{ $student->formatted_id }}</div>
-                                            </td>
-                                            <td class="px-3 py-3 text-slate-700">{{ $student->email }}</td>
-                                            <td class="px-3 py-3">
-                                                @if ($currentStatus !== '' && isset($statusLabels[$currentStatus]))
-                                                    <span
-                                                        class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                                        {{ $statusLabels[$currentStatus] }}
-                                                    </span>
-                                                @else
-                                                    <span
-                                                        class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
-                                                        Not Checked Yet
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="px-3 py-3">
-                                                <div class="space-y-2">
-                                                    <select name="attendance[{{ $student->id }}][status]"
-                                                        {{ $isSelectedClassSaved ? 'disabled' : '' }}
-                                                        class="js-student-status sr-only" tabindex="-1"
-                                                        aria-hidden="true">
-                                                        @foreach ($statusLabels as $statusKey => $statusLabel)
-                                                            <option value="{{ $statusKey }}"
-                                                                {{ $selectedStatus === $statusKey ? 'selected' : '' }}>
-                                                                {{ $statusLabel }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <div class="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-                                                        @foreach ($statusLabels as $statusKey => $statusLabel)
-                                                            @php
-                                                                $isActiveStatus = $selectedStatus === $statusKey;
-                                                            @endphp
-                                                            <button type="button"
-                                                                data-status-option="{{ $statusKey }}"
-                                                                {{ $isSelectedClassSaved ? 'disabled' : '' }}
-                                                                aria-pressed="{{ $isActiveStatus ? 'true' : 'false' }}"
-                                                                class="js-status-box rounded-lg border px-2 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 {{ $isActiveStatus ? 'border-indigo-300 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-indigo-700' }}">
-                                                                {{ $statusLabel }}
-                                                            </button>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-3 py-3">
-                                                <input type="text" name="attendance[{{ $student->id }}][remark]"
-                                                    value="{{ $remarkValue }}" maxlength="255"
-                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                                    placeholder="Optional note">
-                                            </td>
-                                        </tr>
-                                    @empty
+                    <form method="POST" action="{{ route('teacher.attendance.store') }}"
+                        class="js-attendance-submit-form space-y-4 p-4 sm:p-5">
+                        @csrf
+                        <input type="hidden" name="school_class_id" value="{{ $classId }}">
+                        <input type="hidden" name="attendance_date" value="{{ $selectedDate }}">
+
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            @if ($isSelectedClassSaved)
+                                <p
+                                    class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+                                    Attendance saved successfully. Check status cannot be changed.
+                                </p>
+                            @else
+                                <p class="text-xs font-semibold text-slate-500">
+                                    Choose a status for each student, then save the table below.
+                                </p>
+                            @endif
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" data-set-all-status="present"
+                                    {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                                    class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                    Set All Present
+                                </button>
+                                <button type="button" data-set-all-status="absent"
+                                    {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                    Set All Absent
+                                </button>
+                                <button type="submit"
+                                    {{ !$hasAttendanceTable || $isSelectedClassSaved ? 'disabled' : '' }}
+                                    class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50">
+                                    Save Attendance
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+                            <div class="max-h-[620px] overflow-auto">
+                                <table class="w-full min-w-[980px] text-left text-sm">
+                                    <thead
+                                        class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 text-xs uppercase tracking-wide text-slate-500 backdrop-blur">
                                         <tr>
-                                            <td colspan="5" class="px-3 py-10 text-center text-sm text-slate-500">
-                                                No users found for this class and filter.
-                                            </td>
+                                            <th class="px-4 py-3 font-semibold">Student Profile</th>
+                                            <th class="px-4 py-3 font-semibold">Attendance</th>
+                                            <th class="px-4 py-3 font-semibold">Check Status</th>
+                                            <th class="px-4 py-3 font-semibold">Remark</th>
                                         </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 bg-white">
+                                        @forelse ($students as $student)
+                                            @php
+                                                $record = $attendanceByStudent->get($student->id);
+                                                $currentStatus = strtolower((string) ($record?->status ?? ''));
+                                                $selectedStatus = old(
+                                                    'attendance.' . $student->id . '.status',
+                                                    $currentStatus !== '' ? $currentStatus : 'present',
+                                                );
+                                                $remarkValue = old(
+                                                    'attendance.' . $student->id . '.remark',
+                                                    (string) ($record?->remark ?? ''),
+                                                );
+                                            @endphp
+                                            <tr class="js-attendance-row align-top hover:bg-slate-50/80"
+                                                data-student-name="{{ $student->name }}">
+                                                <td class="px-4 py-4">
+                                                    <div class="flex items-center gap-3">
+                                                        <div
+                                                            class="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-indigo-100 ring-2 ring-white shadow-sm">
+                                                            <img src="{{ $student->avatar_url }}"
+                                                                onerror="this.onerror=null;this.src='{{ $student->fallback_avatar_url }}';"
+                                                                alt="{{ $student->name }}"
+                                                                class="h-full w-full object-cover">
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="font-semibold text-slate-900">{{ $student->name }}
+                                                            </div>
+                                                            <div class="mt-0.5 text-xs text-slate-500">ID
+                                                                #{{ $student->formatted_id }}</div>
+                                                            <div class="mt-0.5 truncate text-xs text-slate-500">
+                                                                {{ $student->email }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-4">
+                                                    @if ($currentStatus !== '' && isset($statusLabels[$currentStatus]))
+                                                        <span
+                                                            class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                                            {{ $statusLabels[$currentStatus] }}
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+                                                            Not Checked Yet
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-4">
+                                                    <div class="space-y-2">
+                                                        <select name="attendance[{{ $student->id }}][status]"
+                                                            {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                                                            class="js-student-status sr-only" tabindex="-1"
+                                                            aria-hidden="true">
+                                                            @foreach ($statusLabels as $statusKey => $statusLabel)
+                                                                <option value="{{ $statusKey }}"
+                                                                    {{ $selectedStatus === $statusKey ? 'selected' : '' }}>
+                                                                    {{ $statusLabel }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <div class="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                                                            @foreach ($statusLabels as $statusKey => $statusLabel)
+                                                                @php
+                                                                    $isActiveStatus = $selectedStatus === $statusKey;
+                                                                @endphp
+                                                                <button type="button"
+                                                                    data-status-option="{{ $statusKey }}"
+                                                                    {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                                                                    aria-pressed="{{ $isActiveStatus ? 'true' : 'false' }}"
+                                                                    class="js-status-box rounded-lg border px-2 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 {{ $isActiveStatus ? 'border-indigo-300 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-indigo-700' }}">
+                                                                    {{ $statusLabel }}
+                                                                </button>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-4">
+                                                    <input type="text" name="attendance[{{ $student->id }}][remark]"
+                                                        value="{{ $remarkValue }}" maxlength="255"
+                                                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                        placeholder="Optional note">
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="px-4 py-10 text-center text-sm text-slate-500">
+                                                    No users found for this class and filter.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             @endif
         </section>
     </div>

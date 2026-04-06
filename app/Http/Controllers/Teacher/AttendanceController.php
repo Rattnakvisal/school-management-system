@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Models\Notification;
 use App\Models\SchoolClass;
 use App\Models\StudentAttendance;
@@ -24,6 +25,7 @@ class AttendanceController extends Controller
         $allowedStatuses = $this->allowedStatuses();
         $attendanceStatuses = array_keys($allowedStatuses);
         $hasClassDayColumn = Schema::hasColumn('class_study_times', 'day_of_week');
+        $hasSubjectDayColumn = Schema::hasColumn('subject_study_times', 'day_of_week');
         $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
         $hasSubjectTeacherColumn = Schema::hasColumn('subject_study_times', 'teacher_id');
         $useSlotAssignments = $hasSubjectClassColumn && $hasSubjectTeacherColumn;
@@ -100,6 +102,46 @@ class AttendanceController extends Controller
                 $schoolClass->setRelation('subjects', $assignedSubjects);
                 $schoolClass->setAttribute('taught_subjects_count', $assignedSubjects->count());
             });
+
+            $teacherStudyTimesByClass = collect();
+            if ($teacherClassIds->isNotEmpty()) {
+                $slotSelect = ['id', 'subject_id', 'school_class_id', 'period', 'start_time', 'end_time', 'sort_order'];
+                if ($hasSubjectDayColumn) {
+                    $slotSelect[] = 'day_of_week';
+                }
+
+                $teacherStudyTimesByClass = SubjectStudyTime::query()
+                    ->with(['subject:id,name', 'schoolClass:id,name,section'])
+                    ->select($slotSelect)
+                    ->where('teacher_id', $teacherId)
+                    ->whereIn('school_class_id', $teacherClassIds->all())
+                    ->orderBy('school_class_id')
+                    ->when($hasSubjectDayColumn, function ($query) {
+                        $query->orderByRaw("CASE day_of_week
+                            WHEN 'monday' THEN 1
+                            WHEN 'tuesday' THEN 2
+                            WHEN 'wednesday' THEN 3
+                            WHEN 'thursday' THEN 4
+                            WHEN 'friday' THEN 5
+                            WHEN 'saturday' THEN 6
+                            WHEN 'sunday' THEN 7
+                            ELSE 8 END");
+                    })
+                    ->orderBy('sort_order')
+                    ->orderBy('start_time')
+                    ->get()
+                    ->groupBy(fn($row) => (string) $row->school_class_id);
+            }
+
+            $classes->each(function (SchoolClass $schoolClass) use ($teacherStudyTimesByClass): void {
+                $teacherStudySlots = $teacherStudyTimesByClass
+                    ->get((string) $schoolClass->id, collect())
+                    ->values();
+
+                $schoolClass->setRelation('teacherStudySchedules', $teacherStudySlots);
+                $schoolClass->setRelation('studySchedules', $teacherStudySlots);
+                $schoolClass->setAttribute('class_slots_count', $teacherStudySlots->count());
+            });
         } else {
             $classes = SchoolClass::query()
                 ->whereHas('subjects', function ($query) use ($teacherId) {
@@ -155,6 +197,44 @@ class AttendanceController extends Controller
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $selectedDate)) {
             $selectedDate = now()->toDateString();
         }
+        $selectedDayKey = strtolower(Carbon::parse($selectedDate)->format('l'));
+        $dayMatchesSelectedDate = function ($dayOfWeek) use ($selectedDayKey): bool {
+            $slotDay = strtolower(trim((string) $dayOfWeek));
+
+            return $slotDay === '' || $slotDay === 'all' || $slotDay === $selectedDayKey;
+        };
+
+        $classes = $classes
+            ->transform(function (SchoolClass $schoolClass) use ($dayMatchesSelectedDate): SchoolClass {
+                $slots = collect($schoolClass->getRelation('teacherStudySchedules') ?? $schoolClass->getRelation('studySchedules') ?? []);
+                if ($slots->isEmpty()) {
+                    $slots = collect($schoolClass->studySchedules ?? []);
+                }
+
+                $filteredSlots = $slots
+                    ->filter(function ($slot) use ($dayMatchesSelectedDate) {
+                        return $dayMatchesSelectedDate($slot->day_of_week ?? 'all');
+                    })
+                    ->values();
+
+                if ($schoolClass->relationLoaded('teacherStudySchedules')) {
+                    $schoolClass->setRelation('teacherStudySchedules', $filteredSlots);
+                }
+
+                if ($schoolClass->relationLoaded('studySchedules')) {
+                    $schoolClass->setRelation('studySchedules', $filteredSlots);
+                }
+
+                $schoolClass->setAttribute('class_slots_count', $filteredSlots->count());
+
+                return $schoolClass;
+            })
+            ->filter(function (SchoolClass $schoolClass) {
+                $slots = collect($schoolClass->getRelation('teacherStudySchedules') ?? $schoolClass->getRelation('studySchedules') ?? []);
+
+                return $slots->isNotEmpty();
+            })
+            ->values();
 
         $hasAttendanceTable = Schema::hasTable('student_attendances');
         $attendanceCheckedByClass = collect();
@@ -276,6 +356,17 @@ class AttendanceController extends Controller
             'hasAttendanceTable' => $hasAttendanceTable,
             'classAttendanceStatus' => $classAttendanceStatus,
             'hasClassDayColumn' => $hasClassDayColumn,
+            'selectedDayKey' => $selectedDayKey,
+            'selectedDayLabel' => [
+                'all' => 'All Days',
+                'monday' => 'Monday',
+                'tuesday' => 'Tuesday',
+                'wednesday' => 'Wednesday',
+                'thursday' => 'Thursday',
+                'friday' => 'Friday',
+                'saturday' => 'Saturday',
+                'sunday' => 'Sunday',
+            ][$selectedDayKey] ?? ucfirst($selectedDayKey),
             'periodLabels' => [
                 'morning' => 'Morning',
                 'afternoon' => 'Afternoon',
