@@ -1,0 +1,19 @@
+<?php
+
+use App\Http\Controllers\Student\DashboardController;
+use App\Http\Controllers\Student\SubjectController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', 'role:student'])
+    ->prefix('student')
+    ->name('student.')
+    ->group(function () {
+
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
+        Route::view('/attendance', 'student.attendance')->name('attendance.index');
+        Route::view('/grades', 'student.grades')->name('grades.index');
+        Route::view('/schedule', 'student.schedule')->name('schedule.index');
+        Route::view('/notices', 'student.notices')->name('notices.index');
+        Route::view('/settings', 'student.settings')->name('settings');
+    });

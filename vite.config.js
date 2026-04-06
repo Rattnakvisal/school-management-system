@@ -1,0 +1,30 @@
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+                'resources/js/chat-bot.js',
+                'resources/js/admin/classes.js',
+                'resources/js/admin/students.js',
+                'resources/js/admin/teacher.js',
+                'resources/js/admin/settings.js',
+                'resources/js/admin/contact.js',
+                'resources/js/admin/subject.js',
+                'resources/js/admin/time-studies.js',
+                'resources/js/Teacher/Attendence.js',
+            ],
+            refresh: true,
+        }),
+        tailwindcss(),
+    ],
+    server: {
+        watch: {
+            ignored: ['**/storage/framework/views/**'],
+        },
+    },
+});

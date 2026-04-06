@@ -1,0 +1,71 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: school_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - vendor_data:/var/www/html/vendor
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:${APP_PORT:-8000}
+      DB_CONNECTION: mysql
+      DB_HOST: host.docker.internal
+      DB_PORT: 3308
+      DB_DATABASE: school_management_system
+      DB_USERNAME: root
+      DB_PASSWORD: Wq_76wZtR2aPRmq
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: school_web
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: school_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: school_management_system
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  vite:
+    image: node:20-alpine
+    container_name: school_vite
+    working_dir: /var/www/html
+    ports:
+      - "${VITE_PORT:-5173}:5173"
+    volumes:
+      - ./:/var/www/html
+      - node_modules_data:/var/www/html/node_modules
+    command: sh -lc "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    profiles:
+      - frontend
+
+volumes:
+  db_data:
+  vendor_data:
+  node_modules_data:

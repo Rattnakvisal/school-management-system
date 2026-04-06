@@ -1,0 +1,378 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Exports\AdminUserReportExport;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Support\Reports\AdminUserReportFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
+use Maatwebsite\Excel\Facades\Excel;
+
+class TeacherController extends Controller
+{
+    public function index(Request $request)
+    {
+        $filters = $this->teacherFilters($request);
+        $teachers = $this->filteredTeacherQuery($filters)
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $search = $filters['search'];
+        $status = $filters['status'];
+        $hasStatusColumn = $filters['hasStatusColumn'];
+        $hasPhoneColumn = $filters['hasPhoneColumn'];
+
+        $baseStatsQuery = User::query()->where('role', 'teacher');
+        $stats = [
+            'total' => (clone $baseStatsQuery)->count(),
+            'active' => $hasStatusColumn ? (clone $baseStatsQuery)->where('is_active', true)->count() : (clone $baseStatsQuery)->count(),
+            'inactive' => $hasStatusColumn ? (clone $baseStatsQuery)->where('is_active', false)->count() : 0,
+        ];
+
+        return view('admin.teachers', [
+            'teachers' => $teachers,
+            'search' => $search,
+            'status' => in_array($status, ['all', 'active', 'inactive'], true) ? $status : 'all',
+            'stats' => $stats,
+            'hasStatusColumn' => $hasStatusColumn,
+            'hasPhoneColumn' => $hasPhoneColumn,
+        ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $report = $this->buildTeacherReportPayload($request);
+
+        return Pdf::loadView('admin.reports.users-pdf', [
+            ...$report,
+            'generatedAt' => now()->format('F j, Y g:i A'),
+        ])
+            ->setPaper('a4', count($report['headings']) > 6 ? 'landscape' : 'portrait')
+            ->download('teachers-report-' . now()->format('Ymd-His') . '.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $report = $this->buildTeacherReportPayload($request);
+
+        return Excel::download(
+            new AdminUserReportExport(
+                $report['title'],
+                $report['subtitle'],
+                $report['sheet_name'],
+                $report['accent'],
+                $report['headings'],
+                $report['rows'],
+                $report['cards'],
+                $report['filters'],
+            ),
+            'teachers-report-' . now()->format('Ymd-His') . '.xlsx'
+        );
+    }
+
+    public function store(Request $request)
+    {
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'confirmed', Password::min(8)],
+            'is_active' => ['nullable', 'boolean'],
+        ];
+
+        if ($this->hasPhoneColumn()) {
+            $rules['phone_number'] = ['nullable', 'string', 'max:30'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $avatarResult = $this->resolveAvatarUpload($request);
+
+        $payload = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role' => 'teacher',
+            'avatar' => $avatarResult['path'],
+            'provider' => null,
+            'google_id' => null,
+        ];
+
+        if ($this->hasPhoneColumn()) {
+            $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
+
+        if ($this->hasStatusColumn()) {
+            $payload['is_active'] = $request->boolean('is_active', true);
+        }
+
+        $teacher = new User($payload);
+        $teacher->save();
+
+        $redirect = redirect()
+            ->route('admin.teachers.index')
+            ->with('success', 'Teacher account created successfully.');
+
+        if ($avatarResult['warning']) {
+            $redirect->with('warning', $avatarResult['warning']);
+        }
+
+        return $redirect;
+    }
+
+    public function update(Request $request, User $teacher)
+    {
+        $teacher = $this->teacherOrFail($teacher);
+
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $teacher->id],
+            'password' => ['nullable', 'confirmed', Password::min(8)],
+            'is_active' => ['nullable', 'boolean'],
+        ];
+
+        if ($this->hasPhoneColumn()) {
+            $rules['phone_number'] = ['nullable', 'string', 'max:30'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $avatarResult = $this->resolveAvatarUpload($request, $teacher);
+
+        $payload = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ];
+
+        if ($this->hasPhoneColumn()) {
+            $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
+
+        if ($avatarResult['path'] !== $teacher->avatar) {
+            $payload['avatar'] = $avatarResult['path'];
+        }
+
+        if ($request->filled('password')) {
+            $payload['password'] = $validated['password'];
+        }
+
+        if ($this->hasStatusColumn()) {
+            $payload['is_active'] = $request->boolean('is_active');
+        }
+
+        $teacher->update($payload);
+
+        $redirect = redirect()
+            ->route('admin.teachers.index')
+            ->with('success', 'Teacher updated successfully.');
+
+        if ($avatarResult['warning']) {
+            $redirect->with('warning', $avatarResult['warning']);
+        }
+
+        return $redirect;
+    }
+
+    public function toggleStatus(User $teacher)
+    {
+        $teacher = $this->teacherOrFail($teacher);
+
+        if (!$this->hasStatusColumn()) {
+            return redirect()
+                ->route('admin.teachers.index')
+                ->with('error', 'Teacher status column is missing. Please run migrations.');
+        }
+
+        $teacher->is_active = !$teacher->is_active;
+        $teacher->save();
+
+        return redirect()
+            ->route('admin.teachers.index')
+            ->with('success', 'Teacher status updated to ' . ($teacher->is_active ? 'active' : 'inactive') . '.');
+    }
+
+    public function destroy(User $teacher)
+    {
+        $teacher = $this->teacherOrFail($teacher);
+
+        $this->deleteStoredAvatar($teacher->avatar);
+        $teacher->delete();
+
+        return redirect()
+            ->route('admin.teachers.index')
+            ->with('success', 'Teacher deleted successfully.');
+    }
+
+    private function teacherOrFail(User $teacher): User
+    {
+        abort_unless($teacher->role === 'teacher', 404);
+        return $teacher;
+    }
+
+    private function buildTeacherReportPayload(Request $request): array
+    {
+        $filters = $this->teacherFilters($request);
+        $teachers = $this->filteredTeacherQuery($filters)
+            ->latest()
+            ->get();
+
+        return app(AdminUserReportFactory::class)->makeTeachers($teachers, [
+            'hasPhoneColumn' => $filters['hasPhoneColumn'],
+            'hasStatusColumn' => $filters['hasStatusColumn'],
+            'filters' => [
+                'Search' => $filters['search'] !== '' ? $filters['search'] : 'Any teacher',
+                'Status' => $filters['hasStatusColumn'] ? ucfirst($filters['status']) : 'All',
+            ],
+        ]);
+    }
+
+    private function teacherFilters(Request $request): array
+    {
+        $status = (string) $request->query('status', 'all');
+
+        return [
+            'search' => trim((string) $request->query('q', '')),
+            'status' => in_array($status, ['all', 'active', 'inactive'], true) ? $status : 'all',
+            'hasStatusColumn' => $this->hasStatusColumn(),
+            'hasPhoneColumn' => $this->hasPhoneColumn(),
+        ];
+    }
+
+    private function filteredTeacherQuery(array $filters): Builder
+    {
+        $teacherQuery = User::query()
+            ->where('role', 'teacher')
+            ->when($filters['search'] !== '', function ($query) use ($filters) {
+                $search = $filters['search'];
+
+                $query->where(function ($inner) use ($search, $filters) {
+                    $inner->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+
+                    if ($filters['hasPhoneColumn']) {
+                        $inner->orWhere('phone_number', 'like', '%' . $search . '%');
+                    }
+                });
+            });
+
+        if ($filters['hasStatusColumn'] && in_array($filters['status'], ['active', 'inactive'], true)) {
+            $teacherQuery->where('is_active', $filters['status'] === 'active');
+        }
+
+        return $teacherQuery;
+    }
+
+    private function hasStatusColumn(): bool
+    {
+        return Schema::hasColumn('users', 'is_active');
+    }
+
+    private function hasPhoneColumn(): bool
+    {
+        return Schema::hasColumn('users', 'phone_number');
+    }
+
+    private function uploadAvatarImage(Request $request, ?User $teacher = null): ?string
+    {
+        if (!$request->hasFile('avatar_image')) {
+            return $teacher?->avatar;
+        }
+
+        $path = $request->file('avatar_image')->store('avatars/teachers', 'public');
+
+        if ($teacher) {
+            $this->deleteStoredAvatar($teacher->avatar);
+        }
+
+        return $path;
+    }
+
+    private function deleteStoredAvatar(?string $avatar): void
+    {
+        if (!$this->isLocalStorageAvatar($avatar)) {
+            return;
+        }
+
+        $path = $this->normalizePublicPath($avatar);
+        if ($path !== '' && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    private function isLocalStorageAvatar(?string $avatar): bool
+    {
+        if (!$avatar) {
+            return false;
+        }
+
+        return !Str::startsWith($avatar, ['http://', 'https://', '//', 'data:image/']);
+    }
+
+    private function normalizePublicPath(string $path): string
+    {
+        $normalized = ltrim($path, '/');
+
+        if (Str::startsWith($normalized, 'storage/')) {
+            return Str::after($normalized, 'storage/');
+        }
+
+        if (Str::startsWith($normalized, 'public/')) {
+            return Str::after($normalized, 'public/');
+        }
+
+        return $normalized;
+    }
+
+    private function resolveAvatarUpload(Request $request, ?User $teacher = null): array
+    {
+        $file = $request->file('avatar_image');
+        $current = $teacher?->avatar;
+
+        if (!$file) {
+            return ['path' => $current, 'warning' => null];
+        }
+
+        if (!$file->isValid()) {
+            return [
+                'path' => $current,
+                'warning' => $teacher
+                    ? 'Avatar upload failed: ' . $this->uploadErrorMessage($file->getError()) . ' Teacher was updated without changing avatar.'
+                    : 'Avatar upload failed: ' . $this->uploadErrorMessage($file->getError()) . ' Teacher was created without avatar.',
+            ];
+        }
+
+        $request->validate([
+            'avatar_image' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB max
+        ]);
+
+        return [
+            'path' => $this->uploadAvatarImage($request, $teacher),
+            'warning' => null,
+        ];
+    }
+
+    private function uploadErrorMessage(int $errorCode): string
+    {
+        return match ($errorCode) {
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE =>
+            'Image is too large for current server upload limit (5MB max).',
+            UPLOAD_ERR_PARTIAL =>
+            'Upload was interrupted. Please try again.',
+            UPLOAD_ERR_NO_TMP_DIR =>
+            'Server temporary folder is missing.',
+            UPLOAD_ERR_CANT_WRITE =>
+            'Server failed to write uploaded file.',
+            UPLOAD_ERR_EXTENSION =>
+            'A PHP extension blocked the upload.',
+            default =>
+            'Unknown upload error.',
+        };
+    }
+}
