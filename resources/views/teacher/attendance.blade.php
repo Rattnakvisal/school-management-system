@@ -91,6 +91,9 @@
                         @if (($subjectId ?? '') !== '')
                             <input type="hidden" name="subject_id" value="{{ $subjectId }}">
                         @endif
+                        @if (($selectedPeriod ?? '') !== '')
+                            <input type="hidden" name="period" value="{{ $selectedPeriod }}">
+                        @endif
                         <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                             <section class="space-y-2">
                                 <h4 class="text-xl font-bold text-slate-900">Date</h4>
@@ -217,9 +220,16 @@
                                             @php
                                                 $classOption = $periodCard['class'];
                                                 $periodSlots = collect($periodCard['period_slots'] ?? []);
-                                                $isActiveClass = ($classId ?? '') === (string) $classOption->id;
+                                                $periodSubjectId = (int) ($periodSlots->first()?->subject_id ?? 0);
+                                                $isActiveClass =
+                                                    ($classId ?? '') === (string) $classOption->id &&
+                                                    (($selectedPeriod ?? '') === '' ||
+                                                        ($selectedPeriod ?? '') === $periodKey);
                                                 $classStatus =
-                                                    $classAttendanceStatus[(int) ($classOption->id ?? 0)] ?? null;
+                                                    $periodAttendanceStatus[(int) ($classOption->id ?? 0)][
+                                                        $periodKey
+                                                    ] ??
+                                                    ($classAttendanceStatus[(int) ($classOption->id ?? 0)] ?? null);
                                                 $attendanceState = (string) ($classStatus['state'] ?? 'pending');
                                                 $checkedCount = (int) ($classStatus['checked_count'] ?? 0);
                                                 $studentsCount = (int) ($classStatus['students_count'] ?? 0);
@@ -264,7 +274,18 @@
                                                     ->values();
                                                 $slotPreview = $periodSlots->take(3);
                                             @endphp
-                                            <a href="{{ route('teacher.attendance.index', ['class_id' => $classOption->id, 'date' => $selectedDate]) }}"
+                                            <a href="{{ route(
+                                                'teacher.attendance.index',
+                                                array_filter(
+                                                    [
+                                                        'class_id' => $classOption->id,
+                                                        'subject_id' => $periodSubjectId > 0 ? $periodSubjectId : null,
+                                                        'period' => $periodKey,
+                                                        'date' => $selectedDate,
+                                                    ],
+                                                    fn($value) => !is_null($value) && $value !== '',
+                                                ),
+                                            ) }}"
                                                 class="block h-full w-full rounded-2xl border px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-md {{ $cardColorClass }}{{ $activeRingClass }}">
                                                 <div class="flex h-full min-h-[18rem] w-full flex-col">
                                                     <div class="flex items-start justify-between gap-2">
@@ -409,6 +430,11 @@
                             <span class="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-sky-700">
                                 Subject: {{ $selectedSubject?->name ?? 'Not selected' }}
                             </span>
+                            @if (($selectedPeriod ?? '') !== '')
+                                <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-700">
+                                    Period: {{ $periodLabels[$selectedPeriod] ?? ucfirst($selectedPeriod) }}
+                                </span>
+                            @endif
                         </div>
 
                         @if (collect($subjectsForSelectedClass ?? [])->isNotEmpty())
@@ -430,6 +456,7 @@
                                                 [
                                                     'class_id' => $classId,
                                                     'subject_id' => $subjectOption->id,
+                                                    'period' => ($selectedPeriod ?? '') !== '' ? $selectedPeriod : null,
                                                     'date' => $selectedDate,
                                                     'q' => $search ?: null,
                                                     'status' => ($statusFilter ?? 'all') !== 'all' ? $statusFilter : null,
@@ -463,6 +490,7 @@
                         <input type="hidden" name="school_class_id" value="{{ $classId }}">
                         <input type="hidden" name="subject_id" value="{{ $subjectId }}">
                         <input type="hidden" name="attendance_date" value="{{ $selectedDate }}">
+                        <input type="hidden" name="attendance_period" value="{{ $selectedPeriod ?? '' }}">
 
                         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                             @if ($isSelectedSubjectSaved)

@@ -29,7 +29,9 @@ class AttendanceController extends Controller
         $hasSubjectDayColumn = Schema::hasColumn('subject_study_times', 'day_of_week');
         $hasSubjectClassColumn = Schema::hasColumn('subject_study_times', 'school_class_id');
         $hasSubjectTeacherColumn = Schema::hasColumn('subject_study_times', 'teacher_id');
+        $hasAttendancePeriodColumn = Schema::hasColumn('student_attendances', 'attendance_period');
         $useSlotAssignments = $hasSubjectClassColumn && $hasSubjectTeacherColumn;
+        $allowedPeriods = ['morning', 'afternoon', 'evening', 'night', 'custom'];
 
         if ($useSlotAssignments) {
             $teacherClassIds = SubjectStudyTime::query()
@@ -199,6 +201,8 @@ class AttendanceController extends Controller
             $selectedDate = now()->toDateString();
         }
         $selectedDayKey = strtolower(Carbon::parse($selectedDate)->format('l'));
+        $selectedPeriodRaw = strtolower(trim((string) $request->query('period', (string) $request->old('attendance_period', ''))));
+        $selectedPeriod = in_array($selectedPeriodRaw, $allowedPeriods, true) ? $selectedPeriodRaw : '';
         $dayMatchesSelectedDate = function ($dayOfWeek) use ($selectedDayKey): bool {
             $slotDay = strtolower(trim((string) $dayOfWeek));
 
@@ -267,6 +271,22 @@ class AttendanceController extends Controller
                     ->orderBy('name')
                     ->get(['id', 'name', 'code']);
             }
+
+            if ($selectedPeriod !== '') {
+                $periodSubjectIds = collect($selectedClass->getRelation('teacherStudySchedules') ?? $selectedClass->getRelation('studySchedules') ?? [])
+                    ->filter(fn($slot) => strtolower((string) ($slot->period ?? 'custom')) === $selectedPeriod)
+                    ->pluck('subject_id')
+                    ->map(fn($id) => (int) $id)
+                    ->filter(fn($id) => $id > 0)
+                    ->unique()
+                    ->values();
+
+                if ($periodSubjectIds->isNotEmpty()) {
+                    $subjectsForSelectedClass = $subjectsForSelectedClass
+                        ->filter(fn($subject) => $periodSubjectIds->contains((int) ($subject->id ?? 0)))
+                        ->values();
+                }
+            }
         }
 
         $subjectIdsForSelectedClass = $subjectsForSelectedClass
@@ -287,9 +307,24 @@ class AttendanceController extends Controller
             ? $subjectsForSelectedClass->firstWhere('id', $selectedSubjectId)
             : null;
 
+        if ($selectedSubjectId !== null && $selectedPeriod === '') {
+            $inferredPeriod = $this->resolveAttendancePeriod(
+                $request,
+                $teacherId,
+                (int) ($selectedClassId ?? 0),
+                $selectedSubjectId,
+                $selectedDate
+            );
+
+            if (is_string($inferredPeriod) && $inferredPeriod !== '') {
+                $selectedPeriod = $inferredPeriod;
+            }
+        }
+
         $hasAttendanceTable = Schema::hasTable('student_attendances');
         $attendanceCheckedByClass = collect();
         $classAttendanceStatus = [];
+        $periodAttendanceStatus = [];
         $subjectAttendanceStatus = [];
         $selectedSubjectAttendanceStatus = [
             'state' => 'pending',
@@ -323,6 +358,76 @@ class AttendanceController extends Controller
             ];
         }
 
+        if ($hasAttendanceTable && $classIds->isNotEmpty() && Schema::hasColumn('student_attendances', 'subject_id')) {
+            $attendancePeriodSelect = $hasAttendancePeriodColumn
+                ? 'COALESCE(attendance_period, "") as attendance_period_key'
+                : '"" as attendance_period_key';
+
+            $attendanceCheckedBySubjectPeriod = StudentAttendance::query()
+                ->where('teacher_id', $teacherId)
+                ->whereDate('attendance_date', $selectedDate)
+                ->whereIn('school_class_id', $classIds->all())
+                ->select(
+                    'school_class_id',
+                    'subject_id',
+                    DB::raw($attendancePeriodSelect),
+                    DB::raw('COUNT(DISTINCT student_id) as checked_count')
+                )
+                ->groupBy('school_class_id', 'subject_id')
+                ->when($hasAttendancePeriodColumn, fn($query) => $query->groupBy('attendance_period'))
+                ->get()
+                ->groupBy(fn($row) => (int) $row->school_class_id)
+                ->map(function ($classRows) {
+                    return $classRows
+                        ->groupBy(fn($row) => (int) $row->subject_id)
+                        ->map(function ($subjectRows) {
+                            return $subjectRows->mapWithKeys(function ($row) {
+                                return [(string) ($row->attendance_period_key ?? '') => (int) $row->checked_count];
+                            });
+                        });
+                });
+
+            foreach ($classes as $classOption) {
+                $classKey = (int) ($classOption->id ?? 0);
+                $studentsCount = (int) ($classOption->students_count ?? 0);
+                $teacherSchedules = collect($classOption->teacherStudySchedules ?? ($classOption->studySchedules ?? []));
+                $periodGroups = $teacherSchedules->groupBy(fn($slot) => strtolower((string) ($slot->period ?? 'custom')));
+
+                foreach ($periodGroups as $periodKey => $periodSlots) {
+                    $subjectIds = collect($periodSlots)
+                        ->pluck('subject_id')
+                        ->map(fn($id) => (int) $id)
+                        ->filter(fn($id) => $id > 0)
+                        ->unique()
+                        ->values();
+
+                    $subjectCounts = $subjectIds->map(function (int $subjectId) use (
+                        $attendanceCheckedBySubjectPeriod,
+                        $classKey,
+                        $periodKey,
+                        $hasAttendancePeriodColumn
+                    ): int {
+                        $countsByPeriod = $attendanceCheckedBySubjectPeriod
+                            ->get($classKey, collect())
+                            ->get($subjectId, collect());
+
+                        return (int) $countsByPeriod->get($hasAttendancePeriodColumn ? $periodKey : '', 0);
+                    });
+
+                    $checkedCount = $subjectCounts->isEmpty() ? 0 : (int) $subjectCounts->min();
+                    $isSaved = $studentsCount > 0
+                        && $subjectIds->isNotEmpty()
+                        && $subjectCounts->every(fn(int $count): bool => $count >= $studentsCount);
+
+                    $periodAttendanceStatus[$classKey][$periodKey] = [
+                        'state' => $studentsCount === 0 ? 'empty' : ($isSaved ? 'saved' : 'pending'),
+                        'students_count' => $studentsCount,
+                        'checked_count' => min($checkedCount, $studentsCount),
+                    ];
+                }
+            }
+        }
+
         $students = collect();
         $attendanceByStudent = collect();
         $lawRequestsByStudent = collect();
@@ -347,6 +452,10 @@ class AttendanceController extends Controller
 
                 if ($selectedSubjectId !== null && Schema::hasColumn('student_attendances', 'subject_id')) {
                     $attendanceQuery->where('subject_id', $selectedSubjectId);
+                }
+
+                if ($hasAttendancePeriodColumn && $selectedPeriod !== '') {
+                    $attendanceQuery->where('attendance_period', $selectedPeriod);
                 }
 
                 $attendanceByStudent = $attendanceQuery
@@ -406,6 +515,7 @@ class AttendanceController extends Controller
                     ->where('school_class_id', $selectedClassId)
                     ->whereDate('attendance_date', $selectedDate)
                     ->whereIn('subject_id', $subjectIdsForSelectedClass->all())
+                    ->when($hasAttendancePeriodColumn && $selectedPeriod !== '', fn($query) => $query->where('attendance_period', $selectedPeriod))
                     ->select('subject_id', DB::raw('COUNT(DISTINCT student_id) as checked_count'))
                     ->groupBy('subject_id')
                     ->get()
@@ -497,8 +607,10 @@ class AttendanceController extends Controller
             'attendanceAlerts' => $attendanceAlerts,
             'hasAttendanceTable' => $hasAttendanceTable,
             'classAttendanceStatus' => $classAttendanceStatus,
+            'periodAttendanceStatus' => $periodAttendanceStatus,
             'hasClassDayColumn' => $hasClassDayColumn,
             'selectedDayKey' => $selectedDayKey,
+            'selectedPeriod' => $selectedPeriod,
             'selectedDayLabel' => [
                 'all' => 'All Days',
                 'monday' => 'Monday',
@@ -547,6 +659,7 @@ class AttendanceController extends Controller
         $subjectId = $resolved['subject_id'];
         $selectedSubject = $resolved['selected_subject'];
         $attendanceDate = $resolved['attendance_date'];
+        $attendancePeriod = $resolved['attendance_period'] ?? null;
         $attendanceRows = $resolved['attendance_rows'];
         $studentIds = $resolved['student_ids'];
 
@@ -563,6 +676,10 @@ class AttendanceController extends Controller
                 Schema::hasColumn('student_attendances', 'subject_id') && $subjectId > 0,
                 fn($query) => $query->where('subject_id', $subjectId)
             )
+            ->when(
+                Schema::hasColumn('student_attendances', 'attendance_period') && filled($attendancePeriod),
+                fn($query) => $query->where('attendance_period', $attendancePeriod)
+            )
             ->distinct('student_id')
             ->count('student_id');
 
@@ -572,6 +689,7 @@ class AttendanceController extends Controller
                     'class_id' => $schoolClassId,
                     'subject_id' => $subjectId,
                     'date' => $attendanceDate,
+                    'period' => $attendancePeriod,
                 ])
                 ->with('warning', 'Attendance already saved successfully. Check status cannot be changed.');
         }
@@ -582,6 +700,7 @@ class AttendanceController extends Controller
             $subjectId,
             $selectedSubject,
             $attendanceDate,
+            $attendancePeriod,
             $attendanceRows,
             $studentIds
         );
@@ -598,6 +717,7 @@ class AttendanceController extends Controller
                 'class_id' => $schoolClassId,
                 'subject_id' => $subjectId,
                 'date' => $attendanceDate,
+                'period' => $attendancePeriod,
             ])
             ->with(
                 'success',
@@ -639,12 +759,13 @@ class AttendanceController extends Controller
                 $resolved['subject_id'],
                 $resolved['selected_subject'],
                 $resolved['attendance_date'],
+                $resolved['attendance_period'] ?? null,
                 $resolved['attendance_rows'],
                 $resolved['student_ids']
             );
         } elseif (Schema::hasTable('student_attendances') && $attendanceDate !== null) {
             StudentAttendance::query()->updateOrCreate(
-                $this->attendanceMatchAttributes((int) ($lawRequest->student_id ?? 0), $attendanceDate, $lawRequestSubjectId),
+                $this->attendanceMatchAttributes((int) ($lawRequest->student_id ?? 0), $attendanceDate, $lawRequestSubjectId, null),
                 $this->attendancePayload(
                     $teacherId > 0 ? $teacherId : null,
                     $schoolClassId > 0 ? $schoolClassId : null,
@@ -713,6 +834,7 @@ class AttendanceController extends Controller
                 $resolved['subject_id'],
                 $resolved['selected_subject'],
                 $resolved['attendance_date'],
+                $resolved['attendance_period'] ?? null,
                 $resolved['attendance_rows'],
                 $resolved['student_ids'],
                 [
@@ -724,7 +846,7 @@ class AttendanceController extends Controller
             );
         } elseif (Schema::hasTable('student_attendances') && $attendanceDate !== null) {
             StudentAttendance::query()->updateOrCreate(
-                $this->attendanceMatchAttributes((int) ($lawRequest->student_id ?? 0), $attendanceDate, $lawRequestSubjectId),
+                $this->attendanceMatchAttributes((int) ($lawRequest->student_id ?? 0), $attendanceDate, $lawRequestSubjectId, null),
                 $this->attendancePayload(
                     $teacherId > 0 ? $teacherId : null,
                     $schoolClassId > 0 ? $schoolClassId : null,
@@ -953,6 +1075,7 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'school_class_id' => ['required', 'integer', Rule::in($classIds)],
             'attendance_date' => ['required', 'date'],
+            'attendance_period' => ['nullable', 'string', Rule::in(['morning', 'afternoon', 'evening', 'night', 'custom'])],
             'attendance' => ['required', 'array'],
             'attendance.*.status' => ['required', 'string', Rule::in($statuses)],
             'attendance.*.remark' => ['nullable', 'string', 'max:255'],
@@ -980,6 +1103,23 @@ class AttendanceController extends Controller
         ]);
 
         $subjectId = (int) ($subjectValidated['subject_id'] ?? 0);
+        $attendanceDate = (string) $validated['attendance_date'];
+        $attendancePeriod = $this->resolveAttendancePeriod(
+            $request,
+            $teacherId,
+            $schoolClassId,
+            $subjectId,
+            $attendanceDate
+        );
+
+        if ($attendancePeriod === false) {
+            return [
+                'ok' => false,
+                'flash_type' => 'error',
+                'message' => 'Selected subject is not assigned to this period.',
+            ];
+        }
+
         $studentIds = User::query()
             ->where('role', 'student')
             ->where('school_class_id', $schoolClassId)
@@ -993,10 +1133,56 @@ class AttendanceController extends Controller
             'school_class_id' => $schoolClassId,
             'subject_id' => $subjectId,
             'selected_subject' => $subjectOptions->firstWhere('id', $subjectId),
-            'attendance_date' => (string) $validated['attendance_date'],
+            'attendance_date' => $attendanceDate,
+            'attendance_period' => $attendancePeriod,
             'attendance_rows' => $validated['attendance'] ?? [],
             'student_ids' => $studentIds,
         ];
+    }
+
+    private function resolveAttendancePeriod(Request $request, int $teacherId, int $schoolClassId, int $subjectId, string $attendanceDate): string|false|null
+    {
+        $period = strtolower(trim((string) $request->input('attendance_period', '')));
+        $allowedPeriods = ['morning', 'afternoon', 'evening', 'night', 'custom'];
+        $selectedDayKey = strtolower(Carbon::parse($attendanceDate)->format('l'));
+
+        if ($period !== '' && !in_array($period, $allowedPeriods, true)) {
+            return false;
+        }
+
+        if (
+            !Schema::hasTable('subject_study_times')
+            || !Schema::hasColumn('subject_study_times', 'school_class_id')
+            || !Schema::hasColumn('subject_study_times', 'teacher_id')
+        ) {
+            return $period !== '' ? $period : null;
+        }
+
+        $query = SubjectStudyTime::query()
+            ->where('teacher_id', $teacherId)
+            ->where('school_class_id', $schoolClassId)
+            ->where('subject_id', $subjectId);
+
+        if (Schema::hasColumn('subject_study_times', 'day_of_week')) {
+            $query->where(function ($inner) use ($selectedDayKey) {
+                $inner->whereNull('day_of_week')
+                    ->orWhere('day_of_week', '')
+                    ->orWhere('day_of_week', 'all')
+                    ->orWhere('day_of_week', $selectedDayKey);
+            });
+        }
+
+        if ($period !== '') {
+            return (clone $query)->whereRaw('LOWER(period) = ?', [$period])->exists() ? $period : false;
+        }
+
+        $resolvedPeriod = (clone $query)
+            ->orderBy('sort_order')
+            ->orderBy('start_time')
+            ->value('period');
+        $resolvedPeriod = strtolower(trim((string) $resolvedPeriod));
+
+        return in_array($resolvedPeriod, $allowedPeriods, true) ? $resolvedPeriod : null;
     }
 
     private function approvedLawRequestsByStudent(
@@ -1048,6 +1234,7 @@ class AttendanceController extends Controller
         ?int $subjectId,
         $selectedSubject,
         string $attendanceDate,
+        ?string $attendancePeriod,
         array $attendanceRows,
         array $studentIds,
         array $forcedRows = []
@@ -1069,6 +1256,7 @@ class AttendanceController extends Controller
             $studentIds,
             $attendanceRows,
             $attendanceDate,
+            $attendancePeriod,
             $schoolClassId,
             $subjectId,
             $teacherId,
@@ -1123,7 +1311,7 @@ class AttendanceController extends Controller
                 }
 
                 StudentAttendance::query()->updateOrCreate(
-                    $this->attendanceMatchAttributes($studentId, $attendanceDate, $subjectId),
+                    $this->attendanceMatchAttributes($studentId, $attendanceDate, $subjectId, $attendancePeriod),
                     $this->attendancePayload($teacherId, $schoolClassId, $subjectId, $status, $remark, $now)
                 );
 
@@ -1192,7 +1380,7 @@ class AttendanceController extends Controller
             ->get(['id', 'name', 'code']);
     }
 
-    private function attendanceMatchAttributes(int $studentId, string $attendanceDate, ?int $subjectId = null): array
+    private function attendanceMatchAttributes(int $studentId, string $attendanceDate, ?int $subjectId = null, ?string $attendancePeriod = null): array
     {
         $attributes = [
             'student_id' => $studentId,
@@ -1201,6 +1389,11 @@ class AttendanceController extends Controller
 
         if (Schema::hasColumn('student_attendances', 'subject_id')) {
             $attributes['subject_id'] = $subjectId > 0 ? $subjectId : null;
+        }
+
+        if (Schema::hasColumn('student_attendances', 'attendance_period')) {
+            $period = strtolower(trim((string) $attendancePeriod));
+            $attributes['attendance_period'] = $period !== '' ? $period : null;
         }
 
         return $attributes;

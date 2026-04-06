@@ -15,6 +15,7 @@ class StudentAttendance extends Model
         'teacher_id',
         'school_class_id',
         'subject_id',
+        'attendance_period',
         'attendance_date',
         'status',
         'remark',
@@ -28,6 +29,7 @@ class StudentAttendance extends Model
             'teacher_id' => 'integer',
             'school_class_id' => 'integer',
             'subject_id' => 'integer',
+            'attendance_period' => 'string',
             'attendance_date' => 'date',
             'checked_at' => 'datetime',
         ];
