@@ -21,38 +21,6 @@
             </x-slot:stats>
         </x-admin.page-header>
 
-        @php
-            $dashboardNow = now();
-            $timezoneLabel = (string) config('app.timezone', 'UTC');
-            $visibleStudentCount = (int) $studies->count();
-            $visibleScheduleCount = $studies->getCollection()->sum(function ($item) use ($studyTimesByStudent) {
-                return count($studyTimesByStudent[(int) ($item->student_id ?? 0)] ?? []);
-            });
-        @endphp
-        <section class="study-reveal grid gap-3 sm:grid-cols-2 xl:grid-cols-4" style="--sd: 1;">
-            <article class="rounded-2xl border border-sky-100 bg-sky-50/80 p-4 shadow-sm ring-1 ring-sky-100">
-                <div class="text-[11px] font-bold uppercase tracking-wide text-sky-700">Schedule Date</div>
-                <div class="mt-1 text-lg font-black text-sky-900">{{ $dashboardNow->format('l') }}</div>
-                <div class="text-sm font-semibold text-sky-700">{{ $dashboardNow->format('M d, Y') }}</div>
-            </article>
-            <article class="rounded-2xl border border-indigo-100 bg-indigo-50/80 p-4 shadow-sm ring-1 ring-indigo-100">
-                <div class="text-[11px] font-bold uppercase tracking-wide text-indigo-700">Schedule Time</div>
-                <div id="live_schedule_time" class="mt-1 text-lg font-black text-indigo-900">
-                    {{ $dashboardNow->format('h:i:s A') }}</div>
-                <div class="text-sm font-semibold text-indigo-700">Server Live Clock</div>
-            </article>
-            <article class="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 shadow-sm ring-1 ring-emerald-100">
-                <div class="text-[11px] font-bold uppercase tracking-wide text-emerald-700">Students Shown</div>
-                <div class="mt-1 text-lg font-black text-emerald-900">{{ $visibleStudentCount }}</div>
-                <div class="text-sm font-semibold text-emerald-700">Current page result count</div>
-            </article>
-            <article class="rounded-2xl border border-amber-100 bg-amber-50/80 p-4 shadow-sm ring-1 ring-amber-100">
-                <div class="text-[11px] font-bold uppercase tracking-wide text-amber-700">Study Slots</div>
-                <div class="mt-1 text-lg font-black text-amber-900">{{ $visibleScheduleCount }}</div>
-                <div class="text-sm font-semibold text-amber-700">{{ $timezoneLabel }}</div>
-            </article>
-        </section>
-
         <section
             class="study-reveal study-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
             style="--sd: 2;">
@@ -205,14 +173,14 @@
                                     <thead
                                         class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                         <tr>
-                                            <th class="w-[220px] px-3 py-3 font-semibold">Student</th>
-                                            <th class="w-[180px] px-3 py-3 font-semibold">Class</th>
-                                            <th class="w-[220px] px-3 py-3 font-semibold">Selected Time</th>
-                                            <th class="w-[220px] px-3 py-3 font-semibold">Major Subject</th>
-                                            <th class="w-[180px] px-3 py-3 font-semibold">Subject Time</th>
-                                            <th class="w-[220px] px-3 py-3 font-semibold">Schedule</th>
-                                            <th class="w-[180px] px-3 py-3 font-semibold">Teacher</th>
-                                            <th class="w-[180px] px-3 py-3 font-semibold">Created</th>
+                                            <th class="w-[260px] whitespace-nowrap px-3 py-3 font-semibold">Student</th>
+                                            <th class="w-[180px] whitespace-nowrap px-3 py-3 font-semibold">Class</th>
+                                            <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Selected Time</th>
+                                            <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Major Subject</th>
+                                            <th class="w-[180px] whitespace-nowrap px-3 py-3 font-semibold">Subject Time</th>
+                                            <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Schedule</th>
+                                            <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Teacher</th>
+                                            <th class="w-[180px] whitespace-nowrap px-3 py-3 font-semibold">Created</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -351,23 +319,39 @@
                                                         ],
                                                     ]);
                                                 }
-                                            @endphp
+                                                @endphp
                                             <tr class="align-top transition hover:bg-slate-50/80 odd:bg-slate-50/30">
-                                                <td class="px-3 py-3">
-                                                    <div class="font-semibold text-slate-800">{{ $row->student_name }}
-                                                    </div>
-                                                    <div class="text-xs text-slate-500">{{ $row->student_email ?: '-' }}
-                                                    </div>
-                                                    <div class="text-xs text-slate-400">ID
-                                                        #{{ str_pad((string) $row->student_id, 7, '0', STR_PAD_LEFT) }}
+                                                <td class="whitespace-nowrap px-3 py-3">
+                                                    @php
+                                                        $studentProfile = new \App\Models\User([
+                                                            'name' => (string) ($row->student_name ?? 'Student'),
+                                                            'email' => (string) ($row->student_email ?? ''),
+                                                            'avatar' => (string) ($row->student_avatar ?? ''),
+                                                        ]);
+                                                    @endphp
+                                                    <div class="flex items-start gap-3">
+                                                        <img src="{{ $studentProfile->avatar_url }}"
+                                                            alt="{{ $row->student_name ?: 'Student' }}"
+                                                            class="h-11 w-11 rounded-2xl border border-slate-200 bg-slate-50 object-cover shadow-sm">
+                                                        <div class="min-w-0">
+                                                            <div class="truncate font-semibold text-slate-800">
+                                                                {{ $row->student_name }}</div>
+                                                            <div class="truncate text-xs text-slate-500">
+                                                                {{ $row->student_email ?: '-' }}</div>
+                                                            <div
+                                                                class="mt-1 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+                                                                ID #{{ str_pad((string) $row->student_id, 7, '0', STR_PAD_LEFT) }}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                <td class="px-3 py-3 text-slate-600">
-                                                    <div class="font-medium text-slate-700">{{ $classLabel }}</div>
+                                                <td class="whitespace-nowrap px-3 py-3 text-slate-600">
+                                                    <div class="whitespace-nowrap font-medium text-slate-700">
+                                                        {{ $classLabel }}</div>
                                                     <div class="text-xs text-slate-400">
                                                         {{ $classRoom !== '' ? 'Room: ' . $classRoom : 'Room: -' }}</div>
                                                 </td>
-                                                <td class="px-3 py-3 text-slate-600">
+                                                <td class="whitespace-nowrap px-3 py-3 text-slate-600">
                                                     @if ($selectedStudyTimes->isNotEmpty())
                                                         @php
                                                             $firstSlot = $selectedStudyTimes->first();
@@ -486,7 +470,7 @@
                                                         <div class="text-slate-400">-</div>
                                                     @endif
                                                 </td>
-                                                <td class="px-3 py-3 text-slate-600">
+                                                <td class="whitespace-nowrap px-3 py-3 text-slate-600">
                                                     @if ($selectedMajorSubjects->isNotEmpty())
                                                         @php
                                                             $firstSubject = $selectedMajorSubjects->first();
@@ -524,7 +508,7 @@
                                                         <span class="text-slate-400">Unassigned</span>
                                                     @endif
                                                 </td>
-                                                <td class="px-3 py-3 text-slate-600">
+                                                <td class="whitespace-nowrap px-3 py-3 text-slate-600">
                                                     <div class="flex flex-wrap gap-1.5">
                                                         @if ($subjectDayLabel)
                                                             <span
@@ -553,7 +537,7 @@
                                                         <div class="mt-1 text-slate-400">-</div>
                                                     @endif
                                                 </td>
-                                                <td class="px-3 py-3">
+                                                <td class="whitespace-nowrap px-3 py-3">
                                                     <div class="flex flex-wrap items-center gap-1.5">
                                                         <span
                                                             class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $scheduleClass }}">
@@ -706,13 +690,31 @@
                                                         @endif
                                                     @endif
                                                 </td>
-                                                <td class="px-3 py-3 text-slate-600">
-                                                    <div class="font-medium text-slate-700">
-                                                        {{ $row->teacher_name ?: 'Unassigned' }}</div>
-                                                    <div class="text-xs text-slate-400">{{ $row->teacher_email ?: '-' }}
+                                                <td class="whitespace-nowrap px-3 py-3 text-slate-600">
+                                                    @php
+                                                        $teacherProfile = new \App\Models\User([
+                                                            'name' => (string) ($row->teacher_name ?? 'Unassigned'),
+                                                            'email' => (string) ($row->teacher_email ?? ''),
+                                                            'avatar' => (string) ($row->teacher_avatar ?? ''),
+                                                        ]);
+                                                    @endphp
+                                                    <div class="flex items-start gap-3">
+                                                        <img src="{{ $teacherProfile->avatar_url }}"
+                                                            alt="{{ $row->teacher_name ?: 'Teacher' }}"
+                                                            class="h-11 w-11 rounded-2xl border border-slate-200 bg-slate-50 object-cover shadow-sm">
+                                                        <div class="min-w-0">
+                                                            <div class="truncate font-semibold text-slate-700">
+                                                                {{ $row->teacher_name ?: 'Unassigned' }}</div>
+                                                            <div class="truncate text-xs text-slate-400">
+                                                                {{ $row->teacher_email ?: '-' }}</div>
+                                                            <div
+                                                                class="mt-1 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+                                                                Teacher Profile
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                <td class="px-3 py-3 text-slate-500">
+                                                <td class="whitespace-nowrap px-3 py-3 text-slate-500">
                                                     <div>
                                                         <div
                                                             class="text-[11px] font-bold uppercase tracking-wide text-slate-400">

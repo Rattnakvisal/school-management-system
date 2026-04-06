@@ -142,6 +142,7 @@ class StudentStudyController extends Controller
             'students.id as student_id',
             'students.name as student_name',
             'students.email as student_email',
+            'students.avatar as student_avatar',
             'students.created_at as student_created_at',
             'classes.name as class_name',
             'classes.section as class_section',
@@ -160,6 +161,7 @@ class StudentStudyController extends Controller
             DB::raw($subjectStudyDayExpression . ' as subject_study_day'),
             'teachers.name as teacher_name',
             'teachers.email as teacher_email',
+            'teachers.avatar as teacher_avatar',
             'teachers.created_at as teacher_created_at',
         ]);
 
