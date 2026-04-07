@@ -67,9 +67,9 @@
                             this.createOpen = false;
                         }
                     };
-
+            
                     update();
-
+            
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -132,84 +132,145 @@
                         @csrf
                         <input type="hidden" name="_form" value="create_class_time">
 
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-black text-slate-900">Class Study Time</h3>
-                        <span class="text-[11px] font-semibold text-slate-400">For all classes</span>
-                    </div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-black text-slate-900">Class Study Time</h3>
+                            <span class="text-[11px] font-semibold text-slate-400">For all classes</span>
+                        </div>
 
-                    <div>
-                        <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
-                            This creates the selected date/time for every class.
-                        </p>
-                    </div>
+                        <div>
+                            <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
+                                This creates the selected date/time for every class.
+                            </p>
+                        </div>
 
-                    @error('class_slots')
-                        <p class="text-xs font-semibold text-red-600">{{ $message }}</p>
-                    @enderror
+                        @error('class_slots')
+                            <p class="text-xs font-semibold text-red-600">{{ $message }}</p>
+                        @enderror
 
-                    <div id="class_slot_rows" class="space-y-3" data-next-index="{{ count($classSlotRows) }}">
-                        @foreach ($classSlotRows as $slotIndex => $slotRow)
-                            @php
-                                $rowDay = strtolower((string) ($slotRow['day_of_week'] ?? 'all'));
-                                $rowPeriod = strtolower((string) ($slotRow['period'] ?? 'morning'));
-                                $rowStart = (string) ($slotRow['start_time'] ?? '');
-                                $rowEnd = (string) ($slotRow['end_time'] ?? '');
-                            @endphp
+                        <div id="class_slot_rows" class="space-y-3" data-next-index="{{ count($classSlotRows) }}">
+                            @foreach ($classSlotRows as $slotIndex => $slotRow)
+                                @php
+                                    $rowDay = strtolower((string) ($slotRow['day_of_week'] ?? 'all'));
+                                    $rowPeriod = strtolower((string) ($slotRow['period'] ?? 'morning'));
+                                    $rowStart = (string) ($slotRow['start_time'] ?? '');
+                                    $rowEnd = (string) ($slotRow['end_time'] ?? '');
+                                @endphp
 
+                                <div class="js-class-slot-row rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3">
+                                    <div class="grid gap-3 sm:grid-cols-12">
+                                        <div class="sm:col-span-3">
+                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Day</label>
+                                            <select name="class_slots[{{ $slotIndex }}][day_of_week]"
+                                                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                @foreach ($dayOptions as $dayKey => $dayLabel)
+                                                    <option value="{{ $dayKey }}"
+                                                        {{ $rowDay === $dayKey ? 'selected' : '' }}>
+                                                        {{ $dayLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('class_slots.' . $slotIndex . '.day_of_week')
+                                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <div class="sm:col-span-3">
+                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Period</label>
+                                            <select name="class_slots[{{ $slotIndex }}][period]"
+                                                class="js-class-period-select w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                @foreach ($periodOptions as $periodKey => $periodLabel)
+                                                    <option value="{{ $periodKey }}"
+                                                        {{ $rowPeriod === $periodKey ? 'selected' : '' }}>
+                                                        {{ $periodLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('class_slots.' . $slotIndex . '.period')
+                                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <div class="sm:col-span-3">
+                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Start</label>
+                                            <input type="text" name="class_slots[{{ $slotIndex }}][start_time]"
+                                                value="{{ $rowStart }}" required placeholder="07:30 AM or 19:30"
+                                                class="js-class-time-input js-class-start-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
+                                            @error('class_slots.' . $slotIndex . '.start_time')
+                                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <div class="sm:col-span-3">
+                                            <label class="mb-1 block text-xs font-semibold text-slate-600">End</label>
+                                            <input type="text" name="class_slots[{{ $slotIndex }}][end_time]"
+                                                value="{{ $rowEnd }}" required placeholder="09:00 AM or 21:00"
+                                                class="js-class-time-input js-class-end-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                            <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
+                                            @error('class_slots.' . $slotIndex . '.end_time')
+                                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2 flex justify-end">
+                                        <button type="button"
+                                            class="js-remove-class-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <button id="add_class_slot_btn" type="button"
+                            class="w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100">
+                            + Add More Date Time
+                        </button>
+
+                        <template id="class_slot_row_template">
                             <div class="js-class-slot-row rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3">
                                 <div class="grid gap-3 sm:grid-cols-12">
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Day</label>
-                                        <select name="class_slots[{{ $slotIndex }}][day_of_week]"
+                                        <select name="class_slots[__INDEX__][day_of_week]"
                                             class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             @foreach ($dayOptions as $dayKey => $dayLabel)
                                                 <option value="{{ $dayKey }}"
-                                                    {{ $rowDay === $dayKey ? 'selected' : '' }}>
+                                                    {{ $dayKey === 'all' ? 'selected' : '' }}>
                                                     {{ $dayLabel }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('class_slots.' . $slotIndex . '.day_of_week')
-                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                        @enderror
                                     </div>
 
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Period</label>
-                                        <select name="class_slots[{{ $slotIndex }}][period]"
+                                        <select name="class_slots[__INDEX__][period]"
                                             class="js-class-period-select w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             @foreach ($periodOptions as $periodKey => $periodLabel)
                                                 <option value="{{ $periodKey }}"
-                                                    {{ $rowPeriod === $periodKey ? 'selected' : '' }}>
+                                                    {{ $periodKey === 'morning' ? 'selected' : '' }}>
                                                     {{ $periodLabel }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('class_slots.' . $slotIndex . '.period')
-                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                        @enderror
                                     </div>
 
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Start</label>
-                                        <input type="text" name="class_slots[{{ $slotIndex }}][start_time]"
-                                            value="{{ $rowStart }}" required placeholder="07:30 AM or 19:30"
+                                        <input type="text" name="class_slots[__INDEX__][start_time]" required
+                                            placeholder="07:30 AM or 19:30"
                                             class="js-class-time-input js-class-start-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
-                                        @error('class_slots.' . $slotIndex . '.start_time')
-                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                        @enderror
                                     </div>
 
                                     <div class="sm:col-span-3">
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">End</label>
-                                        <input type="text" name="class_slots[{{ $slotIndex }}][end_time]"
-                                            value="{{ $rowEnd }}" required placeholder="09:00 AM or 21:00"
+                                        <input type="text" name="class_slots[__INDEX__][end_time]" required
+                                            placeholder="09:00 AM or 21:00"
                                             class="js-class-time-input js-class-end-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
-                                        @error('class_slots.' . $slotIndex . '.end_time')
-                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                        @enderror
                                     </div>
                                 </div>
 
@@ -220,67 +281,7 @@
                                     </button>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-
-                    <button id="add_class_slot_btn" type="button"
-                        class="w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100">
-                        + Add More Date Time
-                    </button>
-
-                    <template id="class_slot_row_template">
-                        <div class="js-class-slot-row rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3">
-                            <div class="grid gap-3 sm:grid-cols-12">
-                                <div class="sm:col-span-3">
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Day</label>
-                                    <select name="class_slots[__INDEX__][day_of_week]"
-                                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                        @foreach ($dayOptions as $dayKey => $dayLabel)
-                                            <option value="{{ $dayKey }}" {{ $dayKey === 'all' ? 'selected' : '' }}>
-                                                {{ $dayLabel }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="sm:col-span-3">
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Period</label>
-                                    <select name="class_slots[__INDEX__][period]"
-                                        class="js-class-period-select w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                        @foreach ($periodOptions as $periodKey => $periodLabel)
-                                            <option value="{{ $periodKey }}"
-                                                {{ $periodKey === 'morning' ? 'selected' : '' }}>
-                                                {{ $periodLabel }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="sm:col-span-3">
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Start</label>
-                                    <input type="text" name="class_slots[__INDEX__][start_time]" required
-                                        placeholder="07:30 AM or 19:30"
-                                        class="js-class-time-input js-class-start-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
-                                </div>
-
-                                <div class="sm:col-span-3">
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">End</label>
-                                    <input type="text" name="class_slots[__INDEX__][end_time]" required
-                                        placeholder="09:00 AM or 21:00"
-                                        class="js-class-time-input js-class-end-input w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <p class="mt-1 text-[11px] text-slate-500">AM/PM or 24H</p>
-                                </div>
-                            </div>
-
-                            <div class="mt-2 flex justify-end">
-                                <button type="button"
-                                    class="js-remove-class-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100">
-                                    Remove
-                                </button>
-                            </div>
-                        </div>
-                    </template>
+                        </template>
 
                         <button type="submit"
                             class="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500">
@@ -294,80 +295,130 @@
                         @csrf
                         <input type="hidden" name="_form" value="create_subject_time">
 
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-black text-slate-900">Subject Study Time</h3>
-                        <span class="text-[11px] font-semibold text-slate-400">Uses class time</span>
-                    </div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-black text-slate-900">Subject Study Time</h3>
+                            <span class="text-[11px] font-semibold text-slate-400">Uses class time</span>
+                        </div>
 
-                    <div>
-                        <label class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
-                        <select id="subject_form_class_id" name="subject_class_id"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            @foreach ($classes as $classOption)
-                                <option value="{{ $classOption->id }}"
-                                    {{ $subjectFormClassId === (string) $classOption->id ? 'selected' : '' }}>
-                                    {{ $classOption->display_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('subject_class_id')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                        <div>
+                            <label class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
+                            <select id="subject_form_class_id" name="subject_class_id"
+                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                @foreach ($classes as $classOption)
+                                    <option value="{{ $classOption->id }}"
+                                        {{ $subjectFormClassId === (string) $classOption->id ? 'selected' : '' }}>
+                                        {{ $classOption->display_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('subject_class_id')
+                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        @error('subject_slots')
+                            <p class="text-xs font-semibold text-red-600">{{ $message }}</p>
                         @enderror
-                    </div>
 
-                    @error('subject_slots')
-                        <p class="text-xs font-semibold text-red-600">{{ $message }}</p>
-                    @enderror
+                        <div id="subject_slot_rows" class="space-y-3"
+                            data-next-index="{{ count($subjectFormSlotRows) }}">
+                            @foreach ($subjectFormSlotRows as $slotIndex => $subjectSlotRow)
+                                @php
+                                    $rowSubjectId = (string) ($subjectSlotRow['subject_id'] ?? '');
+                                    $rowTeacherId = (string) ($subjectSlotRow['teacher_id'] ?? '');
+                                    $rowClassTimeId = (string) ($subjectSlotRow['class_time_id'] ?? '');
+                                @endphp
+                                <div class="js-subject-slot-row rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3">
+                                    <div class="grid gap-3">
+                                        <div>
+                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
+                                            <select name="subject_slots[{{ $slotIndex }}][subject_id]"
+                                                data-selected="{{ $rowSubjectId }}"
+                                                class="js-subject-form-subject w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="">Select a subject</option>
+                                            </select>
+                                            @error('subject_slots.' . $slotIndex . '.subject_id')
+                                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
 
-                    <div id="subject_slot_rows" class="space-y-3" data-next-index="{{ count($subjectFormSlotRows) }}">
-                        @foreach ($subjectFormSlotRows as $slotIndex => $subjectSlotRow)
-                            @php
-                                $rowSubjectId = (string) ($subjectSlotRow['subject_id'] ?? '');
-                                $rowTeacherId = (string) ($subjectSlotRow['teacher_id'] ?? '');
-                                $rowClassTimeId = (string) ($subjectSlotRow['class_time_id'] ?? '');
-                            @endphp
+                                        <div>
+                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Class
+                                                Time</label>
+                                            <select name="subject_slots[{{ $slotIndex }}][class_time_id]"
+                                                data-selected="{{ $rowClassTimeId }}"
+                                                class="js-subject-form-class-time w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="">Select class time</option>
+                                            </select>
+                                            @error('subject_slots.' . $slotIndex . '.class_time_id')
+                                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
+                                            <select name="subject_slots[{{ $slotIndex }}][teacher_id]"
+                                                data-selected="{{ $rowTeacherId }}"
+                                                class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                <option value="">Unassigned</option>
+                                                @foreach ($teachers as $teacherOption)
+                                                    <option value="{{ $teacherOption->id }}"
+                                                        {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                        {{ $teacherOption->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('subject_slots.' . $slotIndex . '.teacher_id')
+                                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2 flex justify-end">
+                                        <button type="button"
+                                            class="js-remove-subject-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <button id="add_subject_slot_btn" type="button"
+                            class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                            + Add More Subject Time
+                        </button>
+
+                        <template id="subject_slot_row_template">
                             <div class="js-subject-slot-row rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3">
                                 <div class="grid gap-3">
                                     <div>
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
-                                        <select name="subject_slots[{{ $slotIndex }}][subject_id]"
-                                            data-selected="{{ $rowSubjectId }}"
+                                        <select name="subject_slots[__INDEX__][subject_id]"
                                             class="js-subject-form-subject w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             <option value="">Select a subject</option>
                                         </select>
-                                        @error('subject_slots.' . $slotIndex . '.subject_id')
-                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                        @enderror
                                     </div>
 
                                     <div>
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Class Time</label>
-                                        <select name="subject_slots[{{ $slotIndex }}][class_time_id]"
-                                            data-selected="{{ $rowClassTimeId }}"
+                                        <select name="subject_slots[__INDEX__][class_time_id]"
                                             class="js-subject-form-class-time w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             <option value="">Select class time</option>
                                         </select>
-                                        @error('subject_slots.' . $slotIndex . '.class_time_id')
-                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                        @enderror
                                     </div>
 
                                     <div>
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
-                                        <select name="subject_slots[{{ $slotIndex }}][teacher_id]"
-                                            data-selected="{{ $rowTeacherId }}"
+                                        <select name="subject_slots[__INDEX__][teacher_id]"
                                             class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             <option value="">Unassigned</option>
                                             @foreach ($teachers as $teacherOption)
-                                                <option value="{{ $teacherOption->id }}"
-                                                    {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                <option value="{{ $teacherOption->id }}">
                                                     {{ $teacherOption->name }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('subject_slots.' . $slotIndex . '.teacher_id')
-                                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                        @enderror
                                     </div>
                                 </div>
 
@@ -378,55 +429,7 @@
                                     </button>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-
-                    <button id="add_subject_slot_btn" type="button"
-                        class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
-                        + Add More Subject Time
-                    </button>
-
-                    <template id="subject_slot_row_template">
-                        <div class="js-subject-slot-row rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3">
-                            <div class="grid gap-3">
-                                <div>
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
-                                    <select name="subject_slots[__INDEX__][subject_id]"
-                                        class="js-subject-form-subject w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                        <option value="">Select a subject</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Class Time</label>
-                                    <select name="subject_slots[__INDEX__][class_time_id]"
-                                        class="js-subject-form-class-time w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                        <option value="">Select class time</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
-                                    <select name="subject_slots[__INDEX__][teacher_id]"
-                                        class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                        <option value="">Unassigned</option>
-                                        @foreach ($teachers as $teacherOption)
-                                            <option value="{{ $teacherOption->id }}">
-                                                {{ $teacherOption->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="mt-2 flex justify-end">
-                                <button type="button"
-                                    class="js-remove-subject-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100">
-                                    Remove
-                                </button>
-                            </div>
-                        </div>
-                    </template>
+                        </template>
 
                         <button type="submit"
                             class="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
@@ -464,17 +467,20 @@
                                 <div class="inline-flex min-w-max">
                                     <button type="button" @click="switchTab('class')"
                                         class="rounded-lg px-3 py-1.5 text-sm font-semibold"
-                                        :class="activeTab === 'class' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'">
+                                        :class="activeTab === 'class' ? 'bg-white text-slate-900 shadow-sm' :
+                                            'text-slate-600 hover:text-slate-900'">
                                         Class Times
                                     </button>
                                     <button type="button" @click="switchTab('subject')"
                                         class="rounded-lg px-3 py-1.5 text-sm font-semibold"
-                                        :class="activeTab === 'subject' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'">
+                                        :class="activeTab === 'subject' ? 'bg-white text-slate-900 shadow-sm' :
+                                            'text-slate-600 hover:text-slate-900'">
                                         Subject Times
                                     </button>
                                     <button type="button" @click="switchTab('teacher')"
                                         class="rounded-lg px-3 py-1.5 text-sm font-semibold"
-                                        :class="activeTab === 'teacher' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'">
+                                        :class="activeTab === 'teacher' ? 'bg-white text-slate-900 shadow-sm' :
+                                            'text-slate-600 hover:text-slate-900'">
                                         Teacher Times
                                     </button>
                                 </div>
@@ -637,7 +643,7 @@
                         <!-- TABLES (same sticky header / container as Student list) -->
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                                <div class="max-h-[700px] overflow-auto">
+                                <div class="max-h-[800px] overflow-auto">
 
                                     <div x-show="activeTab === 'class'" x-cloak>
                                         <table class="w-full min-w-[1280px] text-left text-sm">
@@ -698,7 +704,8 @@
                                                         </td>
 
                                                         <td class="whitespace-nowrap px-3 py-3 align-top">
-                                                            <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
+                                                            <div
+                                                                class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                                 <button type="button" @click="openClassEdit = true"
                                                                     class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                     Edit
@@ -938,7 +945,8 @@
                                                         </td>
 
                                                         <td class="whitespace-nowrap px-3 py-3 align-top">
-                                                            <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
+                                                            <div
+                                                                class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                                 <button type="button" @click="openSubjectEdit = true"
                                                                     class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                     Edit
@@ -1160,144 +1168,6 @@
                                 </div>
                             </div>
 
-                            <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                                <div class="mb-3 flex items-center justify-between gap-2">
-                                    <h3 class="text-sm font-black text-slate-900">Recently Added</h3>
-                                    <span class="text-xs font-semibold text-slate-500">Latest
-                                        <span x-show="activeTab === 'class'" x-cloak>{{ $recentClassTimes->count() }}</span>
-                                        <span x-show="activeTab === 'subject'" x-cloak>{{ $recentSubjectTimes->count() }}</span>
-                                        <span x-show="activeTab === 'teacher'" x-cloak>{{ $recentTeacherTimes->count() }}</span>
-                                    </span>
-                                </div>
-
-                                <div class="grid gap-3 md:grid-cols-2">
-                                    <div x-show="activeTab === 'class'" x-cloak class="contents">
-                                        @forelse ($recentClassTimes as $recent)
-                                        @php
-                                            $recentDay = strtolower((string) ($recent->day_of_week ?? 'all'));
-                                            $recentPeriod = strtolower((string) ($recent->period ?? 'custom'));
-                                        @endphp
-
-                                        <article class="rounded-xl border border-slate-200 bg-white p-3">
-                                            <div class="font-semibold text-slate-900">
-                                                {{ $recent->schoolClass?->display_name ?? 'Class slot' }}
-                                            </div>
-
-                                            <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                                                <span
-                                                    class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-semibold text-slate-700">
-                                                    {{ $dayOptions[$recentDay] ?? ucfirst($recentDay) }}
-                                                </span>
-                                                <span
-                                                    class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 font-semibold uppercase tracking-wide text-indigo-700">
-                                                    {{ $periodOptions[$recentPeriod] ?? ucfirst($recentPeriod) }}
-                                                </span>
-                                            </div>
-
-                                            <div class="mt-2 text-xs text-slate-600">
-                                                {{ \Carbon\Carbon::parse($recent->start_time)->format('h:i A') }}
-                                                -
-                                                {{ \Carbon\Carbon::parse($recent->end_time)->format('h:i A') }}
-                                            </div>
-                                            <div class="mt-1 text-[11px] text-slate-400">
-                                                Added {{ optional($recent->created_at)->diffForHumans() ?? '-' }}
-                                            </div>
-                                        </article>
-                                        @empty
-                                            <div
-                                                class="md:col-span-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
-                                                No recent items yet.
-                                            </div>
-                                        @endforelse
-                                    </div>
-
-                                    <div x-show="activeTab === 'subject'" x-cloak class="contents">
-                                        @forelse ($recentSubjectTimes as $recent)
-                                            @php
-                                                $recentDay = strtolower((string) ($recent->day_of_week ?? 'all'));
-                                                $recentPeriod = strtolower((string) ($recent->period ?? 'custom'));
-                                            @endphp
-
-                                            <article class="rounded-xl border border-slate-200 bg-white p-3">
-                                                <div class="font-semibold text-slate-900">
-                                                    {{ $recent->subject?->name ?? 'Subject slot' }}
-                                                </div>
-                                                <div class="text-xs text-slate-500">
-                                                    {{ $recent->schoolClass?->display_name ?? ($recent->subject?->schoolClass?->display_name ?? 'Unassigned class') }}
-                                                </div>
-
-                                                <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                                                    <span
-                                                        class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-semibold text-slate-700">
-                                                        {{ $dayOptions[$recentDay] ?? ucfirst($recentDay) }}
-                                                    </span>
-                                                    <span
-                                                        class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 font-semibold uppercase tracking-wide text-indigo-700">
-                                                        {{ $periodOptions[$recentPeriod] ?? ucfirst($recentPeriod) }}
-                                                    </span>
-                                                </div>
-
-                                                <div class="mt-2 text-xs text-slate-600">
-                                                    {{ \Carbon\Carbon::parse($recent->start_time)->format('h:i A') }}
-                                                    -
-                                                    {{ \Carbon\Carbon::parse($recent->end_time)->format('h:i A') }}
-                                                </div>
-                                                <div class="mt-1 text-[11px] text-slate-400">
-                                                    Added {{ optional($recent->created_at)->diffForHumans() ?? '-' }}
-                                                </div>
-                                            </article>
-                                        @empty
-                                            <div
-                                                class="md:col-span-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
-                                                No recent items yet.
-                                            </div>
-                                        @endforelse
-                                    </div>
-
-                                    <div x-show="activeTab === 'teacher'" x-cloak class="contents">
-                                        @forelse ($recentTeacherTimes as $recent)
-                                            @php
-                                                $recentDay = strtolower((string) ($recent->day_of_week ?? 'all'));
-                                                $recentPeriod = strtolower((string) ($recent->period ?? 'custom'));
-                                            @endphp
-
-                                            <article class="rounded-xl border border-slate-200 bg-white p-3">
-                                                <div class="font-semibold text-slate-900">
-                                                    {{ $recent->teacher?->name ?? ($recent->subject?->teacher?->name ?? 'Unassigned teacher') }}
-                                                </div>
-                                                <div class="text-xs text-slate-500">
-                                                    {{ $recent->subject?->name ?? 'Subject slot' }}
-                                                </div>
-
-                                                <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                                                    <span
-                                                        class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 font-semibold text-slate-700">
-                                                        {{ $dayOptions[$recentDay] ?? ucfirst($recentDay) }}
-                                                    </span>
-                                                    <span
-                                                        class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 font-semibold uppercase tracking-wide text-indigo-700">
-                                                        {{ $periodOptions[$recentPeriod] ?? ucfirst($recentPeriod) }}
-                                                    </span>
-                                                </div>
-
-                                                <div class="mt-2 text-xs text-slate-600">
-                                                    {{ \Carbon\Carbon::parse($recent->start_time)->format('h:i A') }}
-                                                    -
-                                                    {{ \Carbon\Carbon::parse($recent->end_time)->format('h:i A') }}
-                                                </div>
-                                                <div class="mt-1 text-[11px] text-slate-400">
-                                                    Added {{ optional($recent->created_at)->diffForHumans() ?? '-' }}
-                                                </div>
-                                            </article>
-                                        @empty
-                                            <div
-                                                class="md:col-span-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
-                                                No recent items yet.
-                                            </div>
-                                        @endforelse
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

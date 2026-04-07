@@ -103,13 +103,21 @@ class SubjectController extends Controller
             ->toArray();
 
         $scheduleRows = $subjectSlots
-            ->map(function (SubjectStudyTime $slot) use ($dayOptions, $hasSubjectDayColumn, $todayKey, $student): array {
+            ->map(function (SubjectStudyTime $slot) use (
+                $dayOptions,
+                $hasSubjectDayColumn,
+                $todayKey,
+                $student,
+                $majorLookup,
+                $classSubjectIds
+            ): array {
                 $dayKey = $this->normalizeDayKey($hasSubjectDayColumn ? (string) ($slot->day_of_week ?? 'all') : 'all');
                 $teacherName = trim((string) (
                     $slot->teacher?->name
                     ?? $slot->subject?->teacher?->name
                     ?? ''
                 ));
+                $subjectId = (int) ($slot->subject_id ?? 0);
 
                 return [
                     'day_key' => $dayKey,
@@ -117,11 +125,20 @@ class SubjectController extends Controller
                     'day_sort' => $this->daySortOrder($dayKey),
                     'subject_name' => (string) ($slot->subject?->name ?? 'Unknown Subject'),
                     'subject_code' => (string) ($slot->subject?->code ?? ''),
+                    'subject_description' => (string) ($slot->subject?->description ?? ''),
+                    'subject_is_major' => isset($majorLookup[$subjectId]),
+                    'subject_is_class' => in_array($subjectId, $classSubjectIds, true),
                     'teacher_name' => $teacherName !== '' ? $teacherName : 'Not assigned',
+                    'teacher_email' => (string) ($slot->teacher?->email ?? $slot->subject?->teacher?->email ?? ''),
                     'class_label' => $slot->schoolClass?->display_name
                         ?? $slot->subject?->schoolClass?->display_name
                         ?? $student->schoolClass?->display_name
                         ?? 'Unassigned',
+                    'class_code' => trim((string) (
+                        $slot->schoolClass?->section
+                        ?? $slot->subject?->schoolClass?->section
+                        ?? ''
+                    )),
                     'period_label' => $this->periodLabel((string) ($slot->period ?? '')),
                     'start_label' => $this->formatTime((string) ($slot->start_time ?? '')),
                     'end_label' => $this->formatTime((string) ($slot->end_time ?? '')),
@@ -214,10 +231,10 @@ class SubjectController extends Controller
 
         $query = SubjectStudyTime::query()
             ->with([
-                'subject:id,name,code,teacher_id,school_class_id',
-                'subject.teacher:id,name',
+                'subject:id,name,code,description,teacher_id,school_class_id',
+                'subject.teacher:id,name,email',
                 'schoolClass:id,name,section',
-                'teacher:id,name',
+                'teacher:id,name,email',
             ])
             ->whereIn('subject_id', $subjectIds);
 

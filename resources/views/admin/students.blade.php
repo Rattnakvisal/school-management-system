@@ -720,7 +720,7 @@
                                                             </div>
 
                                                             <div
-                                                                class="relative z-10 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl">
+                                                                class="relative z-10 flex w-full max-w-xl max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
                                                                 <div class="mb-4 flex items-center justify-between">
                                                                     <h3 class="text-lg font-black text-slate-900">Edit
                                                                         Student
@@ -738,12 +738,13 @@
                                                                 <form method="POST"
                                                                     action="{{ route('admin.students.update', $student) }}"
                                                                     enctype="multipart/form-data"
-                                                                    class="js-edit-form space-y-4"
+                                                                    class="js-edit-form flex min-h-0 flex-1 flex-col"
                                                                     data-student="{{ $student->name }}">
                                                                     @csrf
                                                                     @method('PUT')
 
-                                                                    <div>
+                                                                    <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 pb-4 pt-1">
+                                                                        <div>
                                                                         <label for="edit_name_{{ $student->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Full
                                                                             Name</label>
@@ -974,7 +975,10 @@
                                                                         </label>
                                                                     @endif
 
-                                                                    <div class="flex justify-end gap-2 pt-2">
+                                                                    </div>
+
+                                                                    <div
+                                                                        class="flex justify-end gap-2 border-t border-slate-100 px-5 py-4">
                                                                         <button type="button" @click="open = false"
                                                                             class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
                                                                             Cancel

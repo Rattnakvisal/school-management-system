@@ -1162,6 +1162,27 @@
         scrollbar-color: #94a3b8 #e2e8f0;
     }
 
+    .study-time-stage .max-h-\[800px\]::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .study-time-stage .max-h-\[800px\]::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 999px;
+        border: 2px solid #f8fafc;
+    }
+
+    .study-time-stage .max-h-\[800px\]::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    .study-time-stage .max-h-\[800px\] {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+    }
+
     /* Match attendance table scrollbar (620px) to other stages */
     .class-stage .max-h-\[620px\]::-webkit-scrollbar,
     .student-stage .max-h-\[620px\]::-webkit-scrollbar,
@@ -1222,16 +1243,29 @@
 
     /* Student list table readability */
     .student-stage .student-table {
-        min-width: 1240px;
+        min-width: 1180px;
         table-layout: auto;
+        border-collapse: separate;
+        border-spacing: 0 0.1rem;
+    }
+
+    .student-stage .student-table thead th {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .student-stage .student-table tbody td {
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+        vertical-align: middle;
     }
 
     .student-stage .student-table .student-col-student {
-        min-width: 260px;
+        min-width: 240px;
     }
 
     .student-stage .student-table .student-col-email {
-        min-width: 270px;
+        min-width: 240px;
     }
 
     .student-stage .student-table .student-col-class {
@@ -1239,11 +1273,11 @@
     }
 
     .student-stage .student-table .student-col-major {
-        min-width: 240px;
+        min-width: 220px;
     }
 
     .student-stage .student-table .student-col-study {
-        min-width: 240px;
+        min-width: 220px;
     }
 
     .student-stage .student-table .student-col-status {
@@ -1255,7 +1289,7 @@
     }
 
     .student-stage .student-table .student-col-actions {
-        min-width: 230px;
+        min-width: 210px;
     }
 
     .student-stage .student-name,

@@ -59,9 +59,9 @@
                             this.createOpen = false;
                         }
                     };
-
+            
                     update();
-
+            
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -294,8 +294,7 @@
                                         </thead>
                                         <tbody class="divide-y divide-slate-100 bg-white">
                                             @forelse ($subjects as $subject)
-                                                <tr class="align-top hover:bg-slate-50/80"
-                                                    x-data="{ open: false, detailOpen: false }">
+                                                <tr class="align-top hover:bg-slate-50/80" x-data="{ open: false, detailOpen: false }">
                                                     <td class="px-3 py-3">
                                                         <div class=" whitespace-nowrap font-semibold text-slate-700">
                                                             {{ $subject->name }}
@@ -320,13 +319,15 @@
                                                                             'all' => 8,
                                                                         ];
 
-                                                                        $dayKey = strtolower((string) ($slot->day_of_week ?? 'all'));
+                                                                        $dayKey = strtolower(
+                                                                            (string) ($slot->day_of_week ?? 'all'),
+                                                                        );
 
                                                                         return sprintf(
                                                                             '%02d-%s-%s',
                                                                             $daySortMap[$dayKey] ?? 99,
                                                                             (string) ($slot->period ?? ''),
-                                                                            (string) ($slot->start_time ?? '')
+                                                                            (string) ($slot->start_time ?? ''),
                                                                         );
                                                                     })
                                                                     ->values();
@@ -339,14 +340,14 @@
                                                                             class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
                                                                             <span
                                                                                 class="font-bold uppercase tracking-wide text-indigo-700">
-                                                                            {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
-                                                                        </span>
-                                                                        <span class="text-indigo-300">|</span>
-                                                                        <span
-                                                                            class="whitespace-nowrap font-semibold text-slate-700">
-                                                                            {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
-                                                                            ->
-                                                                            {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
+                                                                                {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
+                                                                            </span>
+                                                                            <span class="text-indigo-300">|</span>
+                                                                            <span
+                                                                                class="whitespace-nowrap font-semibold text-slate-700">
+                                                                                {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
+                                                                                ->
+                                                                                {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
                                                                             </span>
                                                                         </div>
                                                                     @endforeach
@@ -437,7 +438,8 @@
                                                     <td class="whitespace-nowrap px-3 py-3 text-slate-500">
                                                         {{ $subject->created_at->format('M d, Y') }}</td>
                                                     <td class="whitespace-nowrap px-3 py-3">
-                                                        <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
+                                                        <div
+                                                            class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                             <button @click="detailOpen = true" type="button"
                                                                 class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                 View Detail
@@ -534,53 +536,68 @@
                                                                 @endphp
 
                                                                 <div class="grid gap-4 md:grid-cols-2">
-                                                                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                                                    <div
+                                                                        class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                                                                         <div
                                                                             class="text-xs font-bold uppercase tracking-wide text-slate-500">
                                                                             Overview</div>
                                                                         <div class="mt-3 space-y-3 text-sm">
-                                                                            <div class="flex items-center justify-between gap-3">
+                                                                            <div
+                                                                                class="flex items-center justify-between gap-3">
                                                                                 <span class="text-slate-500">Subject</span>
                                                                                 <span class="font-semibold text-slate-900">
                                                                                     {{ $subject->name }}
                                                                                 </span>
                                                                             </div>
-                                                                            <div class="flex items-center justify-between gap-3">
+                                                                            <div
+                                                                                class="flex items-center justify-between gap-3">
                                                                                 <span class="text-slate-500">Code</span>
                                                                                 <span class="font-semibold text-slate-900">
                                                                                     {{ $subject->code ?: '-' }}
                                                                                 </span>
                                                                             </div>
-                                                                            <div class="flex items-center justify-between gap-3">
-                                                                                <span class="text-slate-500">Total Students</span>
+                                                                            <div
+                                                                                class="flex items-center justify-between gap-3">
+                                                                                <span class="text-slate-500">Total
+                                                                                    Students</span>
                                                                                 <span class="font-semibold text-slate-900">
                                                                                     {{ $subjectStudents->count() }}
                                                                                 </span>
                                                                             </div>
-                                                                            <div class="flex items-center justify-between gap-3">
+                                                                            <div
+                                                                                class="flex items-center justify-between gap-3">
                                                                                 <span class="text-slate-500">Status</span>
-                                                                                <span class="font-semibold {{ $subject->is_active ? 'text-emerald-700' : 'text-rose-700' }}">
+                                                                                <span
+                                                                                    class="font-semibold {{ $subject->is_active ? 'text-emerald-700' : 'text-rose-700' }}">
                                                                                     {{ $subject->is_active ? 'Active' : 'Inactive' }}
                                                                                 </span>
                                                                             </div>
                                                                         </div>
 
-                                                                        <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-                                                                            <div class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                                                                        <div
+                                                                            class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                                                                            <div
+                                                                                class="text-xs font-bold uppercase tracking-wide text-slate-500">
                                                                                 Description
                                                                             </div>
-                                                                            <p class="mt-2 text-sm leading-6 text-slate-600">
+                                                                            <p
+                                                                                class="mt-2 text-sm leading-6 text-slate-600">
                                                                                 {{ $subject->description ?: 'No description available.' }}
                                                                             </p>
                                                                         </div>
 
-                                                                        <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-                                                                            <div class="flex items-center justify-between gap-3">
+                                                                        <div
+                                                                            class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                                                                            <div
+                                                                                class="flex items-center justify-between gap-3">
                                                                                 <div>
-                                                                                    <div class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                                                                                    <div
+                                                                                        class="text-xs font-bold uppercase tracking-wide text-slate-500">
                                                                                         Total Students</div>
-                                                                                    <div class="mt-1 text-sm text-slate-500">
-                                                                                        {{ $subjectStudents->count() }} enrolled
+                                                                                    <div
+                                                                                        class="mt-1 text-sm text-slate-500">
+                                                                                        {{ $subjectStudents->count() }}
+                                                                                        enrolled
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -599,7 +616,8 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                                                                    <div
+                                                                        class="rounded-2xl border border-slate-200 bg-white p-4">
                                                                         <div
                                                                             class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
                                                                             <div>
@@ -607,7 +625,8 @@
                                                                                     class="text-xs font-bold uppercase tracking-wide text-slate-500">
                                                                                     Full Schedule</div>
                                                                                 <div class="mt-1 text-sm text-slate-500">
-                                                                                    {{ $subjectDetailStudyRows->count() }} slots total
+                                                                                    {{ $subjectDetailStudyRows->count() }}
+                                                                                    slots total
                                                                                 </div>
                                                                             </div>
                                                                             <a href="{{ route('admin.time-studies.index', ['tab' => 'subject', 'subject_id' => $subject->id]) }}"
@@ -617,18 +636,21 @@
                                                                         </div>
 
                                                                         <div class="mt-4 space-y-3">
-                                                                            <div class="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                                                                            <div
+                                                                                class="max-h-[420px] space-y-2 overflow-y-auto pr-1">
                                                                                 @forelse ($subjectDetailStudyRows as $slot)
                                                                                     @php
                                                                                         $slotDayKey = strtolower(
-                                                                                            (string) ($slot->day_of_week ?? 'all'),
+                                                                                            (string) ($slot->day_of_week ??
+                                                                                                'all'),
                                                                                         );
                                                                                         $slotDayLabel =
                                                                                             $dayOptions[$slotDayKey] ??
                                                                                             ucfirst($slotDayKey);
                                                                                         $slotPeriodLabel =
-                                                                                            $periodOptions[$slot->period] ??
-                                                                                            ucfirst($slot->period);
+                                                                                            $periodOptions[
+                                                                                                $slot->period
+                                                                                            ] ?? ucfirst($slot->period);
                                                                                         $slotStartTime = \Carbon\Carbon::parse(
                                                                                             $slot->start_time,
                                                                                         )->format('h:i A');
@@ -638,13 +660,17 @@
                                                                                     @endphp
                                                                                     <div
                                                                                         class="flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-800">
-                                                                                        <span class="uppercase tracking-wide">
+                                                                                        <span
+                                                                                            class="uppercase tracking-wide">
                                                                                             {{ $slotDayLabel }}
                                                                                         </span>
-                                                                                        <span class="text-indigo-300">|</span>
+                                                                                        <span
+                                                                                            class="text-indigo-300">|</span>
                                                                                         <span>{{ $slotPeriodLabel }}</span>
-                                                                                        <span class="text-indigo-300">|</span>
-                                                                                        <span class="whitespace-nowrap text-slate-700">
+                                                                                        <span
+                                                                                            class="text-indigo-300">|</span>
+                                                                                        <span
+                                                                                            class="whitespace-nowrap text-slate-700">
                                                                                             {{ $slotStartTime }} ->
                                                                                             {{ $slotEndTime }}
                                                                                         </span>

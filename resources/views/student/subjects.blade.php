@@ -164,66 +164,6 @@
         </section>
 
         <section class="student-reveal student-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
-            style="--sd: 6;">
-            <div class="mb-4 flex items-center justify-between gap-2">
-                <h2 class="text-lg font-bold text-slate-900">Assigned Subjects</h2>
-                <span
-                    class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
-                    {{ number_format($subjects->count()) }} total
-                </span>
-            </div>
-
-            @if ($subjects->isNotEmpty())
-                <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    @foreach ($subjects as $subject)
-                        @php
-                            $slotCount = (int) ($subjectSlotCounts[(int) $subject->id] ?? 0);
-                        @endphp
-                        <article
-                            class="group rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md">
-                            <div class="flex items-start justify-between gap-2">
-                                <div>
-                                    <h3 class="text-sm font-bold text-slate-900">{{ $subject->name }}</h3>
-                                    <div class="text-xs text-slate-500">{{ $subject->code ?: 'No code' }}</div>
-                                </div>
-                                <span
-                                    class="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">
-                                    {{ number_format($slotCount) }} slot{{ $slotCount === 1 ? '' : 's' }}
-                                </span>
-                            </div>
-
-                            <div class="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
-                                @if ($subject->is_major_subject)
-                                    <span class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">
-                                        Major
-                                    </span>
-                                @endif
-                                @if ($subject->is_class_subject)
-                                    <span class="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-700">
-                                        Class
-                                    </span>
-                                @endif
-                            </div>
-
-                            <div class="mt-3 text-xs text-slate-600">
-                                <span class="font-semibold text-slate-700">Teacher:</span>
-                                {{ $subject->teacher?->name ?: 'Not assigned' }}
-                            </div>
-                            <p class="mt-2 text-xs leading-relaxed text-slate-500">
-                                {{ \Illuminate\Support\Str::limit((string) ($subject->description ?: 'No description available.'), 110) }}
-                            </p>
-                        </article>
-                    @endforeach
-                </div>
-            @else
-                <div
-                    class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
-                    No subjects assigned yet. Please contact admin to assign class or major subjects.
-                </div>
-            @endif
-        </section>
-
-        <section class="student-reveal student-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
             style="--sd: 7;">
             <div class="mb-4 flex items-center justify-between gap-3">
                 <h2 class="text-lg font-bold text-slate-900">Subject Schedule</h2>
@@ -242,7 +182,7 @@
             @if ($scheduleRows->isNotEmpty())
                 <div class="overflow-hidden rounded-2xl border border-slate-200">
                     <div class="max-h-[560px] overflow-auto">
-                        <table class="w-full min-w-[860px] text-left text-sm">
+                        <table class="w-full min-w-[1040px] text-left text-sm">
                             <thead
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
@@ -252,6 +192,7 @@
                                     <th class="px-3 py-3 font-semibold">Start</th>
                                     <th class="px-3 py-3 font-semibold">End</th>
                                     <th class="px-3 py-3 font-semibold">Subject</th>
+                                    <th class="px-3 py-3 font-semibold">Details</th>
                                     <th class="px-3 py-3 font-semibold">Period</th>
                                     <th class="px-3 py-3 font-semibold">Teacher</th>
                                     <th class="px-3 py-3 font-semibold">Class</th>
@@ -280,14 +221,41 @@
                                             </div>
                                             <div class="text-xs text-slate-500">{{ $row['subject_code'] ?: 'No code' }}</div>
                                         </td>
+                                        <td class="px-3 py-3 align-top">
+                                            <div class="space-y-1.5">
+                                                <div class="text-xs leading-relaxed text-slate-600">
+                                                    {{ $row['subject_description'] ?: 'No description available.' }}
+                                                </div>
+                                                <div class="flex flex-wrap gap-1.5 text-[11px] font-semibold">
+                                                    @if (!empty($row['subject_is_major']))
+                                                        <span
+                                                            class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">Major</span>
+                                                    @endif
+                                                    @if (!empty($row['subject_is_class']))
+                                                        <span
+                                                            class="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-700">Class</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td class="px-3 py-3">
                                             <span
                                                 class="inline-flex items-center rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">
                                                 {{ $row['period_label'] }}
                                             </span>
                                         </td>
-                                        <td class="px-3 py-3 text-slate-700">{{ $row['teacher_name'] }}</td>
-                                        <td class="px-3 py-3 text-slate-700">{{ $row['class_label'] }}</td>
+                                        <td class="px-3 py-3 text-slate-700">
+                                            {{ $row['teacher_name'] }}
+                                            @if (!empty($row['teacher_email']))
+                                                <div class="text-xs text-slate-500">{{ $row['teacher_email'] }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-3 text-slate-700">
+                                            {{ $row['class_label'] }}
+                                            @if (!empty($row['class_code']))
+                                                <div class="text-xs text-slate-500">{{ $row['class_code'] }}</div>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
