@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\Models\Notification;
 use App\Models\SchoolClass;
 use App\Models\StudentAttendance;
+use App\Models\StudentLawRequest;
 use App\Models\Subject;
 use App\Models\SubjectStudyTime;
 use App\Models\User;
@@ -236,9 +237,65 @@ class AttendanceController extends Controller
             })
             ->values();
 
+        $availableClassIds = $classes->pluck('id')->map(fn($id) => (int) $id)->values();
+        if ($selectedClassId !== null && !$availableClassIds->contains($selectedClassId)) {
+            $selectedClassId = null;
+        }
+
+        $selectedClass = $selectedClassId !== null
+            ? $classes->firstWhere('id', $selectedClassId)
+            : null;
+
+        $subjectsForSelectedClass = collect();
+        if ($selectedClass) {
+            $subjectIdsForDay = collect($selectedClass->getRelation('teacherStudySchedules') ?? $selectedClass->getRelation('studySchedules') ?? [])
+                ->pluck('subject_id')
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => $id > 0)
+                ->unique()
+                ->values();
+
+            $subjectsForSelectedClass = collect($selectedClass->getRelation('subjects') ?? [])
+                ->filter(function ($subject) use ($subjectIdsForDay) {
+                    return $subjectIdsForDay->isEmpty() || $subjectIdsForDay->contains((int) ($subject->id ?? 0));
+                })
+                ->values();
+
+            if ($subjectsForSelectedClass->isEmpty() && $subjectIdsForDay->isNotEmpty()) {
+                $subjectsForSelectedClass = Subject::query()
+                    ->whereIn('id', $subjectIdsForDay->all())
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'code']);
+            }
+        }
+
+        $subjectIdsForSelectedClass = $subjectsForSelectedClass
+            ->pluck('id')
+            ->map(fn($id) => (int) $id)
+            ->filter(fn($id) => $id > 0)
+            ->values();
+
+        $selectedSubjectIdRaw = trim((string) $request->query('subject_id', (string) $request->old('subject_id', '')));
+        $selectedSubjectId = $subjectIdsForSelectedClass->isNotEmpty()
+            ? (
+                ctype_digit($selectedSubjectIdRaw) && $subjectIdsForSelectedClass->contains((int) $selectedSubjectIdRaw)
+                    ? (int) $selectedSubjectIdRaw
+                    : (int) $subjectIdsForSelectedClass->first()
+            )
+            : null;
+        $selectedSubject = $selectedSubjectId !== null
+            ? $subjectsForSelectedClass->firstWhere('id', $selectedSubjectId)
+            : null;
+
         $hasAttendanceTable = Schema::hasTable('student_attendances');
         $attendanceCheckedByClass = collect();
         $classAttendanceStatus = [];
+        $subjectAttendanceStatus = [];
+        $selectedSubjectAttendanceStatus = [
+            'state' => 'pending',
+            'students_count' => 0,
+            'checked_count' => 0,
+        ];
 
         if ($hasAttendanceTable && $classIds->isNotEmpty()) {
             $attendanceCheckedByClass = StudentAttendance::query()
@@ -268,6 +325,7 @@ class AttendanceController extends Controller
 
         $students = collect();
         $attendanceByStudent = collect();
+        $lawRequestsByStudent = collect();
         if ($selectedClassId !== null) {
             $students = User::query()
                 ->where('role', 'student')
@@ -282,12 +340,52 @@ class AttendanceController extends Controller
                 ->get(['id', 'name', 'email', 'is_active', 'school_class_id']);
 
             if ($hasAttendanceTable) {
-                $attendanceByStudent = StudentAttendance::query()
+                $attendanceQuery = StudentAttendance::query()
                     ->where('teacher_id', $teacherId)
                     ->where('school_class_id', $selectedClassId)
-                    ->whereDate('attendance_date', $selectedDate)
+                    ->whereDate('attendance_date', $selectedDate);
+
+                if ($selectedSubjectId !== null && Schema::hasColumn('student_attendances', 'subject_id')) {
+                    $attendanceQuery->where('subject_id', $selectedSubjectId);
+                }
+
+                $attendanceByStudent = $attendanceQuery
                     ->get()
                     ->keyBy('student_id');
+            }
+
+            if (Schema::hasTable('student_law_requests')) {
+                $lawRequestQuery = StudentLawRequest::query()
+                    ->where('school_class_id', $selectedClassId)
+                    ->whereDate('requested_for', $selectedDate)
+                    ->whereIn('status', ['pending', 'approved', 'rejected'])
+                    ->orderByRaw("CASE status WHEN 'approved' THEN 0 WHEN 'pending' THEN 1 WHEN 'rejected' THEN 2 ELSE 3 END")
+                    ->orderByDesc('reviewed_at')
+                    ->orderByDesc('created_at');
+
+                if ($selectedSubjectId !== null) {
+                    if (Schema::hasColumn('student_law_requests', 'subject_id')) {
+                        $lawRequestQuery->where('subject_id', $selectedSubjectId);
+                    } elseif ($selectedSubject) {
+                        $lawRequestQuery->where('subject', (string) ($selectedSubject->name ?? ''));
+                    }
+                }
+
+                if (Schema::hasColumn('student_law_requests', 'teacher_id')) {
+                    $lawRequestQuery->where(function ($query) use ($teacherId) {
+                        $query->where('teacher_id', $teacherId)
+                            ->orWhereNull('teacher_id');
+                    });
+                }
+
+                $lawRequestsByStudent = $lawRequestQuery
+                    ->get()
+                    ->groupBy(function (StudentLawRequest $lawRequest) {
+                        return (int) ($lawRequest->student_id ?? 0);
+                    })
+                    ->map(function ($rows) {
+                        return $rows->first();
+                    });
             }
 
             if ($statusFilter !== 'all' && in_array($statusFilter, $attendanceStatuses, true)) {
@@ -297,6 +395,45 @@ class AttendanceController extends Controller
                     return $currentStatus === $statusFilter;
                 })->values();
             }
+
+            if (
+                $hasAttendanceTable
+                && $subjectIdsForSelectedClass->isNotEmpty()
+                && Schema::hasColumn('student_attendances', 'subject_id')
+            ) {
+                $attendanceCheckedBySubject = StudentAttendance::query()
+                    ->where('teacher_id', $teacherId)
+                    ->where('school_class_id', $selectedClassId)
+                    ->whereDate('attendance_date', $selectedDate)
+                    ->whereIn('subject_id', $subjectIdsForSelectedClass->all())
+                    ->select('subject_id', DB::raw('COUNT(DISTINCT student_id) as checked_count'))
+                    ->groupBy('subject_id')
+                    ->get()
+                    ->mapWithKeys(function ($row) {
+                        return [(int) $row->subject_id => (int) $row->checked_count];
+                    });
+
+                foreach ($subjectsForSelectedClass as $subjectOption) {
+                    $subjectKey = (int) ($subjectOption->id ?? 0);
+                    $studentsCount = $students->count();
+                    $checkedCount = (int) $attendanceCheckedBySubject->get($subjectKey, 0);
+                    $isSaved = $studentsCount > 0 && $checkedCount >= $studentsCount;
+
+                    $subjectAttendanceStatus[$subjectKey] = [
+                        'state' => $studentsCount === 0 ? 'empty' : ($isSaved ? 'saved' : 'pending'),
+                        'students_count' => $studentsCount,
+                        'checked_count' => min($checkedCount, $studentsCount),
+                    ];
+                }
+            }
+        }
+
+        if ($selectedSubjectId !== null) {
+            $selectedSubjectAttendanceStatus = $subjectAttendanceStatus[$selectedSubjectId] ?? [
+                'state' => $students->isEmpty() ? 'empty' : 'pending',
+                'students_count' => $students->count(),
+                'checked_count' => $attendanceByStudent->count(),
+            ];
         }
 
         $summary = [
@@ -345,11 +482,16 @@ class AttendanceController extends Controller
         return view('teacher.attendance', [
             'classes' => $classes,
             'classId' => $selectedClassId !== null ? (string) $selectedClassId : '',
+            'subjectId' => $selectedSubjectId !== null ? (string) $selectedSubjectId : '',
+            'subjectsForSelectedClass' => $subjectsForSelectedClass,
+            'subjectAttendanceStatus' => $subjectAttendanceStatus,
+            'selectedSubjectAttendanceStatus' => $selectedSubjectAttendanceStatus,
             'selectedDate' => $selectedDate,
             'search' => $search,
             'statusFilter' => in_array($statusFilter, array_merge(['all'], $attendanceStatuses), true) ? $statusFilter : 'all',
             'students' => $students,
             'attendanceByStudent' => $attendanceByStudent,
+            'lawRequestsByStudent' => $lawRequestsByStudent,
             'statusLabels' => $allowedStatuses,
             'summary' => $summary,
             'attendanceAlerts' => $attendanceAlerts,
@@ -396,6 +538,384 @@ class AttendanceController extends Controller
             return back()->withInput()->with('error', 'Attendance table is missing. Please run migrations.');
         }
 
+        $resolved = $this->resolveAttendanceSubmission($request, $teacherId);
+        if (!$resolved['ok']) {
+            return back()->withInput()->with($resolved['flash_type'], $resolved['message']);
+        }
+
+        $schoolClassId = $resolved['school_class_id'];
+        $subjectId = $resolved['subject_id'];
+        $selectedSubject = $resolved['selected_subject'];
+        $attendanceDate = $resolved['attendance_date'];
+        $attendanceRows = $resolved['attendance_rows'];
+        $studentIds = $resolved['student_ids'];
+
+        if (count($studentIds) === 0) {
+            return back()->withInput()->with('warning', 'No students found in selected class.');
+        }
+
+        $alreadyCheckedCount = StudentAttendance::query()
+            ->where('teacher_id', $teacherId)
+            ->where('school_class_id', $schoolClassId)
+            ->whereDate('attendance_date', $attendanceDate)
+            ->whereIn('student_id', $studentIds)
+            ->when(
+                Schema::hasColumn('student_attendances', 'subject_id') && $subjectId > 0,
+                fn($query) => $query->where('subject_id', $subjectId)
+            )
+            ->distinct('student_id')
+            ->count('student_id');
+
+        if ($alreadyCheckedCount >= count($studentIds)) {
+            return redirect()
+                ->route('teacher.attendance.index', [
+                    'class_id' => $schoolClassId,
+                    'subject_id' => $subjectId,
+                    'date' => $attendanceDate,
+                ])
+                ->with('warning', 'Attendance already saved successfully. Check status cannot be changed.');
+        }
+
+        [$savedCount, $autoExcusedCount, $savedStudentRows] = $this->persistAttendanceRows(
+            $teacherId,
+            $schoolClassId,
+            $subjectId,
+            $selectedSubject,
+            $attendanceDate,
+            $attendanceRows,
+            $studentIds
+        );
+
+        $this->notifyStudentsAttendanceChecked(
+            $savedStudentRows,
+            $selectedSubject,
+            trim((string) ($request->user()?->name ?? '')),
+            $attendanceDate
+        );
+
+        return redirect()
+            ->route('teacher.attendance.index', [
+                'class_id' => $schoolClassId,
+                'subject_id' => $subjectId,
+                'date' => $attendanceDate,
+            ])
+            ->with(
+                'success',
+                'Attendance checked successfully for '
+                . $savedCount
+                . ' student(s).'
+                . ($autoExcusedCount > 0 ? (' Auto-excused ' . $autoExcusedCount . ' student(s) due to approved law request.') : '')
+            );
+    }
+
+    public function approveLawRequest(Request $request, StudentLawRequest $lawRequest)
+    {
+        [$teacherId, $schoolClassId, $lawRequestSubjectId] = $this->authorizeTeacherLawRequest($request, $lawRequest);
+
+        if (strtolower((string) ($lawRequest->status ?? 'pending')) === 'approved') {
+            return $this->lawRequestActionResponse($request, 'warning', 'This student law request is already approved.');
+        }
+
+        $lawRequest->update([
+            'status' => 'approved',
+            'reviewed_at' => now(),
+        ]);
+
+        $attendanceDate = $lawRequest->requested_for?->toDateString();
+        $lawRemark = $this->buildStudentLawRequestRemark($lawRequest);
+        $studentName = trim((string) ($lawRequest->student?->name ?? 'Student'));
+        $teacherName = trim((string) ($request->user()?->name ?? 'Teacher'));
+
+        $savedCount = null;
+        if (Schema::hasTable('student_attendances') && $attendanceDate !== null && $request->has('attendance')) {
+            $resolved = $this->resolveAttendanceSubmission($request, $teacherId);
+            if (!$resolved['ok']) {
+                return $this->lawRequestActionResponse($request, $resolved['flash_type'], $resolved['message']);
+            }
+
+            [$savedCount] = $this->persistAttendanceRows(
+                $teacherId,
+                $resolved['school_class_id'],
+                $resolved['subject_id'],
+                $resolved['selected_subject'],
+                $resolved['attendance_date'],
+                $resolved['attendance_rows'],
+                $resolved['student_ids']
+            );
+        } elseif (Schema::hasTable('student_attendances') && $attendanceDate !== null) {
+            StudentAttendance::query()->updateOrCreate(
+                $this->attendanceMatchAttributes((int) ($lawRequest->student_id ?? 0), $attendanceDate, $lawRequestSubjectId),
+                $this->attendancePayload(
+                    $teacherId > 0 ? $teacherId : null,
+                    $schoolClassId > 0 ? $schoolClassId : null,
+                    $lawRequestSubjectId,
+                    'excused',
+                    $lawRemark !== '' ? mb_substr($lawRemark, 0, 255) : null,
+                    now()
+                )
+            );
+        }
+
+        $dateParam = trim((string) $request->input('attendance_date', $attendanceDate ?: now()->toDateString()));
+        $this->notifyStudentLawRequestApproved($lawRequest, $teacherName, $dateParam);
+
+        return $this->lawRequestActionResponse(
+            $request,
+            'success',
+            'Approved law request for ' . ($studentName !== '' ? $studentName : 'student') . '.',
+            [
+                'law_request_status' => 'approved',
+                'attendance_status' => 'excused',
+                'remark' => $lawRemark !== '' ? mb_substr($lawRemark, 0, 255) : null,
+                'law_request_id' => (int) ($lawRequest->id ?? 0),
+                'student_id' => (int) ($lawRequest->student_id ?? 0),
+                'saved_count' => $savedCount,
+            ],
+            [
+                'class_id' => $schoolClassId,
+                'subject_id' => $lawRequestSubjectId,
+                'date' => $dateParam,
+            ]
+        );
+    }
+
+    public function rejectLawRequest(Request $request, StudentLawRequest $lawRequest)
+    {
+        if (!Schema::hasTable('student_law_requests')) {
+            return back()->with('error', 'Student law request table is missing.');
+        }
+
+        [$teacherId, $schoolClassId, $lawRequestSubjectId] = $this->authorizeTeacherLawRequest($request, $lawRequest);
+
+        if (strtolower((string) ($lawRequest->status ?? 'pending')) === 'rejected') {
+            return $this->lawRequestActionResponse($request, 'warning', 'This student law request is already cancelled.');
+        }
+
+        $lawRequest->update([
+            'status' => 'rejected',
+            'reviewed_at' => now(),
+        ]);
+
+        $attendanceDate = $lawRequest->requested_for?->toDateString();
+        $studentName = trim((string) ($lawRequest->student?->name ?? 'Student'));
+        $remark = 'Law Request Cancelled';
+
+        $savedCount = null;
+        if (Schema::hasTable('student_attendances') && $attendanceDate !== null && $request->has('attendance')) {
+            $resolved = $this->resolveAttendanceSubmission($request, $teacherId);
+            if (!$resolved['ok']) {
+                return $this->lawRequestActionResponse($request, $resolved['flash_type'], $resolved['message']);
+            }
+
+            [$savedCount] = $this->persistAttendanceRows(
+                $teacherId,
+                $resolved['school_class_id'],
+                $resolved['subject_id'],
+                $resolved['selected_subject'],
+                $resolved['attendance_date'],
+                $resolved['attendance_rows'],
+                $resolved['student_ids'],
+                [
+                    (int) ($lawRequest->student_id ?? 0) => [
+                        'status' => 'absent',
+                        'remark' => $remark,
+                    ],
+                ]
+            );
+        } elseif (Schema::hasTable('student_attendances') && $attendanceDate !== null) {
+            StudentAttendance::query()->updateOrCreate(
+                $this->attendanceMatchAttributes((int) ($lawRequest->student_id ?? 0), $attendanceDate, $lawRequestSubjectId),
+                $this->attendancePayload(
+                    $teacherId > 0 ? $teacherId : null,
+                    $schoolClassId > 0 ? $schoolClassId : null,
+                    $lawRequestSubjectId,
+                    'absent',
+                    $remark,
+                    now()
+                )
+            );
+        }
+
+        $dateParam = trim((string) $request->input('attendance_date', $attendanceDate ?: now()->toDateString()));
+
+        return $this->lawRequestActionResponse(
+            $request,
+            'success',
+            'Cancelled law request for ' . ($studentName !== '' ? $studentName : 'student') . '. Attendance is now absent.',
+            [
+                'law_request_status' => 'rejected',
+                'attendance_status' => 'absent',
+                'remark' => $remark,
+                'law_request_id' => (int) ($lawRequest->id ?? 0),
+                'student_id' => (int) ($lawRequest->student_id ?? 0),
+                'saved_count' => $savedCount,
+            ],
+            [
+                'class_id' => $schoolClassId,
+                'subject_id' => $lawRequestSubjectId,
+                'date' => $dateParam,
+            ]
+        );
+    }
+
+    private function teacherClassIds(int $teacherId)
+    {
+        return SchoolClass::query()
+            ->when(
+                Schema::hasColumn('subject_study_times', 'school_class_id') && Schema::hasColumn('subject_study_times', 'teacher_id'),
+                function ($query) use ($teacherId) {
+                    $query->whereIn(
+                        'id',
+                        SubjectStudyTime::query()
+                            ->where('teacher_id', $teacherId)
+                            ->whereNotNull('school_class_id')
+                            ->distinct()
+                            ->pluck('school_class_id')
+                            ->all()
+                    );
+                },
+                function ($query) use ($teacherId) {
+                    $query->whereHas('subjects', function ($subjectQuery) use ($teacherId) {
+                        $subjectQuery->where('teacher_id', $teacherId);
+                    });
+                }
+            )
+            ->pluck('id')
+            ->map(fn($id) => (int) $id)
+            ->filter(fn($id) => $id > 0)
+            ->values();
+    }
+
+    private function authorizeTeacherLawRequest(Request $request, StudentLawRequest $lawRequest): array
+    {
+        $teacherId = (int) ($request->user()?->id ?? 0);
+        $allowedClassIds = $this->teacherClassIds($teacherId);
+        $schoolClassId = (int) ($lawRequest->school_class_id ?? 0);
+        $lawRequestSubjectId = $this->resolveLawRequestSubjectId($lawRequest);
+
+        if (!$allowedClassIds->contains($schoolClassId)) {
+            abort(404);
+        }
+
+        if (Schema::hasColumn('student_law_requests', 'teacher_id')) {
+            $assignedTeacherId = (int) ($lawRequest->teacher_id ?? 0);
+            if ($assignedTeacherId > 0 && $assignedTeacherId !== $teacherId) {
+                abort(404);
+            }
+        }
+
+        if ($lawRequestSubjectId !== null) {
+            $allowedSubjectIds = $this->teacherSubjectOptions($teacherId, $schoolClassId)
+                ->pluck('id')
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => $id > 0)
+                ->values();
+
+            if ($allowedSubjectIds->isNotEmpty() && !$allowedSubjectIds->contains($lawRequestSubjectId)) {
+                abort(404);
+            }
+        }
+
+        return [$teacherId, $schoolClassId, $lawRequestSubjectId];
+    }
+
+    private function lawRequestActionResponse(Request $request, string $flashType, string $message, array $payload = [], array $routeParams = [])
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(array_merge([
+                'ok' => $flashType !== 'error',
+                'message' => $message,
+                'flash_type' => $flashType,
+            ], $payload));
+        }
+
+        return redirect()
+            ->route('teacher.attendance.index', $routeParams)
+            ->with($flashType, $message);
+    }
+
+    private function notifyStudentLawRequestApproved(StudentLawRequest $lawRequest, string $teacherName, string $dateParam): void
+    {
+        $studentId = (int) ($lawRequest->student_id ?? 0);
+        if ($studentId <= 0) {
+            return;
+        }
+
+        $subjectText = trim((string) ($lawRequest->subject ?? ''));
+        $subjectTimeText = trim((string) ($lawRequest->subject_time ?? ''));
+        $displayDate = $lawRequest->requested_for
+            ? Carbon::parse($lawRequest->requested_for)->format('M d, Y')
+            : Carbon::parse($dateParam)->format('M d, Y');
+        $studentTag = '[student_id:' . $studentId . '] ';
+        $message = $studentTag . 'Your law request was approved by '
+            . ($teacherName !== '' ? $teacherName : 'your teacher')
+            . ' for '
+            . $displayDate;
+
+        if ($subjectText !== '') {
+            $message .= ': ' . $subjectText;
+            if ($subjectTimeText !== '') {
+                $message .= ' | ' . $subjectTimeText;
+            }
+        } else {
+            $message .= '.';
+        }
+
+        Notification::query()->create([
+            'type' => 'student_law_request_approved',
+            'title' => 'Law request approved',
+            'message' => $message,
+            'url' => route('student.law-requests.index'),
+            'is_read' => false,
+        ]);
+    }
+
+    private function notifyStudentsAttendanceChecked(array $savedStudentRows, $selectedSubject, string $teacherName, string $attendanceDate): void
+    {
+        if ($savedStudentRows === []) {
+            return;
+        }
+
+        $statusLabels = $this->allowedStatuses();
+        $displayDate = Carbon::parse($attendanceDate)->format('M d, Y');
+        $subjectText = trim((string) ($selectedSubject->name ?? ''));
+        $teacherText = $teacherName !== '' ? $teacherName : 'your teacher';
+
+        foreach ($savedStudentRows as $savedStudentRow) {
+            $studentId = (int) ($savedStudentRow['student_id'] ?? 0);
+            if ($studentId <= 0) {
+                continue;
+            }
+
+            $statusKey = strtolower(trim((string) ($savedStudentRow['status'] ?? '')));
+            if ($statusKey === '' || !isset($statusLabels[$statusKey])) {
+                continue;
+            }
+
+            $message = '[student_id:' . $studentId . '] '
+                . 'Your attendance was checked by '
+                . $teacherText
+                . ' for '
+                . $displayDate;
+
+            if ($subjectText !== '') {
+                $message .= ' in ' . $subjectText;
+            }
+
+            $message .= ': ' . $statusLabels[$statusKey] . '.';
+
+            Notification::query()->create([
+                'type' => 'student_attendance_checked',
+                'title' => 'Attendance updated',
+                'message' => $message,
+                'url' => route('student.notices.index'),
+                'is_read' => false,
+            ]);
+        }
+    }
+
+    private function resolveAttendanceSubmission(Request $request, int $teacherId): array
+    {
         $classIds = SchoolClass::query()
             ->when(
                 Schema::hasColumn('subject_study_times', 'school_class_id') && Schema::hasColumn('subject_study_times', 'teacher_id'),
@@ -421,8 +941,12 @@ class AttendanceController extends Controller
             ->values()
             ->all();
 
-        if (count($classIds) === 0) {
-            return back()->withInput()->with('error', 'No class found for this teacher.');
+        if ($classIds === []) {
+            return [
+                'ok' => false,
+                'flash_type' => 'error',
+                'message' => 'No class found for this teacher.',
+            ];
         }
 
         $statuses = array_keys($this->allowedStatuses());
@@ -435,9 +959,27 @@ class AttendanceController extends Controller
         ]);
 
         $schoolClassId = (int) $validated['school_class_id'];
-        $attendanceDate = (string) $validated['attendance_date'];
-        $attendanceRows = $validated['attendance'] ?? [];
+        $subjectOptions = $this->teacherSubjectOptions($teacherId, $schoolClassId);
+        $subjectIds = $subjectOptions
+            ->pluck('id')
+            ->map(fn($id) => (int) $id)
+            ->filter(fn($id) => $id > 0)
+            ->values()
+            ->all();
 
+        if ($subjectIds === []) {
+            return [
+                'ok' => false,
+                'flash_type' => 'error',
+                'message' => 'No subject found for this teacher in the selected class.',
+            ];
+        }
+
+        $subjectValidated = $request->validate([
+            'subject_id' => ['required', 'integer', Rule::in($subjectIds)],
+        ]);
+
+        $subjectId = (int) ($subjectValidated['subject_id'] ?? 0);
         $studentIds = User::query()
             ->where('role', 'student')
             ->where('school_class_id', $schoolClassId)
@@ -446,38 +988,96 @@ class AttendanceController extends Controller
             ->values()
             ->all();
 
-        if (count($studentIds) === 0) {
-            return back()->withInput()->with('warning', 'No students found in selected class.');
+        return [
+            'ok' => true,
+            'school_class_id' => $schoolClassId,
+            'subject_id' => $subjectId,
+            'selected_subject' => $subjectOptions->firstWhere('id', $subjectId),
+            'attendance_date' => (string) $validated['attendance_date'],
+            'attendance_rows' => $validated['attendance'] ?? [],
+            'student_ids' => $studentIds,
+        ];
+    }
+
+    private function approvedLawRequestsByStudent(
+        int $schoolClassId,
+        string $attendanceDate,
+        array $studentIds,
+        int $teacherId,
+        ?int $subjectId,
+        $selectedSubject
+    ) {
+        if (!Schema::hasTable('student_law_requests') || $studentIds === []) {
+            return collect();
         }
 
-        $alreadyCheckedCount = StudentAttendance::query()
-            ->where('teacher_id', $teacherId)
+        $lawRequestQuery = StudentLawRequest::query()
             ->where('school_class_id', $schoolClassId)
-            ->whereDate('attendance_date', $attendanceDate)
+            ->whereDate('requested_for', $attendanceDate)
             ->whereIn('student_id', $studentIds)
-            ->distinct('student_id')
-            ->count('student_id');
+            ->where('status', 'approved')
+            ->orderByDesc('reviewed_at')
+            ->orderByDesc('created_at');
 
-        if ($alreadyCheckedCount >= count($studentIds)) {
-            return redirect()
-                ->route('teacher.attendance.index', [
-                    'class_id' => $schoolClassId,
-                    'date' => $attendanceDate,
-                ])
-                ->with('warning', 'Attendance already saved successfully. Check status cannot be changed.');
+        if (Schema::hasColumn('student_law_requests', 'subject_id') && $subjectId > 0) {
+            $lawRequestQuery->where('subject_id', $subjectId);
+        } elseif ($selectedSubject) {
+            $lawRequestQuery->where('subject', (string) ($selectedSubject->name ?? ''));
         }
 
+        if (Schema::hasColumn('student_law_requests', 'teacher_id')) {
+            $lawRequestQuery->where(function ($query) use ($teacherId) {
+                $query->where('teacher_id', $teacherId)
+                    ->orWhereNull('teacher_id');
+            });
+        }
+
+        return $lawRequestQuery
+            ->get()
+            ->groupBy(function (StudentLawRequest $lawRequest) {
+                return (int) ($lawRequest->student_id ?? 0);
+            })
+            ->map(function ($rows) {
+                return $rows->first();
+            });
+    }
+
+    private function persistAttendanceRows(
+        int $teacherId,
+        int $schoolClassId,
+        ?int $subjectId,
+        $selectedSubject,
+        string $attendanceDate,
+        array $attendanceRows,
+        array $studentIds,
+        array $forcedRows = []
+    ): array {
         $now = now();
         $savedCount = 0;
+        $autoExcusedCount = 0;
+        $savedStudentRows = [];
+        $approvedLawRequestsByStudent = $this->approvedLawRequestsByStudent(
+            $schoolClassId,
+            $attendanceDate,
+            $studentIds,
+            $teacherId,
+            $subjectId,
+            $selectedSubject
+        );
 
         DB::transaction(function () use (
             $studentIds,
             $attendanceRows,
             $attendanceDate,
             $schoolClassId,
+            $subjectId,
             $teacherId,
             $now,
-            &$savedCount
+            $approvedLawRequestsByStudent,
+            $forcedRows,
+            &$savedCount,
+            &$autoExcusedCount,
+            &$savedStudentRows
         ) {
             foreach ($studentIds as $studentId) {
                 $row = $attendanceRows[(string) $studentId] ?? null;
@@ -491,31 +1091,156 @@ class AttendanceController extends Controller
                 }
 
                 $remark = trim((string) ($row['remark'] ?? ''));
+                $approvedLawRequest = $approvedLawRequestsByStudent->get((int) $studentId);
+                if ($approvedLawRequest) {
+                    if ($status !== 'excused') {
+                        $autoExcusedCount += 1;
+                    }
+
+                    $status = 'excused';
+                    $lawRemark = $this->buildStudentLawRequestRemark($approvedLawRequest);
+                    if ($lawRemark !== '') {
+                        if ($remark !== '' && stripos($remark, $lawRemark) === false) {
+                            $remark = $lawRemark . ' | ' . $remark;
+                        } elseif ($remark === '') {
+                            $remark = $lawRemark;
+                        }
+                        $remark = mb_substr($remark, 0, 255);
+                    }
+                }
+
+                $forcedRow = $forcedRows[(int) $studentId] ?? null;
+                if (is_array($forcedRow)) {
+                    $forcedStatus = strtolower(trim((string) ($forcedRow['status'] ?? '')));
+                    if ($forcedStatus !== '') {
+                        $status = $forcedStatus;
+                    }
+
+                    $forcedRemark = trim((string) ($forcedRow['remark'] ?? ''));
+                    if ($forcedRemark !== '') {
+                        $remark = $forcedRemark;
+                    }
+                }
 
                 StudentAttendance::query()->updateOrCreate(
-                    [
-                        'student_id' => $studentId,
-                        'attendance_date' => $attendanceDate,
-                    ],
-                    [
-                        'teacher_id' => $teacherId,
-                        'school_class_id' => $schoolClassId,
-                        'status' => $status,
-                        'remark' => $remark !== '' ? $remark : null,
-                        'checked_at' => $now,
-                    ]
+                    $this->attendanceMatchAttributes($studentId, $attendanceDate, $subjectId),
+                    $this->attendancePayload($teacherId, $schoolClassId, $subjectId, $status, $remark, $now)
                 );
 
                 $savedCount += 1;
+                $savedStudentRows[] = [
+                    'student_id' => (int) $studentId,
+                    'status' => $status,
+                ];
             }
         });
 
-        return redirect()
-            ->route('teacher.attendance.index', [
-                'class_id' => $schoolClassId,
-                'date' => $attendanceDate,
-            ])
-            ->with('success', 'Attendance checked successfully for ' . $savedCount . ' student(s).');
+        return [$savedCount, $autoExcusedCount, $savedStudentRows];
+    }
+
+    private function buildStudentLawRequestRemark(StudentLawRequest $lawRequest): string
+    {
+        $lawType = trim((string) ($lawRequest->law_type ?? ''));
+        $subject = trim((string) ($lawRequest->subject ?? ''));
+        $subjectTime = trim((string) ($lawRequest->subject_time ?? ''));
+        $reason = trim((string) ($lawRequest->reason ?? ''));
+        $labelType = $lawType !== '' ? ucwords(str_replace('_', ' ', $lawType)) : 'Request';
+        $remark = 'Law Request (' . $labelType . ')';
+
+        if ($subject !== '') {
+            $remark .= ': ' . $subject;
+            if ($subjectTime !== '') {
+                $remark .= ' @ ' . $subjectTime;
+            }
+        }
+
+        if ($reason !== '') {
+            $remark .= ($subject !== '' ? ' | ' : ': ') . $reason;
+        }
+
+        return trim($remark);
+    }
+
+    private function teacherSubjectOptions(int $teacherId, int $schoolClassId)
+    {
+        $query = Subject::query()
+            ->orderBy('name');
+
+        if (
+            Schema::hasTable('subject_study_times')
+            && Schema::hasColumn('subject_study_times', 'teacher_id')
+            && Schema::hasColumn('subject_study_times', 'school_class_id')
+        ) {
+            $subjectIds = SubjectStudyTime::query()
+                ->where('teacher_id', $teacherId)
+                ->where('school_class_id', $schoolClassId)
+                ->pluck('subject_id')
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => $id > 0)
+                ->unique()
+                ->values()
+                ->all();
+
+            if ($subjectIds !== []) {
+                return $query->whereIn('id', $subjectIds)->get(['id', 'name', 'code']);
+            }
+        }
+
+        return $query
+            ->where('teacher_id', $teacherId)
+            ->where('school_class_id', $schoolClassId)
+            ->get(['id', 'name', 'code']);
+    }
+
+    private function attendanceMatchAttributes(int $studentId, string $attendanceDate, ?int $subjectId = null): array
+    {
+        $attributes = [
+            'student_id' => $studentId,
+            'attendance_date' => $attendanceDate,
+        ];
+
+        if (Schema::hasColumn('student_attendances', 'subject_id')) {
+            $attributes['subject_id'] = $subjectId > 0 ? $subjectId : null;
+        }
+
+        return $attributes;
+    }
+
+    private function attendancePayload(?int $teacherId, ?int $schoolClassId, ?int $subjectId, string $status, ?string $remark, $checkedAt): array
+    {
+        $payload = [
+            'teacher_id' => $teacherId,
+            'school_class_id' => $schoolClassId,
+            'status' => $status,
+            'remark' => $remark !== '' ? $remark : null,
+            'checked_at' => $checkedAt,
+        ];
+
+        if (Schema::hasColumn('student_attendances', 'subject_id')) {
+            $payload['subject_id'] = $subjectId > 0 ? $subjectId : null;
+        }
+
+        return $payload;
+    }
+
+    private function resolveLawRequestSubjectId(StudentLawRequest $lawRequest): ?int
+    {
+        if (Schema::hasColumn('student_law_requests', 'subject_id')) {
+            $subjectId = (int) ($lawRequest->subject_id ?? 0);
+            if ($subjectId > 0) {
+                return $subjectId;
+            }
+        }
+
+        $subjectName = trim((string) ($lawRequest->subject ?? ''));
+        if ($subjectName === '') {
+            return null;
+        }
+
+        return Subject::query()
+            ->where('school_class_id', (int) ($lawRequest->school_class_id ?? 0))
+            ->where('name', $subjectName)
+            ->value('id');
     }
 
     private function allowedStatuses(): array

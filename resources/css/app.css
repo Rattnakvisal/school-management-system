@@ -1462,6 +1462,12 @@
         vertical-align: top;
     }
 
+    .teacher-time-stage .teacher-attendance-table-wrap,
+    .teacher-time-stage .teacher-attendance-table-scroller,
+    .teacher-time-stage .teacher-attendance-table {
+        min-width: 0;
+    }
+
     /* ==============================
      Define per-stage accent easily
   =============================== */
@@ -1659,7 +1665,86 @@
             line-height: 1.2;
         }
 
-        .teacher-time-stage table,
+        .teacher-time-stage .teacher-attendance-table-wrap {
+            overflow: visible;
+            border-radius: 1.5rem;
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .teacher-time-stage .teacher-attendance-table-scroller {
+            max-height: none;
+            overflow: visible;
+            background: transparent;
+        }
+
+        .teacher-time-stage .teacher-attendance-table {
+            display: block;
+            min-width: 0;
+            background: transparent;
+        }
+
+        .teacher-time-stage .teacher-attendance-table thead {
+            display: none;
+        }
+
+        .teacher-time-stage .teacher-attendance-table tbody {
+            display: grid;
+            gap: 0.85rem;
+            background: transparent;
+        }
+
+        .teacher-time-stage .teacher-attendance-table tbody tr.teacher-attendance-row {
+            display: block;
+            overflow: hidden;
+            border: 1px solid #dbe3f0;
+            border-radius: 1.25rem;
+            background: #ffffff;
+            box-shadow: 0 12px 24px -24px rgba(15, 23, 42, 0.35);
+        }
+
+        .teacher-time-stage .teacher-attendance-table tbody tr.teacher-attendance-row td.teacher-attendance-cell {
+            display: block;
+            padding: 0.85rem 1rem;
+            border: 0;
+        }
+
+        .teacher-time-stage .teacher-attendance-table tbody tr.teacher-attendance-row td.teacher-attendance-cell + td.teacher-attendance-cell {
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .teacher-time-stage .teacher-attendance-cell::before {
+            content: attr(data-cell-label);
+            display: block;
+            margin-bottom: 0.55rem;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        .teacher-time-stage .teacher-attendance-cell .max-w-xs {
+            max-width: 100%;
+        }
+
+        .teacher-time-stage .teacher-attendance-cell .truncate {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            overflow-wrap: anywhere;
+        }
+
+        .teacher-time-stage .teacher-attendance-cell input[type="text"] {
+            width: 100%;
+        }
+
+        .teacher-time-stage .js-attendance-submit-form > .flex:first-of-type button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .teacher-time-stage table:not(.teacher-attendance-table),
         .teacher-classes-stage table {
             min-width: 860px;
         }

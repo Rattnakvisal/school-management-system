@@ -23,10 +23,11 @@
 
         {{-- SIDEBAR --}}
         <aside
-            class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col overflow-hidden border-r border-slate-200/80 bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.10),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_24px_50px_-34px_rgba(15,23,42,0.35)] transition-all duration-300 lg:translate-x-0"
+            class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col overflow-hidden border-r border-slate-200/80 bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.10),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_24px_50px_-34px_rgba(15,23,42,0.35)] transition-all duration-300"
             :class="[
-                mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-                sidebarCollapsed ? 'w-24' : 'w-72'
+                isDesktop
+                    ? (sidebarCollapsed ? 'translate-x-0 w-24' : 'translate-x-0 w-72')
+                    : (mobileOpen ? 'translate-x-0 w-[84vw] max-w-[19rem]' : '-translate-x-full w-[84vw] max-w-[19rem]')
             ]"
             aria-label="Sidebar">
 
@@ -223,7 +224,7 @@
             </nav>
 
             {{-- Footer card --}}
-            <div class="border-t border-slate-200/80 p-4 shrink-0" x-show="!sidebarCollapsed" x-transition>
+            <div class="hidden shrink-0 border-t border-slate-200/80 p-4 sm:block" x-show="!sidebarCollapsed" x-transition>
                 <div
                     class="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-4 text-white shadow-[0_18px_40px_-24px_rgba(79,70,229,0.9)]">
                     <div class="text-[11px] font-black uppercase tracking-[0.22em] text-white/70">Teacher Focus</div>
@@ -239,7 +240,8 @@
         </aside>
 
         {{-- MAIN AREA --}}
-        <div class="min-h-screen flex flex-col" :class="sidebarCollapsed ? 'lg:pl-24' : 'lg:pl-72'">
+        <div class="min-h-screen flex flex-col transition-[padding] duration-300"
+            :class="isDesktop ? (sidebarCollapsed ? 'pl-24' : 'pl-72') : 'pl-0'">
 
             {{-- TOPBAR --}}
             <header class="sticky top-0 z-30 border-b border-slate-200 bg-slate-100/80 backdrop-blur">

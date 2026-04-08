@@ -18,6 +18,10 @@ Route::middleware(['auth', 'role:teacher'])
         Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
         Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::post('/attendance/law-requests/{lawRequest}/approve', [AttendanceController::class, 'approveLawRequest'])
+            ->name('attendance.law-requests.approve');
+        Route::post('/attendance/law-requests/{lawRequest}/reject', [AttendanceController::class, 'rejectLawRequest'])
+            ->name('attendance.law-requests.reject');
         Route::get('/law-requests', [LawRequestController::class, 'index'])->name('law-requests.index');
         Route::post('/law-requests', [LawRequestController::class, 'store'])->name('law-requests.store');
         Route::put('/law-requests/{lawRequest}', [LawRequestController::class, 'update'])->name('law-requests.update');

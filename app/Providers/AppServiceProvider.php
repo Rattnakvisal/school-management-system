@@ -22,35 +22,47 @@ class AppServiceProvider extends ServiceProvider
         View::composer([
             'layout.admin.navbar.navbar',
             'layout.teacher.navbar',
+            'layout.students.navbar',
         ], function ($view) {
             $role = strtolower((string) (auth()->user()?->role ?? ''));
             $userId = (int) (auth()->id() ?? 0);
             $notifQuery = Notification::query()->latest();
             $unreadQuery = Notification::query()->where('is_read', false);
+            $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request'];
+            $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked'];
 
             // Teacher law-request notifications are admin workflow alerts.
             if ($role === 'teacher') {
                 $teacherTag = '[teacher_id:' . $userId . ']';
 
                 $notifQuery->where('type', '!=', 'teacher_law_request')
-                    ->where(function ($query) use ($teacherTag) {
-                        $query->whereNotIn('type', ['teacher_law_request_approved', 'teacher_attendance_checked'])
+                    ->where(function ($query) use ($teacherTag, $teacherOnlyTypes) {
+                        $query->whereNotIn('type', $teacherOnlyTypes)
                             ->orWhere('message', 'like', '%' . $teacherTag . '%');
                     });
 
                 $unreadQuery->where('type', '!=', 'teacher_law_request')
-                    ->where(function ($query) use ($teacherTag) {
-                        $query->whereNotIn('type', ['teacher_law_request_approved', 'teacher_attendance_checked'])
+                    ->where(function ($query) use ($teacherTag, $teacherOnlyTypes) {
+                        $query->whereNotIn('type', $teacherOnlyTypes)
                             ->orWhere('message', 'like', '%' . $teacherTag . '%');
                     });
             } elseif ($role === 'admin') {
                 // Approval notifications are for teachers.
-                $notifQuery->whereNotIn('type', ['teacher_law_request_approved', 'teacher_attendance_checked']);
-                $unreadQuery->whereNotIn('type', ['teacher_law_request_approved', 'teacher_attendance_checked']);
+                $notifQuery->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes));
+                $unreadQuery->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes));
             } else {
-                // Non-admin/non-teacher users should not see admin/teacher workflow alerts.
-                $notifQuery->whereNotIn('type', ['teacher_law_request', 'teacher_law_request_approved', 'teacher_attendance_checked']);
-                $unreadQuery->whereNotIn('type', ['teacher_law_request', 'teacher_law_request_approved', 'teacher_attendance_checked']);
+                // Student notifications can include targeted student alerts.
+                $studentTag = '[student_id:' . $userId . ']';
+                $notifQuery->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes))
+                    ->where(function ($query) use ($studentOnlyTypes, $studentTag) {
+                        $query->whereNotIn('type', $studentOnlyTypes)
+                            ->orWhere('message', 'like', '%' . $studentTag . '%');
+                    });
+                $unreadQuery->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes))
+                    ->where(function ($query) use ($studentOnlyTypes, $studentTag) {
+                        $query->whereNotIn('type', $studentOnlyTypes)
+                            ->orWhere('message', 'like', '%' . $studentTag . '%');
+                    });
             }
 
             $notifs = $notifQuery->take(10)->get();

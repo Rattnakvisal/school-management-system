@@ -3,32 +3,10 @@
 @section('page')
     @php
         $selectedClass = collect($classes ?? [])->firstWhere('id', (int) ($classId ?? 0));
+        $selectedSubject = collect($subjectsForSelectedClass ?? [])->firstWhere('id', (int) ($subjectId ?? 0));
     @endphp
 
     <div class="teacher-time-stage space-y-6">
-        <section class="teacher-time-reveal admin-page-header teacher-page-header" style="--sd: 1;">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Attendance Check</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">
-                        Mark daily attendance for students in your classes.
-                    </p>
-                </div>
-
-                <div class="teacher-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="admin-page-stat">Students: {{ number_format($summary['students'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Present:
-                        {{ number_format($summary['present'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--rose">Absent:
-                        {{ number_format($summary['absent'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--amber">Late:
-                        {{ number_format($summary['late'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--rose">Not Marked:
-                        {{ number_format($summary['not_marked'] ?? 0) }}</span>
-                </div>
-            </div>
-        </section>
-
         @if (session('success'))
             <div class="js-inline-flash teacher-time-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
                 style="--sd: 2;">
@@ -63,6 +41,9 @@
                 <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
                     <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-700">
                         Class: {{ $selectedClass?->display_name ?? 'Not selected' }}
+                    </span>
+                    <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700">
+                        Subject: {{ $selectedSubject?->name ?? 'Choose class first' }}
                     </span>
                     <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-700">
                         Date: {{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}
@@ -104,6 +85,12 @@
 
                     <form method="GET" action="{{ route('teacher.attendance.index') }}"
                         class="flex min-h-0 flex-1 flex-col" @submit="filterOpen = false">
+                        @if (($classId ?? '') !== '')
+                            <input type="hidden" name="class_id" value="{{ $classId }}">
+                        @endif
+                        @if (($subjectId ?? '') !== '')
+                            <input type="hidden" name="subject_id" value="{{ $subjectId }}">
+                        @endif
                         <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                             <section class="space-y-2">
                                 <h4 class="text-xl font-bold text-slate-900">Date</h4>
@@ -376,8 +363,7 @@
             @if (($classId ?? '') === '')
             @else
                 @php
-                    $selectedClassStatus = $classAttendanceStatus[(int) ($classId ?? 0)] ?? null;
-                    $isSelectedClassSaved = ($selectedClassStatus['state'] ?? '') === 'saved';
+                    $isSelectedSubjectSaved = ($selectedSubjectAttendanceStatus['state'] ?? '') === 'saved';
                 @endphp
                 <div class="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-200 bg-slate-50/80 px-4 py-4 sm:px-5">
@@ -385,8 +371,11 @@
                             <div>
                                 <div class="text-sm font-black text-slate-900">Attendance Table</div>
                                 <div class="mt-1 text-xs text-slate-500">
-                                    Mark attendance for {{ $selectedClass?->display_name ?? 'this class' }} on
-                                    {{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}.
+                                    Mark attendance for {{ $selectedClass?->display_name ?? 'this class' }}
+                                    @if ($selectedSubject)
+                                        in {{ $selectedSubject->name }}
+                                    @endif
+                                    on {{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}.
                                 </div>
                             </div>
 
@@ -417,53 +406,103 @@
                                 class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700">
                                 Selected class: {{ $selectedClass?->display_name ?? 'N/A' }}
                             </span>
+                            <span class="rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-sky-700">
+                                Subject: {{ $selectedSubject?->name ?? 'Not selected' }}
+                            </span>
                         </div>
+
+                        @if (collect($subjectsForSelectedClass ?? [])->isNotEmpty())
+                            <div class="mt-4">
+                                <div class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Subject for this
+                                    class</div>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    @foreach ($subjectsForSelectedClass as $subjectOption)
+                                        @php
+                                            $subjectStatus =
+                                                $subjectAttendanceStatus[(int) ($subjectOption->id ?? 0)] ?? null;
+                                            $isActiveSubject =
+                                                (string) ($subjectId ?? '') === (string) ($subjectOption->id ?? '');
+                                            $isSavedSubject = ($subjectStatus['state'] ?? '') === 'saved';
+                                        @endphp
+                                        <a href="{{ route(
+                                            'teacher.attendance.index',
+                                            array_filter(
+                                                [
+                                                    'class_id' => $classId,
+                                                    'subject_id' => $subjectOption->id,
+                                                    'date' => $selectedDate,
+                                                    'q' => $search ?: null,
+                                                    'status' => ($statusFilter ?? 'all') !== 'all' ? $statusFilter : null,
+                                                ],
+                                                fn($value) => !is_null($value) && $value !== '',
+                                            ),
+                                        ) }}"
+                                            class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition {{ $isActiveSubject ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : ($isSavedSubject ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50') }}">
+                                            <span>{{ $subjectOption->name }}</span>
+                                            <span
+                                                class="rounded-full px-2 py-0.5 text-[10px] {{ $isSavedSubject ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
+                                                {{ $isSavedSubject ? 'Saved' : 'Pending' }}
+                                            </span>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        @if (!$selectedSubject)
+                            <div
+                                class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+                                Choose a subject for this class before saving attendance.
+                            </div>
+                        @endif
                     </div>
 
                     <form method="POST" action="{{ route('teacher.attendance.store') }}"
                         class="js-attendance-submit-form space-y-4 p-4 sm:p-5">
                         @csrf
                         <input type="hidden" name="school_class_id" value="{{ $classId }}">
+                        <input type="hidden" name="subject_id" value="{{ $subjectId }}">
                         <input type="hidden" name="attendance_date" value="{{ $selectedDate }}">
 
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            @if ($isSelectedClassSaved)
+                        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                            @if ($isSelectedSubjectSaved)
                                 <p
                                     class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
-                                    Attendance saved successfully. Check status cannot be changed.
+                                    Attendance for this subject is already saved. Check status cannot be changed.
                                 </p>
                             @else
                                 <p class="text-xs font-semibold text-slate-500">
-                                    Choose a status for each student, then save the table below.
+                                    Choose a status for each student in this subject, then save the table below.
                                 </p>
                             @endif
 
-                            <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                                 <button type="button" data-set-all-status="present"
-                                    {{ $isSelectedClassSaved ? 'disabled' : '' }}
-                                    class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                    {{ !$selectedSubject || $isSelectedSubjectSaved ? 'disabled' : '' }}
+                                    class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50 sm:py-1.5">
                                     Set All Present
                                 </button>
                                 <button type="button" data-set-all-status="absent"
-                                    {{ $isSelectedClassSaved ? 'disabled' : '' }}
-                                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                    {{ !$selectedSubject || $isSelectedSubjectSaved ? 'disabled' : '' }}
+                                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50 sm:py-1.5">
                                     Set All Absent
                                 </button>
                                 <button type="submit"
-                                    {{ !$hasAttendanceTable || $isSelectedClassSaved ? 'disabled' : '' }}
-                                    class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50">
+                                    {{ !$hasAttendanceTable || !$selectedSubject || $isSelectedSubjectSaved ? 'disabled' : '' }}
+                                    class="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 sm:py-2">
                                     Save Attendance
                                 </button>
                             </div>
                         </div>
 
-                        <div class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
-                            <div class="max-h-[620px] overflow-auto">
-                                <table class="w-full min-w-[980px] text-left text-sm">
+                        <div class="teacher-attendance-table-wrap overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+                            <div class="teacher-attendance-table-scroller max-h-[620px] overflow-auto">
+                                <table class="teacher-attendance-table w-full min-w-[1220px] text-left text-sm">
                                     <thead
                                         class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 text-xs uppercase tracking-wide text-slate-500 backdrop-blur">
                                         <tr>
                                             <th class="px-4 py-3 font-semibold">Student Profile</th>
+                                            <th class="px-4 py-3 font-semibold">Law Request</th>
                                             <th class="px-4 py-3 font-semibold">Attendance</th>
                                             <th class="px-4 py-3 font-semibold">Check Status</th>
                                             <th class="px-4 py-3 font-semibold">Remark</th>
@@ -473,19 +512,65 @@
                                         @forelse ($students as $student)
                                             @php
                                                 $record = $attendanceByStudent->get($student->id);
+                                                $lawRequest = ($lawRequestsByStudent ?? collect())->get(
+                                                    (int) $student->id,
+                                                );
                                                 $currentStatus = strtolower((string) ($record?->status ?? ''));
+                                                $lawStatus = strtolower((string) ($lawRequest?->status ?? ''));
+                                                $isLawApproved = $lawStatus === 'approved';
+                                                $isLawPending = $lawStatus === 'pending';
+                                                $isLawRejected = $lawStatus === 'rejected';
+                                                $hasActiveLawRequest =
+                                                    $lawRequest && ($isLawPending || $isLawApproved || $isLawRejected);
+                                                $lawTypeLabel = $lawRequest
+                                                    ? ucfirst(
+                                                        str_replace(
+                                                            '_',
+                                                            ' ',
+                                                            (string) ($lawRequest->law_type ?? 'request'),
+                                                        ),
+                                                    )
+                                                    : '';
+                                                $lawRequestSubject = trim((string) ($lawRequest->subject ?? ''));
+                                                $lawRequestSubjectTime = trim(
+                                                    (string) ($lawRequest->subject_time ?? ''),
+                                                );
+                                                $defaultLawRemark = '';
+                                                if ($hasActiveLawRequest) {
+                                                    $defaultLawRemark = 'Law Request (' . $lawTypeLabel . ')';
+                                                    if ($lawRequestSubject !== '') {
+                                                        $defaultLawRemark .= ': ' . $lawRequestSubject;
+                                                    }
+                                                    if ($lawRequestSubjectTime !== '') {
+                                                        $defaultLawRemark .= ' @ ' . $lawRequestSubjectTime;
+                                                    }
+                                                    if (!empty($lawRequest?->reason)) {
+                                                        $defaultLawRemark .=
+                                                            ($lawRequestSubject !== '' ? ' | ' : ': ') .
+                                                            trim((string) $lawRequest->reason);
+                                                    }
+                                                    $defaultLawRemark = mb_substr($defaultLawRemark, 0, 170);
+                                                }
                                                 $selectedStatus = old(
                                                     'attendance.' . $student->id . '.status',
-                                                    $currentStatus !== '' ? $currentStatus : 'present',
+                                                    $currentStatus !== ''
+                                                        ? $currentStatus
+                                                        : ($isLawApproved
+                                                            ? 'excused'
+                                                            : ($isLawRejected
+                                                                ? 'absent'
+                                                                : 'present')),
                                                 );
                                                 $remarkValue = old(
                                                     'attendance.' . $student->id . '.remark',
-                                                    (string) ($record?->remark ?? ''),
+                                                    (string) ($record?->remark ?? $defaultLawRemark),
                                                 );
                                             @endphp
-                                            <tr class="js-attendance-row align-top hover:bg-slate-50/80"
-                                                data-student-name="{{ $student->name }}">
-                                                <td class="px-4 py-4">
+                                            <tr class="teacher-attendance-row js-attendance-row align-top hover:bg-slate-50/80"
+                                                data-student-name="{{ $student->name }}"
+                                                data-student-id="{{ $student->id }}"
+                                                data-law-request-id="{{ (int) ($lawRequest->id ?? 0) }}">
+                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Student Profile">
                                                     <div class="flex items-center gap-3">
                                                         <div
                                                             class="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-indigo-100 ring-2 ring-white shadow-sm">
@@ -504,23 +589,87 @@
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="px-4 py-4">
+                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Law Request">
+                                                    @if ($hasActiveLawRequest)
+                                                        <div class="space-y-2">
+                                                            <div class="flex flex-wrap items-center gap-1.5">
+                                                                <span data-law-request-badge
+                                                                    class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold {{ $isLawApproved ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : ($isLawRejected ? 'border-red-200 bg-red-50 text-red-700' : 'border-amber-200 bg-amber-50 text-amber-700') }}">
+                                                                    {{ ucfirst($lawStatus) }}
+                                                                </span>
+                                                                <span
+                                                                    class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">
+                                                                    {{ $lawTypeLabel }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="text-xs font-semibold text-slate-700">
+                                                                {{ $lawRequestSubject !== '' ? $lawRequestSubject : 'Subject not set' }}
+                                                            </div>
+                                                            <div class="text-xs text-indigo-600">
+                                                                {{ $lawRequest->requested_for?->format('M d, Y') ?? 'Selected date' }}
+                                                                @if ($lawRequestSubjectTime !== '')
+                                                                    | {{ $lawRequestSubjectTime }}
+                                                                @endif
+                                                            </div>
+                                                            @if (!empty($lawRequest?->reason))
+                                                                <div
+                                                                    class="max-w-xs text-xs leading-relaxed text-slate-500 line-clamp-3">
+                                                                    {{ $lawRequest->reason }}
+                                                                </div>
+                                                            @endif
+                                                            @if ($isLawPending)
+                                                                <div class="flex flex-wrap gap-2 pt-1"
+                                                                    data-law-request-actions>
+                                                                    <button type="submit"
+                                                                        formaction="{{ route('teacher.attendance.law-requests.approve', $lawRequest) }}"
+                                                                        formmethod="POST" formnovalidate
+                                                                        data-law-action="approve"
+                                                                        {{ !$selectedSubject || $isSelectedSubjectSaved ? 'disabled' : '' }}
+                                                                        class="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                                                        Approve
+                                                                    </button>
+                                                                    <button type="submit"
+                                                                        formaction="{{ route('teacher.attendance.law-requests.reject', $lawRequest) }}"
+                                                                        formmethod="POST" formnovalidate
+                                                                        data-law-action="reject"
+                                                                        {{ !$selectedSubject || $isSelectedSubjectSaved ? 'disabled' : '' }}
+                                                                        class="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                                                        Cancel
+                                                                    </button>
+                                                                </div>
+                                                            @elseif ($isLawRejected)
+                                                                <div class="text-[11px] font-semibold text-red-700"
+                                                                    data-law-request-state>
+                                                                    Cancelled and marked absent
+                                                                </div>
+                                                            @else
+                                                                <div class="text-[11px] font-semibold text-emerald-700"
+                                                                    data-law-request-state>
+                                                                    Approved for attendance
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    @else
+                                                        <span class="text-xs text-slate-400">No request</span>
+                                                    @endif
+                                                </td>
+                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Attendance">
                                                     @if ($currentStatus !== '' && isset($statusLabels[$currentStatus]))
-                                                        <span
+                                                        <span data-attendance-indicator
                                                             class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                                                             {{ $statusLabels[$currentStatus] }}
                                                         </span>
                                                     @else
-                                                        <span
+                                                        <span data-attendance-indicator
                                                             class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
                                                             Not Checked Yet
                                                         </span>
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-4">
+                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Check Status">
                                                     <div class="space-y-2">
                                                         <select name="attendance[{{ $student->id }}][status]"
-                                                            {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                                                            {{ !$selectedSubject || $isSelectedSubjectSaved ? 'disabled' : '' }}
                                                             class="js-student-status sr-only" tabindex="-1"
                                                             aria-hidden="true">
                                                             @foreach ($statusLabels as $statusKey => $statusLabel)
@@ -537,7 +686,7 @@
                                                                 @endphp
                                                                 <button type="button"
                                                                     data-status-option="{{ $statusKey }}"
-                                                                    {{ $isSelectedClassSaved ? 'disabled' : '' }}
+                                                                    {{ !$selectedSubject || $isSelectedSubjectSaved ? 'disabled' : '' }}
                                                                     aria-pressed="{{ $isActiveStatus ? 'true' : 'false' }}"
                                                                     class="js-status-box rounded-lg border px-2 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 {{ $isActiveStatus ? 'border-indigo-300 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-indigo-700' }}">
                                                                     {{ $statusLabel }}
@@ -546,7 +695,7 @@
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="px-4 py-4">
+                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Remark">
                                                     <input type="text" name="attendance[{{ $student->id }}][remark]"
                                                         value="{{ $remarkValue }}" maxlength="255"
                                                         class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
@@ -555,7 +704,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="px-4 py-10 text-center text-sm text-slate-500">
+                                                <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500">
                                                     No users found for this class and filter.
                                                 </td>
                                             </tr>

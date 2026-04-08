@@ -14,6 +14,7 @@ class StudentAttendance extends Model
         'student_id',
         'teacher_id',
         'school_class_id',
+        'subject_id',
         'attendance_date',
         'status',
         'remark',
@@ -26,6 +27,7 @@ class StudentAttendance extends Model
             'student_id' => 'integer',
             'teacher_id' => 'integer',
             'school_class_id' => 'integer',
+            'subject_id' => 'integer',
             'attendance_date' => 'date',
             'checked_at' => 'datetime',
         ];
@@ -45,5 +47,9 @@ class StudentAttendance extends Model
     {
         return $this->belongsTo(SchoolClass::class);
     }
-}
 
+    public function subject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
+    }
+}

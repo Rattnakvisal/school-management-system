@@ -10,9 +10,7 @@
     $sections = [
         [
             'title' => 'Main',
-            'items' => [
-                $item('admin.dashboard', 'Dashboard', 'home'),
-            ],
+            'items' => [$item('admin.dashboard', 'Dashboard', 'home')],
         ],
         [
             'title' => 'Management',
@@ -35,15 +33,11 @@
         ],
         [
             'title' => 'Communication',
-            'items' => [
-                $item('admin.contacts.index', 'Contacts', 'mail', $contactUnread ?? 0),
-            ],
+            'items' => [$item('admin.contacts.index', 'Contacts', 'mail', $contactUnread ?? 0)],
         ],
         [
             'title' => 'System',
-            'items' => [
-                $item('admin.settings', 'Settings', 'cog'),
-            ],
+            'items' => [$item('admin.settings', 'Settings', 'cog')],
         ],
     ];
 @endphp

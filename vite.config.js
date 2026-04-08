@@ -17,6 +17,7 @@ export default defineConfig({
                 'resources/js/admin/subject.js',
                 'resources/js/admin/time-studies.js',
                 'resources/js/Teacher/Attendence.js',
+                'resources/js/Student/LawRequests.js',
             ],
             refresh: true,
         }),

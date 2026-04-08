@@ -18,7 +18,11 @@
             this.notifOpen = false;
             this.profileOpen = false;
         }
-    }" @keydown.escape.window="closeAll()" class="min-h-screen">
+    }" @keydown.escape.window="closeAll()" class="min-h-screen" data-student-notification-root
+        data-notification-poll-url="{{ route('student.notifications.poll') }}"
+        data-notification-readall-url="{{ route('student.notifications.readAll') }}"
+        data-notification-latest-id="{{ (int) ($navNotifs->first()->id ?? 0) }}"
+        data-notification-unread-count="{{ (int) ($navUnread ?? 0) }}">
 
         {{-- MOBILE OVERLAY --}}
         <div x-show="mobile" class="fixed inset-0 z-40 bg-black/40 lg:hidden" @click="mobile = false"></div>
@@ -77,11 +81,11 @@
                             ],
                         ],
                         [
-                            'title' => 'Attendance',
+                            'title' => 'Requests',
                             'items' => [
-                                $item('student.attendance.index', 'Attendance', 'check'),
+                                $item('student.law-requests.index', 'Law Requests', 'document'),
                                 $item('student.schedule.index', 'Schedule', 'calendar'),
-                                $item('student.notices.index', 'Notices', 'bell'),
+                                $item('student.notices.index', 'Notifications', 'bell'),
                             ],
                         ],
                         [
@@ -168,6 +172,18 @@
                                                 </svg>
                                             @break
 
+                                            @case('document')
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
+                                                    viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M8 3.5h6l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20V5A1.5 1.5 0 0 1 7.5 3.5Z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M14 3.5V8h4" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M9 12h6M9 16h6" />
+                                                </svg>
+                                            @break
+
                                             @case('cog')
                                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
                                                     viewBox="0 0 24 24" aria-hidden="true">
@@ -227,6 +243,68 @@
 
                     <div class="flex-1 text-sm font-semibold text-slate-700">
                         Welcome back, {{ auth()->user()->name }}
+                    </div>
+
+                    <div class="relative" @click.outside="notifOpen=false">
+                        <button
+                            class="relative inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
+                            @click="profileOpen = false; notifOpen = !notifOpen" aria-label="Notifications"
+                            type="button">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2Z" />
+                            </svg>
+
+                            <span id="student-notif-badge"
+                                class="absolute -top-1 -right-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white {{ ($navUnread ?? 0) > 0 ? '' : 'hidden' }}">
+                                {{ $navUnread ?? 0 }}
+                            </span>
+                        </button>
+
+                        <div x-show="notifOpen" x-cloak x-transition.origin.top.right
+                            class="fixed left-3 right-3 top-20 z-[80] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80">
+                            <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                                <div class="text-sm font-bold text-slate-900">Notifications</div>
+                                <span class="text-xs text-slate-500">Latest</span>
+                            </div>
+
+                            <div id="student-notif-list" class="max-h-80 overflow-auto">
+                                @forelse (($navNotifs ?? []) as $n)
+                                    <a href="{{ trim((string) ($n->url ?? '')) !== '' ? $n->url : route('student.notices.index') }}"
+                                        class="block px-4 py-3 hover:bg-slate-50">
+                                        <div class="flex items-start gap-3">
+                                            <span
+                                                class="mt-2 h-2 w-2 rounded-full {{ $n->is_read ? 'bg-slate-300' : 'bg-indigo-600' }}"></span>
+                                            <div class="min-w-0">
+                                                <div class="text-sm font-semibold text-slate-800">{{ $n->title }}</div>
+                                                <div class="truncate text-xs text-slate-500">{{ $n->message }}</div>
+                                                <div class="mt-1 text-[11px] text-slate-400">
+                                                    {{ $n->created_at->diffForHumans() }}</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                @empty
+                                    <div id="student-notif-empty"
+                                        class="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.</div>
+                                @endforelse
+                            </div>
+
+                            <div class="border-t border-slate-100 px-4 py-3">
+                                <div class="grid gap-2 sm:grid-cols-2">
+                                    <a href="{{ route('student.notices.index') }}"
+                                        class="rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-slate-800">
+                                        View all
+                                    </a>
+                                    <form method="POST" action="{{ route('student.notifications.readAll') }}">
+                                        @csrf
+                                        <button
+                                            class="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                            Mark all read
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- PROFILE --}}
