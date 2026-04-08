@@ -67,6 +67,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let lastAutoRequestedFor = "";
 
+    const queueAlerts = (items) => {
+        const alerts = Array.isArray(items) ? items.filter(Boolean) : [];
+        if (alerts.length === 0) {
+            return Promise.resolve();
+        }
+
+        document.querySelectorAll(".js-inline-flash").forEach((element) => {
+            element.classList.add("hidden");
+        });
+
+        return alerts.reduce((chain, config) => {
+            return chain.then(() => showAlert(config));
+        }, Promise.resolve());
+    };
+
     const showAlert = (options) => {
         const config = {
             icon: options.icon || "success",
@@ -433,13 +448,5 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (alertQueue.length > 0) {
-        document.querySelectorAll(".js-inline-flash").forEach((element) => {
-            element.classList.add("hidden");
-        });
-
-        alertQueue.reduce((chain, config) => {
-            return chain.then(() => showAlert(config));
-        }, Promise.resolve());
-    }
+    queueAlerts(alertQueue);
 });

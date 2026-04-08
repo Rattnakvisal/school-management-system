@@ -11,6 +11,29 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        $query = $this->teacherNotificationQuery($user?->id ?? 0, $user?->role ?? '');
+
+        $notifications = (clone $query)
+            ->latest()
+            ->take(20)
+            ->get(['id', 'type', 'title', 'message', 'url', 'is_read', 'created_at'])
+            ->map(fn(Notification $notification) => $this->formatNotification($notification))
+            ->values()
+            ->all();
+
+        $latestId = (int) ((clone $query)->max('id') ?? 0);
+        $unreadCount = (int) ((clone $query)->where('is_read', false)->count());
+
+        return view('teacher.notices', [
+            'notifications' => $notifications,
+            'latestId' => $latestId,
+            'unreadCount' => $unreadCount,
+        ]);
+    }
+
     public function poll(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -20,17 +43,7 @@ class NotificationController extends Controller
             ->latest()
             ->take(10)
             ->get(['id', 'type', 'title', 'message', 'url', 'is_read', 'created_at'])
-            ->map(function (Notification $notification) {
-                return [
-                    'id' => (int) $notification->id,
-                    'type' => (string) ($notification->type ?? ''),
-                    'title' => trim((string) ($notification->title ?? 'Notification')),
-                    'message' => $this->cleanNotificationText((string) ($notification->message ?? '')),
-                    'url' => trim((string) ($notification->url ?? '')),
-                    'is_read' => (bool) ($notification->is_read ?? false),
-                    'created_at_human' => $notification->created_at?->diffForHumans(),
-                ];
-            })
+            ->map(fn(Notification $notification) => $this->formatNotification($notification))
             ->values()
             ->all();
 
@@ -84,5 +97,18 @@ class NotificationController extends Controller
         $clean = preg_replace('/\[teacher_id:\d+\]\s*/', '', $clean);
 
         return trim((string) $clean);
+    }
+
+    private function formatNotification(Notification $notification): array
+    {
+        return [
+            'id' => (int) $notification->id,
+            'type' => (string) ($notification->type ?? ''),
+            'title' => trim((string) ($notification->title ?? 'Notification')),
+            'message' => $this->cleanNotificationText((string) ($notification->message ?? '')),
+            'url' => trim((string) ($notification->url ?? '')),
+            'is_read' => (bool) ($notification->is_read ?? false),
+            'created_at_human' => $notification->created_at?->diffForHumans(),
+        ];
     }
 }

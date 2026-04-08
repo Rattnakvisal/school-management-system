@@ -28,7 +28,7 @@ Route::middleware(['auth', 'role:teacher'])
         Route::delete('/law-requests/{lawRequest}', [LawRequestController::class, 'destroy'])->name('law-requests.destroy');
         Route::view('/assignments', 'teacher.assignments')->name('assignments.index');
         Route::view('/grades', 'teacher.grades')->name('grades.index');
-        Route::view('/notices', 'teacher.notices')->name('notices.index');
+        Route::get('/notices', [NotificationController::class, 'index'])->name('notices.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
         Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');

@@ -9,10 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     const hasSwal = typeof window.Swal !== "undefined";
 
-    if (!subjectSelect || !timeOptionsContainer) {
-        return;
-    }
-
     const defaultPageData = {
         approvalAlerts: [],
         validationErrors: [],
@@ -48,6 +44,21 @@ document.addEventListener("DOMContentLoaded", () => {
         pageData.formDefaults.subject_time_keys : [];
 
     let lastAutoRequestedFor = "";
+
+    const queueAlerts = (items) => {
+        const alerts = Array.isArray(items) ? items.filter(Boolean) : [];
+        if (alerts.length === 0) {
+            return Promise.resolve();
+        }
+
+        document.querySelectorAll(".js-inline-flash").forEach((element) => {
+            element.classList.add("hidden");
+        });
+
+        return alerts.reduce((chain, item) => {
+            return chain.then(() => showAlert(item));
+        }, Promise.resolve());
+    };
 
     const showAlert = (options) => {
         const config = {
@@ -264,27 +275,30 @@ document.addEventListener("DOMContentLoaded", () => {
         syncRequestedForDate();
     };
 
-    const approvalAlerts = Array.isArray(pageData.approvalAlerts) ?
-        pageData.approvalAlerts : [];
-    approvalAlerts.forEach((alertItem, index) => {
-        window.setTimeout(() => {
-            const title = String(alertItem && alertItem.title ? alertItem.title : "Law request approved");
-            const text = String(alertItem && alertItem.text ? alertItem.text : "Your law request has been approved.");
-            showAlert({
-                icon: "success",
-                title: title,
-                text: text,
-                confirmButtonText: "OK",
-                confirmButtonColor: "#4f46e5",
-            });
-        }, index * 250);
+    const flash = pageData.flash || {};
+    const alertQueue = [];
+
+    const approvalAlerts = Array.isArray(pageData.approvalAlerts)
+        ? pageData.approvalAlerts
+        : [];
+    approvalAlerts.forEach((alertItem) => {
+        alertQueue.push({
+            icon: "success",
+            title: String(
+                alertItem && alertItem.title
+                    ? alertItem.title
+                    : "Law request approved",
+            ),
+            text: String(
+                alertItem && alertItem.text
+                    ? alertItem.text
+                    : "Your law request has been approved.",
+            ),
+        });
     });
 
-    const flash = pageData.flash || {};
-    const flashMessages = [];
-
     if (String(flash.success || "").trim() !== "") {
-        flashMessages.push({
+        alertQueue.push({
             icon: "success",
             title: "Success",
             text: String(flash.success),
@@ -292,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (String(flash.warning || "").trim() !== "") {
-        flashMessages.push({
+        alertQueue.push({
             icon: "warning",
             title: "Warning",
             text: String(flash.warning),
@@ -300,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (String(flash.error || "").trim() !== "") {
-        flashMessages.push({
+        alertQueue.push({
             icon: "error",
             title: "Error",
             text: String(flash.error),
@@ -310,24 +324,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const validationErrors = Array.isArray(pageData.validationErrors) ?
         pageData.validationErrors : [];
     if (validationErrors.length > 0) {
-        flashMessages.push({
+        alertQueue.push({
             icon: "error",
             title: "Validation Error",
             text: String(validationErrors[0] || ""),
         });
     }
 
-    flashMessages.forEach((item, index) => {
-        window.setTimeout(() => {
-            showAlert({
-                icon: item.icon,
-                title: item.title,
-                text: item.text,
-                confirmButtonText: "OK",
-                confirmButtonColor: "#4f46e5",
-            });
-        }, index * 250);
-    });
+    queueAlerts(alertQueue);
 
     if (submitForm) {
         submitForm.addEventListener("submit", (event) => {
@@ -376,38 +380,40 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    const initialSubjectId = String(
-        pageData.formDefaults && pageData.formDefaults.subject_id ?
-        pageData.formDefaults.subject_id :
-        "all",
-    );
-    const initialTimeKeys = Array.isArray(defaultTimeKeys) ? defaultTimeKeys : [];
+    if (subjectSelect && timeOptionsContainer) {
+        const initialSubjectId = String(
+            pageData.formDefaults && pageData.formDefaults.subject_id ?
+            pageData.formDefaults.subject_id :
+            "all",
+        );
+        const initialTimeKeys = Array.isArray(defaultTimeKeys) ? defaultTimeKeys : [];
 
-    if (subjectSelect.value !== initialSubjectId) {
-        subjectSelect.value = initialSubjectId;
-    }
-
-    renderTimeOptions(initialTimeKeys);
-
-    if (requestedForInput) {
-        requestedForInput.addEventListener("input", () => {
-            if (requestedForInput.value !== lastAutoRequestedFor) {
-                lastAutoRequestedFor = "";
-            }
-        });
-
-        requestedForInput.addEventListener("change", () => {
-            if (requestedForInput.value !== lastAutoRequestedFor) {
-                lastAutoRequestedFor = "";
-            }
-        });
-    }
-
-    subjectSelect.addEventListener("change", () => {
-        if (requestedForInput) {
-            requestedForInput.value = "";
+        if (subjectSelect.value !== initialSubjectId) {
+            subjectSelect.value = initialSubjectId;
         }
-        lastAutoRequestedFor = "";
-        renderTimeOptions([]);
-    });
+
+        renderTimeOptions(initialTimeKeys);
+
+        if (requestedForInput) {
+            requestedForInput.addEventListener("input", () => {
+                if (requestedForInput.value !== lastAutoRequestedFor) {
+                    lastAutoRequestedFor = "";
+                }
+            });
+
+            requestedForInput.addEventListener("change", () => {
+                if (requestedForInput.value !== lastAutoRequestedFor) {
+                    lastAutoRequestedFor = "";
+                }
+            });
+        }
+
+        subjectSelect.addEventListener("change", () => {
+            if (requestedForInput) {
+                requestedForInput.value = "";
+            }
+            lastAutoRequestedFor = "";
+            renderTimeOptions([]);
+        });
+    }
 });

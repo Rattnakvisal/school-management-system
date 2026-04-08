@@ -102,6 +102,7 @@
                                 $item('teacher.law-requests.index', 'Law Requests', 'document'),
                                 $item('teacher.assignments.index', 'Assignments', 'clipboard'),
                                 $item('teacher.grades.index', 'Grades', 'book'),
+                                $item('teacher.notices.index', 'Notifications', 'bell'),
                             ],
                         ],
                         [
@@ -293,7 +294,8 @@
 
                                 <div id="teacher-notif-list" class="max-h-80 overflow-auto">
                                     @forelse (($navNotifs ?? []) as $n)
-                                        <a href="{{ $n->url ?? '#' }}" class="block px-4 py-3 hover:bg-slate-50">
+                                        <a href="{{ trim((string) ($n->url ?? '')) !== '' ? $n->url : route('teacher.notices.index') }}"
+                                            class="block px-4 py-3 hover:bg-slate-50">
                                             <div class="flex items-start gap-3">
                                                 <span
                                                     class="mt-2 h-2 w-2 rounded-full {{ $n->is_read ? 'bg-slate-300' : 'bg-indigo-600' }}"></span>
@@ -315,13 +317,19 @@
                                 </div>
 
                                 <div class="border-t border-slate-100 px-4 py-3">
-                                    <form method="POST" action="{{ route('teacher.notifications.readAll') }}">
-                                        @csrf
-                                        <button
-                                            class="w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                                            Mark all as read
-                                        </button>
-                                    </form>
+                                    <div class="grid gap-2 sm:grid-cols-2">
+                                        <a href="{{ route('teacher.notices.index') }}"
+                                            class="rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-slate-800">
+                                            View all
+                                        </a>
+                                        <form method="POST" action="{{ route('teacher.notifications.readAll') }}">
+                                            @csrf
+                                            <button
+                                                class="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                                Mark all read
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>

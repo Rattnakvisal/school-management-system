@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const badge = document.getElementById('teacher-notif-badge');
     const list = document.getElementById('teacher-notif-list');
-    const emptyState = document.getElementById('teacher-notif-empty');
-    const hasSwal = typeof window.Swal !== 'undefined';
     const state = {
         latestId: Number(root.dataset.notificationLatestId || 0) || 0,
         unreadCount: Number(root.dataset.notificationUnreadCount || 0) || 0,
@@ -70,27 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     };
 
-    const showApprovalAlert = (title, text, icon = 'success') => {
-        const cleanTitle = String(title || 'Notification');
-        const cleanText = String(text || '').trim();
-        if (cleanText === '') {
-            return;
-        }
-
-        if (hasSwal) {
-            window.Swal.fire({
-                icon,
-                title: cleanTitle,
-                text: cleanText,
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#4f46e5',
-            });
-            return;
-        }
-
-        window.alert(`${cleanTitle}\n\n${cleanText}`);
-    };
-
     const poll = async () => {
         try {
             const response = await window.fetch(pollUrl, {
@@ -115,23 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (notifications.length > 0) {
                 renderNotifications(notifications);
-
-                if (latestId > state.latestId) {
-                    const newNotifications = notifications.filter((item) => Number(item?.id || 0) > state.latestId);
-                    newNotifications
-                        .filter((item) => ['teacher_law_request_approved', 'student_law_request'].includes(String(item?.type || '')))
-                        .forEach((item) => {
-                            const type = String(item?.type || '');
-                            showApprovalAlert(
-                                item?.title || (type === 'student_law_request' ? 'New student law request' : 'Law request approved'),
-                                item?.message || (type === 'student_law_request'
-                                    ? 'A student submitted a new law request.'
-                                    : 'Your law request has been approved.'),
-                                type === 'student_law_request' ? 'info' : 'success',
-                            );
-                        });
-                }
-
                 state.latestId = latestId;
             }
         } catch (error) {

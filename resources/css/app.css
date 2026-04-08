@@ -1468,6 +1468,53 @@
         min-width: 0;
     }
 
+    .attendence-stage .admin-teacher-attendance-table {
+        min-width: 0;
+    }
+
+    .attendence-stage .admin-teacher-attendance-table th,
+    .attendence-stage .admin-teacher-attendance-table td {
+        vertical-align: top;
+    }
+
+    .attendence-stage .admin-teacher-col-teacher {
+        width: 16rem;
+        min-width: 16rem;
+    }
+
+    .attendence-stage .admin-teacher-col-law {
+        width: 20rem;
+        min-width: 20rem;
+    }
+
+    .attendence-stage .admin-teacher-col-current {
+        width: 9.5rem;
+        min-width: 9.5rem;
+    }
+
+    .attendence-stage .admin-teacher-col-check {
+        width: 18rem;
+        min-width: 18rem;
+    }
+
+    .attendence-stage .admin-teacher-col-remark {
+        width: 17rem;
+        min-width: 17rem;
+    }
+
+    .attendence-stage .admin-teacher-col-checked {
+        width: 11rem;
+        min-width: 11rem;
+    }
+
+    .attendence-stage .admin-teacher-status-grid {
+        align-items: center;
+    }
+
+    .attendence-stage .admin-teacher-cell .max-w-sm {
+        max-width: 18rem;
+    }
+
     /* ==============================
      Define per-stage accent easily
   =============================== */
