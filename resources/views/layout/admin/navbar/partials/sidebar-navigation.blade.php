@@ -10,34 +10,38 @@
     $sections = [
         [
             'title' => 'Main',
-            'items' => [$item('admin.dashboard', 'Dashboard', 'home')],
+            'items' => [$item('admin.dashboard', 'Dashboard', 'layout-dashboard')],
         ],
+
         [
             'title' => 'Management',
             'items' => [
                 $item('admin.students.index', 'Students', 'users'),
-                $item('admin.teachers.index', 'Teachers', 'user'),
-                $item('admin.classes.index', 'Classes', 'grid'),
-                $item('admin.subjects.index', 'Subjects', 'book'),
-                $item('admin.time-studies.index', 'Time Studies', 'clock'),
-                $item('admin.student-study.index', 'Student Study', 'academic'),
-                $item('admin.exams.index', 'Exams', 'clipboard'),
+                $item('admin.teachers.index', 'Teachers', 'user-cog'),
+                $item('admin.classes.index', 'Classes', 'layers'),
+                $item('admin.subjects.index', 'Subjects', 'book-open'),
+                $item('admin.time-studies.index', 'Schedule', 'clock-3'),
+                $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
+                $item('admin.mission.index', 'Mission', 'flag'),
             ],
         ],
+
         [
             'title' => 'Attendance',
             'items' => [
-                $item('admin.attendance.teachers.index', 'Teacher Attendance', 'user-check'),
-                $item('admin.attendance.index', 'Attendance', 'calendar-check'),
+                $item('admin.attendance.teachers.index', 'Teacher Attendance', 'clipboard-check'),
+                $item('admin.attendance.index', 'Student Attendance', 'calendar-check'),
             ],
         ],
+
         [
             'title' => 'Communication',
-            'items' => [$item('admin.contacts.index', 'Contacts', 'mail', $contactUnread ?? 0)],
+            'items' => [$item('admin.contacts.index', 'Messages', 'mail', $contactUnread ?? 0)],
         ],
+
         [
             'title' => 'System',
-            'items' => [$item('admin.settings', 'Settings', 'cog')],
+            'items' => [$item('admin.settings', 'Settings', 'settings')],
         ],
     ];
 @endphp

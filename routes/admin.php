@@ -63,7 +63,7 @@ Route::middleware(['auth', 'admin'])
             ->name('attendance.teachers.law-requests.approve');
         Route::post('/attendance/teachers/law-requests/{lawRequest}/reject', [TeacherAttendanceController::class, 'rejectLawRequest'])
             ->name('attendance.teachers.law-requests.reject');
-        Route::view('/exams', 'admin.exams')->name('exams.index');
+        Route::view('/mission', 'admin.mission')->name('mission.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
         Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
