@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -3084,6 +3084,645 @@
     .teacher-workload__meta {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+.student-dashboard-shell {
+    --student-card-border: rgba(226, 232, 240, 0.95);
+    --student-card-shadow: 0 22px 44px -34px rgba(15, 23, 42, 0.22);
+    --student-page-bg: #f6f8fc;
+    font-family:
+        "Manrope", "Plus Jakarta Sans", "Segoe UI", ui-sans-serif, system-ui,
+        sans-serif;
+    letter-spacing: -0.01em;
+}
+
+.student-dashboard-shell h1,
+.student-dashboard-shell h2,
+.student-dashboard-shell h3 {
+    font-family:
+        "Outfit", "Sora", "Plus Jakarta Sans", "Segoe UI", ui-sans-serif,
+        system-ui, sans-serif;
+    letter-spacing: -0.04em;
+}
+
+.student-dashboard-shell strong,
+.student-dashboard-shell .student-summary-bar__value,
+.student-dashboard-shell .student-insight-card__value,
+.student-dashboard-shell .student-insight-card__percentage,
+.student-dashboard-shell .student-profile-card__name {
+    font-family:
+        "Outfit", "Sora", "Plus Jakarta Sans", "Segoe UI", ui-sans-serif,
+        system-ui, sans-serif;
+}
+
+.student-profile-card,
+.student-insight-card,
+.student-summary-card,
+.student-detail-card {
+    border: 1px solid var(--student-card-border);
+    border-radius: 2rem;
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(96, 165, 250, 0.08),
+            transparent 32%
+        ),
+        linear-gradient(180deg, #ffffff, #fbfdff);
+    box-shadow: var(--student-card-shadow);
+}
+
+.student-profile-card {
+    padding: clamp(1.2rem, 2vw, 1.75rem);
+}
+
+.student-profile-card__top,
+.student-detail-card__head,
+.student-summary-card__head,
+.student-insight-card__topline {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.student-profile-card__eyebrow,
+.student-summary-card__eyebrow,
+.student-detail-card__eyebrow {
+    margin: 0 0 0.2rem;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.student-profile-card__title,
+.student-summary-card h2,
+.student-detail-card h2,
+.student-insight-card h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.student-profile-card__chip,
+.student-summary-card__chip,
+.student-detail-card__chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    border-radius: 9999px;
+    background: #f8fafc;
+    padding: 0.65rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.student-profile-card__body {
+    display: grid;
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 1100px) {
+    .student-profile-card__body {
+        grid-template-columns: minmax(260px, 1.2fr) minmax(0, 2fr);
+    }
+}
+
+.student-profile-card__identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.student-profile-card__avatar {
+    width: 4.8rem;
+    height: 4.8rem;
+    border-radius: 9999px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 5px solid #eef5ff;
+}
+
+.student-profile-card__name {
+    margin: 0;
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+    font-weight: 800;
+    color: #24364b;
+}
+
+.student-profile-card__subtitle,
+.student-profile-card__focus,
+.student-insight-card p,
+.student-rate-trend__item small {
+    margin: 0.25rem 0 0;
+    font-size: 0.86rem;
+    color: #94a3b8;
+}
+
+.student-profile-card__focus {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.student-profile-card__meta {
+    display: grid;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .student-profile-card__meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1400px) {
+    .student-profile-card__meta {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.student-profile-card__meta-item span {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.student-profile-card__meta-item strong {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.94rem;
+    font-weight: 800;
+    color: #334155;
+    overflow-wrap: anywhere;
+}
+
+.student-profile-card__stats {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .student-profile-card__stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1280px) {
+    .student-profile-card__stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.student-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    border-radius: 1.4rem;
+    padding: 1rem 1.1rem;
+    background: #ffffff;
+}
+
+.student-stat-card strong {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #334155;
+}
+
+.student-stat-card span:last-child {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.student-stat-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+.student-stat-card__icon svg {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.student-stat-card--blue {
+    background: linear-gradient(180deg, #f8fbff, #ffffff);
+}
+
+.student-stat-card--blue .student-stat-card__icon {
+    background: #e0f1ff;
+    color: #2090f5;
+}
+
+.student-stat-card--lime .student-stat-card__icon {
+    background: #eef9d7;
+    color: #84cc16;
+}
+
+.student-stat-card--amber .student-stat-card__icon {
+    background: #fff2d7;
+    color: #f59e0b;
+}
+
+.student-stat-card--rose .student-stat-card__icon {
+    background: #ffe1e4;
+    color: #ef4444;
+}
+
+.student-dashboard-main,
+.student-dashboard-lower {
+    display: grid;
+    gap: 1.5rem;
+}
+
+@media (min-width: 1200px) {
+    .student-dashboard-main {
+        grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.38fr);
+    }
+
+    .student-dashboard-lower {
+        grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.9fr);
+    }
+}
+
+.student-dashboard-lower--single {
+    grid-template-columns: 1fr;
+}
+
+.student-dashboard-lower--single .student-dashboard-lower__side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.student-dashboard-main__left,
+.student-dashboard-lower__side {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.student-insight-card,
+.student-summary-card,
+.student-detail-card {
+    padding: 1.5rem;
+}
+
+.student-insight-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.student-insight-card__value {
+    font-size: clamp(1.9rem, 4vw, 2.4rem);
+    font-weight: 400;
+    color: #334155;
+    text-align: right;
+}
+
+.student-insight-card--stacked {
+    display: block;
+}
+
+.student-insight-card--stacked .student-insight-card__percentage {
+    font-size: clamp(2.2rem, 4vw, 3.1rem);
+    font-weight: 400;
+    color: #24364b;
+    line-height: 1;
+}
+
+.student-rate-trend {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1.4rem;
+}
+
+.student-rate-trend__item {
+    display: grid;
+    grid-template-columns: 72px minmax(72px, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.8rem;
+    border-top: 1px solid #edf2f7;
+    padding-top: 0.85rem;
+}
+
+.student-rate-trend__item:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.student-rate-trend__month {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.95rem;
+    border-radius: 1rem;
+    background: #eff6ff;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #3b82f6;
+}
+
+.student-rate-trend__item strong {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #334155;
+}
+
+.student-rate-trend__track {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 0.8rem;
+    border-radius: 9999px;
+    background: #edf2f7;
+    overflow: hidden;
+}
+
+.student-rate-trend__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #66b8ff, #2f8fff);
+}
+
+.student-summary-card__chip {
+    background: #f4f7fb;
+}
+
+.student-summary-bars {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.35rem;
+}
+
+.student-summary-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    min-height: 17rem;
+}
+
+.student-summary-bar__value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    color: #334155;
+}
+
+.student-summary-bar__track {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    flex: 1;
+    min-height: 13rem;
+    overflow: hidden;
+    border-radius: 1.6rem;
+    background: #eef3f8;
+}
+
+.student-summary-bar__fill {
+    width: 100%;
+    border-radius: 1.35rem;
+}
+
+.student-summary-bar__label {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.student-summary-bar--blue .student-summary-bar__track {
+    background: #dbeeff;
+}
+
+.student-summary-bar--blue .student-summary-bar__fill {
+    background: linear-gradient(180deg, #4aa8f1, #2f8ddd);
+}
+
+.student-summary-bar--lime .student-summary-bar__track {
+    background: #eaf7d5;
+}
+
+.student-summary-bar--lime .student-summary-bar__fill {
+    background: linear-gradient(180deg, #8cda1a, #74c500);
+}
+
+.student-summary-bar--amber .student-summary-bar__track {
+    background: #fff2d8;
+}
+
+.student-summary-bar--amber .student-summary-bar__fill {
+    background: linear-gradient(180deg, #ffc250, #ffab2f);
+}
+
+.student-summary-bar--rose .student-summary-bar__track {
+    background: #ffdfe3;
+}
+
+.student-summary-bar--rose .student-summary-bar__fill {
+    background: linear-gradient(180deg, #ff676f, #ff3942);
+}
+
+.student-detail-card--wide {
+    min-width: 0;
+}
+
+.student-schedule-list,
+.student-check-list,
+.student-subject-stack {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1.35rem;
+}
+
+.student-schedule-item,
+.student-check-item,
+.student-subject-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    border: 1px solid #edf2f7;
+    border-radius: 1.3rem;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 0.95rem 1rem;
+}
+
+.student-schedule-item__dot {
+    width: 0.72rem;
+    height: 0.72rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+.student-schedule-item__dot--indigo {
+    background: #4f46e5;
+}
+
+.student-schedule-item__dot--sky {
+    background: #0ea5e9;
+}
+
+.student-schedule-item__title,
+.student-check-item strong,
+.student-subject-pill strong {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.student-schedule-item__subtitle,
+.student-check-item span,
+.student-subject-pill span {
+    display: block;
+    margin-top: 0.16rem;
+    font-size: 0.78rem;
+    color: #94a3b8;
+}
+
+.student-schedule-item__time {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748b;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.student-check-item {
+    justify-content: space-between;
+}
+
+.student-check-item__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 6.2rem;
+    border-radius: 9999px;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.student-check-item__badge--present {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.student-check-item__badge--late {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.student-check-item__badge--excused {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.student-check-item__badge--absent {
+    background: #ffe4e6;
+    color: #be123c;
+}
+
+.student-subject-pill {
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.student-subject-pill--emerald {
+    background: linear-gradient(180deg, #ecfdf5, #ffffff);
+}
+
+.student-subject-pill--sky {
+    background: linear-gradient(180deg, #f0f9ff, #ffffff);
+}
+
+.student-empty-state {
+    border: 1px dashed #dbe4f0;
+    border-radius: 1.25rem;
+    background: #f8fafc;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+@media (max-width: 1024px) {
+    .student-summary-bars {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .student-summary-bar {
+        min-height: 14rem;
+    }
+
+    .student-dashboard-lower--single .student-dashboard-lower__side {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .student-profile-card,
+    .student-insight-card,
+    .student-summary-card,
+    .student-detail-card {
+        padding: 1.2rem;
+        border-radius: 1.6rem;
+    }
+
+    .student-insight-card,
+    .student-profile-card__top,
+    .student-detail-card__head,
+    .student-summary-card__head,
+    .student-insight-card__topline,
+    .student-schedule-item,
+    .student-check-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .student-insight-card__value,
+    .student-insight-card--stacked .student-insight-card__percentage,
+    .student-schedule-item__time {
+        text-align: left;
+    }
+
+    .student-rate-trend__item {
+        grid-template-columns: 1fr;
+    }
+
+    .student-summary-bars {
+        grid-template-columns: 1fr;
+    }
+
+    .student-summary-bar {
+        min-height: auto;
+    }
+
+    .student-summary-bar__track {
+        min-height: 8rem;
+    }
+
+    .student-check-item__badge {
+        min-width: 0;
     }
 }
 

@@ -506,7 +506,8 @@
                                                     <th class="student-col-study px-3 py-3 font-semibold">Study Time</th>
                                                 @endif
                                                 <th class="student-col-status px-3 py-3 font-semibold">Status</th>
-                                                <th class="student-col-created whitespace-nowrap px-3 py-3 font-semibold">Created</th>
+                                                <th class="student-col-created whitespace-nowrap px-3 py-3 font-semibold">
+                                                    Created</th>
                                                 <th class="student-col-actions whitespace-nowrap px-3 py-3 font-semibold">
                                                     Actions
                                                 </th>
@@ -678,7 +679,8 @@
                                                             class="whitespace-nowrap">{{ $student->created_at->format('M d, Y') }}</span>
                                                     </td>
                                                     <td class="student-col-actions whitespace-nowrap px-3 py-3 align-top">
-                                                        <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
+                                                        <div
+                                                            class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                             <button @click="open = true" type="button"
                                                                 class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                 Edit
@@ -722,7 +724,9 @@
                                                             <div
                                                                 class="relative z-10 flex w-full max-w-xl max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
                                                                 <div class="mb-4 flex items-center justify-between">
-                                                                    <h3 class="text-lg font-black text-slate-900">Edit
+                                                                    <h3
+                                                                        class="ml-4 mt-1 text-lg font-black text-slate-900">
+                                                                        Edit
                                                                         Student
                                                                     </h3>
                                                                     <button type="button" @click="open = false"
@@ -743,237 +747,250 @@
                                                                     @csrf
                                                                     @method('PUT')
 
-                                                                    <div class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 pb-4 pt-1">
+                                                                    <div
+                                                                        class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 pb-4 pt-1">
                                                                         <div>
-                                                                        <label for="edit_name_{{ $student->id }}"
-                                                                            class="mb-1 block text-xs font-semibold text-slate-600">Full
-                                                                            Name</label>
-                                                                        <input id="edit_name_{{ $student->id }}"
-                                                                            name="name" type="text"
-                                                                            value="{{ $student->name }}"
-                                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                    </div>
-
-                                                                    <div>
-                                                                        <label for="edit_email_{{ $student->id }}"
-                                                                            class="mb-1 block text-xs font-semibold text-slate-600">Email</label>
-                                                                        <input id="edit_email_{{ $student->id }}"
-                                                                            name="email" type="email"
-                                                                            value="{{ $student->email }}"
-                                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                    </div>
-
-                                                                    @if ($hasPhoneColumn ?? false)
-                                                                        <div>
-                                                                            <label
-                                                                                for="edit_phone_number_{{ $student->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Phone
-                                                                                Number</label>
-                                                                            <input
-                                                                                id="edit_phone_number_{{ $student->id }}"
-                                                                                name="phone_number" type="text"
-                                                                                value="{{ $student->phone_number }}"
-                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                                                                placeholder="+855 12 345 678">
-                                                                        </div>
-                                                                    @endif
-
-                                                                    <div>
-                                                                        <label for="edit_role_{{ $student->id }}"
-                                                                            class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
-                                                                        <select id="edit_role_{{ $student->id }}"
-                                                                            name="role"
-                                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                            <option value="student"
-                                                                                {{ $student->role === 'student' ? 'selected' : '' }}>
-                                                                                Student</option>
-                                                                            <option value="teacher"
-                                                                                {{ $student->role === 'teacher' ? 'selected' : '' }}>
-                                                                                Teacher</option>
-                                                                            <option value="admin"
-                                                                                {{ $student->role === 'admin' ? 'selected' : '' }}>
-                                                                                Admin</option>
-                                                                        </select>
-                                                                        <p class="mt-1 text-[11px] text-slate-500">
-                                                                            Changing role from student will remove this user
-                                                                            from Student List.
-                                                                        </p>
-                                                                    </div>
-
-                                                                    @if ($hasClassColumn)
-                                                                        <div>
-                                                                            <label
-                                                                                for="edit_school_class_id_{{ $student->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Home
-                                                                                Class (Optional)</label>
-                                                                            <select
-                                                                                id="edit_school_class_id_{{ $student->id }}"
-                                                                                name="school_class_id"
+                                                                            <label for="edit_name_{{ $student->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Full
+                                                                                Name</label>
+                                                                            <input id="edit_name_{{ $student->id }}"
+                                                                                name="name" type="text"
+                                                                                value="{{ $student->name }}"
                                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                                <option value="">Unassigned</option>
-                                                                                @foreach ($classes as $classOption)
-                                                                                    <option value="{{ $classOption->id }}"
-                                                                                        {{ (string) $student->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
-                                                                                        {{ $classOption->display_name }}
-                                                                                    </option>
-                                                                                @endforeach
+                                                                        </div>
+
+                                                                        <div>
+                                                                            <label for="edit_email_{{ $student->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Email</label>
+                                                                            <input id="edit_email_{{ $student->id }}"
+                                                                                name="email" type="email"
+                                                                                value="{{ $student->email }}"
+                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                        </div>
+
+                                                                        @if ($hasPhoneColumn ?? false)
+                                                                            <div>
+                                                                                <label
+                                                                                    for="edit_phone_number_{{ $student->id }}"
+                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Phone
+                                                                                    Number</label>
+                                                                                <input
+                                                                                    id="edit_phone_number_{{ $student->id }}"
+                                                                                    name="phone_number" type="text"
+                                                                                    value="{{ $student->phone_number }}"
+                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                                                    placeholder="+855 12 345 678">
+                                                                            </div>
+                                                                        @endif
+
+                                                                        <div>
+                                                                            <label for="edit_role_{{ $student->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
+                                                                            <select id="edit_role_{{ $student->id }}"
+                                                                                name="role"
+                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                <option value="student"
+                                                                                    {{ $student->role === 'student' ? 'selected' : '' }}>
+                                                                                    Student</option>
+                                                                                <option value="teacher"
+                                                                                    {{ $student->role === 'teacher' ? 'selected' : '' }}>
+                                                                                    Teacher</option>
+                                                                                <option value="admin"
+                                                                                    {{ $student->role === 'admin' ? 'selected' : '' }}>
+                                                                                    Admin</option>
                                                                             </select>
+                                                                            <p class="mt-1 text-[11px] text-slate-500">
+                                                                                Changing role from student will remove this
+                                                                                user
+                                                                                from Student List.
+                                                                            </p>
                                                                         </div>
 
-                                                                        @if ($hasMajorSubjectColumn)
+                                                                        @if ($hasClassColumn)
                                                                             <div>
-                                                                                @php
-                                                                                    $editSelectedMajorSubjectIds = [];
-                                                                                    if (
-                                                                                        ($hasStudentMajorSubjectsTable ??
-                                                                                            false) &&
-                                                                                        $student->relationLoaded(
-                                                                                            'majorSubjects',
-                                                                                        ) &&
-                                                                                        $student->majorSubjects->isNotEmpty()
-                                                                                    ) {
-                                                                                        $editSelectedMajorSubjectIds = $student->majorSubjects
-                                                                                            ->pluck('id')
-                                                                                            ->map(
-                                                                                                fn(
-                                                                                                    $value,
-                                                                                                ) => (string) $value,
-                                                                                            )
-                                                                                            ->values()
-                                                                                            ->all();
-                                                                                    } elseif (
-                                                                                        $student->major_subject_id
-                                                                                    ) {
-                                                                                        $editSelectedMajorSubjectIds = [
-                                                                                            (string) $student->major_subject_id,
-                                                                                        ];
-                                                                                    }
-                                                                                @endphp
                                                                                 <label
-                                                                                    for="edit_major_subject_id_{{ $student->id }}"
-                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Major
-                                                                                    Subjects</label>
+                                                                                    for="edit_school_class_id_{{ $student->id }}"
+                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Home
+                                                                                    Class (Optional)</label>
                                                                                 <select
-                                                                                    id="edit_major_subject_id_{{ $student->id }}"
-                                                                                    name="major_subject_ids[]"
-                                                                                    data-selected-list='@json($editSelectedMajorSubjectIds)'
-                                                                                    data-checkbox-target="edit_major_subject_checkbox_list_{{ $student->id }}"
-                                                                                    multiple size="5"
-                                                                                    class="hidden">
-                                                                                    <option value="">Select major
-                                                                                        subjects</option>
+                                                                                    id="edit_school_class_id_{{ $student->id }}"
+                                                                                    name="school_class_id"
+                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                    <option value="">Unassigned
+                                                                                    </option>
+                                                                                    @foreach ($classes as $classOption)
+                                                                                        <option
+                                                                                            value="{{ $classOption->id }}"
+                                                                                            {{ (string) $student->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
+                                                                                            {{ $classOption->display_name }}
+                                                                                        </option>
+                                                                                    @endforeach
                                                                                 </select>
-                                                                                <div id="edit_major_subject_checkbox_list_{{ $student->id }}"
-                                                                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-                                                                                </div>
-                                                                                <p class="mt-1 text-[11px] text-slate-500">
-                                                                                    You can select multiple major subjects.
-                                                                                </p>
                                                                             </div>
+
+                                                                            @if ($hasMajorSubjectColumn)
+                                                                                <div>
+                                                                                    @php
+                                                                                        $editSelectedMajorSubjectIds = [];
+                                                                                        if (
+                                                                                            ($hasStudentMajorSubjectsTable ??
+                                                                                                false) &&
+                                                                                            $student->relationLoaded(
+                                                                                                'majorSubjects',
+                                                                                            ) &&
+                                                                                            $student->majorSubjects->isNotEmpty()
+                                                                                        ) {
+                                                                                            $editSelectedMajorSubjectIds = $student->majorSubjects
+                                                                                                ->pluck('id')
+                                                                                                ->map(
+                                                                                                    fn(
+                                                                                                        $value,
+                                                                                                    ) => (string) $value,
+                                                                                                )
+                                                                                                ->values()
+                                                                                                ->all();
+                                                                                        } elseif (
+                                                                                            $student->major_subject_id
+                                                                                        ) {
+                                                                                            $editSelectedMajorSubjectIds = [
+                                                                                                (string) $student->major_subject_id,
+                                                                                            ];
+                                                                                        }
+                                                                                    @endphp
+                                                                                    <label
+                                                                                        for="edit_major_subject_id_{{ $student->id }}"
+                                                                                        class="mb-1 block text-xs font-semibold text-slate-600">Major
+                                                                                        Subjects</label>
+                                                                                    <select
+                                                                                        id="edit_major_subject_id_{{ $student->id }}"
+                                                                                        name="major_subject_ids[]"
+                                                                                        data-selected-list='@json($editSelectedMajorSubjectIds)'
+                                                                                        data-checkbox-target="edit_major_subject_checkbox_list_{{ $student->id }}"
+                                                                                        multiple size="5"
+                                                                                        class="hidden">
+                                                                                        <option value="">Select major
+                                                                                            subjects</option>
+                                                                                    </select>
+                                                                                    <div id="edit_major_subject_checkbox_list_{{ $student->id }}"
+                                                                                        class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                                                                                    </div>
+                                                                                    <p
+                                                                                        class="mt-1 text-[11px] text-slate-500">
+                                                                                        You can select multiple major
+                                                                                        subjects.
+                                                                                    </p>
+                                                                                </div>
+                                                                            @endif
+
+                                                                            @if ($hasClassStudyTimeColumn)
+                                                                                <div>
+                                                                                    @php
+                                                                                        $editSelectedStudyTimeIds = [];
+                                                                                        if (
+                                                                                            $student->relationLoaded(
+                                                                                                'studyTimes',
+                                                                                            ) &&
+                                                                                            $student->studyTimes->isNotEmpty()
+                                                                                        ) {
+                                                                                            $editSelectedStudyTimeIds = $student->studyTimes
+                                                                                                ->pluck('id')
+                                                                                                ->map(
+                                                                                                    fn(
+                                                                                                        $value,
+                                                                                                    ) => (string) $value,
+                                                                                                )
+                                                                                                ->values()
+                                                                                                ->all();
+                                                                                        } elseif (
+                                                                                            $student->class_study_time_id
+                                                                                        ) {
+                                                                                            $editSelectedStudyTimeIds = [
+                                                                                                (string) $student->class_study_time_id,
+                                                                                            ];
+                                                                                        }
+                                                                                    @endphp
+                                                                                    <label
+                                                                                        for="edit_class_study_time_id_{{ $student->id }}"
+                                                                                        class="mb-1 block text-xs font-semibold text-slate-600">Study
+                                                                                        Time</label>
+                                                                                    <select
+                                                                                        id="edit_class_study_time_id_{{ $student->id }}"
+                                                                                        name="class_study_time_ids[]"
+                                                                                        data-selected-list='@json($editSelectedStudyTimeIds)'
+                                                                                        data-checkbox-target="edit_study_time_checkbox_list_{{ $student->id }}"
+                                                                                        multiple size="4"
+                                                                                        class="hidden">
+                                                                                        <option value="">Select class
+                                                                                            first</option>
+                                                                                    </select>
+                                                                                    <div id="edit_study_time_checkbox_list_{{ $student->id }}"
+                                                                                        class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                                                                                    </div>
+                                                                                    <p
+                                                                                        class="mt-1 text-[11px] text-slate-500">
+                                                                                        You can select multiple study times.
+                                                                                    </p>
+                                                                                </div>
+                                                                            @endif
                                                                         @endif
 
-                                                                        @if ($hasClassStudyTimeColumn)
-                                                                            <div>
-                                                                                @php
-                                                                                    $editSelectedStudyTimeIds = [];
-                                                                                    if (
-                                                                                        $student->relationLoaded(
-                                                                                            'studyTimes',
-                                                                                        ) &&
-                                                                                        $student->studyTimes->isNotEmpty()
-                                                                                    ) {
-                                                                                        $editSelectedStudyTimeIds = $student->studyTimes
-                                                                                            ->pluck('id')
-                                                                                            ->map(
-                                                                                                fn(
-                                                                                                    $value,
-                                                                                                ) => (string) $value,
-                                                                                            )
-                                                                                            ->values()
-                                                                                            ->all();
-                                                                                    } elseif (
-                                                                                        $student->class_study_time_id
-                                                                                    ) {
-                                                                                        $editSelectedStudyTimeIds = [
-                                                                                            (string) $student->class_study_time_id,
-                                                                                        ];
-                                                                                    }
-                                                                                @endphp
-                                                                                <label
-                                                                                    for="edit_class_study_time_id_{{ $student->id }}"
-                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Study
-                                                                                    Time</label>
-                                                                                <select
-                                                                                    id="edit_class_study_time_id_{{ $student->id }}"
-                                                                                    name="class_study_time_ids[]"
-                                                                                    data-selected-list='@json($editSelectedStudyTimeIds)'
-                                                                                    data-checkbox-target="edit_study_time_checkbox_list_{{ $student->id }}"
-                                                                                    multiple size="4"
-                                                                                    class="hidden">
-                                                                                    <option value="">Select class
-                                                                                        first</option>
-                                                                                </select>
-                                                                                <div id="edit_study_time_checkbox_list_{{ $student->id }}"
-                                                                                    class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-                                                                                </div>
-                                                                                <p class="mt-1 text-[11px] text-slate-500">
-                                                                                    You can select multiple study times.</p>
-                                                                            </div>
-                                                                        @endif
-                                                                    @endif
-
-                                                                    <div>
-                                                                        <label for="edit_avatar_image_{{ $student->id }}"
-                                                                            class="mb-1 block text-xs font-semibold text-slate-600">Avatar
-                                                                            Image</label>
-                                                                        <input id="edit_avatar_image_{{ $student->id }}"
-                                                                            name="avatar_image" type="file"
-                                                                            accept="image/*"
-                                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                        <p class="mt-1 text-[11px] text-slate-500">Leave
-                                                                            empty
-                                                                            to keep
-                                                                            current avatar.</p>
-                                                                    </div>
-
-                                                                    <div class="grid gap-4 sm:grid-cols-2">
-                                                                        <div>
-                                                                            <label for="edit_password_{{ $student->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">New
-                                                                                Password</label>
-                                                                            <input id="edit_password_{{ $student->id }}"
-                                                                                name="password" type="password"
-                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                                                                placeholder="Leave blank to keep current">
-                                                                        </div>
                                                                         <div>
                                                                             <label
-                                                                                for="edit_password_confirmation_{{ $student->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Confirm
-                                                                                Password</label>
+                                                                                for="edit_avatar_image_{{ $student->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Avatar
+                                                                                Image</label>
                                                                             <input
-                                                                                id="edit_password_confirmation_{{ $student->id }}"
-                                                                                name="password_confirmation"
-                                                                                type="password"
-                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                id="edit_avatar_image_{{ $student->id }}"
+                                                                                name="avatar_image" type="file"
+                                                                                accept="image/*"
+                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                            <p class="mt-1 text-[11px] text-slate-500">
+                                                                                Leave
+                                                                                empty
+                                                                                to keep
+                                                                                current avatar.</p>
                                                                         </div>
-                                                                    </div>
 
-                                                                    @if ($hasStatusColumn)
-                                                                        <label
-                                                                            class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">
-                                                                            <span
-                                                                                class="text-sm font-semibold text-slate-700">Status</span>
-                                                                            <span
-                                                                                class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
-                                                                                <input type="checkbox" name="is_active"
-                                                                                    value="1"
-                                                                                    class="h-4 w-4 rounded border-slate-300"
-                                                                                    {{ $student->is_active ? 'checked' : '' }}>
-                                                                                Active
-                                                                            </span>
-                                                                        </label>
-                                                                    @endif
+                                                                        <div class="grid gap-4 sm:grid-cols-2">
+                                                                            <div>
+                                                                                <label
+                                                                                    for="edit_password_{{ $student->id }}"
+                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">New
+                                                                                    Password</label>
+                                                                                <input
+                                                                                    id="edit_password_{{ $student->id }}"
+                                                                                    name="password" type="password"
+                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                                                    placeholder="Leave blank to keep current">
+                                                                            </div>
+                                                                            <div>
+                                                                                <label
+                                                                                    for="edit_password_confirmation_{{ $student->id }}"
+                                                                                    class="mb-1 block text-xs font-semibold text-slate-600">Confirm
+                                                                                    Password</label>
+                                                                                <input
+                                                                                    id="edit_password_confirmation_{{ $student->id }}"
+                                                                                    name="password_confirmation"
+                                                                                    type="password"
+                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                            </div>
+                                                                        </div>
+
+                                                                        @if ($hasStatusColumn)
+                                                                            <label
+                                                                                class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">
+                                                                                <span
+                                                                                    class="text-sm font-semibold text-slate-700">Status</span>
+                                                                                <span
+                                                                                    class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500">
+                                                                                    <input type="checkbox"
+                                                                                        name="is_active" value="1"
+                                                                                        class="h-4 w-4 rounded border-slate-300"
+                                                                                        {{ $student->is_active ? 'checked' : '' }}>
+                                                                                    Active
+                                                                                </span>
+                                                                            </label>
+                                                                        @endif
 
                                                                     </div>
 

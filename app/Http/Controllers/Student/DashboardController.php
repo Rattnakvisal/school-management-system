@@ -213,6 +213,47 @@ class DashboardController extends Controller
             ? (int) $student->studyTimes()->count()
             : ((int) ($student->class_study_time_id ? 1 : 0));
 
+        $monthlyAttendanceTrend = collect(range(2, 0))
+            ->map(function (int $offset) use ($student): array {
+                $monthStart = now()->copy()->startOfMonth()->subMonths($offset);
+
+                return [
+                    'label' => $monthStart->format('M'),
+                    'value' => 0.0,
+                    'total' => 0,
+                ];
+            })
+            ->values();
+
+        if (Schema::hasTable('student_attendances')) {
+            $positiveStatuses = ['present', 'late', 'excused'];
+
+            $monthlyAttendanceTrend = collect(range(2, 0))
+                ->map(function (int $offset) use ($student, $positiveStatuses): array {
+                    $monthStart = now()->copy()->startOfMonth()->subMonths($offset);
+                    $monthEnd = $monthStart->copy()->endOfMonth();
+
+                    $monthQuery = StudentAttendance::query()
+                        ->where('student_id', $student->id)
+                        ->whereBetween('attendance_date', [
+                            $monthStart->toDateString(),
+                            $monthEnd->toDateString(),
+                        ]);
+
+                    $monthTotal = (clone $monthQuery)->count();
+                    $monthPositive = (clone $monthQuery)
+                        ->whereIn('status', $positiveStatuses)
+                        ->count();
+
+                    return [
+                        'label' => $monthStart->format('M'),
+                        'value' => $monthTotal > 0 ? round(($monthPositive / $monthTotal) * 100, 1) : 0.0,
+                        'total' => $monthTotal,
+                    ];
+                })
+                ->values();
+        }
+
         $chartData = [
             'attendance' => [
                 'labels' => ['Present', 'Late', 'Excused', 'Absent'],
@@ -255,6 +296,7 @@ class DashboardController extends Controller
             'attendanceRate' => $attendanceRate,
             'latestAttendance' => $latestAttendance,
             'studySlotCount' => $studySlotCount,
+            'monthlyAttendanceTrend' => $monthlyAttendanceTrend,
             'chartData' => $chartData,
         ]);
     }
