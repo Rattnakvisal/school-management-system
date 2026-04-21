@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\ClassStudyTime;
 use App\Models\SchoolClass;
+use App\Models\StudentAttendance;
 use App\Models\Subject;
 use App\Models\SubjectStudyTime;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,6 +91,24 @@ class DashboardController extends Controller
         }
 
         $classIds = $teacherClasses->pluck('id')->map(fn($id) => (int) $id)->values();
+        $teacherStudents = User::query()
+            ->where('role', 'student')
+            ->whereIn('school_class_id', $classIds->all())
+            ->with('schoolClass:id,name,section')
+            ->orderBy('name')
+            ->get(['id', 'name', 'avatar', 'school_class_id']);
+
+        $attendanceByStudent = StudentAttendance::query()
+            ->select(
+                'student_id',
+                DB::raw("SUM(CASE WHEN status IN ('present', 'late') THEN 1 ELSE 0 END) as attended_count"),
+                DB::raw('COUNT(*) as total_count')
+            )
+            ->where('teacher_id', $teacherId)
+            ->whereIn('student_id', $teacherStudents->pluck('id')->all())
+            ->groupBy('student_id')
+            ->get()
+            ->keyBy('student_id');
 
         $classSlotsQuery = ClassStudyTime::query()
             ->with('schoolClass:id,name,section')
@@ -256,6 +276,14 @@ class DashboardController extends Controller
             ->values()
             ->all();
 
+        $todayScheduledMinutes = collect($todayTimeline)->sum(function (array $slot): int {
+            try {
+                return Carbon::parse($slot['start_24'] ?? null)->diffInMinutes(Carbon::parse($slot['end_24'] ?? null));
+            } catch (\Throwable $exception) {
+                return 0;
+            }
+        });
+
         $subjectCount = $useSlotAssignments
             ? (int) SubjectStudyTime::query()
                 ->where('teacher_id', $teacherId)
@@ -290,6 +318,51 @@ class DashboardController extends Controller
             ];
         })->values();
 
+        $featuredStudents = $teacherStudents
+            ->map(function (User $student) use ($attendanceByStudent) {
+                $attendance = $attendanceByStudent->get((int) $student->id);
+                $total = (int) ($attendance->total_count ?? 0);
+                $attended = (int) ($attendance->attended_count ?? 0);
+                $percent = $total > 0 ? (int) round(($attended / $total) * 100) : null;
+
+                return [
+                    'id' => (int) $student->id,
+                    'name' => $student->name,
+                    'avatar_url' => $student->avatar_url,
+                    'class_label' => $student->schoolClass?->display_name ?? 'Student',
+                    'attendance_percent' => $percent,
+                    'attendance_total' => $total,
+                ];
+            })
+            ->sortByDesc(fn(array $student) => $student['attendance_percent'] ?? -1)
+            ->take(4)
+            ->values()
+            ->all();
+
+        $featuredClasses = $teacherClasses
+            ->take(3)
+            ->map(function (SchoolClass $schoolClass, int $index) use ($todayTimeline) {
+                $classSlotsToday = collect($todayTimeline)
+                    ->where('class_name', $schoolClass->display_name)
+                    ->count();
+
+                return [
+                    'badge' => ['A1', 'B1', 'C1'][$index] ?? 'A' . ($index + 1),
+                    'title' => $schoolClass->display_name,
+                    'meta' => $schoolClass->taught_subjects_count . ' subject' . ($schoolClass->taught_subjects_count === 1 ? '' : 's'),
+                    'action' => $classSlotsToday > 0 ? 'Today has ' . $classSlotsToday . ' lesson' . ($classSlotsToday === 1 ? '' : 's') : 'No lesson today',
+                    'members' => (int) $schoolClass->students_count,
+                    'capacity_label' => $schoolClass->capacity ? ((int) $schoolClass->capacity . ' seats') : 'Open class',
+                ];
+            })
+            ->values()
+            ->all();
+
+        $workloadPercent = (int) max(0, min(100, round(($todayScheduledMinutes / 480) * 100)));
+        $coveragePercent = $todayClassSlots->count() > 0
+            ? (int) max(0, min(100, round(($todaySubjectSlots->count() / max($todayClassSlots->count(), 1)) * 100)))
+            : 0;
+
         $chartData = [
             'weekly' => [
                 'labels' => $weeklyChartSummary->pluck('label')->values()->all(),
@@ -318,6 +391,10 @@ class DashboardController extends Controller
             'weeklySummary' => $weeklyChartSummary,
             'maxWeeklyTotal' => max(1, (int) $weeklyChartSummary->max('total')),
             'chartData' => $chartData,
+            'featuredStudents' => $featuredStudents,
+            'featuredClasses' => $featuredClasses,
+            'workloadPercent' => $workloadPercent,
+            'coveragePercent' => $coveragePercent,
         ]);
     }
 }

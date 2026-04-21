@@ -1,58 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const timeEl = document.getElementById('dashboard-live-time');
-    const hintEl = document.getElementById('dashboard-live-hint');
-    const dayEl = document.getElementById('dashboard-live-day');
-    const dateEl = document.getElementById('dashboard-live-date');
-    const openTodayLink = document.getElementById('dashboard-open-today-link');
     const dataNode = document.getElementById('teacher-dashboard-data');
+    const workloadCanvas = document.getElementById('teacherWorkloadChart');
+    const calendarRoot = document.getElementById('teacher-dashboard-calendar');
+    const calendarLabel = document.getElementById('teacher-dashboard-calendar-label');
     const slots = Array.from(document.querySelectorAll('.js-dash-slot'));
-
-    if (!dataNode || typeof window.Chart === 'undefined') {
-        return;
-    }
 
     let dashboardData = {};
     try {
-        dashboardData = JSON.parse(dataNode.textContent || '{}');
+        dashboardData = JSON.parse(dataNode?.textContent || '{}');
     } catch (error) {
         console.error('Unable to parse teacher dashboard data.', error);
         dashboardData = {};
     }
-
-    const dayLabels = dashboardData.dayLabels || {};
-    const chartData = dashboardData.chartData || {
-        weekly: {
-            labels: [],
-            classes: [],
-            subjects: [],
-        },
-        todayMix: {
-            labels: [],
-            values: [],
-        },
-        todayPeriods: {
-            labels: [],
-            values: [],
-        },
-    };
-    const weeklyData = chartData.weekly || {
-        labels: [],
-        classes: [],
-        subjects: [],
-    };
-    const todayMixData = chartData.todayMix || {
-        labels: [],
-        values: [],
-    };
-    const todayPeriodsData = chartData.todayPeriods || {
-        labels: [],
-        values: [],
-    };
-    const todayKey = String(dashboardData.todayKey || '').trim();
-    const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-    Chart.defaults.responsive = true;
-    Chart.defaults.maintainAspectRatio = false;
 
     const toMinutes = (value) => {
         const parts = String(value || '').split(':');
@@ -75,33 +34,36 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        element.className = 'js-dash-slot-status rounded-full border px-2.5 py-1 text-[11px] font-semibold';
+        element.className = 'js-dash-slot-status teacher-lesson__status';
 
         if (mode === 'live') {
-            element.classList.add('border-emerald-200', 'bg-emerald-50', 'text-emerald-700');
+            element.classList.add('teacher-lesson__status--live');
             return;
         }
 
         if (mode === 'upcoming') {
-            element.classList.add('border-amber-200', 'bg-amber-50', 'text-amber-700');
+            element.classList.add('teacher-lesson__status--upcoming');
             return;
         }
 
-        element.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-600');
+        if (mode === 'done') {
+            element.classList.add('teacher-lesson__status--done');
+            return;
+        }
+
+        element.classList.add('teacher-lesson__status--default');
     };
 
     const updateRealtimeSchedule = () => {
         const now = new Date();
         const nowMinutes = (now.getHours() * 60) + now.getMinutes();
-        let liveCount = 0;
-        let nearestUpcoming = null;
 
         slots.forEach((slot) => {
             const start = toMinutes(slot.dataset.start);
             const end = toMinutes(slot.dataset.end);
             const statusEl = slot.querySelector('.js-dash-slot-status');
 
-            slot.classList.remove('ring-1', 'ring-emerald-200');
+            slot.classList.remove('teacher-lesson--live');
 
             if (start === null || end === null || !statusEl) {
                 return;
@@ -109,209 +71,109 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (nowMinutes >= start && nowMinutes < end) {
                 setStatusClass(statusEl, 'live');
-                statusEl.textContent = 'Live Now';
-                slot.classList.add('ring-1', 'ring-emerald-200');
-                liveCount += 1;
+                statusEl.textContent = 'Live now';
+                slot.classList.add('teacher-lesson--live');
                 return;
             }
 
             if (nowMinutes < start) {
-                const delta = start - nowMinutes;
                 setStatusClass(statusEl, 'upcoming');
-                statusEl.textContent = `Starts in ${delta}m`;
-                nearestUpcoming = nearestUpcoming === null ? delta : Math.min(nearestUpcoming, delta);
+                statusEl.textContent = `Starts in ${start - nowMinutes}m`;
                 return;
             }
 
-            setStatusClass(statusEl, 'default');
+            setStatusClass(statusEl, 'done');
             statusEl.textContent = 'Finished';
         });
-
-        if (!hintEl) {
-            return;
-        }
-
-        if (liveCount > 0) {
-            hintEl.textContent = `${liveCount} slot(s) live now`;
-            return;
-        }
-
-        if (nearestUpcoming !== null) {
-            hintEl.textContent = `Next slot starts in ${nearestUpcoming} minute(s)`;
-            return;
-        }
-
-        hintEl.textContent = 'No more slots for today';
     };
 
-    const updateLiveClock = () => {
-        if (!timeEl) {
+    const renderCalendar = () => {
+        if (!calendarRoot) {
             return;
         }
 
-        const now = new Date();
-        timeEl.textContent = now.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
+        const today = dashboardData.calendar || {};
+        const year = Number(today.year) || new Date().getFullYear();
+        const monthIndex = Math.max(0, (Number(today.month) || (new Date().getMonth() + 1)) - 1);
+        const activeDay = Number(today.day) || new Date().getDate();
+        const monthDate = new Date(year, monthIndex, 1);
+        const monthLabel = monthDate.toLocaleDateString([], {
+            month: 'long',
+            year: 'numeric',
         });
+        const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+        const startOffset = (monthDate.getDay() + 6) % 7;
+        const cells = [];
+
+        if (calendarLabel) {
+            calendarLabel.textContent = monthLabel;
+        }
+
+        for (let index = 0; index < startOffset; index += 1) {
+            cells.push('<span class="teacher-calendar__day teacher-calendar__day--muted"></span>');
+        }
+
+        for (let day = 1; day <= daysInMonth; day += 1) {
+            const activeClass = day === activeDay ? ' teacher-calendar__day--active' : '';
+            cells.push(`<span class="teacher-calendar__day${activeClass}">${day}</span>`);
+        }
+
+        calendarRoot.innerHTML = cells.join('');
     };
 
-    const updateLiveDateMeta = () => {
-        const now = new Date();
-        const fallbackDayKey = dayKeys[now.getDay()] || '';
-        const activeDayKey = todayKey || fallbackDayKey;
+    if (workloadCanvas && typeof window.Chart !== 'undefined') {
+        const progressValue = Math.max(0, Math.min(100, Number(dashboardData.workloadPercent) || 0));
+        const centerText = {
+            id: 'teacherWorkloadCenterText',
+            afterDraw(chart) {
+                const {ctx} = chart;
+                const point = chart.getDatasetMeta(0)?.data?.[0];
 
-        if (dayEl) {
-            dayEl.textContent = dayLabels[activeDayKey] || (activeDayKey ? activeDayKey.charAt(0).toUpperCase() + activeDayKey.slice(1) : '');
-        }
+                if (!point) {
+                    return;
+                }
 
-        if (dateEl) {
-            dateEl.textContent = now.toLocaleDateString([], {
-                month: 'short',
-                day: '2-digit',
-                year: 'numeric',
-            });
-        }
-
-        if (openTodayLink && activeDayKey) {
-            const url = new URL(openTodayLink.href, window.location.origin);
-            url.searchParams.set('day', activeDayKey);
-            openTodayLink.href = url.toString();
-        }
-    };
-
-    const weeklyCanvas = document.getElementById('teacherWeeklyChart');
-    if (weeklyCanvas) {
-        new Chart(weeklyCanvas, {
-            type: 'bar',
-            data: {
-                labels: weeklyData.labels || [],
-                datasets: [{
-                        label: 'Class Slots',
-                        data: weeklyData.classes || [],
-                        borderRadius: 8,
-                        backgroundColor: 'rgba(14, 165, 233, 0.75)',
-                    },
-                    {
-                        label: 'Subject Slots',
-                        data: weeklyData.subjects || [],
-                        borderRadius: 8,
-                        backgroundColor: 'rgba(99, 102, 241, 0.75)',
-                    },
-                ],
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#111827';
+                ctx.font = '700 34px sans-serif';
+                ctx.fillText(`${progressValue}%`, point.x, point.y - 6);
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '600 11px sans-serif';
+                ctx.fillText('booked today', point.x, point.y + 22);
+                ctx.restore();
             },
-            options: {
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            boxWidth: 8,
-                        },
-                    },
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0,
-                            stepSize: 1,
-                        },
-                        grid: {
-                            color: 'rgba(148, 163, 184, 0.2)',
-                        },
-                    },
-                    x: {
-                        grid: {
-                            display: false,
-                        },
-                    },
-                },
-            },
-        });
-    }
+        };
 
-    const mixCanvas = document.getElementById('teacherTodayMixChart');
-    if (mixCanvas) {
-        new Chart(mixCanvas, {
+        new Chart(workloadCanvas, {
             type: 'doughnut',
             data: {
-                labels: todayMixData.labels || [],
                 datasets: [{
-                    data: todayMixData.values || [],
+                    data: [progressValue, Math.max(0, 100 - progressValue)],
                     borderWidth: 0,
-                    backgroundColor: ['rgba(56, 189, 248, 0.9)', 'rgba(99, 102, 241, 0.9)'],
-                    hoverOffset: 6,
+                    backgroundColor: ['#4f46e5', '#fbbf24'],
+                    hoverOffset: 0,
                 }],
             },
             options: {
-                cutout: '65%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            boxWidth: 8,
-                        },
-                    },
-                },
-            },
-        });
-    }
-
-    const periodCanvas = document.getElementById('teacherPeriodChart');
-    if (periodCanvas) {
-        new Chart(periodCanvas, {
-            type: 'bar',
-                data: {
-                    labels: todayPeriodsData.labels || [],
-                    datasets: [{
-                        label: 'Slots',
-                        data: todayPeriodsData.values || [],
-                        borderRadius: 10,
-                        backgroundColor: [
-                            'rgba(16, 185, 129, 0.82)',
-                            'rgba(59, 130, 246, 0.82)',
-                            'rgba(99, 102, 241, 0.82)',
-                            'rgba(245, 158, 11, 0.82)',
-                            'rgba(148, 163, 184, 0.82)',
-                        ],
-                    }],
-                },
-            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '78%',
                 plugins: {
                     legend: {
                         display: false,
                     },
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0,
-                            stepSize: 1,
-                        },
-                        grid: {
-                            color: 'rgba(148, 163, 184, 0.18)',
-                        },
-                    },
-                    x: {
-                        grid: {
-                            display: false,
-                        },
+                    tooltip: {
+                        enabled: false,
                     },
                 },
             },
+            plugins: [centerText],
         });
     }
 
-    updateLiveDateMeta();
-    updateLiveClock();
+    renderCalendar();
     updateRealtimeSchedule();
-    window.setInterval(updateLiveDateMeta, 30000);
-    window.setInterval(updateLiveClock, 1000);
     window.setInterval(updateRealtimeSchedule, 30000);
 });
