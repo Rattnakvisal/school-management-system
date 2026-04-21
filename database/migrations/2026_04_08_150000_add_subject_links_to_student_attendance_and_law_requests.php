@@ -100,11 +100,34 @@ return new class extends Migration {
             return;
         }
 
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table($table, function (Blueprint $blueprint) use ($indexName) {
+                try {
+                    $blueprint->dropIndex($indexName);
+                } catch (\Throwable) {
+                }
+            });
+
+            return;
+        }
+
         DB::statement(sprintf('ALTER TABLE `%s` DROP INDEX `%s`', $table, $indexName));
     }
 
     private function indexExists(string $table, string $indexName): bool
     {
+        if (DB::getDriverName() === 'sqlite') {
+            $indexes = DB::select("PRAGMA index_list('{$table}')");
+
+            foreach ($indexes as $index) {
+                if ((string) ($index->name ?? '') === $indexName) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         $connection = Schema::getConnection();
         $database = $connection->getDatabaseName();
 

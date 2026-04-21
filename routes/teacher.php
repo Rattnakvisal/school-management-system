@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Teacher\ClassController;
+use App\Http\Controllers\Teacher\AssignmentController;
 use App\Http\Controllers\Teacher\DashboardController;
 use App\Http\Controllers\Teacher\NotificationController;
 use App\Http\Controllers\Teacher\ScheduleController;
@@ -26,7 +27,9 @@ Route::middleware(['auth', 'role:teacher'])
         Route::post('/law-requests', [LawRequestController::class, 'store'])->name('law-requests.store');
         Route::put('/law-requests/{lawRequest}', [LawRequestController::class, 'update'])->name('law-requests.update');
         Route::delete('/law-requests/{lawRequest}', [LawRequestController::class, 'destroy'])->name('law-requests.destroy');
-        Route::view('/assignments', 'teacher.assignments')->name('assignments.index');
+        Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments.index');
+        Route::post('/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
+        Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
         Route::view('/grades', 'teacher.grades')->name('grades.index');
         Route::get('/notices', [NotificationController::class, 'index'])->name('notices.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');

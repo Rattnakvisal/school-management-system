@@ -230,10 +230,17 @@
                                         <td class="px-3 py-3 text-slate-700">{{ $lawRequest->created_at?->format('M d, Y h:i A') }}</td>
                                         <td class="px-3 py-3">
                                             <div class="flex flex-wrap items-center gap-2">
-                                                <a href="{{ route('teacher.law-requests.index', ['edit' => $lawRequest->id]) }}"
-                                                    class="inline-flex items-center rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
-                                                    Edit
-                                                </a>
+                                                @if ($statusKey === 'pending')
+                                                    <a href="{{ route('teacher.law-requests.index', ['edit' => $lawRequest->id]) }}"
+                                                        class="inline-flex items-center rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
+                                                        Edit
+                                                    </a>
+                                                @else
+                                                    <span
+                                                        class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-400">
+                                                        Locked
+                                                    </span>
+                                                @endif
                                                 <form method="POST"
                                                     action="{{ route('teacher.law-requests.destroy', $lawRequest) }}"
                                                     class="js-law-request-delete-form"

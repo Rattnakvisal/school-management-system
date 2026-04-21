@@ -75,17 +75,19 @@ class NotificationController extends Controller
         $role = strtolower(trim($role));
         $teacherTag = '[teacher_id:' . $userId . ']';
         $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request'];
+        $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted'];
 
         if ($role === 'teacher') {
             $query->where('type', '!=', 'teacher_law_request')
+                ->whereNotIn('type', $studentOnlyTypes)
                 ->where(function ($inner) use ($teacherTag, $teacherOnlyTypes) {
                     $inner->whereNotIn('type', $teacherOnlyTypes)
                         ->orWhere('message', 'like', '%' . $teacherTag . '%');
                 });
         } elseif ($role === 'admin') {
-            $query->whereNotIn('type', $teacherOnlyTypes);
+            $query->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes));
         } else {
-            $query->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes));
+            $query->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes, $studentOnlyTypes));
         }
 
         return $query;

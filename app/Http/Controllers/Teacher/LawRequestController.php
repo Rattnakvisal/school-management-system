@@ -31,6 +31,11 @@ class LawRequestController extends Controller
         $editIdRaw = trim((string) $request->query('edit', ''));
         if (ctype_digit($editIdRaw)) {
             $editingRequest = $lawRequests->firstWhere('id', (int) $editIdRaw);
+            if ($editingRequest && strtolower((string) ($editingRequest->status ?? 'pending')) !== 'pending') {
+                return redirect()
+                    ->route('teacher.law-requests.index')
+                    ->with('warning', 'Approved or rejected requests can no longer be edited.');
+            }
         }
 
         $selectionDefaults = $this->resolveSelectionFromRequest($editingRequest, $subjectOptions, $subjectTimeOptionsBySubject);
@@ -143,6 +148,12 @@ class LawRequestController extends Controller
         $teacherId = (int) ($request->user()?->id ?? 0);
         if ((int) ($lawRequest->teacher_id ?? 0) !== $teacherId) {
             abort(404);
+        }
+
+        if (strtolower((string) ($lawRequest->status ?? 'pending')) !== 'pending') {
+            return redirect()
+                ->route('teacher.law-requests.index')
+                ->with('warning', 'Approved or rejected requests can no longer be edited.');
         }
 
         $resolved = $this->validateAndBuildPayload($request, $teacherId, $this->lawTypes());

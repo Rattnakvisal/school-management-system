@@ -63,4 +63,10 @@ class Subject extends Model
             ->orderBy('sort_order')
             ->orderBy('start_time');
     }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class)
+            ->latest();
+    }
 }

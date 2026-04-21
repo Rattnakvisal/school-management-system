@@ -84,7 +84,7 @@
                             'title' => 'Requests',
                             'items' => [
                                 $item('student.law-requests.index', 'Law Requests', 'document'),
-                                $item('student.schedule.index', 'Schedule', 'calendar'),
+                                $item('student.assignment.index', 'Assignment', 'clipboard'),
                                 $item('student.notices.index', 'Notifications', 'bell'),
                             ],
                         ],
@@ -177,10 +177,8 @@
                                                     viewBox="0 0 24 24" aria-hidden="true">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="M8 3.5h6l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20V5A1.5 1.5 0 0 1 7.5 3.5Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M14 3.5V8h4" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9 12h6M9 16h6" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 3.5V8h4" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6" />
                                                 </svg>
                                             @break
 
@@ -217,7 +215,7 @@
                         Stay focused and keep learning.
                     </div>
                     <div class="mt-4 inline-flex items-center rounded-xl bg-white/15 px-3 py-2 text-xs font-semibold">
-                        Open your schedule, check notices, and keep moving forward.
+                        Open your assignment, check notices, and keep moving forward.
                     </div>
                 </div>
             </div>
@@ -276,7 +274,8 @@
                                             <span
                                                 class="mt-2 h-2 w-2 rounded-full {{ $n->is_read ? 'bg-slate-300' : 'bg-indigo-600' }}"></span>
                                             <div class="min-w-0">
-                                                <div class="text-sm font-semibold text-slate-800">{{ $n->title }}</div>
+                                                <div class="text-sm font-semibold text-slate-800">{{ $n->title }}
+                                                </div>
                                                 <div class="truncate text-xs text-slate-500">{{ $n->message }}</div>
                                                 <div class="mt-1 text-[11px] text-slate-400">
                                                     {{ $n->created_at->diffForHumans() }}</div>
@@ -285,7 +284,8 @@
                                     </a>
                                 @empty
                                     <div id="student-notif-empty"
-                                        class="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.</div>
+                                        class="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.
+                                    </div>
                                 @endforelse
                             </div>
 

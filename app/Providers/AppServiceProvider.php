@@ -29,19 +29,21 @@ class AppServiceProvider extends ServiceProvider
             $notifQuery = Notification::query()->latest();
             $unreadQuery = Notification::query()->where('is_read', false);
             $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request'];
-            $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked'];
+            $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted'];
 
             // Teacher law-request notifications are admin workflow alerts.
             if ($role === 'teacher') {
                 $teacherTag = '[teacher_id:' . $userId . ']';
 
                 $notifQuery->where('type', '!=', 'teacher_law_request')
+                    ->whereNotIn('type', $studentOnlyTypes)
                     ->where(function ($query) use ($teacherTag, $teacherOnlyTypes) {
                         $query->whereNotIn('type', $teacherOnlyTypes)
                             ->orWhere('message', 'like', '%' . $teacherTag . '%');
                     });
 
                 $unreadQuery->where('type', '!=', 'teacher_law_request')
+                    ->whereNotIn('type', $studentOnlyTypes)
                     ->where(function ($query) use ($teacherTag, $teacherOnlyTypes) {
                         $query->whereNotIn('type', $teacherOnlyTypes)
                             ->orWhere('message', 'like', '%' . $teacherTag . '%');

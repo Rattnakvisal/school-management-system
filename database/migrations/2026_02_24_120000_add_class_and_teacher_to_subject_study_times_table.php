@@ -28,6 +28,30 @@ return new class extends Migration
         });
 
         // Backfill existing rows from subjects table so legacy data keeps working.
+        if (DB::getDriverName() === 'sqlite') {
+            $rows = DB::table('subject_study_times')
+                ->leftJoin('subjects', 'subjects.id', '=', 'subject_study_times.subject_id')
+                ->select([
+                    'subject_study_times.id',
+                    'subject_study_times.school_class_id as existing_school_class_id',
+                    'subject_study_times.teacher_id as existing_teacher_id',
+                    'subjects.school_class_id as subject_school_class_id',
+                    'subjects.teacher_id as subject_teacher_id',
+                ])
+                ->get();
+
+            foreach ($rows as $row) {
+                DB::table('subject_study_times')
+                    ->where('id', $row->id)
+                    ->update([
+                        'school_class_id' => $row->existing_school_class_id ?? $row->subject_school_class_id,
+                        'teacher_id' => $row->existing_teacher_id ?? $row->subject_teacher_id,
+                    ]);
+            }
+
+            return;
+        }
+
         DB::statement('
             UPDATE subject_study_times sst
             INNER JOIN subjects s ON s.id = sst.subject_id
@@ -49,4 +73,3 @@ return new class extends Migration
         });
     }
 };
-
