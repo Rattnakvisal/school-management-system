@@ -137,6 +137,16 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function givenGrades(): HasMany
+    {
+        return $this->hasMany(Grade::class, 'teacher_id');
+    }
+
+    public function receivedGrades(): HasMany
+    {
+        return $this->hasMany(Grade::class, 'student_id');
+    }
+
     public function getAvatarUrlAttribute(): string
     {
         $avatar = trim((string) $this->avatar);

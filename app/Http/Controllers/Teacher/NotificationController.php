@@ -75,7 +75,7 @@ class NotificationController extends Controller
         $role = strtolower(trim($role));
         $teacherTag = '[teacher_id:' . $userId . ']';
         $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request'];
-        $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted'];
+        $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted'];
 
         if ($role === 'teacher') {
             $query->where('type', '!=', 'teacher_law_request')

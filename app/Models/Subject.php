@@ -69,4 +69,10 @@ class Subject extends Model
         return $this->hasMany(Assignment::class)
             ->latest();
     }
+
+    public function grades(): HasMany
+    {
+        return $this->hasMany(Grade::class)
+            ->latest('graded_at');
+    }
 }

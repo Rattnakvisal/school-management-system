@@ -78,7 +78,7 @@
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-black text-slate-900">Create Student</h2>
-                        <p class="mt-1 text-xs text-slate-500">Create a new account and assign the role.</p>
+                        <p class="mt-1 text-xs text-slate-500">Create a new student account for the roster.</p>
                     </div>
                     <button type="button" @click="createOpen = !createOpen"
                         :aria-expanded="(createOpen || isDesktop).toString()" aria-controls="create-student-form-panel"
@@ -97,6 +97,7 @@
                     x-cloak x-transition.opacity.duration.150ms>
                     @csrf
                     <input type="hidden" name="_form" value="create_student">
+                    <input type="hidden" name="role" value="student">
 
                     <div>
                         <label for="name" class="mb-1 block text-xs font-semibold text-slate-600">Full Name</label>
@@ -132,17 +133,15 @@
                     @endif
 
                     <div>
-                        <label for="role" class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
-                        <select id="role" name="role"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                            <option value="student" {{ old('role', 'student') === 'student' ? 'selected' : '' }}>Student
-                            </option>
-                            <option value="teacher" {{ old('role') === 'teacher' ? 'selected' : '' }}>Teacher</option>
-                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                        </select>
-                        @error('role')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
+                        <span class="mb-1 block text-xs font-semibold text-slate-600">Role</span>
+                        <div
+                            class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+                            <span class="font-semibold">Student</span>
+                            <span
+                                class="rounded-full bg-indigo-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-700">
+                                Fixed
+                            </span>
+                        </div>
                     </div>
 
                     @if ($hasClassColumn)

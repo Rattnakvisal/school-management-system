@@ -3,6 +3,7 @@
 use App\Http\Controllers\Teacher\ClassController;
 use App\Http\Controllers\Teacher\AssignmentController;
 use App\Http\Controllers\Teacher\DashboardController;
+use App\Http\Controllers\Teacher\GradeController;
 use App\Http\Controllers\Teacher\NotificationController;
 use App\Http\Controllers\Teacher\ScheduleController;
 use App\Http\Controllers\Teacher\AttendanceController;
@@ -30,7 +31,9 @@ Route::middleware(['auth', 'role:teacher'])
         Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments.index');
         Route::post('/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
         Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
-        Route::view('/grades', 'teacher.grades')->name('grades.index');
+        Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
+        Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
+        Route::put('/grades/{grade}', [GradeController::class, 'update'])->name('grades.update');
         Route::get('/notices', [NotificationController::class, 'index'])->name('notices.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');

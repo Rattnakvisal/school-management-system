@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Student\AssignmentController;
+use App\Http\Controllers\Student\GradeController;
 use App\Http\Controllers\Student\NotificationController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\LawRequestController;
@@ -19,7 +20,7 @@ Route::middleware(['auth', 'role:student'])
         Route::put('/law-requests/{lawRequest}', [LawRequestController::class, 'update'])->name('law-requests.update');
         Route::delete('/law-requests/{lawRequest}', [LawRequestController::class, 'destroy'])->name('law-requests.destroy');
         Route::redirect('/attendance', '/student/dashboard');
-        Route::view('/grades', 'student.grades')->name('grades.index');
+        Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
         Route::redirect('/Assignment', '/student/assignments');
         Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignment.index');
         Route::get('/notices', [NotificationController::class, 'index'])->name('notices.index');

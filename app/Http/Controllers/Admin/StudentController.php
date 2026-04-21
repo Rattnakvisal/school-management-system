@@ -114,6 +114,10 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'role' => 'student',
+        ]);
+
         $validated = $this->validateStudentRequest($request);
         $selectedMajorSubjectIds = $this->extractSelectedMajorSubjectIdsFromRequest($request);
         $selectedStudyTimeIds = $this->extractSelectedStudyTimeIdsFromRequest($request);
@@ -124,7 +128,7 @@ class StudentController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
-            'role' => (string) ($validated['role'] ?? 'student'),
+            'role' => 'student',
             'avatar' => $avatarResult['path'],
             'provider' => null,
             'google_id' => null,
@@ -169,7 +173,7 @@ class StudentController extends Controller
 
         $redirect = redirect()
             ->route('admin.students.index')
-            ->with('success', 'User account created successfully.');
+            ->with('success', 'Student account created successfully.');
 
         if ($avatarResult['warning']) {
             $redirect->with('warning', $avatarResult['warning']);
