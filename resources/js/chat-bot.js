@@ -3,32 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "(prefers-reduced-motion: reduce)",
     );
 
-    requestAnimationFrame(() => {
-        document.body.classList.add("page-ready");
-    });
-
-    document.body.classList.add("reveal-ready");
-    const items = document.querySelectorAll("[data-reveal]");
-    const firstFold = document.querySelectorAll("[data-first][data-reveal]");
-    firstFold.forEach((el) => el.classList.add("is-visible"));
-    if (!("IntersectionObserver" in window)) {
-        items.forEach((el) => el.classList.add("is-visible"));
-        return;
-    }
-    const io = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add("is-visible");
-                    io.unobserve(entry.target);
-                }
-            });
-        },
-        { threshold: 0.14, rootMargin: "0px 0px -6% 0px" },
-    );
-
-    items.forEach((el) => io.observe(el));
-
     const chatbot = document.getElementById("school-chatbot");
     if (!chatbot) {
         return;
@@ -42,6 +16,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const messages = document.getElementById("chatbot-messages");
     const quickWrap = document.getElementById("chatbot-quick-questions");
 
+    const parseJson = (value, fallback) => {
+        if (!value) {
+            return fallback;
+        }
+
+        try {
+            return JSON.parse(value);
+        } catch {
+            return fallback;
+        }
+    };
+
     const animateNode = (node, frames, options) => {
         if (
             prefersReducedMotion.matches ||
@@ -54,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return node.animate(frames, options);
     };
 
-    const quickQuestions = [
+    const defaultQuickQuestions = [
         "How can I apply for admission?",
         "What programs are available?",
         "What are the office hours?",
@@ -63,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Do teachers manage attendance in the system?",
     ];
 
-    const answers = [
+    const defaultAnswers = [
         {
             keywords: [
                 "admission",
@@ -111,10 +97,25 @@ document.addEventListener("DOMContentLoaded", () => {
         },
     ];
 
+    const quickQuestions = parseJson(
+        chatbot.dataset.quickQuestions,
+        defaultQuickQuestions,
+    );
+    const answers = parseJson(chatbot.dataset.answers, defaultAnswers);
+    const thinkingText = chatbot.dataset.thinking || "Typing...";
+    const emptyQuestionText =
+        chatbot.dataset.emptyQuestion || "Please type a question so I can help you.";
+    const fallbackAnswerText =
+        chatbot.dataset.fallbackAnswer ||
+        "I can help with admission, programs, contact details, office hours, and platform features. Please ask one of those topics.";
+    const welcomeText =
+        chatbot.dataset.welcome ||
+        `Hi, welcome to ${schoolName}. Ask me a question and I will answer automatically.`;
+
     const normalize = (text) =>
         text
             .toLowerCase()
-            .replace(/[^a-z0-9\s]/g, " ")
+            .replace(/[^\p{L}\p{N}\s]/gu, " ")
             .trim();
 
     const addMessage = (role, text) => {
@@ -152,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const pickAnswer = (question) => {
         const clean = normalize(question);
         if (!clean) {
-            return "Please type a question so I can help you.";
+            return emptyQuestionText;
         }
 
         let best = null;
@@ -174,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return best.answer;
         }
 
-        return `I can help with admission, programs, contact details, office hours, and platform features. Please ask one of those topics.`;
+        return fallbackAnswerText;
     };
 
     const renderQuickQuestions = () => {
@@ -200,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         addMessage("user", text);
-        const thinkingBubble = addMessage("bot", "Typing...");
+        const thinkingBubble = addMessage("bot", thinkingText);
         setTimeout(() => {
             thinkingBubble.textContent = pickAnswer(text);
             messages.scrollTop = messages.scrollHeight;
@@ -282,9 +283,6 @@ document.addEventListener("DOMContentLoaded", () => {
         sendQuestion(input.value);
     });
 
-    addMessage(
-        "bot",
-        `Hi, welcome to ${schoolName}. Ask me a question and I will answer automatically.`,
-    );
+    addMessage("bot", welcomeText);
     renderQuickQuestions();
 });

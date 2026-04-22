@@ -6,6 +6,7 @@ import "./Student/Notifications";
 const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
 );
+let homeRevealObserver = null;
 
 const isAnimatableChild = (node) => {
     return (
@@ -16,7 +17,7 @@ const isAnimatableChild = (node) => {
     );
 };
 
-const animatePageBlocks = () => {
+const animatePageBlocks = (force = false) => {
     if (prefersReducedMotion.matches) {
         return;
     }
@@ -24,7 +25,7 @@ const animatePageBlocks = () => {
     document.querySelectorAll("[data-page-animate]").forEach((container) => {
         if (
             !(container instanceof HTMLElement) ||
-            container.dataset.pageAnimated === "1"
+            (!force && container.dataset.pageAnimated === "1")
         ) {
             return;
         }
@@ -53,8 +54,95 @@ const animatePageBlocks = () => {
     });
 };
 
+const setupHomeReveal = (replay = false) => {
+    if (
+        !(document.body instanceof HTMLElement) ||
+        !document.body.classList.contains("website-home")
+    ) {
+        return;
+    }
+
+    document.body.classList.add("page-ready");
+
+    if (homeRevealObserver) {
+        homeRevealObserver.disconnect();
+        homeRevealObserver = null;
+    }
+
+    const items = Array.from(document.querySelectorAll("[data-reveal]")).filter(
+        (node) => node instanceof HTMLElement,
+    );
+
+    if (!items.length) {
+        return;
+    }
+
+    items.forEach((el) => el.classList.remove("is-visible"));
+    document.body.classList.remove("reveal-ready");
+
+    const activateReveal = () => {
+        document.body.classList.add("reveal-ready");
+
+        const firstFold = document.querySelectorAll("[data-first][data-reveal]");
+        firstFold.forEach((el) => el.classList.add("is-visible"));
+
+        if (
+            prefersReducedMotion.matches ||
+            !("IntersectionObserver" in window)
+        ) {
+            items.forEach((el) => el.classList.add("is-visible"));
+            return;
+        }
+
+        homeRevealObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("is-visible");
+                        homeRevealObserver?.unobserve(entry.target);
+                    }
+                });
+            },
+            { threshold: 0.14, rootMargin: "0px 0px -6% 0px" },
+        );
+
+        items.forEach((el) => homeRevealObserver?.observe(el));
+    };
+
+    if (replay) {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(activateReveal);
+        });
+        return;
+    }
+
+    requestAnimationFrame(activateReveal);
+};
+
+const bootHomeAnimations = ({
+    replayPageBlocks = false,
+    replayReveal = false,
+} = {}) => {
+    if (replayPageBlocks) {
+        document
+            .querySelectorAll("[data-page-animate]")
+            .forEach((container) =>
+                container.removeAttribute("data-page-animated"),
+            );
+    }
+
+    setupHomeReveal(replayReveal);
+    animatePageBlocks(replayPageBlocks);
+};
+
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", animatePageBlocks);
+    document.addEventListener("DOMContentLoaded", () => bootHomeAnimations());
 } else {
-    animatePageBlocks();
+    bootHomeAnimations();
 }
+
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+        bootHomeAnimations({ replayPageBlocks: true, replayReveal: true });
+    }
+});

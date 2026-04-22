@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Foundation\Application;
@@ -18,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'telegram/webhook',
             'telegram/webhook/*',
+        ]);
+
+        $middleware->web(append: [
+            SetLocale::class,
         ]);
 
         $middleware->alias([

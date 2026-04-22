@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Website\TelegramBotController as WebsiteTelegramBotController;
 use App\Http\Controllers\Website\ContactMessageController as WebsiteContactMessageController;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,20 @@ Route::get('/', function () {
         'dashboardRoute' => $dashboardRoute,
     ]);
 })->name('home');
+
+Route::get('/language/{locale}', function (Request $request, string $locale) {
+    abort_unless(in_array($locale, config('app.supported_locales', ['en', 'km']), true), 404);
+
+    $request->session()->put('locale', $locale);
+
+    $previousUrl = url()->previous();
+
+    if (! $previousUrl || $previousUrl === $request->fullUrl()) {
+        return redirect()->route('home');
+    }
+
+    return redirect()->to($previousUrl);
+})->name('language.switch');
 
 Route::get('/storage/{path}', function (string $path) {
     $path = ltrim(str_replace('\\', '/', $path), '/');
