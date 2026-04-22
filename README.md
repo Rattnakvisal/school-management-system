@@ -20,44 +20,49 @@ Main auth flows:
 - Nginx
 - Vite
 
-## Current Docker Setup (Important)
+## Docker Setup
 
-The current `docker-compose.yml` is configured so:
+The default `docker-compose.yml` now uses your local MySQL instance:
 
 - `web` is exposed on `http://localhost:8000`
-- `app` (Laravel/PHP-FPM) connects to **host MySQL** at:
-  - `DB_HOST=host.docker.internal`
-  - `DB_PORT=3308`
+- `app` connects to `host.docker.internal:3308`
+- `assets` builds Vite files during startup, so a fresh clone can boot without a manual local `npm run build`
+- the bundled `db` service is available only when you explicitly enable the `docker-db` profile
 
-This is intentional so the app can use your existing MySQL data/users on port `3308`.
+If your local MySQL credentials are different, update the `DOCKER_DB_*` values in `.env`. The defaults are:
 
-The `db` service still exists, but it is **not exposed to host port** by default.
+```bash
+DOCKER_DB_HOST=host.docker.internal
+DOCKER_DB_PORT=3308
+DOCKER_DB_DATABASE=school_management_system
+DOCKER_DB_USERNAME=root
+DOCKER_DB_PASSWORD=your-password
+```
 
 ## Quick Start
 
-1. Install dependencies (if needed):
+1. Copy env file if needed:
 
 ```bash
-composer install
-npm install
+cp .env.example .env
 ```
 
-2. Build frontend assets:
-
-```bash
-npm run build
-```
-
-3. Start Docker services:
+2. Start Docker services:
 
 ```bash
 docker compose up -d --build
 ```
 
-4. Generate app key (only first setup):
+3. Generate app key (only first setup):
 
 ```bash
 docker compose exec app php artisan key:generate
+```
+
+4. Run migrations:
+
+```bash
+docker compose exec app php artisan migrate
 ```
 
 5. Open:
@@ -110,6 +115,12 @@ Start services:
 docker compose up -d
 ```
 
+Rebuild containers and assets:
+
+```bash
+docker compose up -d --build
+```
+
 Restart only app:
 
 ```bash
@@ -127,7 +138,13 @@ View logs:
 ```bash
 docker compose logs -f app
 docker compose logs -f web
-docker compose logs -f db
+docker compose logs -f assets
+```
+
+Use the optional Docker MySQL service:
+
+```bash
+docker compose --profile docker-db up -d db
 ```
 
 Stop services:
@@ -160,8 +177,18 @@ Restart `web` (nginx) after recreating `app`:
 docker compose restart web
 ```
 
-### `ERR_INVALID_HTTP_RESPONSE` on `localhost:3308`
+### Frontend assets are missing or stale
 
-This is expected in a browser. MySQL is not HTTP.
-Use a SQL client (SQLyog, DBeaver, Workbench) for DB port connections.
+Re-run the asset builder:
 
+```bash
+docker compose run --rm assets
+```
+
+### Need the bundled Docker MySQL container
+
+Start it only when needed:
+
+```bash
+docker compose --profile docker-db up -d db
+```

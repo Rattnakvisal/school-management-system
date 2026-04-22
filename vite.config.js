@@ -22,6 +22,7 @@ export default defineConfig({
                 'resources/js/Teacher/LawRequests.js',
                 'resources/js/Teacher/schedule.js',
                 'resources/js/Teacher/settings.js',
+                'resources/js/Student/dashboard.js',
                 'resources/js/Student/LawRequests.js',
             ],
             refresh: true,
