@@ -335,7 +335,7 @@ class DashboardController extends Controller
                 ];
             })
             ->sortByDesc(fn(array $student) => $student['attendance_percent'] ?? -1)
-            ->take(7)
+            ->take(5)
             ->values()
             ->all();
 
