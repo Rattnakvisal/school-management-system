@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const calendarRoot = document.getElementById('teacher-dashboard-calendar');
     const calendarLabel = document.getElementById('teacher-dashboard-calendar-label');
     const slots = Array.from(document.querySelectorAll('.js-dash-slot'));
+    const numberNodes = Array.from(document.querySelectorAll('.teacher-animate-number'));
+    const progressFills = Array.from(document.querySelectorAll('.teacher-progress-fill'));
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let dashboardData = {};
     try {
@@ -12,6 +15,69 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Unable to parse teacher dashboard data.', error);
         dashboardData = {};
     }
+
+    const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
+
+    const animateNumber = (element) => {
+        if (!element || !element.dataset.value) {
+            return;
+        }
+
+        const end = Number.parseFloat(element.dataset.value || '0');
+        const decimals = Number.parseInt(element.dataset.decimals || (Number.isInteger(end) ? '0' : '1'), 10);
+        const suffix = element.dataset.suffix || '';
+
+        if (Number.isNaN(end)) {
+            return;
+        }
+
+        if (prefersReducedMotion) {
+            const staticValue = decimals > 0 ? end.toFixed(decimals) : Math.round(end).toString();
+            element.textContent = `${staticValue}${suffix}`;
+            return;
+        }
+
+        const startedAt = performance.now();
+        const duration = 1100;
+
+        const step = (now) => {
+            const progress = Math.min((now - startedAt) / duration, 1);
+            const eased = easeOutCubic(progress);
+            const current = end * eased;
+            const output = decimals > 0 ? current.toFixed(decimals) : Math.round(current).toString();
+
+            element.textContent = `${output}${suffix}`;
+
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+
+        window.requestAnimationFrame(step);
+    };
+
+    const animateProgressFill = (fill, index) => {
+        if (!fill) {
+            return;
+        }
+
+        const finalWidth = Math.max(0, Math.min(100, Number.parseFloat(fill.dataset.width || '0')));
+
+        if (prefersReducedMotion) {
+            fill.style.width = `${finalWidth}%`;
+            return;
+        }
+
+        fill.style.width = '0%';
+        fill.style.transition = 'width 900ms cubic-bezier(0.22, 1, 0.36, 1)';
+        fill.style.transitionDelay = `${index * 110}ms`;
+
+        window.requestAnimationFrame(() => {
+            window.setTimeout(() => {
+                fill.style.width = `${finalWidth}%`;
+            }, 180);
+        });
+    };
 
     const toMinutes = (value) => {
         const parts = String(value || '').split(':');
@@ -119,10 +185,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         calendarRoot.innerHTML = cells.join('');
+
+        if (!prefersReducedMotion) {
+            Array.from(calendarRoot.children).forEach((cell, index) => {
+                cell.style.opacity = '0';
+                cell.style.transform = 'translateY(8px) scale(0.96)';
+                cell.style.transition = 'opacity 320ms ease, transform 320ms ease';
+                cell.style.transitionDelay = `${index * 18}ms`;
+
+                window.requestAnimationFrame(() => {
+                    cell.style.opacity = '1';
+                    cell.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        }
     };
 
     if (workloadCanvas && typeof window.Chart !== 'undefined') {
         const progressValue = Math.max(0, Math.min(100, Number(dashboardData.workloadPercent) || 0));
+        let animatedProgressValue = prefersReducedMotion ? progressValue : 0;
         const centerText = {
             id: 'teacherWorkloadCenterText',
             afterDraw(chart) {
@@ -137,20 +218,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = '#111827';
-                ctx.font = '700 34px sans-serif';
-                ctx.fillText(`${progressValue}%`, point.x, point.y - 6);
+                ctx.font = '700 34px "Sora", sans-serif';
+                ctx.fillText(`${Math.round(animatedProgressValue)}%`, point.x, point.y - 6);
                 ctx.fillStyle = '#94a3b8';
-                ctx.font = '600 11px sans-serif';
+                ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
                 ctx.fillText('booked today', point.x, point.y + 22);
                 ctx.restore();
             },
         };
 
-        new Chart(workloadCanvas, {
+        const chart = new Chart(workloadCanvas, {
             type: 'doughnut',
             data: {
                 datasets: [{
-                    data: [progressValue, Math.max(0, 100 - progressValue)],
+                    data: [animatedProgressValue, Math.max(0, 100 - animatedProgressValue)],
                     borderWidth: 0,
                     backgroundColor: ['#4f46e5', '#fbbf24'],
                     hoverOffset: 0,
@@ -171,9 +252,34 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             plugins: [centerText],
         });
+
+        if (!prefersReducedMotion) {
+            const startedAt = performance.now();
+            const duration = 1150;
+
+            const step = (now) => {
+                const progress = Math.min((now - startedAt) / duration, 1);
+                const eased = easeOutCubic(progress);
+
+                animatedProgressValue = progressValue * eased;
+                chart.data.datasets[0].data = [
+                    animatedProgressValue,
+                    Math.max(0, 100 - animatedProgressValue),
+                ];
+                chart.update('none');
+
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+
+            window.requestAnimationFrame(step);
+        }
     }
 
     renderCalendar();
     updateRealtimeSchedule();
+    numberNodes.forEach((node) => animateNumber(node));
+    progressFills.forEach((fill, index) => animateProgressFill(fill, index));
     window.setInterval(updateRealtimeSchedule, 30000);
 });

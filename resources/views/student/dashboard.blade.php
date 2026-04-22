@@ -68,7 +68,7 @@
         $softText = 'text-sm text-slate-500';
     @endphp
 
-    <div class="space-y-6 bg-[linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)] font-[Manrope] tracking-[-0.01em]">
+    <div class="dashboard-stage space-y-6 bg-[linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)] font-[Plus Jakarta Sans] tracking-[-0.01em]">
         {{-- Hero / Profile --}}
         <section
             class="dash-reveal relative overflow-hidden rounded-[32px] border border-white/70 bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(167,139,250,0.10),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.98))] px-6 py-6 shadow-[0_24px_70px_-30px_rgba(15,23,42,0.22)] sm:px-8 sm:py-8"
@@ -86,7 +86,7 @@
                             Student dashboard
                         </span>
                         <h1
-                            class="font-[Outfit] text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-[0.95] tracking-[-0.06em] text-slate-900">
+                            class="font-[Sora] text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-[0.95] tracking-[-0.06em] text-slate-900">
                             Welcome back,
                             <span class="bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">
                                 {{ $firstName }}
@@ -105,14 +105,14 @@
 
                 <div class="mt-8 grid gap-6 xl:grid-cols-[minmax(300px,1.05fr)_minmax(0,1.4fr)]">
                     <div
-                        class="flex min-w-0 items-center gap-4 rounded-[26px] border border-white/70 bg-white/80 p-4 shadow-[0_14px_35px_-28px_rgba(15,23,42,0.18)] sm:p-5">
+                        class="student-hover-card dash-hover flex min-w-0 items-center gap-4 rounded-[26px] border border-white/70 bg-white/80 p-4 shadow-[0_14px_35px_-28px_rgba(15,23,42,0.18)] sm:p-5">
                         <img src="{{ $student->avatar_url }}" alt="{{ $fullName }}"
                             onerror="this.onerror=null;this.src='{{ $student->fallback_avatar_url }}';"
                             class="h-20 w-20 shrink-0 rounded-full border-[5px] border-[#eef5ff] object-cover shadow-md">
 
                         <div class="min-w-0">
                             <h2
-                                class="truncate font-[Outfit] text-[clamp(1.25rem,3vw,1.75rem)] font-extrabold tracking-[-0.04em] text-slate-900">
+                                class="truncate font-[Sora] text-[clamp(1.25rem,3vw,1.75rem)] font-extrabold tracking-[-0.04em] text-slate-900">
                                 {{ $fullName }}
                             </h2>
 
@@ -130,38 +130,38 @@
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
-                        <article class="rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
+                        <article class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
                             <span class="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Student
                                 ID</span>
                             <strong
-                                class="mt-2 block break-words font-[Outfit] text-[0.98rem] font-extrabold text-slate-800">
+                                class="mt-2 block break-words font-[Sora] text-[0.98rem] font-extrabold text-slate-800">
                                 {{ $displayStudentId }}
                             </strong>
                         </article>
 
-                        <article class="rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
+                        <article class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
                             <span
                                 class="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Phone</span>
                             <strong
-                                class="mt-2 block break-words font-[Outfit] text-[0.98rem] font-extrabold text-slate-800">
+                                class="mt-2 block break-words font-[Sora] text-[0.98rem] font-extrabold text-slate-800">
                                 {{ $studentPhone !== '' ? $studentPhone : 'Not set' }}
                             </strong>
                         </article>
 
-                        <article class="rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
+                        <article class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
                             <span
                                 class="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Email</span>
                             <strong
-                                class="mt-2 block break-words font-[Outfit] text-[0.98rem] font-extrabold text-slate-800">
+                                class="mt-2 block break-words font-[Sora] text-[0.98rem] font-extrabold text-slate-800">
                                 {{ $studentEmail !== '' ? $studentEmail : 'Not set' }}
                             </strong>
                         </article>
 
-                        <article class="rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
+                        <article class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
                             <span
                                 class="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Address</span>
                             <strong
-                                class="mt-2 block break-words font-[Outfit] text-[0.98rem] font-extrabold text-slate-800">
+                                class="mt-2 block break-words font-[Sora] text-[0.98rem] font-extrabold text-slate-800">
                                 {{ $studentAddress }}
                             </strong>
                         </article>
@@ -192,7 +192,7 @@
                         @endphp
 
                         <article
-                            class="flex items-center gap-4 rounded-[24px] border border-white/70 {{ $cardTone['wrap'] }} px-4 py-4 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.14)]">
+                            class="student-hover-card dash-hover flex items-center gap-4 rounded-[24px] border border-white/70 {{ $cardTone['wrap'] }} px-4 py-4 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.14)]">
                             <span
                                 class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full {{ $cardTone['icon'] }}">
                                 @switch($card['icon'])
@@ -233,8 +233,9 @@
 
                             <div>
                                 <strong
-                                    class="block font-[Outfit] text-[1.15rem] font-extrabold tracking-[-0.04em] text-slate-800">
-                                    {{ number_format($card['value']) }} Days
+                                    class="student-animate-number block font-[Sora] text-[1.15rem] font-extrabold tracking-[-0.04em] text-slate-800"
+                                    data-value="{{ (int) $card['value'] }}" data-suffix=" Days">
+                                    0 Days
                                 </strong>
                                 <span class="mt-1 block text-[0.8rem] text-slate-400">{{ $card['label'] }}</span>
                             </div>
@@ -247,7 +248,7 @@
         {{-- Main Grid --}}
         <section class="dash-reveal grid gap-6 xl:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.35fr)]" style="--d: 2;">
             <div class="grid gap-6">
-                <article class="{{ $panelClass }} {{ $panelPadding }}">
+                <article class="student-hover-card dash-hover {{ $panelClass }} {{ $panelPadding }}">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p class="{{ $eyebrowClass }}">Monthly</p>
@@ -256,14 +257,14 @@
                         </div>
 
                         <div
-                            class="font-[Outfit] text-[clamp(2rem,4vw,2.6rem)] font-normal tracking-[-0.05em] text-slate-800 max-sm:text-left">
-                            {{ number_format($attendanceThisMonth ?? 0) }}
-                            <span class="text-lg font-bold text-slate-400">Days</span>
+                            class="student-animate-number font-[Sora] text-[clamp(2rem,4vw,2.6rem)] font-normal tracking-[-0.05em] text-slate-800 max-sm:text-left"
+                            data-value="{{ (int) ($attendanceThisMonth ?? 0) }}" data-suffix=" Days">
+                            0 Days
                         </div>
                     </div>
                 </article>
 
-                <article class="{{ $panelClass }} {{ $panelPadding }}">
+                <article class="student-hover-card dash-hover {{ $panelClass }} {{ $panelPadding }}">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <p class="{{ $eyebrowClass }}">Performance</p>
@@ -272,28 +273,32 @@
                         </div>
 
                         <div
-                            class="font-[Outfit] text-[clamp(2.3rem,4vw,3.25rem)] font-normal leading-none tracking-[-0.06em] text-slate-900">
-                            {{ number_format((float) ($attendanceRate ?? 0), 1) }}%
+                            class="student-animate-number font-[Sora] text-[clamp(2.3rem,4vw,3.25rem)] font-normal leading-none tracking-[-0.06em] text-slate-900"
+                            data-value="{{ (float) ($attendanceRate ?? 0) }}" data-decimals="1" data-suffix="%">
+                            0.0%
                         </div>
                     </div>
 
                     <div class="mt-6 grid gap-3">
                         @forelse ($monthlyAttendanceTrend as $trend)
                             <article
-                                class="grid gap-3 border-t border-slate-100 pt-3 first:border-t-0 first:pt-0 md:grid-cols-[76px_minmax(72px,auto)_minmax(0,1fr)_auto] md:items-center">
+                                class="student-hover-card dash-hover grid gap-3 border-t border-slate-100 pt-3 first:border-t-0 first:pt-0 md:grid-cols-[76px_minmax(72px,auto)_minmax(0,1fr)_auto] md:items-center">
                                 <span
                                     class="inline-flex min-h-[3rem] items-center justify-center rounded-2xl bg-blue-50 px-3 py-2 text-[0.82rem] font-bold text-blue-600 shadow-sm">
                                     {{ $trend['label'] }}
                                 </span>
 
                                 <strong
-                                    class="font-[Outfit] text-[1.08rem] font-extrabold tracking-[-0.04em] text-slate-800">
-                                    {{ number_format((float) ($trend['value'] ?? 0), 1) }}%
+                                    class="student-animate-number font-[Sora] text-[1.08rem] font-extrabold tracking-[-0.04em] text-slate-800"
+                                    data-value="{{ (float) ($trend['value'] ?? 0) }}" data-decimals="1"
+                                    data-suffix="%">
+                                    0.0%
                                 </strong>
 
                                 <span class="relative block h-3 w-full overflow-hidden rounded-full bg-slate-100">
                                     <span
-                                        class="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sky-400 to-blue-600"
+                                        class="student-trend-fill absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sky-400 to-blue-600"
+                                        data-width="{{ max(0, min(100, (float) ($trend['value'] ?? 0))) }}"
                                         style="width: {{ max(0, min(100, (float) ($trend['value'] ?? 0))) }}%"></span>
                                 </span>
 
@@ -311,7 +316,7 @@
                 </article>
             </div>
 
-            <article class="{{ $panelClass }} {{ $panelPadding }}">
+            <article class="student-hover-card dash-hover {{ $panelClass }} {{ $panelPadding }}">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                         <p class="{{ $eyebrowClass }}">Summary</p>
@@ -342,15 +347,17 @@
                             };
                         @endphp
 
-                        <article class="flex flex-col gap-3 rounded-[24px] bg-slate-50/70 p-4">
+                        <article class="student-hover-card dash-hover flex flex-col gap-3 rounded-[24px] bg-slate-50/70 p-4">
                             <div
-                                class="text-center font-[Outfit] text-[1.75rem] font-extrabold tracking-[-0.05em] text-slate-800">
-                                {{ $card['display_value'] }}
+                                class="student-animate-number text-center font-[Sora] text-[1.75rem] font-extrabold tracking-[-0.05em] text-slate-800"
+                                data-value="{{ (int) $card['value'] }}">
+                                0
                             </div>
 
                             <div
                                 class="relative flex min-h-[8rem] flex-1 items-end overflow-hidden rounded-[1.5rem] {{ $trackClass }} md:min-h-[10rem] xl:min-h-[14rem]">
-                                <div class="w-full rounded-[1.25rem] {{ $fillClass }}"
+                                <div class="student-summary-fill w-full rounded-[1.25rem] {{ $fillClass }}"
+                                    data-height="{{ $card['height'] }}"
                                     style="height: {{ $card['height'] }}%"></div>
                             </div>
 
@@ -365,7 +372,7 @@
 
         {{-- Lower Grid --}}
         <section class="dash-reveal grid gap-6 md:grid-cols-2" style="--d: 3;">
-            <article class="{{ $panelClass }} {{ $panelPadding }}">
+            <article class="student-hover-card dash-hover {{ $panelClass }} {{ $panelPadding }}">
                 <div>
                     <p class="{{ $eyebrowClass }}">Recent</p>
                     <h2 class="{{ $titleClass }}">Attendance Checks</h2>
@@ -385,7 +392,7 @@
                             @endphp
 
                             <article
-                                class="flex flex-col gap-3 rounded-[22px] border border-slate-100 bg-slate-50/70 p-4 transition hover:bg-white sm:flex-row sm:items-center sm:justify-between">
+                                class="student-hover-card dash-hover flex flex-col gap-3 rounded-[22px] border border-slate-100 bg-slate-50/70 p-4 transition hover:bg-white sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <strong class="block text-[0.95rem] font-extrabold text-slate-800">
                                         {{ optional($record->attendance_date)->format('d M Y') ?? '-' }}
@@ -410,7 +417,7 @@
                 @endif
             </article>
 
-            <article class="{{ $panelClass }} {{ $panelPadding }}">
+            <article class="student-hover-card dash-hover {{ $panelClass }} {{ $panelPadding }}">
                 <div>
                     <p class="{{ $eyebrowClass }}">Subjects</p>
                     <h2 class="{{ $titleClass }}">Study Focus</h2>
@@ -420,7 +427,7 @@
                 <div class="mt-6 grid gap-4">
                     @forelse ($majorSubjects->take(3) as $subject)
                         <article
-                            class="rounded-[22px] border border-emerald-100 bg-[linear-gradient(180deg,#ecfdf5,#ffffff)] p-4 shadow-[0_10px_24px_-20px_rgba(16,185,129,0.22)]">
+                            class="student-hover-card dash-hover rounded-[22px] border border-emerald-100 bg-[linear-gradient(180deg,#ecfdf5,#ffffff)] p-4 shadow-[0_10px_24px_-20px_rgba(16,185,129,0.22)]">
                             <strong class="block text-[0.95rem] font-extrabold text-slate-800">
                                 {{ $subject->name }}
                             </strong>
@@ -431,7 +438,7 @@
                     @empty
                         @forelse ($classSubjects->take(3) as $subject)
                             <article
-                                class="rounded-[22px] border border-sky-100 bg-[linear-gradient(180deg,#f0f9ff,#ffffff)] p-4 shadow-[0_10px_24px_-20px_rgba(14,165,233,0.22)]">
+                                class="student-hover-card dash-hover rounded-[22px] border border-sky-100 bg-[linear-gradient(180deg,#f0f9ff,#ffffff)] p-4 shadow-[0_10px_24px_-20px_rgba(14,165,233,0.22)]">
                                 <strong class="block text-[0.95rem] font-extrabold text-slate-800">
                                     {{ $subject->name }}
                                 </strong>

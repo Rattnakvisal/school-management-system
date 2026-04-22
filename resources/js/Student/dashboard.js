@@ -10,6 +10,7 @@ function setupRevealAnimation() {
     const items = document.querySelectorAll(".dash-reveal");
 
     if (!items.length) return;
+    if (document.querySelector(".dashboard-stage")) return;
 
     items.forEach((item) => {
         const delayStep = Number.parseFloat(

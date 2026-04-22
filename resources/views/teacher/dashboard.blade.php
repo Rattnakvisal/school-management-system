@@ -49,7 +49,7 @@
         $mutedLinkClass = 'text-sm font-semibold text-slate-400 transition hover:text-slate-600';
     @endphp
 
-    <div class="space-y-6">
+    <div class="dashboard-stage space-y-6">
         <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
             <div class="space-y-6">
                 {{-- Hero --}}
@@ -83,29 +83,30 @@
 
                                 <p class="max-w-2xl text-[1rem] leading-7 text-slate-500 sm:text-[1.05rem]">
                                     Today's subject coverage is
-                                    <strong class="font-extrabold text-rose-500">{{ $coveragePercent }}%</strong>.
+                                    <strong class="teacher-animate-number font-extrabold text-rose-500"
+                                        data-value="{{ $coveragePercent }}" data-suffix="%">0%</strong>.
                                     {{ $progressLine }}
                                 </p>
                             </div>
 
                             <div class="flex flex-wrap gap-3">
                                 <span
-                                    class="inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 ring-1 ring-blue-100">
-                                    Classes {{ number_format($stats['classes']) }}
+                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 ring-1 ring-blue-100">
+                                    Classes <span class="teacher-animate-number ml-1" data-value="{{ (int) $stats['classes'] }}">0</span>
                                 </span>
                                 <span
-                                    class="inline-flex items-center rounded-full bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700 ring-1 ring-amber-100">
-                                    Students {{ number_format($stats['students']) }}
+                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700 ring-1 ring-amber-100">
+                                    Students <span class="teacher-animate-number ml-1" data-value="{{ (int) $stats['students'] }}">0</span>
                                 </span>
                                 <span
-                                    class="inline-flex items-center rounded-full bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 ring-1 ring-rose-100">
-                                    Subjects {{ number_format($stats['subjects']) }}
+                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 ring-1 ring-rose-100">
+                                    Subjects <span class="teacher-animate-number ml-1" data-value="{{ (int) $stats['subjects'] }}">0</span>
                                 </span>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-3">
                                 <a href="{{ route('teacher.schedule.index', ['day' => $todayKey]) }}"
-                                    class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-3 text-sm font-bold text-white shadow-[0_18px_30px_-16px_rgba(59,130,246,0.5)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_34px_-16px_rgba(59,130,246,0.55)]">
+                                    class="dash-hover inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-3 text-sm font-bold text-white shadow-[0_18px_30px_-16px_rgba(59,130,246,0.5)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_34px_-16px_rgba(59,130,246,0.55)]">
                                     Open today schedule
                                 </a>
 
@@ -118,7 +119,7 @@
                         <div class="relative flex items-center justify-center">
                             <div class="absolute inset-x-8 inset-y-8 rounded-full bg-indigo-100/60 blur-3xl"></div>
                             <img src="{{ asset('images/9865735.png') }}" alt="Teacher dashboard study illustration"
-                                class="relative block h-auto w-full max-w-[28rem] rounded-[30px] object-cover drop-shadow-[0_18px_40px_rgba(59,130,246,0.20)]">
+                                class="teacher-hero-art relative block h-auto w-full max-w-[28rem] rounded-[30px] object-cover drop-shadow-[0_18px_40px_rgba(59,130,246,0.20)]">
                         </div>
                     </div>
                 </section>
@@ -154,7 +155,7 @@
                                 @endphp
 
                                 <div
-                                    class="grid items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white sm:grid-cols-[minmax(0,1.25fr)_minmax(110px,1fr)_auto]">
+                                    class="dash-hover grid items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white sm:grid-cols-[minmax(0,1.25fr)_minmax(110px,1fr)_auto]">
                                     <div class="flex min-w-0 items-center gap-3">
                                         <img src="{{ $student['avatar_url'] }}" alt="{{ $student['name'] }}"
                                             class="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm">
@@ -170,12 +171,14 @@
                                     </div>
 
                                     <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                                        <span class="block h-full rounded-full bg-gradient-to-r {{ $barClass }}"
+                                        <span class="teacher-progress-fill block h-full rounded-full bg-gradient-to-r {{ $barClass }}"
+                                            data-width="{{ max(0, min(100, (float) $progressPercent)) }}"
                                             style="width: {{ $progressPercent }}%"></span>
                                     </div>
 
-                                    <div class="text-sm font-extrabold text-slate-800">
-                                        {{ $progressLabel }}
+                                    <div class="teacher-animate-number text-sm font-extrabold text-slate-800"
+                                        @if ($student['attendance_percent'] !== null) data-value="{{ (float) $student['attendance_percent'] }}" data-suffix="%" @endif>
+                                        {{ $student['attendance_percent'] !== null ? '0%' : $progressLabel }}
                                     </div>
                                 </div>
                             @empty
@@ -201,7 +204,7 @@
                             </span>
                         </div>
 
-                        <div class="relative h-[230px]">
+                        <div class="teacher-chart-shell relative h-[230px]">
                             <canvas id="teacherWorkloadChart"></canvas>
                         </div>
 
@@ -217,16 +220,18 @@
                         </div>
 
                         <div class="mt-5 grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
-                            <div class="rounded-2xl bg-slate-50 p-4">
-                                <strong class="block text-lg font-extrabold text-slate-900">
-                                    {{ $stats['todaySchedules'] }}
+                            <div class="dash-hover rounded-2xl bg-slate-50 p-4">
+                                <strong class="teacher-animate-number block text-lg font-extrabold text-slate-900"
+                                    data-value="{{ (int) $stats['todaySchedules'] }}">
+                                    0
                                 </strong>
                                 <span class="text-xs font-medium text-slate-400">lesson slots today</span>
                             </div>
 
-                            <div class="rounded-2xl bg-slate-50 p-4">
-                                <strong class="block text-lg font-extrabold text-slate-900">
-                                    {{ $coveragePercent }}%
+                            <div class="dash-hover rounded-2xl bg-slate-50 p-4">
+                                <strong class="teacher-animate-number block text-lg font-extrabold text-slate-900"
+                                    data-value="{{ $coveragePercent }}" data-suffix="%">
+                                    0%
                                 </strong>
                                 <span class="text-xs font-medium text-slate-400">subject coverage</span>
                             </div>
@@ -254,7 +259,7 @@
                             @endphp
 
                             <div
-                                class="grid items-center gap-4 rounded-3xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white lg:grid-cols-[minmax(0,1.6fr)_minmax(140px,1fr)_auto_auto]">
+                                class="dash-hover grid items-center gap-4 rounded-3xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white lg:grid-cols-[minmax(0,1.6fr)_minmax(140px,1fr)_auto_auto]">
                                 <div class="flex min-w-0 items-center gap-4">
                                     <span
                                         class="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-extrabold {{ $badgeClass }}">
@@ -365,7 +370,7 @@
                             @endphp
 
                             <article
-                                class="js-dash-slot flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white {{ $lesson['is_live'] ?? false ? 'ring-1 ring-indigo-100 shadow-[0_16px_30px_-20px_rgba(79,70,229,0.30)]' : '' }}"
+                                class="js-dash-slot dash-hover flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white {{ $lesson['is_live'] ?? false ? 'ring-1 ring-indigo-100 shadow-[0_16px_30px_-20px_rgba(79,70,229,0.30)]' : '' }}"
                                 data-start="{{ $lesson['start_24'] ?? '' }}" data-end="{{ $lesson['end_24'] ?? '' }}">
                                 <span class="w-1 shrink-0 rounded-full bg-gradient-to-b {{ $accentClass }}"></span>
 
@@ -411,7 +416,7 @@
                     <div class="space-y-3">
                         @forelse ($recentUpdates as $notice)
                             <article
-                                class="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white">
+                                class="dash-hover flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white">
                                 <span
                                     class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
