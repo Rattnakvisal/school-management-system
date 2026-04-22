@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -1947,7 +1947,432 @@
     }
 }
 
+@keyframes home-reveal-up {
+    from {
+        opacity: 0;
+        transform: translateY(26px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes home-orb-drift {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    50% {
+        transform: translate3d(10px, -16px, 0) scale(1.06);
+    }
+}
+
+@keyframes home-card-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+@keyframes home-image-drift {
+    from {
+        transform: scale(1.02) translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: scale(1.08) translate3d(0, -10px, 0);
+    }
+}
+
+@keyframes home-sheen {
+    from {
+        transform: translateX(-42%) rotate(14deg);
+    }
+
+    to {
+        transform: translateX(235%) rotate(14deg);
+    }
+}
+
+@keyframes home-breathe {
+    0%,
+    100% {
+        box-shadow: 0 16px 36px -24px rgba(14, 116, 144, 0.52);
+    }
+
+    50% {
+        box-shadow: 0 22px 44px -22px rgba(8, 145, 178, 0.7);
+    }
+}
+
+@keyframes home-robot-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes home-robot-blink {
+    0%,
+    44%,
+    48%,
+    100% {
+        transform: scaleY(1);
+    }
+
+    46% {
+        transform: scaleY(0.12);
+    }
+}
+
+@keyframes home-robot-wave {
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(18deg);
+    }
+}
+
+@keyframes home-robot-signal {
+    0%,
+    100% {
+        opacity: 0.24;
+        transform: scale(0.84);
+    }
+
+    45% {
+        opacity: 0.95;
+        transform: scale(1);
+    }
+}
+
 @layer utilities {
+    .website-home [data-reveal] {
+        opacity: 1;
+        transform: none;
+    }
+
+    .website-home.reveal-ready [data-reveal] {
+        opacity: 0;
+        transform: translateY(26px) scale(0.985);
+        transition:
+            opacity 680ms ease,
+            transform 680ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--d, 0ms);
+        will-change: transform, opacity;
+    }
+
+    .website-home.reveal-ready [data-reveal].is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .website-home .home-orb {
+        animation: home-orb-drift 10s ease-in-out infinite;
+    }
+
+    .website-home .home-orb--b {
+        animation-delay: 1400ms;
+    }
+
+    .website-home .home-orb--c {
+        animation-delay: 2600ms;
+    }
+
+    .website-home .home-float-card {
+        animation: home-card-float 6s ease-in-out infinite;
+    }
+
+    .website-home .home-float-card--slow {
+        animation-duration: 8.2s;
+    }
+
+    .website-home .home-lift-card {
+        transition:
+            transform 240ms ease,
+            box-shadow 240ms ease,
+            border-color 240ms ease,
+            background-color 240ms ease;
+    }
+
+    .website-home .home-hero-shell {
+        position: relative;
+        isolation: isolate;
+    }
+
+    .website-home .home-hero-shell::after {
+        content: "";
+        position: absolute;
+        inset: -35% auto auto -28%;
+        width: 66%;
+        height: 215%;
+        background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        );
+        transform: rotate(14deg);
+        animation: home-sheen 8.5s linear infinite;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .website-home .home-hero-image {
+        animation: home-image-drift 13s ease-in-out infinite alternate;
+        transform-origin: center;
+    }
+
+    .website-home .home-cta {
+        animation: home-breathe 2.6s ease-in-out infinite;
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease,
+            background-color 220ms ease,
+            border-color 220ms ease,
+            color 220ms ease;
+    }
+
+    .website-home .home-chatbot-toggle {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:
+            radial-gradient(
+                circle at 30% 25%,
+                rgba(255, 255, 255, 0.22),
+                transparent 38%
+            ),
+            linear-gradient(145deg, #0f766e 0%, #0891b2 48%, #06b6d4 100%);
+        animation: home-robot-float 2.8s ease-in-out infinite;
+        box-shadow:
+            0 26px 44px -26px rgba(6, 182, 212, 0.72),
+            0 16px 34px -26px rgba(15, 23, 42, 0.42);
+        transition:
+            transform 220ms ease,
+            background-color 220ms ease,
+            box-shadow 220ms ease;
+    }
+
+    .website-home .home-chatbot-toggle::before {
+        content: "";
+        position: absolute;
+        inset: 3px;
+        border-radius: inherit;
+        background:
+            radial-gradient(
+                circle at top,
+                rgba(255, 255, 255, 0.16),
+                transparent 52%
+            ),
+            linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.08),
+                rgba(255, 255, 255, 0)
+            );
+        z-index: 0;
+    }
+
+    .website-home .home-chatbot-toggle::after {
+        content: "";
+        position: absolute;
+        inset: auto auto 10px 10px;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+        filter: blur(8px);
+        z-index: 0;
+    }
+
+    .website-home .home-chatbot-toggle.is-open {
+        background:
+            radial-gradient(
+                circle at 30% 25%,
+                rgba(255, 255, 255, 0.24),
+                transparent 38%
+            ),
+            linear-gradient(145deg, #0f766e 0%, #0e7490 48%, #0891b2 100%);
+        transform: translateY(-2px) scale(1.04);
+    }
+
+    .website-home .home-chatbot-toggle > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .website-home .home-chatbot-toggle__status {
+        position: absolute;
+        top: 0.45rem;
+        right: 0.45rem;
+        width: 0.68rem;
+        height: 0.68rem;
+        border-radius: 999px;
+        border: 2px solid rgba(255, 255, 255, 0.92);
+        background: #bbf7d0;
+        box-shadow: 0 0 0 5px rgba(187, 247, 208, 0.16);
+        z-index: 2;
+    }
+
+    .website-home .home-chatbot-chip {
+        margin-bottom: 0.7rem;
+        width: max-content;
+        max-width: min(78vw, 14rem);
+        margin-left: auto;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 20px 34px -28px rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(18px);
+    }
+
+    .website-home .home-chatbot-panel {
+        transform-origin: bottom right;
+    }
+
+    .website-home .home-hover-soft {
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease,
+            border-color 220ms ease,
+            background-color 220ms ease,
+            color 220ms ease;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .website-home .home-lift-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 44px -30px rgba(15, 23, 42, 0.28);
+        }
+
+        .website-home .home-cta:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 26px 46px -28px rgba(15, 23, 42, 0.44),
+                0 18px 34px -30px rgba(8, 145, 178, 0.3);
+        }
+
+        .website-home .home-chatbot-toggle:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow:
+                0 30px 48px -26px rgba(6, 182, 212, 0.8),
+                0 20px 40px -26px rgba(15, 23, 42, 0.46);
+        }
+
+        .website-home .home-hover-soft:hover {
+            transform: translateY(-2px);
+            border-color: rgba(103, 232, 249, 0.9);
+            background-color: rgba(236, 254, 255, 0.72);
+            box-shadow: 0 18px 36px -30px rgba(8, 145, 178, 0.28);
+        }
+    }
+
+    .website-home .home-chatbot-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        animation: home-robot-float 2.8s ease-in-out infinite;
+    }
+
+    .website-home .home-chatbot-mark svg {
+        overflow: visible;
+        filter: drop-shadow(0 3px 8px rgba(8, 145, 178, 0.2));
+    }
+
+    .website-home .home-chatbot-mark__line {
+        stroke: currentColor;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+    }
+
+    .website-home .home-chatbot-mark__bubble {
+        fill: rgba(255, 255, 255, 0.14);
+        stroke: rgba(236, 254, 255, 0.65);
+        stroke-width: 1.1;
+    }
+
+    .website-home .home-chatbot-mark__head {
+        fill: currentColor;
+        opacity: 0.22;
+        stroke: currentColor;
+        stroke-width: 1.4;
+    }
+
+    .website-home .home-chatbot-mark__face {
+        fill: #0f172a;
+        opacity: 0.78;
+    }
+
+    .website-home .home-chatbot-mark__eye {
+        fill: #cffafe;
+        transform-origin: center;
+        transform-box: fill-box;
+        animation: home-robot-blink 4.8s ease-in-out infinite;
+    }
+
+    .website-home .home-chatbot-mark__eye--right {
+        animation-delay: 180ms;
+    }
+
+    .website-home .home-chatbot-mark__mouth {
+        stroke: #bae6fd;
+        stroke-width: 1.4;
+        stroke-linecap: round;
+        fill: none;
+        opacity: 0.9;
+    }
+
+    .website-home .home-chatbot-mark__core {
+        fill: #67e8f9;
+        opacity: 0.95;
+    }
+
+    .website-home .home-chatbot-mark__arm {
+        stroke: currentColor;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        opacity: 0.8;
+        transform-origin: 17px 16px;
+        transform-box: fill-box;
+    }
+
+    .website-home .home-chatbot-mark__arm--right {
+        animation: home-robot-wave 2.2s ease-in-out infinite;
+    }
+
+    .website-home .home-chatbot-mark__signal {
+        fill: #67e8f9;
+        transform-origin: center;
+        transform-box: fill-box;
+        animation: home-robot-signal 1.9s ease-in-out infinite;
+    }
+
+    .website-home .home-chatbot-mark__signal--b {
+        animation-delay: 220ms;
+    }
+
+    .website-home .home-chatbot-mark__signal--c {
+        animation-delay: 440ms;
+    }
+
+    .website-home .home-chatbot-mark--sm {
+        animation-duration: 3.1s;
+    }
+
     .dashboard-stage .student-hero {
         position: relative;
         overflow: hidden;
@@ -2326,6 +2751,25 @@
    Reduced motion support (keep yours)
 =================================== */
 @media (prefers-reduced-motion: reduce) {
+    .website-home [data-reveal] {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .website-home .home-orb,
+    .website-home .home-float-card,
+    .website-home .home-hero-shell::after,
+    .website-home .home-hero-image,
+    .website-home .home-cta,
+    .website-home .home-chatbot-toggle,
+    .website-home .home-chatbot-mark,
+    .website-home .home-chatbot-mark__eye,
+    .website-home .home-chatbot-mark__arm--right,
+    .website-home .home-chatbot-mark__signal {
+        animation: none !important;
+    }
+
     .layout-rail,
     .layout-topbar {
         animation: none !important;

@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+    );
+
     requestAnimationFrame(() => {
         document.body.classList.add("page-ready");
     });
@@ -37,6 +41,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("chatbot-input");
     const messages = document.getElementById("chatbot-messages");
     const quickWrap = document.getElementById("chatbot-quick-questions");
+
+    const animateNode = (node, frames, options) => {
+        if (
+            prefersReducedMotion.matches ||
+            !(node instanceof HTMLElement) ||
+            typeof node.animate !== "function"
+        ) {
+            return null;
+        }
+
+        return node.animate(frames, options);
+    };
 
     const quickQuestions = [
         "How can I apply for admission?",
@@ -116,6 +132,20 @@ document.addEventListener("DOMContentLoaded", () => {
         row.appendChild(bubble);
         messages.appendChild(row);
         messages.scrollTop = messages.scrollHeight;
+
+        animateNode(
+            row,
+            [
+                { opacity: 0, transform: "translateY(12px) scale(0.98)" },
+                { opacity: 1, transform: "translateY(0) scale(1)" },
+            ],
+            {
+                duration: 320,
+                easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                fill: "both",
+            },
+        );
+
         return bubble;
     };
 
@@ -179,13 +209,72 @@ document.addEventListener("DOMContentLoaded", () => {
         input.value = "";
     };
 
+    let panelClosing = false;
+
+    const openPanel = () => {
+        panelClosing = false;
+        panel.classList.remove("hidden");
+        toggle.classList.add("is-open");
+        toggle.setAttribute("aria-expanded", "true");
+
+        animateNode(
+            panel,
+            [
+                { opacity: 0, transform: "translateY(16px) scale(0.96)" },
+                { opacity: 1, transform: "translateY(0) scale(1)" },
+            ],
+            {
+                duration: 260,
+                easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+                fill: "both",
+            },
+        );
+
+        requestAnimationFrame(() => input.focus());
+    };
+
+    const closePanel = () => {
+        if (panel.classList.contains("hidden") || panelClosing) {
+            return;
+        }
+
+        panelClosing = true;
+        toggle.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+
+        const animation = animateNode(
+            panel,
+            [
+                { opacity: 1, transform: "translateY(0) scale(1)" },
+                { opacity: 0, transform: "translateY(14px) scale(0.96)" },
+            ],
+            {
+                duration: 220,
+                easing: "ease-in",
+                fill: "both",
+            },
+        );
+
+        if (!animation) {
+            panel.classList.add("hidden");
+            panelClosing = false;
+            return;
+        }
+
+        animation.addEventListener("finish", () => {
+            panel.classList.add("hidden");
+            panelClosing = false;
+        });
+    };
+
     toggle.addEventListener("click", () => {
         const isOpen = !panel.classList.contains("hidden");
-        panel.classList.toggle("hidden", isOpen);
-        toggle.setAttribute("aria-expanded", String(!isOpen));
-        if (!isOpen) {
-            input.focus();
+        if (isOpen) {
+            closePanel();
+            return;
         }
+
+        openPanel();
     });
 
     form.addEventListener("submit", (event) => {
