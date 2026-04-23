@@ -71,11 +71,14 @@ class LoginOtpService
             'attempts' => 0,
         ]);
 
+        $displayName = trim((string) $user->name);
         $message = implode("\n", [
-            'Login OTP',
-            'Code: ' . $otp,
-            'Expires in: ' . $expiresMinutes . ' minutes',
+            'Hi ' . ($displayName !== '' ? $displayName : 'there') . '!',
+            'Use the following one-time password (OTP) to sign in to your TechBridge Academy account.',
+            'This OTP will be valid for ' . $expiresMinutes . ' minute' . ($expiresMinutes === 1 ? '' : 's') . ': ' . $otp,
             'If this was not you, contact administrator.',
+            'Best regards,',
+            'TechBridge Academy',
         ]);
 
         $sent = $this->telegramBotService->sendMessage($chatId, $message);
@@ -178,6 +181,7 @@ class LoginOtpService
         $lines = [
             'Telegram is not linked yet.',
             'Open the bot and send: link ' . $phoneNumber,
+            'Type Menu in the bot if you need the instructions again.',
         ];
 
         if (app()->environment('local')) {

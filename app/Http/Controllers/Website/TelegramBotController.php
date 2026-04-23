@@ -69,7 +69,12 @@ class TelegramBotController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        if ($text === '' || str_starts_with($text, '/start')) {
+        if (
+            $text === ''
+            || str_starts_with($text, '/start')
+            || strcasecmp($text, 'menu') === 0
+            || strcasecmp($text, '/menu') === 0
+        ) {
             $telegram->sendMessage($chatId, $this->startLinkText($firstName), $this->mainKeyboard());
             return response()->json(['ok' => true]);
         }
@@ -281,7 +286,7 @@ class TelegramBotController extends Controller
     {
         $name = $firstName !== '' ? $firstName : 'Student';
         return "Hi {$name}.\n"
-            . "This Telegram bot is for login OTP linking only.\n\n"
+            . "This Telegram bot is for TechBridge Academy login OTP linking only.\n\n"
             . $this->defaultLinkInstruction();
     }
 
@@ -290,9 +295,12 @@ class TelegramBotController extends Controller
         return implode("\n", [
             "To link your account, send:",
             "link <your phone number>",
-            "Example: link +85512345678",
             "",
-            "You can also tap 'Share phone number' below.",
+            "Example:",
+            "link +85512345678",
+            "",
+            "Use the same phone number saved in your school account.",
+            "Type Menu any time to see this message again.",
         ]);
     }
 
@@ -301,11 +309,7 @@ class TelegramBotController extends Controller
         return [
             'reply_markup' => [
                 'keyboard' => [
-                    [[
-                        'text' => 'Share phone number',
-                        'request_contact' => true,
-                    ]],
-                    [['text' => 'link +85578841050']],
+                    [['text' => 'Menu']],
                 ],
                 'resize_keyboard' => true,
                 'one_time_keyboard' => false,
