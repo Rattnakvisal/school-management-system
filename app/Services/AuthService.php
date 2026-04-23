@@ -187,7 +187,7 @@ class AuthService
 
         return match ($role) {
             'admin'   => redirect()->route('admin.dashboard'),
-            'staff'   => redirect()->route('admin.dashboard'),
+            'staff'   => redirect()->route('staff.dashboard'),
             'teacher' => redirect()->route('teacher.dashboard'),
             default   => redirect()->route('student.dashboard'),
         };
@@ -212,7 +212,7 @@ class AuthService
 
             $routeName = match ($role) {
                 'admin' => 'admin.dashboard',
-                'staff' => 'admin.dashboard',
+                'staff' => 'staff.dashboard',
                 'teacher' => 'teacher.dashboard',
                 default => 'student.dashboard',
             };

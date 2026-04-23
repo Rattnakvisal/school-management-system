@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer([
             'layout.admin.navbar.navbar',
+            'layout.staff.navbar',
             'layout.teacher.navbar',
             'layout.students.navbar',
         ], function ($view) {
@@ -48,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
                         $query->whereNotIn('type', $teacherOnlyTypes)
                             ->orWhere('message', 'like', '%' . $teacherTag . '%');
                     });
-            } elseif ($role === 'admin') {
+            } elseif (in_array($role, ['admin', 'staff'], true)) {
                 // Approval notifications are for teachers.
                 $notifQuery->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes));
                 $unreadQuery->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes));

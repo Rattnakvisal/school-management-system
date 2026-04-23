@@ -16,6 +16,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        if (strtolower(trim((string) (auth()->user()?->role ?? ''))) === 'staff') {
+            return redirect()->route('staff.dashboard');
+        }
+
         $hasUserStatusColumn = Schema::hasColumn('users', 'is_active');
         $hasClassStatusColumn = Schema::hasColumn('school_classes', 'is_active');
         $hasSubjectStatusColumn = Schema::hasColumn('subjects', 'is_active');

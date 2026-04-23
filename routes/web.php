@@ -23,7 +23,7 @@ Route::get('/', function () {
     if (auth()->check()) {
         $dashboardRoute = match (strtolower(trim((string) auth()->user()->role))) {
             'admin' => 'admin.dashboard',
-            'staff' => 'admin.dashboard',
+            'staff' => 'staff.dashboard',
             'teacher' => 'teacher.dashboard',
             default => 'student.dashboard',
         };
@@ -109,6 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
     require __DIR__ . '/admin.php';
+    require __DIR__ . '/staff.php';
     require __DIR__ . '/teacher.php';
     require __DIR__ . '/student.php';
 });

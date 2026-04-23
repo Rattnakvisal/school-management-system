@@ -18,6 +18,7 @@ export default defineConfig({
                 'resources/js/admin/subject.js',
                 'resources/js/admin/time-studies.js',
                 'resources/js/admin/teacher-attendance.js',
+                'resources/js/Staff/dashboard.js',
                 'resources/js/Teacher/Attendence.js',
                 'resources/js/Teacher/dashboard.js',
                 'resources/js/Teacher/LawRequests.js',
