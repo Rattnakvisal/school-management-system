@@ -29,6 +29,13 @@
         </svg>
     @break
 
+    @case('shield')
+    @case('shield-user')
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2 4 5.2V11c0 5.05 3.41 9.76 8 11 4.59-1.24 8-5.95 8-11V5.2L12 2Zm0 4a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm5.1 10.1A8.72 8.72 0 0 1 12 19.84a8.72 8.72 0 0 1-5.1-3.74C7.63 14.84 9.9 14 12 14s4.37.84 5.1 2.1Z" />
+        </svg>
+    @break
+
     @case('grid')
     @case('layers')
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

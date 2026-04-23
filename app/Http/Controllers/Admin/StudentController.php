@@ -1020,7 +1020,7 @@ class StudentController extends Controller
 
     private function allowedRoles(): array
     {
-        return ['student', 'teacher', 'admin'];
+        return ['student', 'teacher', 'admin', 'staff'];
     }
 
     private function uploadAvatarImage(Request $request, ?User $student = null): ?string

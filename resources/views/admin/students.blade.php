@@ -63,9 +63,9 @@
                             this.createOpen = false;
                         }
                     };
-            
+
                     update();
-            
+
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -132,18 +132,6 @@
                         </div>
                     @endif
 
-                    <div>
-                        <span class="mb-1 block text-xs font-semibold text-slate-600">Role</span>
-                        <div
-                            class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
-                            <span class="font-semibold">Student</span>
-                            <span
-                                class="rounded-full bg-indigo-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-700">
-                                Fixed
-                            </span>
-                        </div>
-                    </div>
-
                     @if ($hasClassColumn)
                         <div>
                             <label for="school_class_id" class="mb-1 block text-xs font-semibold text-slate-600">Home Class
@@ -191,7 +179,8 @@
                                 <div id="major_subject_checkbox_list"
                                     class="min-h-[132px] space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
                                 </div>
-                                <p class="mt-1 text-[11px] text-slate-500">You can select multiple major subjects.</p>
+                                <p class="mt-1 text-[11px] text-slate-500">Select a major to auto-fill the grade and show
+                                    matching study times.</p>
                                 @error('major_subject_ids')
                                     <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                                 @enderror
@@ -256,16 +245,52 @@
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label for="password" class="mb-1 block text-xs font-semibold text-slate-600">Password</label>
-                            <input id="password" name="password" type="password"
-                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                placeholder="Minimum 8 characters">
+                            <div class="relative">
+                                <input id="password" name="password" type="password"
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 pr-10 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                    placeholder="Minimum 8 characters">
+                                <button type="button" onclick="toggleStudentPassword('password', this)"
+                                    class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
+                                    aria-label="Show password">
+                                    <svg class="student-eye-icon h-4 w-4" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
+                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <svg class="student-eye-off-icon hidden h-4 w-4" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.77 9.77 0 0112 4c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-3.13 4.44M6.61 6.61A11.72 11.72 0 001 11.5C2.73 15.89 7 19 12 19a9.8 9.8 0 004.39-1.03" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label for="password_confirmation"
                                 class="mb-1 block text-xs font-semibold text-slate-600">Confirm</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password"
-                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                placeholder="Re-enter password">
+                            <div class="relative">
+                                <input id="password_confirmation" name="password_confirmation" type="password"
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 pr-10 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                    placeholder="Re-enter password">
+                                <button type="button" onclick="toggleStudentPassword('password_confirmation', this)"
+                                    class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
+                                    aria-label="Show password confirmation">
+                                    <svg class="student-eye-icon h-4 w-4" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
+                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <svg class="student-eye-off-icon hidden h-4 w-4" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.77 9.77 0 0112 4c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-3.13 4.44M6.61 6.61A11.72 11.72 0 001 11.5C2.73 15.89 7 19 12 19a9.8 9.8 0 004.39-1.03" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     @error('password')
@@ -483,7 +508,7 @@
 
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                                <div class="max-h-[700px] overflow-auto">
+                                <div class="max-h-[1200px] overflow-auto">
                                     <table class="student-table w-full min-w-[1300px] text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -749,6 +774,25 @@
                                                                     <div
                                                                         class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 pb-4 pt-1">
                                                                         <div>
+                                                                            <label for="edit_role_{{ $student->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
+                                                                            <select id="edit_role_{{ $student->id }}"
+                                                                                name="role"
+                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm capitalize outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                @foreach (['student', 'teacher', 'admin', 'staff'] as $roleOption)
+                                                                                    <option value="{{ $roleOption }}"
+                                                                                        {{ $student->role === $roleOption ? 'selected' : '' }}>
+                                                                                        {{ ucfirst($roleOption) }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                            <p class="mt-1 text-[11px] text-slate-500">
+                                                                                Changing away from Student removes class,
+                                                                                major subject, and study time assignments.
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div>
                                                                             <label for="edit_name_{{ $student->id }}"
                                                                                 class="mb-1 block text-xs font-semibold text-slate-600">Full
                                                                                 Name</label>
@@ -781,29 +825,6 @@
                                                                                     placeholder="+855 12 345 678">
                                                                             </div>
                                                                         @endif
-
-                                                                        <div>
-                                                                            <label for="edit_role_{{ $student->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
-                                                                            <select id="edit_role_{{ $student->id }}"
-                                                                                name="role"
-                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                                <option value="student"
-                                                                                    {{ $student->role === 'student' ? 'selected' : '' }}>
-                                                                                    Student</option>
-                                                                                <option value="teacher"
-                                                                                    {{ $student->role === 'teacher' ? 'selected' : '' }}>
-                                                                                    Teacher</option>
-                                                                                <option value="admin"
-                                                                                    {{ $student->role === 'admin' ? 'selected' : '' }}>
-                                                                                    Admin</option>
-                                                                            </select>
-                                                                            <p class="mt-1 text-[11px] text-slate-500">
-                                                                                Changing role from student will remove this
-                                                                                user
-                                                                                from Student List.
-                                                                            </p>
-                                                                        </div>
 
                                                                         @if ($hasClassColumn)
                                                                             <div>
@@ -875,8 +896,9 @@
                                                                                     </div>
                                                                                     <p
                                                                                         class="mt-1 text-[11px] text-slate-500">
-                                                                                        You can select multiple major
-                                                                                        subjects.
+                                                                                        Select a major to auto-fill the
+                                                                                        grade and show matching study
+                                                                                        times.
                                                                                     </p>
                                                                                 </div>
                                                                             @endif
@@ -956,22 +978,84 @@
                                                                                     for="edit_password_{{ $student->id }}"
                                                                                     class="mb-1 block text-xs font-semibold text-slate-600">New
                                                                                     Password</label>
-                                                                                <input
-                                                                                    id="edit_password_{{ $student->id }}"
-                                                                                    name="password" type="password"
-                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                                                                    placeholder="Leave blank to keep current">
+                                                                                <div class="relative">
+                                                                                    <input
+                                                                                        id="edit_password_{{ $student->id }}"
+                                                                                        name="password" type="password"
+                                                                                        class="w-full rounded-xl border border-slate-200 px-3 py-2.5 pr-10 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                                                        placeholder="Leave blank to keep current">
+                                                                                    <button type="button"
+                                                                                        onclick="toggleStudentPassword('edit_password_{{ $student->id }}', this)"
+                                                                                        class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
+                                                                                        aria-label="Show new password">
+                                                                                        <svg class="student-eye-icon h-4 w-4"
+                                                                                            fill="none"
+                                                                                            stroke="currentColor"
+                                                                                            viewBox="0 0 24 24"
+                                                                                            aria-hidden="true">
+                                                                                            <path stroke-width="2"
+                                                                                                stroke-linecap="round"
+                                                                                                stroke-linejoin="round"
+                                                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
+                                                                                            <path stroke-width="2"
+                                                                                                stroke-linecap="round"
+                                                                                                stroke-linejoin="round"
+                                                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                        </svg>
+                                                                                        <svg class="student-eye-off-icon hidden h-4 w-4"
+                                                                                            fill="none"
+                                                                                            stroke="currentColor"
+                                                                                            viewBox="0 0 24 24"
+                                                                                            aria-hidden="true">
+                                                                                            <path stroke-width="2"
+                                                                                                stroke-linecap="round"
+                                                                                                stroke-linejoin="round"
+                                                                                                d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.77 9.77 0 0112 4c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-3.13 4.44M6.61 6.61A11.72 11.72 0 001 11.5C2.73 15.89 7 19 12 19a9.8 9.8 0 004.39-1.03" />
+                                                                                        </svg>
+                                                                                    </button>
+                                                                                </div>
                                                                             </div>
                                                                             <div>
                                                                                 <label
                                                                                     for="edit_password_confirmation_{{ $student->id }}"
                                                                                     class="mb-1 block text-xs font-semibold text-slate-600">Confirm
                                                                                     Password</label>
-                                                                                <input
-                                                                                    id="edit_password_confirmation_{{ $student->id }}"
-                                                                                    name="password_confirmation"
-                                                                                    type="password"
-                                                                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                <div class="relative">
+                                                                                    <input
+                                                                                        id="edit_password_confirmation_{{ $student->id }}"
+                                                                                        name="password_confirmation"
+                                                                                        type="password"
+                                                                                        class="w-full rounded-xl border border-slate-200 px-3 py-2.5 pr-10 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                    <button type="button"
+                                                                                        onclick="toggleStudentPassword('edit_password_confirmation_{{ $student->id }}', this)"
+                                                                                        class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
+                                                                                        aria-label="Show password confirmation">
+                                                                                        <svg class="student-eye-icon h-4 w-4"
+                                                                                            fill="none"
+                                                                                            stroke="currentColor"
+                                                                                            viewBox="0 0 24 24"
+                                                                                            aria-hidden="true">
+                                                                                            <path stroke-width="2"
+                                                                                                stroke-linecap="round"
+                                                                                                stroke-linejoin="round"
+                                                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
+                                                                                            <path stroke-width="2"
+                                                                                                stroke-linecap="round"
+                                                                                                stroke-linejoin="round"
+                                                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                        </svg>
+                                                                                        <svg class="student-eye-off-icon hidden h-4 w-4"
+                                                                                            fill="none"
+                                                                                            stroke="currentColor"
+                                                                                            viewBox="0 0 24 24"
+                                                                                            aria-hidden="true">
+                                                                                            <path stroke-width="2"
+                                                                                                stroke-linecap="round"
+                                                                                                stroke-linejoin="round"
+                                                                                                d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.77 9.77 0 0112 4c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-3.13 4.44M6.61 6.61A11.72 11.72 0 001 11.5C2.73 15.89 7 19 12 19a9.8 9.8 0 004.39-1.03" />
+                                                                                        </svg>
+                                                                                    </button>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
 
@@ -1052,6 +1136,23 @@
         ];
     @endphp
     <script id="admin-students-data" type="application/json">{!! json_encode($studentPageData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+    <script>
+        function toggleStudentPassword(id, button) {
+            const input = document.getElementById(id);
+            const eye = button.querySelector('.student-eye-icon');
+            const eyeOff = button.querySelector('.student-eye-off-icon');
+
+            if (!input) {
+                return;
+            }
+
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            eye?.classList.toggle('hidden', isHidden);
+            eyeOff?.classList.toggle('hidden', !isHidden);
+        }
+    </script>
     @vite(['resources/js/admin/students.js'])
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

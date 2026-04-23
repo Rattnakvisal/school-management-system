@@ -18,7 +18,7 @@ class AdminMiddleware
         }
 
         $role = strtolower(trim((string) ($user->role ?? '')));
-        if ($role !== 'admin') {
+        if (!in_array($role, ['admin', 'staff'], true)) {
             $hasAdmin = User::query()
                 ->whereRaw('LOWER(TRIM(role)) = ?', ['admin'])
                 ->exists();
@@ -30,7 +30,7 @@ class AdminMiddleware
             }
         }
 
-        if ($role !== 'admin') {
+        if (!in_array($role, ['admin', 'staff'], true)) {
             $targetRoute = match ($role) {
                 'teacher' => 'teacher.dashboard',
                 'student' => 'student.dashboard',
@@ -39,7 +39,7 @@ class AdminMiddleware
 
             return redirect()
                 ->route($targetRoute)
-                ->with('error', 'Admin access is required to open that page.');
+                ->with('error', 'Admin or staff access is required to open that page.');
         }
 
         return $next($request);

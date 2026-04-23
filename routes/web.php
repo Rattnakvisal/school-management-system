@@ -21,8 +21,9 @@ Route::get('/', function () {
     $dashboardRoute = null;
 
     if (auth()->check()) {
-        $dashboardRoute = match (auth()->user()->role) {
+        $dashboardRoute = match (strtolower(trim((string) auth()->user()->role))) {
             'admin' => 'admin.dashboard',
+            'staff' => 'admin.dashboard',
             'teacher' => 'teacher.dashboard',
             default => 'student.dashboard',
         };

@@ -183,8 +183,11 @@ class AuthService
     // ==========================
     public function redirectByRole(string $role)
     {
+        $role = strtolower(trim($role));
+
         return match ($role) {
             'admin'   => redirect()->route('admin.dashboard'),
+            'staff'   => redirect()->route('admin.dashboard'),
             'teacher' => redirect()->route('teacher.dashboard'),
             default   => redirect()->route('student.dashboard'),
         };
@@ -205,8 +208,11 @@ class AuthService
     public function createWelcomeNotification(User $user)
     {
         try {
-            $routeName = match ($user->role) {
+            $role = strtolower(trim((string) $user->role));
+
+            $routeName = match ($role) {
                 'admin' => 'admin.dashboard',
+                'staff' => 'admin.dashboard',
                 'teacher' => 'teacher.dashboard',
                 default => 'student.dashboard',
             };

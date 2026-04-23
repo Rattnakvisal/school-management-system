@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schema;
 
 class TelegramBotController extends Controller
 {
-    private const TELEGRAM_OTP_ROLES = ['admin', 'teacher', 'student'];
+    private const TELEGRAM_OTP_ROLES = ['admin', 'staff', 'teacher', 'student'];
 
     public function webhook(Request $request, TelegramBotService $telegram, ?string $secret = null)
     {
@@ -146,8 +146,8 @@ class TelegramBotController extends Controller
         $user = $this->findUserByPhone($phone);
         if (!$user) {
             $message = $fromContactShare
-                ? 'No admin/student/teacher account found with this contact phone number.'
-                : 'No admin/student/teacher account found for that phone number.';
+                ? 'No admin/staff/student/teacher account found with this contact phone number.'
+                : 'No admin/staff/student/teacher account found for that phone number.';
 
             $telegram->sendMessage($chatId, $message, $this->mainKeyboard());
             return true;
@@ -188,7 +188,7 @@ class TelegramBotController extends Controller
         }
 
         $users = User::query()
-            ->whereIn('role', self::TELEGRAM_OTP_ROLES)
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(TRIM(role))'), self::TELEGRAM_OTP_ROLES)
             ->whereNotNull('phone_number')
             ->get();
 
@@ -284,7 +284,7 @@ class TelegramBotController extends Controller
 
     private function startLinkText(string $firstName): string
     {
-        $name = $firstName !== '' ? $firstName : 'Student';
+        $name = $firstName !== '' ? $firstName : 'there';
         return "Hi {$name}.\n"
             . "This Telegram bot is for TechBridge Academy login OTP linking only.\n\n"
             . $this->defaultLinkInstruction();

@@ -16,6 +16,7 @@
         [
             'title' => 'Management',
             'items' => [
+                $item('admin.admin-staff.index', 'Admin / Staff', 'shield'),
                 $item('admin.students.index', 'Students', 'users'),
                 $item('admin.teachers.index', 'Teachers', 'user-cog'),
                 $item('admin.classes.index', 'Classes', 'layers'),

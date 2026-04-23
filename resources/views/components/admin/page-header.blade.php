@@ -38,6 +38,14 @@
                             </svg>
                         @break
 
+                        @case('staff')
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 3 5 5.8v5.4c0 4.4 2.9 8.5 7 9.8 4.1-1.3 7-5.4 7-9.8V5.8L12 3Z" />
+                                <circle cx="12" cy="9.2" r="2.4" />
+                                <path d="M7.8 16.5c.8-1.8 2.5-2.8 4.2-2.8s3.4 1 4.2 2.8" />
+                            </svg>
+                        @break
+
                         @case('classes')
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3.5" y="4" width="17" height="14" rx="2.2" />

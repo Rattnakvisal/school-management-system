@@ -66,10 +66,25 @@
                                 <span class="text-xs font-medium text-slate-400">6 digits</span>
                             </div>
 
-                            <input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"
-                                autocomplete="one-time-code" value="{{ old('otp') }}" required autofocus
-                                class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-2xl font-bold tracking-[0.48em] text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 lg:py-2.5"
-                                placeholder="000000">
+                            <div class="relative mt-2">
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 left-5 flex items-center text-indigo-500">
+                                    <span
+                                        class="relative flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 shadow-[0_10px_22px_rgba(79,70,229,0.16)]">
+                                        <span
+                                            class="absolute inset-0 rounded-full bg-indigo-200/60 opacity-70 animate-ping"></span>
+                                        <svg class="relative h-5 w-5 animate-bounce" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 10h.01M12 10h.01M16 10h.01M7 16l-4 4V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H7z" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+                                    autocomplete="one-time-code" value="{{ old('otp') }}" required autofocus
+                                    class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-20 pr-6 text-center text-2xl font-bold tracking-[0.48em] text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 lg:py-2.5"
+                                    placeholder="000000">
+                            </div>
                             <p class="mt-2 text-xs leading-5 text-slate-500">
                                 Enter the one-time password from your Telegram message to complete sign in.
                             </p>
@@ -118,7 +133,7 @@
                                 TechBridge Academy
                             </div>
                             <p class="mt-5 text-sm leading-6 text-slate-500">
-                                Secure sign-in keeps your student, teacher, and admin access protected every day.
+                                Secure sign-in keeps your student, teacher, staff, and admin access protected every day.
                             </p>
                             <div class="mt-5">
                                 <span

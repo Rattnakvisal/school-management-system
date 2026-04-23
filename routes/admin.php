@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\ClassController;
@@ -19,6 +20,11 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/admin-staff', [AdminStaffController::class, 'index'])->name('admin-staff.index');
+        Route::post('/admin-staff', [AdminStaffController::class, 'store'])->name('admin-staff.store');
+        Route::put('/admin-staff/{account}', [AdminStaffController::class, 'update'])->name('admin-staff.update');
+        Route::patch('/admin-staff/{account}/status', [AdminStaffController::class, 'toggleStatus'])->name('admin-staff.status');
+        Route::delete('/admin-staff/{account}', [AdminStaffController::class, 'destroy'])->name('admin-staff.destroy');
         Route::get('/students', [StudentController::class, 'index'])->name('students.index');
         Route::get('/students/export/pdf', [StudentController::class, 'exportPdf'])->name('students.export.pdf');
         Route::get('/students/export/excel', [StudentController::class, 'exportExcel'])->name('students.export.excel');

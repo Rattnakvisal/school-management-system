@@ -2,7 +2,7 @@
 
 return [
     'meta' => [
-        'title_suffix' => 'School Management',
+        'title_suffix' => 'TechBridge Academy',
     ],
 
     'locales' => [

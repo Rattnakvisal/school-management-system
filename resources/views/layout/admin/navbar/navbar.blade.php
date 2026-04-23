@@ -5,7 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>{{ $title ?? 'Admin Dashboard' }}</title>
+    @php
+        $adminShellRole = strtolower(trim((string) (auth()->user()?->role ?? 'admin')));
+        $adminShellLabel = $adminShellRole === 'staff' ? 'Staff' : 'Admin';
+    @endphp
+    <title>{{ $title ?? $adminShellLabel . ' Dashboard' }}</title>
 
     {{-- Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -35,7 +39,7 @@
 
                     <div x-show="!collapsed" x-transition class="min-w-0">
                         <div class="truncate text-base font-extrabold tracking-tight text-slate-900">TechBridge Academy</div>
-                        <div class="truncate text-xs text-slate-500">Admin Dashboard</div>
+                        <div class="truncate text-xs text-slate-500">{{ $adminShellLabel }} Dashboard</div>
                     </div>
                 </a>
 
@@ -70,7 +74,7 @@
             {{-- Footer --}}
             <div class="border-t border-slate-100 p-4 shrink-0" x-show="!collapsed" x-transition>
                 <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 text-white shadow-lg">
-                    <div class="text-sm font-bold">Admin Panel</div>
+                    <div class="text-sm font-bold">{{ $adminShellLabel }} Panel</div>
                     <div class="mt-1 text-xs text-white/80">
                         Manage students, teachers, classes, and attendance easily.
                     </div>
@@ -334,7 +338,7 @@
             </main>
 
             <footer class="px-4 py-4 text-xs text-slate-500 sm:px-6">
-                &copy; {{ date('Y') }} TechBridge Academy &bull; Admin Panel
+                &copy; {{ date('Y') }} TechBridge Academy &bull; {{ $adminShellLabel }} Panel
             </footer>
         </div>
     </div>

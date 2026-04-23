@@ -76,7 +76,7 @@
     x-effect="document.body.classList.toggle('overflow-hidden', showBanner)"
     @keydown.escape.window="if (showBanner) closeBanner(); langDesktopOpen = false; langMobileOpen = false">
     @php
-        $schoolName = $schoolName ?? 'TechBridge Academy';
+        $schoolName = $schoolName ?? 'TechBridge';
         $studentsTotal = $studentsTotal ?? 0;
         $teachersTotal = $teachersTotal ?? 0;
         $dashboardRoute = $dashboardRoute ?? 'home';

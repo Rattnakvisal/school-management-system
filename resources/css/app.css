@@ -29,8 +29,9 @@
         font-family: "Noto Sans Khmer", "Kantumruy Pro", system-ui, sans-serif;
     }
 
-    .website-home.khmer-ui [class*='font-family:Outfit'] {
-        font-family: "Kantumruy Pro", "Noto Sans Khmer", system-ui, sans-serif !important;
+    .website-home.khmer-ui [class*="font-family:Outfit"] {
+        font-family:
+            "Kantumruy Pro", "Noto Sans Khmer", system-ui, sans-serif !important;
         letter-spacing: -0.01em !important;
     }
 
@@ -1138,7 +1139,9 @@
     }
 
     .class-stage .max-h-\[700px\]::-webkit-scrollbar,
-    .student-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .admin-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .admin-stage .max-h-\[1200px\]::-webkit-scrollbar,
+    .student-stage .max-h-\[1200px\]::-webkit-scrollbar,
     .teacher-stage .max-h-\[700px\]::-webkit-scrollbar,
     .subject-stage .max-h-\[700px\]::-webkit-scrollbar,
     .study-stage .max-h-\[700px\]::-webkit-scrollbar,
@@ -1152,6 +1155,8 @@
     }
 
     .class-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .admin-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .admin-stage .max-h-\[1200px\]::-webkit-scrollbar-thumb,
     .student-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
     .teacher-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
     .subject-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
@@ -1167,7 +1172,9 @@
     }
 
     .class-stage .max-h-\[700px\]::-webkit-scrollbar-track,
-    .student-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .admin-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .admin-stage .max-h-\[1200px\]::-webkit-scrollbar-track,
+    .student-stage .max-h-\[1200px\]::-webkit-scrollbar-track,
     .teacher-stage .max-h-\[700px\]::-webkit-scrollbar-track,
     .subject-stage .max-h-\[700px\]::-webkit-scrollbar-track,
     .study-stage .max-h-\[700px\]::-webkit-scrollbar-track,
@@ -1181,7 +1188,9 @@
     }
 
     .class-stage .max-h-\[700px\],
-    .student-stage .max-h-\[700px\],
+    .admin-stage .max-h-\[700px\],
+    .admin-stage .max-h-\[1200px\],
+    .student-stage .max-h-\[1200px\],
     .teacher-stage .max-h-\[700px\],
     .subject-stage .max-h-\[700px\],
     .study-stage .max-h-\[700px\],
@@ -1217,6 +1226,7 @@
 
     /* Match attendance table scrollbar (620px) to other stages */
     .class-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .admin-stage .max-h-\[620px\]::-webkit-scrollbar,
     .student-stage .max-h-\[620px\]::-webkit-scrollbar,
     .teacher-stage .max-h-\[620px\]::-webkit-scrollbar,
     .subject-stage .max-h-\[620px\]::-webkit-scrollbar,
@@ -1231,6 +1241,7 @@
     }
 
     .class-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .admin-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
     .student-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
     .teacher-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
     .subject-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
@@ -1246,6 +1257,7 @@
     }
 
     .class-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .admin-stage .max-h-\[620px\]::-webkit-scrollbar-track,
     .student-stage .max-h-\[620px\]::-webkit-scrollbar-track,
     .teacher-stage .max-h-\[620px\]::-webkit-scrollbar-track,
     .subject-stage .max-h-\[620px\]::-webkit-scrollbar-track,
@@ -1260,6 +1272,7 @@
     }
 
     .class-stage .max-h-\[620px\],
+    .admin-stage .max-h-\[620px\],
     .student-stage .max-h-\[620px\],
     .teacher-stage .max-h-\[620px\],
     .subject-stage .max-h-\[620px\],
@@ -1331,6 +1344,73 @@
     }
 
     .student-stage .student-email {
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .admin-stage .admin-staff-table {
+        min-width: 1180px;
+        table-layout: auto;
+        border-collapse: separate;
+        border-spacing: 0 0.1rem;
+    }
+
+    .admin-stage .admin-staff-table thead th {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .admin-stage .admin-staff-table tbody td {
+        border-top: 0;
+        border-bottom: 0;
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+        vertical-align: middle;
+    }
+
+    .admin-stage .admin-staff-table tbody tr:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .admin-stage .admin-staff-table tbody tr:hover td {
+        background: transparent;
+    }
+
+    .admin-stage .admin-staff-table .student-col-student {
+        min-width: 240px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-email {
+        min-width: 260px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-phone {
+        min-width: 150px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-class {
+        min-width: 110px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-status {
+        min-width: 120px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-created {
+        min-width: 120px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-actions {
+        min-width: 210px;
+    }
+
+    .admin-stage .student-name {
+        line-height: 1.35;
+        white-space: normal;
+    }
+
+    .admin-stage .student-email {
         line-height: 1.4;
         overflow-wrap: anywhere;
     }
@@ -3085,7 +3165,11 @@
 
 .teacher-lesson--live {
     border-color: #c7d2fe !important;
-    background: linear-gradient(135deg, rgba(238, 242, 255, 0.98), rgba(255, 255, 255, 0.98));
+    background: linear-gradient(
+        135deg,
+        rgba(238, 242, 255, 0.98),
+        rgba(255, 255, 255, 0.98)
+    );
     box-shadow: 0 18px 32px -26px rgba(79, 70, 229, 0.38);
 }
 

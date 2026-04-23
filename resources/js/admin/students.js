@@ -231,21 +231,80 @@ document.addEventListener('DOMContentLoaded', function () {
         return rows;
     })();
 
+    const allSubjects = (() => {
+        const subjects = [];
+        const seen = new Set();
+
+        Object.entries(subjectsByClass || {}).forEach(([classId, group]) => {
+            if (!Array.isArray(group)) {
+                return;
+            }
+
+            group.forEach((subject) => {
+                const subjectId = String(subject?.id || '');
+                const subjectClassId = String(subject?.school_class_id || classId || '');
+                const key = `${subjectClassId}:${subjectId}`;
+
+                if (subjectId === '' || seen.has(key)) {
+                    return;
+                }
+
+                seen.add(key);
+                subjects.push({
+                    ...subject,
+                    school_class_id: Number(subjectClassId || 0),
+                });
+            });
+        });
+
+        return subjects;
+    })();
+
+    const classIdsForSubjects = (subjectIds) => {
+        const selectedSet = new Set(parseSelectedIds(subjectIds));
+        if (selectedSet.size === 0) {
+            return [];
+        }
+
+        return Array.from(new Set(
+            allSubjects
+                .filter((subject) => selectedSet.has(String(subject.id)))
+                .map((subject) => String(subject.school_class_id || ''))
+                .filter((classId) => classId !== ''),
+        ));
+    };
+
+    const syncClassFromMajorSelection = (classSelect, majorSelect) => {
+        if (!classSelect || !majorSelect) {
+            return '';
+        }
+
+        const selectedClassIds = classIdsForSubjects(selectedIdsFromSelect(majorSelect));
+        if (selectedClassIds.length === 1) {
+            classSelect.value = selectedClassIds[0];
+            return selectedClassIds[0];
+        }
+
+        return classSelect.value || '';
+    };
+
     const renderMajorSubjects = (select, classId, selectedIds = []) => {
         if (!select) {
             return;
         }
 
         const key = String(classId || '');
-            const subjects = key !== '' && Array.isArray(subjectsByClass[key])
-                ? subjectsByClass[key]
-                : [];
-        let placeholder = 'Select class first';
+        const subjects = key !== ''
+            ? (Array.isArray(subjectsByClass[key]) ? subjectsByClass[key] : [])
+            : allSubjects;
+        let placeholder = 'Select major subjects';
 
         if (subjects.length > 0 && key !== '') {
             placeholder = 'Select major subjects';
         } else if (subjects.length === 0 && key !== '') {
             placeholder = 'No subjects in selected class';
+        } else if (subjects.length === 0) {
+            placeholder = 'No major subjects available';
         }
 
         resetSelect(select, placeholder);
@@ -262,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function () {
             select.appendChild(option);
         });
 
-        select.disabled = key === '' || subjects.length === 0;
+        select.disabled = subjects.length === 0;
         select.dataset.selectedList = '';
         select.dataset.selected = '';
         renderSelectAsCheckboxes(select);
@@ -285,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedSubjectIds = parseSelectedIds(subjectIds);
 
         if (requireSubjectMatch && selectedSubjectIds.length === 0) {
-            slots = key ? allStudyTimes.filter((item) => String(item.school_class_id || '') === key) : [];
+            slots = [];
         } else if (selectedSubjectIds.length > 0) {
             const allowedStudyTimeIds = new Set();
 
@@ -334,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let placeholder = 'Select major subjects first';
         if (requireSubjectMatch && selectedSubjectIds.length === 0 && key === '') {
-            placeholder = 'Select class first';
+            placeholder = 'Select major subjects first';
         } else if (slots.length > 0) {
             placeholder = 'Select study time';
         } else if (selectedSubjectIds.length > 0) {
@@ -439,9 +498,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (majorSelect && studyTimeSelect) {
             majorSelect.addEventListener('change', () => {
                 const selectedMajorIds = selectedIdsFromSelect(majorSelect);
+                const classId = syncClassFromMajorSelection(classSelect, majorSelect);
+
+                renderMajorSubjects(majorSelect, classId, selectedMajorIds);
                 renderStudyTimes(
                     studyTimeSelect,
-                    classSelect.value || '',
+                    classId,
                     [],
                     selectedMajorIds,
                     true,

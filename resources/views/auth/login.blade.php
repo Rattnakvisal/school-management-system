@@ -85,10 +85,24 @@
                             <label for="login" class="block text-sm font-semibold text-slate-700">
                                 Email Address or Phone Number
                             </label>
-                            <input id="login" type="text" name="login" value="{{ old('login', old('email')) }}"
-                                required autofocus autocomplete="username"
-                                class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 lg:py-2.5"
-                                placeholder="you@example.com or 012345678">
+                            <div class="relative mt-2">
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-indigo-500">
+                                    <span
+                                        class="relative flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 shadow-[0_10px_22px_rgba(79,70,229,0.16)]">
+                                        <span class="absolute inset-0 rounded-full bg-indigo-100/80"></span>
+                                        <svg class="relative h-5 w-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 8l8 5 8-5M5 6h14a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1z" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <input id="login" type="text" name="login" value="{{ old('login', old('email')) }}"
+                                    required autofocus autocomplete="username"
+                                    class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-20 pr-4 text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 lg:py-2.5"
+                                    placeholder="you@example.com or 012345678">
+                            </div>
                         </div>
 
                         <div>
@@ -98,9 +112,21 @@
                             </div>
 
                             <div class="relative mt-2">
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-indigo-500">
+                                    <span
+                                        class="relative flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 shadow-[0_10px_22px_rgba(79,70,229,0.16)]">
+                                        <span class="absolute inset-0 rounded-full bg-indigo-100/80"></span>
+                                        <svg class="relative h-5 w-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                d="M8 11V8a4 4 0 118 0v3M7 11h10a1 1 0 011 1v7a1 1 0 01-1 1H7a1 1 0 01-1-1v-7a1 1 0 011-1z" />
+                                        </svg>
+                                    </span>
+                                </div>
                                 <input id="password" type="password" name="password" required
                                     autocomplete="current-password"
-                                    class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 lg:py-2.5"
+                                    class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-20 pr-12 text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 lg:py-2.5"
                                     placeholder="Enter your password">
                                 <button type="button" onclick="togglePass('password', this)"
                                     class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
@@ -174,7 +200,7 @@
                                 TechBridge Academy
                             </div>
                             <p class="mt-5 text-sm leading-6 text-slate-500">
-                                We&apos;ve got tools to help your students, teachers, and admins stay connected every day.
+                                We&apos;ve got tools to help your students, teachers, staff, and admins stay connected every day.
                             </p>
                             <div class="mt-5">
                                 <span

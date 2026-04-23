@@ -92,7 +92,7 @@ class GoogleController extends Controller
                     ->with('success', 'OTP sent to your Telegram.');
             }
 
-            // Redirect based on stored role (admin, teacher, student)
+            // Redirect based on stored role (admin, staff, teacher, student)
             return $this->authService->redirectByRole($user->role);
         } catch (\Throwable $e) {
             Log::error('Google login failed: ' . $e->getMessage(), ['exception' => $e]);
