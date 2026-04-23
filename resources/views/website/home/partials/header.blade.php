@@ -10,12 +10,8 @@
         <div
             class="home-header-shell flex items-center justify-between gap-4 rounded-[2rem] border border-white/80 bg-white/92 px-5 py-4 shadow-[0_24px_70px_-38px_rgba(37,99,235,0.35)] ring-1 ring-slate-200/70 backdrop-blur-2xl">
             <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3 transition hover:opacity-95">
-                <span
-                    class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white shadow-[0_18px_30px_-20px_rgba(15,23,42,0.9)]">
-                    <svg class="h-5 w-5 text-cyan-200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v9l10 5 10-5V4l-10 5Z" />
-                    </svg>
-                </span>
+                <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                    class="h-14 w-14 shrink-0 object-contain drop-shadow-[0_18px_30px_-20px_rgba(24,80,200,0.55)]" />
 
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">

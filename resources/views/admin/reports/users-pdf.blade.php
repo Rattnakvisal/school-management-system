@@ -174,7 +174,7 @@
 
 <body>
     <section class="hero">
-        <div class="brand">Schooli Report</div>
+        <div class="brand">TechBridge Academy Report</div>
         <h1>{{ $title }}</h1>
         <p class="subtitle">{{ $subtitle }}</p>
         <div class="meta">Generated on {{ $generatedAt }}</div>
@@ -221,7 +221,7 @@
         </tbody>
     </table>
 
-    <div class="footer-note">Prepared from the Schooli admin dashboard.</div>
+    <div class="footer-note">Prepared from the TechBridge Academy admin dashboard.</div>
 </body>
 
 </html>

@@ -34,15 +34,11 @@
             {{-- Header --}}
             <div class="flex h-20 items-center justify-between border-b border-slate-200/80 px-5 shrink-0">
                 <a href="{{ route('teacher.dashboard') }}" class="flex items-center gap-3 min-w-0">
-                    <div
-                        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-500 shadow-[0_12px_24px_-14px_rgba(79,70,229,0.75)]">
-                        <svg class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v9l10 5 10-5V4l-10 5Z" />
-                        </svg>
-                    </div>
+                    <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                        class="h-12 w-12 shrink-0 object-contain drop-shadow-[0_12px_24px_-14px_rgba(24,80,200,0.45)]" />
 
                     <div class="min-w-0" x-show="!sidebarCollapsed" x-transition>
-                        <div class="truncate text-lg font-black tracking-tight text-slate-900">Schooli</div>
+                        <div class="truncate text-lg font-black tracking-tight text-slate-900">TechBridge Academy</div>
                         <div class="truncate text-xs font-medium text-slate-500">Teacher Panel</div>
                     </div>
                 </a>

@@ -55,105 +55,14 @@
 
                 <div class="hidden md:flex md:items-center md:justify-end">
                     <div class="dashboard-hero-art">
-                        <svg viewBox="0 0 340 230" class="h-32 w-auto dashboard-logo dashboard-logo--enhanced lg:h-44"
-                            fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <defs>
-                                <radialGradient id="adminHdrBlobA" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="rgba(125,211,252,0.45)" />
-                                    <stop offset="100%" stop-color="rgba(125,211,252,0)" />
-                                </radialGradient>
-                                <radialGradient id="adminHdrBlobB" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="rgba(199,210,254,0.4)" />
-                                    <stop offset="100%" stop-color="rgba(199,210,254,0)" />
-                                </radialGradient>
-                                <linearGradient id="adminHdrPanelA" x1="0%" y1="0%" x2="100%"
-                                    y2="100%">
-                                    <stop offset="0%" stop-color="rgba(255,255,255,0.35)" />
-                                    <stop offset="100%" stop-color="rgba(255,255,255,0.12)" />
-                                </linearGradient>
-                                <linearGradient id="adminHdrPanelB" x1="0%" y1="0%" x2="100%"
-                                    y2="100%">
-                                    <stop offset="0%" stop-color="rgba(255,255,255,0.3)" />
-                                    <stop offset="100%" stop-color="rgba(255,255,255,0.08)" />
-                                </linearGradient>
-                                <linearGradient id="adminHdrCap" x1="0%" y1="0%" x2="100%"
-                                    y2="100%">
-                                    <stop offset="0%" stop-color="#111827" />
-                                    <stop offset="100%" stop-color="#0f172a" />
-                                </linearGradient>
-                                <filter id="adminHdrShadow" x="-60%" y="-60%" width="220%" height="220%">
-                                    <feGaussianBlur in="SourceAlpha" stdDeviation="7" />
-                                    <feOffset dx="0" dy="10" result="offset" />
-                                    <feFlood flood-color="rgba(15,23,42,0.32)" />
-                                    <feComposite in2="offset" operator="in" />
-                                    <feMerge>
-                                        <feMergeNode />
-                                        <feMergeNode in="SourceGraphic" />
-                                    </feMerge>
-                                </filter>
-                            </defs>
-
-                            <ellipse cx="172" cy="210" rx="120" ry="13"
-                                fill="rgba(15,23,42,0.2)" />
-
-                            <circle class="dashboard-logo__orb dashboard-logo__orb--a" cx="85" cy="88" r="56"
-                                fill="url(#adminHdrBlobA)" />
-                            <circle class="dashboard-logo__orb dashboard-logo__orb--b" cx="250" cy="72" r="72"
-                                fill="url(#adminHdrBlobB)" />
-
-                            <g class="dashboard-logo__panel dashboard-logo__panel--left" filter="url(#adminHdrShadow)">
-                                <rect x="44" y="70" width="132" height="86" rx="22"
-                                    fill="url(#adminHdrPanelA)" stroke="rgba(255,255,255,0.35)" />
-                                <path d="M63 125c20-24 31 10 46-12 15-20 24-26 35-8 13 20 25 6 38-12"
-                                    stroke="rgba(255,255,255,0.92)" stroke-width="3.4" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <circle cx="76" cy="112" r="3.2" fill="#34d399" />
-                                <circle cx="120" cy="118" r="3.2" fill="#60a5fa" />
-                                <circle cx="157" cy="102" r="3.2" fill="#a78bfa" />
-                            </g>
-
-                            <g class="dashboard-logo__panel dashboard-logo__panel--right" filter="url(#adminHdrShadow)">
-                                <rect x="174" y="50" width="122" height="102" rx="22"
-                                    fill="url(#adminHdrPanelB)" stroke="rgba(255,255,255,0.3)" />
-                                <rect class="dashboard-logo__bar dashboard-logo__bar--a" x="194" y="84" width="8"
-                                    height="44" rx="4" fill="rgba(255,255,255,0.86)" />
-                                <rect class="dashboard-logo__bar dashboard-logo__bar--b" x="220" y="94" width="8"
-                                    height="34" rx="4" fill="rgba(255,255,255,0.76)" />
-                                <rect class="dashboard-logo__bar dashboard-logo__bar--c" x="246" y="76" width="8"
-                                    height="52" rx="4" fill="rgba(255,255,255,0.9)" />
-                                <rect class="dashboard-logo__bar dashboard-logo__bar--d" x="272" y="98" width="8"
-                                    height="30" rx="4" fill="rgba(255,255,255,0.72)" />
-                                <circle cx="246" cy="66" r="10" stroke="rgba(255,255,255,0.62)"
-                                    stroke-width="3" />
-                                <path d="M252 61 L257 66 L252 71" stroke="rgba(255,255,255,0.82)" stroke-width="2.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </g>
-
-                            <path d="M170 144 L199 132" stroke="rgba(255,255,255,0.32)" stroke-width="1.2"
-                                stroke-dasharray="4 4" />
-
-                            <g class="dashboard-logo__cap" filter="url(#adminHdrShadow)">
-                                <path d="M170 90 L100 116 L170 142 L240 116 Z" fill="url(#adminHdrCap)" />
-                                <path d="M170 90 L100 116 L109 118 L170 96 L231 118 L240 116 Z"
-                                    fill="rgba(71,85,105,0.6)" />
-                                <path d="M126 124v21c0 14 20 25 44 25s44-11 44-25v-21l-44 17-44-17Z"
-                                    fill="rgba(241,245,249,0.95)" stroke="rgba(203,213,225,0.56)" />
-                                <path d="M240 116v30" stroke="rgba(255,255,255,0.86)" stroke-width="3"
-                                    stroke-linecap="round" />
-                                <circle class="dashboard-logo__tassel" cx="240" cy="148" r="7"
-                                    fill="#22c55e" />
-                                <circle cx="240" cy="148" r="4" fill="#4ade80" />
-                            </g>
-
-                            <g class="dashboard-logo__sparkles">
-                                <path d="M74 56 L76 61 L81 63 L76 65 L74 70 L72 65 L67 63 L72 61 Z"
-                                    fill="rgba(255,255,255,0.72)" />
-                                <path d="M258 34 L259 37 L262 38 L259 39 L258 42 L257 39 L254 38 L257 37 Z"
-                                    fill="rgba(255,255,255,0.64)" />
-                                <path d="M47 164 L48 166 L50 167 L48 168 L47 170 L46 168 L44 167 L46 166 Z"
-                                    fill="rgba(255,255,255,0.56)" />
-                            </g>
-                        </svg>
+                        <div class="flex flex-col items-center gap-3 text-center">
+                            <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                                class="h-32 w-auto dashboard-logo dashboard-logo--enhanced lg:h-44" />
+                            <div
+                                class="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.26em] text-white/85">
+                                TechBridge Academy
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

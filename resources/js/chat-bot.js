@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const schoolName = (chatbot.dataset.schoolName || "Schooli").trim();
+    const schoolName = (chatbot.dataset.schoolName || "TechBridge Academy").trim();
     const toggle = document.getElementById("chatbot-toggle");
     const panel = document.getElementById("chatbot-panel");
     const form = document.getElementById("chatbot-form");

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $schoolName ?? 'Schooli' }} | {{ __('home.meta.title_suffix') }}</title>
+    <title>{{ $schoolName ?? 'TechBridge Academy' }} | {{ __('home.meta.title_suffix') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -76,7 +76,7 @@
     x-effect="document.body.classList.toggle('overflow-hidden', showBanner)"
     @keydown.escape.window="if (showBanner) closeBanner(); langDesktopOpen = false; langMobileOpen = false">
     @php
-        $schoolName = $schoolName ?? 'Schooli';
+        $schoolName = $schoolName ?? 'TechBridge Academy';
         $studentsTotal = $studentsTotal ?? 0;
         $teachersTotal = $teachersTotal ?? 0;
         $dashboardRoute = $dashboardRoute ?? 'home';

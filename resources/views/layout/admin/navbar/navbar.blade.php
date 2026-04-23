@@ -30,15 +30,11 @@
             {{-- Header --}}
             <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4 shrink-0">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0">
-                    <div
-                        class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm shrink-0">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v9l10 5 10-5V4l-10 5Z" />
-                        </svg>
-                    </div>
+                    <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                        class="h-12 w-12 shrink-0 object-contain" />
 
                     <div x-show="!collapsed" x-transition class="min-w-0">
-                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">Schooli</div>
+                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">TechBridge Academy</div>
                         <div class="truncate text-xs text-slate-500">Admin Dashboard</div>
                     </div>
                 </a>
@@ -338,7 +334,7 @@
             </main>
 
             <footer class="px-4 py-4 text-xs text-slate-500 sm:px-6">
-                &copy; {{ date('Y') }} Schooli &bull; Admin Panel
+                &copy; {{ date('Y') }} TechBridge Academy &bull; Admin Panel
             </footer>
         </div>
     </div>

@@ -3,12 +3,8 @@
         <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
             <div class="lg:col-span-2">
                 <div class="flex items-center gap-3">
-                    <span
-                        class="grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-cyan-300 ring-1 ring-white/10">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 4v9l10 5 10-5V4l-10 5Z" />
-                        </svg>
-                    </span>
+                    <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                        class="h-14 w-14 object-contain" />
                     <div>
                         <h3 class="[font-family:Outfit,_sans-serif] text-xl font-semibold text-white">{{ $schoolName }}</h3>
                         <p class="text-sm text-slate-400">{{ __('home.footer.tagline') }}</p>
