@@ -334,6 +334,9 @@
                                     @forelse ($accounts as $account)
                                         @php
                                             $isSelf = (int) auth()->id() === (int) $account->id;
+                                            $currentUserIsStaff =
+                                                strtolower(trim((string) (auth()->user()?->role ?? ''))) === 'staff';
+                                            $deleteDisabled = $isSelf || ($currentUserIsStaff && $account->role === 'admin');
                                             $roleBadgeClass =
                                                 $account->role === 'admin'
                                                     ? 'bg-indigo-50 text-indigo-700'
@@ -420,7 +423,7 @@
                                                         class="js-delete-form" data-account="{{ $account->name }}">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" {{ $isSelf ? 'disabled' : '' }}
+                                                        <button type="submit" {{ $deleteDisabled ? 'disabled' : '' }}
                                                             class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50">
                                                             Delete
                                                         </button>

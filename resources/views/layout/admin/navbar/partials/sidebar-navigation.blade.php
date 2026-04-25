@@ -1,4 +1,7 @@
 @php
+    $currentRole = strtolower(trim((string) (auth()->user()?->role ?? 'admin')));
+    $isStaffUser = $currentRole === 'staff';
+
     $item = fn($route, $label, $icon, $badge = 0) => [
         'route' => $route,
         'label' => $label,
@@ -6,6 +9,20 @@
         'badge' => max((int) $badge, 0),
         'active' => request()->routeIs($route),
     ];
+
+    $managementItems = [
+        $item('admin.students.index', 'Students', 'users'),
+        $item('admin.teachers.index', 'Teachers', 'user-cog'),
+        $item('admin.classes.index', 'Classes', 'layers'),
+        $item('admin.subjects.index', 'Subjects', 'book-open'),
+        $item('admin.time-studies.index', 'Schedule', 'clock-3'),
+        $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
+    ];
+
+    if (! $isStaffUser) {
+        array_unshift($managementItems, $item('admin.admin-staff.index', 'Admin / Staff', 'shield'));
+        $managementItems[] = $item('admin.mission.index', 'Mission', 'flag');
+    }
 
     $sections = [
         [
@@ -15,16 +32,7 @@
 
         [
             'title' => 'Management',
-            'items' => [
-                $item('admin.admin-staff.index', 'Admin / Staff', 'shield'),
-                $item('admin.students.index', 'Students', 'users'),
-                $item('admin.teachers.index', 'Teachers', 'user-cog'),
-                $item('admin.classes.index', 'Classes', 'layers'),
-                $item('admin.subjects.index', 'Subjects', 'book-open'),
-                $item('admin.time-studies.index', 'Schedule', 'clock-3'),
-                $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
-                $item('admin.mission.index', 'Mission', 'flag'),
-            ],
+            'items' => $managementItems,
         ],
 
         [

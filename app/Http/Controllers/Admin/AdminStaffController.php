@@ -19,6 +19,10 @@ class AdminStaffController extends Controller
 
     public function index(Request $request)
     {
+        if ($this->currentUserIsStaff()) {
+            return $this->redirectStaffAway();
+        }
+
         $filters = $this->filters($request);
         $accounts = $this->filteredQuery($filters)
             ->latest()
@@ -53,6 +57,10 @@ class AdminStaffController extends Controller
 
     public function store(Request $request)
     {
+        if ($this->currentUserIsStaff()) {
+            return $this->redirectStaffAway();
+        }
+
         $validated = $request->validate($this->rules($request));
         $avatarResult = $this->resolveAvatarUpload($request);
 
@@ -89,6 +97,10 @@ class AdminStaffController extends Controller
 
     public function update(Request $request, User $account)
     {
+        if ($this->currentUserIsStaff()) {
+            return $this->redirectStaffAway();
+        }
+
         $account = $this->adminStaffOrFail($account);
         $validated = $request->validate($this->rules($request, $account));
         $avatarResult = $this->resolveAvatarUpload($request, $account);
@@ -138,6 +150,10 @@ class AdminStaffController extends Controller
 
     public function toggleStatus(User $account)
     {
+        if ($this->currentUserIsStaff()) {
+            return $this->redirectStaffAway();
+        }
+
         $account = $this->adminStaffOrFail($account);
 
         if ($this->isSelf($account)) {
@@ -162,6 +178,10 @@ class AdminStaffController extends Controller
 
     public function destroy(User $account)
     {
+        if ($this->currentUserIsStaff()) {
+            return $this->redirectStaffAway();
+        }
+
         $account = $this->adminStaffOrFail($account);
 
         if ($this->isSelf($account)) {
@@ -247,6 +267,18 @@ class AdminStaffController extends Controller
     private function isSelf(User $account): bool
     {
         return (int) auth()->id() === (int) $account->id;
+    }
+
+    private function currentUserIsStaff(): bool
+    {
+        return strtolower(trim((string) (auth()->user()?->role ?? ''))) === 'staff';
+    }
+
+    private function redirectStaffAway()
+    {
+        return redirect()
+            ->route('staff.dashboard')
+            ->with('error', 'Staff accounts cannot manage admin or staff accounts.');
     }
 
     private function hasStatusColumn(): bool

@@ -179,6 +179,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         calendarRoot.innerHTML = cells.join('');
+
+        if (!prefersReducedMotion) {
+            Array.from(calendarRoot.children).forEach((cell, index) => {
+                cell.style.opacity = '0';
+                cell.style.transform = 'translateY(8px) scale(0.96)';
+                cell.style.transition = 'opacity 320ms ease, transform 320ms ease';
+                cell.style.transitionDelay = `${index * 18}ms`;
+
+                window.requestAnimationFrame(() => {
+                    cell.style.opacity = '1';
+                    cell.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        }
     };
 
     if (workloadCanvas && typeof window.Chart !== 'undefined') {

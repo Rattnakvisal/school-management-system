@@ -38,7 +38,8 @@
                         class="h-12 w-12 shrink-0 object-contain" />
 
                     <div x-show="!collapsed" x-transition class="min-w-0">
-                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">TechBridge Academy</div>
+                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">TechBridge Academy
+                        </div>
                         <div class="truncate text-xs text-slate-500">{{ $adminShellLabel }} Dashboard</div>
                     </div>
                 </a>
