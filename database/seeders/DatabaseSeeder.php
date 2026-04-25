@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         User::query()->updateOrCreate(
             ['email' => 'visalchunrathanak@gmail.com'],
             [
-                'name' => 'Chun Rattnak Visal',
+                'name' => 'Chun RattnakVisal',
                 'phone_number' => '078841050',
                 'password' => 'Wq_76wZtR2aPRmq',
                 'role' => 'admin',

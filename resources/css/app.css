@@ -13,6 +13,27 @@
         "Noto Color Emoji";
 }
 
+:root {
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --surface-2: #f1f5f9;
+    --border: #dbe3f0;
+    --border-2: #e2e8f0;
+
+    --text: #0f172a;
+    --text-soft: #475569;
+    --muted: #64748b;
+
+    --shadow-sm: 0 10px 20px -18px rgba(15, 23, 42, 0.45);
+    --shadow-md: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+
+    --ring: 0 0 0 4px rgba(59, 130, 246, 0.18);
+    /* blue ring default */
+}
+
 @layer utilities {
     .website-home.khmer-ui {
         font-family: "Noto Sans Khmer", "Kantumruy Pro", system-ui, sans-serif;
@@ -462,27 +483,6 @@
         .dashboard-stage .dashboard-logo__sparkles {
             animation: none !important;
         }
-    }
-
-    :root {
-        --surface: #ffffff;
-        --surface-soft: #f8fafc;
-        --surface-2: #f1f5f9;
-        --border: #dbe3f0;
-        --border-2: #e2e8f0;
-
-        --text: #0f172a;
-        --text-soft: #475569;
-        --muted: #64748b;
-
-        --shadow-sm: 0 10px 20px -18px rgba(15, 23, 42, 0.45);
-        --shadow-md: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
-
-        --radius-lg: 1rem;
-        --radius-xl: 1.5rem;
-
-        --ring: 0 0 0 4px rgba(59, 130, 246, 0.18);
-        /* blue ring default */
     }
 
     /* =========================================
@@ -1139,6 +1139,7 @@
     }
 
     .class-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .teacher-assignment-stage .max-h-\[700px\]::-webkit-scrollbar,
     .admin-stage .max-h-\[700px\]::-webkit-scrollbar,
     .admin-stage .max-h-\[1200px\]::-webkit-scrollbar,
     .student-stage .max-h-\[1200px\]::-webkit-scrollbar,
@@ -1155,6 +1156,7 @@
     }
 
     .class-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .teacher-assignment-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
     .admin-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
     .admin-stage .max-h-\[1200px\]::-webkit-scrollbar-thumb,
     .student-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
@@ -1172,6 +1174,7 @@
     }
 
     .class-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .teacher-assignment-stage .max-h-\[700px\]::-webkit-scrollbar-track,
     .admin-stage .max-h-\[700px\]::-webkit-scrollbar-track,
     .admin-stage .max-h-\[1200px\]::-webkit-scrollbar-track,
     .student-stage .max-h-\[1200px\]::-webkit-scrollbar-track,
@@ -1188,6 +1191,7 @@
     }
 
     .class-stage .max-h-\[700px\],
+    .teacher-assignment-stage .max-h-\[700px\],
     .admin-stage .max-h-\[700px\],
     .admin-stage .max-h-\[1200px\],
     .student-stage .max-h-\[1200px\],
@@ -1224,6 +1228,32 @@
         scrollbar-color: #94a3b8 #e2e8f0;
     }
 
+    /* Teacher history tables use 44rem containers; match Law Requests scrollbar styling */
+    .teacher-assignment-stage .max-h-\[44rem\]::-webkit-scrollbar,
+    .teacher-grade-stage .max-h-\[44rem\]::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .teacher-assignment-stage .max-h-\[44rem\]::-webkit-scrollbar-thumb,
+    .teacher-grade-stage .max-h-\[44rem\]::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 999px;
+        border: 2px solid #f8fafc;
+    }
+
+    .teacher-assignment-stage .max-h-\[44rem\]::-webkit-scrollbar-track,
+    .teacher-grade-stage .max-h-\[44rem\]::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    .teacher-assignment-stage .max-h-\[44rem\],
+    .teacher-grade-stage .max-h-\[44rem\] {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+    }
+
     /* Match attendance table scrollbar (620px) to other stages */
     .class-stage .max-h-\[620px\]::-webkit-scrollbar,
     .admin-stage .max-h-\[620px\]::-webkit-scrollbar,
@@ -1241,6 +1271,7 @@
     }
 
     .class-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .teacher-assignment-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
     .admin-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
     .student-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
     .teacher-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
@@ -1257,6 +1288,7 @@
     }
 
     .class-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .teacher-assignment-stage .max-h-\[620px\]::-webkit-scrollbar-track,
     .admin-stage .max-h-\[620px\]::-webkit-scrollbar-track,
     .student-stage .max-h-\[620px\]::-webkit-scrollbar-track,
     .teacher-stage .max-h-\[620px\]::-webkit-scrollbar-track,
@@ -1272,6 +1304,7 @@
     }
 
     .class-stage .max-h-\[620px\],
+    .teacher-assignment-stage .max-h-\[620px\],
     .admin-stage .max-h-\[620px\],
     .student-stage .max-h-\[620px\],
     .teacher-stage .max-h-\[620px\],
@@ -3256,8 +3289,16 @@
     position: relative;
     overflow: hidden;
     background:
-        radial-gradient(circle at 8% 0%, rgba(99, 102, 241, 0.12), transparent 28%),
-        radial-gradient(circle at 92% 8%, rgba(20, 184, 166, 0.12), transparent 26%),
+        radial-gradient(
+            circle at 8% 0%,
+            rgba(99, 102, 241, 0.12),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 92% 8%,
+            rgba(20, 184, 166, 0.12),
+            transparent 26%
+        ),
         linear-gradient(180deg, #f8fbff 0%, #f2f4ff 100%);
 }
 
@@ -3301,8 +3342,16 @@
     inset: 0;
     z-index: -1;
     background:
-        radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.16), transparent 24%),
-        radial-gradient(circle at 84% 16%, rgba(125, 211, 252, 0.28), transparent 22%),
+        radial-gradient(
+            circle at 18% 22%,
+            rgba(255, 255, 255, 0.16),
+            transparent 24%
+        ),
+        radial-gradient(
+            circle at 84% 16%,
+            rgba(125, 211, 252, 0.28),
+            transparent 22%
+        ),
         linear-gradient(105deg, rgba(255, 255, 255, 0.11), transparent 44%);
 }
 
@@ -3311,7 +3360,12 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.14) 44%, transparent 68%);
+    background: linear-gradient(
+        100deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.14) 44%,
+        transparent 68%
+    );
     animation: staff-hero-sheen 7s ease-in-out infinite;
 }
 
@@ -3402,7 +3456,11 @@
     place-items: center;
     border-radius: 9999px;
     background:
-        radial-gradient(circle at center, rgba(15, 23, 42, 0.2) 0 49%, transparent 50%),
+        radial-gradient(
+            circle at center,
+            rgba(15, 23, 42, 0.2) 0 49%,
+            transparent 50%
+        ),
         conic-gradient(from 210deg, #fef08a, #67e8f9, #c4b5fd, #fef08a);
     transform: translate(-50%, -50%);
     animation: staff-ring-pulse 3.8s ease-in-out infinite;
@@ -3413,7 +3471,11 @@
     position: absolute;
     inset: 0.72rem;
     border-radius: inherit;
-    background: linear-gradient(135deg, rgba(49, 46, 129, 0.95), rgba(14, 165, 233, 0.74));
+    background: linear-gradient(
+        135deg,
+        rgba(49, 46, 129, 0.95),
+        rgba(14, 165, 233, 0.74)
+    );
 }
 
 .staff-hero__ring-core,
@@ -3482,7 +3544,11 @@
     overflow: hidden;
     border-radius: 1.25rem;
     background:
-        radial-gradient(circle at 50% 45%, rgba(99, 102, 241, 0.08), transparent 44%),
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(99, 102, 241, 0.08),
+            transparent 44%
+        ),
         linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
