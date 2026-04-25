@@ -13,6 +13,55 @@
         $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good Evening');
         $studentsNeedStudyTime = max(0, (int) ($studentsTotal ?? 0) - (int) ($studentsWithStudyTime ?? 0));
         $focusCount = (int) ($messagesUnread ?? 0) + $studentsNeedStudyTime;
+        $adminStatCards = [
+            [
+                'label' => 'Students',
+                'activeLabel' => 'Active',
+                'active' => (int) ($studentsActive ?? 0),
+                'total' => (int) ($studentsTotal ?? 0),
+                'route' => route('admin.students.index'),
+                'icon' => 'students',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Teachers',
+                'activeLabel' => 'Active',
+                'active' => (int) ($teachersActive ?? 0),
+                'total' => (int) ($teachersTotal ?? 0),
+                'route' => route('admin.teachers.index'),
+                'icon' => 'teachers',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+            [
+                'label' => 'Classes',
+                'activeLabel' => 'Active',
+                'active' => (int) ($classesActive ?? 0),
+                'total' => (int) ($classesTotal ?? 0),
+                'route' => route('admin.classes.index'),
+                'icon' => 'classes',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Subjects',
+                'activeLabel' => 'Active',
+                'active' => (int) ($subjectsActive ?? 0),
+                'total' => (int) ($subjectsTotal ?? 0),
+                'route' => route('admin.subjects.index'),
+                'icon' => 'subjects',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+            [
+                'label' => 'Messages',
+                'activeLabel' => 'Unread',
+                'active' => (int) ($messagesUnread ?? 0),
+                'total' => (int) ($messagesTotal ?? 0),
+                'route' => route('admin.contacts.index'),
+                'icon' => 'messages',
+                'tone' => 'from-rose-100 to-white text-rose-600',
+            ],
+        ];
+        $statPanelClass =
+            'rounded-[26px] border border-white/80 bg-white/90 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur';
     @endphp
 
     <div class="dashboard-stage space-y-6">
@@ -68,39 +117,87 @@
             </div>
         </section>
 
-        <section class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
-            <article class="dash-reveal dash-hover rounded-3xl border border-indigo-100 bg-indigo-50/80 p-5"
-                style="--d: 2;">
-                <div class="text-xs font-semibold uppercase tracking-wide text-indigo-600">Students</div>
-                <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format($studentsTotal ?? 0) }}</div>
-                <div class="mt-1 text-xs text-slate-500">Active: {{ number_format($studentsActive ?? 0) }}</div>
-            </article>
+        <section class="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+            @foreach ($adminStatCards as $index => $card)
+                @php
+                    $progress = (int) round(($card['active'] / max(1, $card['total'])) * 100);
+                @endphp
+                <a href="{{ $card['route'] }}"
+                    class="dash-reveal dash-hover {{ $statPanelClass }} min-h-[132px] p-5"
+                    style="--d: {{ $index + 2 }};">
+                    <div class="flex items-start justify-between gap-4">
+                        <span
+                            class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br {{ $card['tone'] }}">
+                            @switch($card['icon'])
+                                @case('students')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-8 0v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>
+                                @break
 
-            <article class="dash-reveal dash-hover rounded-3xl border border-sky-100 bg-sky-50/80 p-5" style="--d: 3;">
-                <div class="text-xs font-semibold uppercase tracking-wide text-sky-600">Teachers</div>
-                <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format($teachersTotal ?? 0) }}</div>
-                <div class="mt-1 text-xs text-slate-500">Active: {{ number_format($teachersActive ?? 0) }}</div>
-            </article>
+                                @case('teachers')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="7" r="4" />
+                                        <path d="M6 21v-2a6 6 0 0 1 12 0v2" />
+                                        <path d="M9 11h6" />
+                                    </svg>
+                                @break
 
-            <article class="dash-reveal dash-hover rounded-3xl border border-emerald-100 bg-emerald-50/80 p-5"
-                style="--d: 4;">
-                <div class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Classes</div>
-                <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format($classesTotal ?? 0) }}</div>
-                <div class="mt-1 text-xs text-slate-500">Active: {{ number_format($classesActive ?? 0) }}</div>
-            </article>
+                                @case('classes')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m12 3 8 4-8 4-8-4 8-4Z" />
+                                        <path d="m4 12 8 4 8-4" />
+                                        <path d="m4 17 8 4 8-4" />
+                                    </svg>
+                                @break
 
-            <article class="dash-reveal dash-hover rounded-3xl border border-amber-100 bg-amber-50/80 p-5"
-                style="--d: 5;">
-                <div class="text-xs font-semibold uppercase tracking-wide text-amber-600">Subjects</div>
-                <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format($subjectsTotal ?? 0) }}</div>
-                <div class="mt-1 text-xs text-slate-500">Active: {{ number_format($subjectsActive ?? 0) }}</div>
-            </article>
+                                @case('subjects')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 19.5V5a2 2 0 0 1 2-2h11a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H6a2 2 0 0 0-2 1.5Z" />
+                                        <path d="M8 7h7" />
+                                        <path d="M8 11h5" />
+                                    </svg>
+                                @break
 
-            <article class="dash-reveal dash-hover rounded-3xl border border-rose-100 bg-rose-50/80 p-5" style="--d: 6;">
-                <div class="text-xs font-semibold uppercase tracking-wide text-rose-600">Messages</div>
-                <div class="mt-2 text-3xl font-black text-slate-900">{{ number_format($messagesTotal ?? 0) }}</div>
-                <div class="mt-1 text-xs text-slate-500">Unread: {{ number_format($messagesUnread ?? 0) }}</div>
-            </article>
+                                @default
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z" />
+                                    </svg>
+                            @endswitch
+                        </span>
+
+                        <span class="text-slate-300">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+                        <span>{{ number_format($card['active']) }}</span>
+                        <span class="pb-0.5 text-base font-extrabold text-slate-300">/
+                            {{ number_format($card['total']) }}</span>
+                    </div>
+                    <div class="mt-1 text-sm font-bold text-slate-600">{{ $card['label'] }}</div>
+                    <div class="mt-1 text-[11px] font-semibold text-slate-400">
+                        {{ $card['activeLabel'] }}: {{ number_format($card['active']) }}
+                    </div>
+                    <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                        <span
+                            class="block h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
+                            style="width: {{ min(100, max(0, $progress)) }}%"></span>
+                    </div>
+                </a>
+            @endforeach
         </section>
 
         <section class="grid gap-6 xl:grid-cols-12">

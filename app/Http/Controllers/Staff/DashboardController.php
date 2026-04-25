@@ -91,6 +91,28 @@ class DashboardController extends Controller
             ->take(5)
             ->get(['id', 'name', 'email', 'role', 'avatar', 'created_at']);
 
+        $onlineAccountIds = collect();
+        if (
+            Schema::hasTable('sessions')
+            && Schema::hasColumn('sessions', 'user_id')
+            && Schema::hasColumn('sessions', 'last_activity')
+        ) {
+            $onlineCutoff = now()->subMinutes((int) config('session.lifetime', 120))->timestamp;
+            $onlineAccountIds = DB::table('sessions')
+                ->whereNotNull('user_id')
+                ->where('last_activity', '>=', $onlineCutoff)
+                ->pluck('user_id')
+                ->map(fn($userId) => (int) $userId)
+                ->unique()
+                ->values();
+        }
+
+        $recentAccounts = $recentAccounts->map(function (User $account) use ($onlineAccountIds) {
+            $account->setAttribute('is_online', $onlineAccountIds->contains((int) $account->id));
+
+            return $account;
+        });
+
         $healthParts = array_filter([
             $studentsTotal > 0 ? ($studentsActive / max($studentsTotal, 1)) * 100 : null,
             $teachersTotal > 0 ? ($teachersActive / max($teachersTotal, 1)) * 100 : null,

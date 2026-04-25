@@ -18,10 +18,28 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::query()->updateOrCreate(
+            ['email' => 'rattnakvisalchun@gmail.com'],
+            [
+                'name' => 'Chun Rattnakvisal',
+                'phone_number' => '078841050',
+                'password' => 'Wq_76wZtR2aPRmq',
+                'role' => 'admin',
+                'email_verified_at' => now(),
+                'is_active' => true,
+            ],
             ['email' => 'visalchunrathanak@gmail.com'],
             [
-                'name' => 'Chun RattnakVisal',
-                'phone_number' => '078841050',
+                'name' => 'Chun Rattnakvisal',
+                'phone_number' => '095300551',
+                'password' => 'Wq_76wZtR2aPRmq',
+                'role' => 'staff',
+                'email_verified_at' => now(),
+                'is_active' => true,
+            ],
+            ['email' => 'chunrattnakvisal246@gmail.com'],
+            [
+                'name' => 'Chun Rattnakvisal',
+                'phone_number' => '0762223238',
                 'password' => 'Wq_76wZtR2aPRmq',
                 'role' => 'admin',
                 'email_verified_at' => now(),

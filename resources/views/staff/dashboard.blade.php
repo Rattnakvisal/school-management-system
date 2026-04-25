@@ -388,16 +388,29 @@
                     </div>
                     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                         @forelse ($recentAccounts as $account)
+                            @php
+                                $isOnline = (bool) ($account->is_online ?? false);
+                            @endphp
                             <div
-                                class="staff-team-card rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
-                                <span
-                                    class="grid h-10 w-10 place-items-center rounded-2xl bg-white text-sm font-black text-indigo-500 shadow-sm">
-                                    {{ strtoupper(substr($account->name ?: $account->role, 0, 1)) }}
-                                </span>
+                                class="staff-team-card group rounded-2xl border border-slate-100 bg-gradient-to-br from-white to-slate-50/90 p-3 shadow-[0_14px_34px_-30px_rgba(78,85,135,0.8)] transition duration-200 hover:-translate-y-0.5 hover:border-indigo-100 hover:shadow-[0_18px_38px_-28px_rgba(79,70,229,0.5)]">
+                                <div class="flex items-start justify-between gap-2">
+                                    <span class="relative shrink-0">
+                                        <img src="{{ $account->avatar_url }}"
+                                            alt="{{ $account->name ?: 'Team member' }}"
+                                            onerror="this.onerror=null;this.src='{{ $account->fallback_avatar_url }}';"
+                                            class="h-12 w-12 rounded-2xl border border-white bg-white object-cover shadow-sm">
+                                        <span
+                                            class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white {{ $isOnline ? 'bg-emerald-400' : 'bg-slate-300' }}"></span>
+                                    </span>
+                                    <span
+                                        class="rounded-full bg-[#f3f0ff] px-2.5 py-1 text-[10px] font-black capitalize text-indigo-500">
+                                        {{ $account->role }}
+                                    </span>
+                                </div>
                                 <span
                                     class="mt-3 block truncate text-xs font-black text-slate-800">{{ $account->name ?: 'Team member' }}</span>
                                 <span
-                                    class="mt-1 block truncate text-[11px] font-semibold capitalize text-slate-400">{{ $account->role }}</span>
+                                    class="mt-1 block truncate text-[11px] font-semibold text-slate-400">{{ $account->email ?: 'No email added' }}</span>
                             </div>
                         @empty
                             <div
