@@ -31,25 +31,30 @@ class AppServiceProvider extends ServiceProvider
             $unreadQuery = Notification::query()->where('is_read', false);
             $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request'];
             $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted'];
+            $staffOnlyTypes = ['mission_event_staff'];
+            $teacherMissionTypes = ['mission_event_teacher'];
 
             // Teacher law-request notifications are admin workflow alerts.
             if ($role === 'teacher') {
                 $teacherTag = '[teacher_id:' . $userId . ']';
 
                 $notifQuery->where('type', '!=', 'teacher_law_request')
-                    ->whereNotIn('type', $studentOnlyTypes)
+                    ->whereNotIn('type', array_merge($studentOnlyTypes, $staffOnlyTypes))
                     ->where(function ($query) use ($teacherTag, $teacherOnlyTypes) {
                         $query->whereNotIn('type', $teacherOnlyTypes)
                             ->orWhere('message', 'like', '%' . $teacherTag . '%');
                     });
 
                 $unreadQuery->where('type', '!=', 'teacher_law_request')
-                    ->whereNotIn('type', $studentOnlyTypes)
+                    ->whereNotIn('type', array_merge($studentOnlyTypes, $staffOnlyTypes))
                     ->where(function ($query) use ($teacherTag, $teacherOnlyTypes) {
                         $query->whereNotIn('type', $teacherOnlyTypes)
                             ->orWhere('message', 'like', '%' . $teacherTag . '%');
                     });
-            } elseif (in_array($role, ['admin', 'staff'], true)) {
+            } elseif ($role === 'staff') {
+                $notifQuery->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes, $teacherMissionTypes));
+                $unreadQuery->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes, $teacherMissionTypes));
+            } elseif ($role === 'admin') {
                 // Approval notifications are for teachers.
                 $notifQuery->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes));
                 $unreadQuery->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes));

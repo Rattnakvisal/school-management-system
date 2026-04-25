@@ -97,6 +97,7 @@
                             'items' => [
                                 $item('teacher.law-requests.index', 'Law Requests', 'document'),
                                 $item('teacher.assignments.index', 'Assignments', 'clipboard'),
+                                $item('teacher.missions.index', 'Mission Events', 'flag'),
                                 $item('teacher.grades.index', 'Grades', 'book'),
                                 $item('teacher.notices.index', 'Notifications', 'bell'),
                             ],
@@ -178,6 +179,12 @@
                                                     viewBox="0 0 24 24">
                                                     <path d="M18 8a6 6 0 00-12 0v5l-2 2h16l-2-2z" />
                                                     <path d="M13.73 21a2 2 0 01-3.46 0" />
+                                                </svg>
+                                            @break
+
+                                            @case('flag')
+                                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M6 3a1 1 0 0 1 1 1v1h9.2l-.54.9a2 2 0 0 0 0 2.1l.68 1.13a2 2 0 0 1 0 2.07l-.68 1.13a2 2 0 0 0 0 2.1l.54.9H7v4a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1Z" />
                                                 </svg>
                                             @break
 

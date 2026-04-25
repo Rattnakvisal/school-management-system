@@ -175,9 +175,12 @@
                                         <tr>
                                             <th class="w-[260px] whitespace-nowrap px-3 py-3 font-semibold">Student</th>
                                             <th class="w-[180px] whitespace-nowrap px-3 py-3 font-semibold">Class</th>
-                                            <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Selected Time</th>
-                                            <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Major Subject</th>
-                                            <th class="w-[180px] whitespace-nowrap px-3 py-3 font-semibold">Subject Time</th>
+                                            <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Selected Time
+                                            </th>
+                                            <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Major Subject
+                                            </th>
+                                            <th class="w-[180px] whitespace-nowrap px-3 py-3 font-semibold">Subject Time
+                                            </th>
                                             <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Schedule</th>
                                             <th class="w-[220px] whitespace-nowrap px-3 py-3 font-semibold">Teacher</th>
                                             <th class="w-[180px] whitespace-nowrap px-3 py-3 font-semibold">Created</th>
@@ -319,7 +322,7 @@
                                                         ],
                                                     ]);
                                                 }
-                                                @endphp
+                                            @endphp
                                             <tr class="align-top transition hover:bg-slate-50/80 odd:bg-slate-50/30">
                                                 <td class="whitespace-nowrap px-3 py-3">
                                                     @php
@@ -340,7 +343,8 @@
                                                                 {{ $row->student_email ?: '-' }}</div>
                                                             <div
                                                                 class="mt-1 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-500">
-                                                                ID #{{ str_pad((string) $row->student_id, 7, '0', STR_PAD_LEFT) }}
+                                                                ID
+                                                                #{{ str_pad((string) $row->student_id, 7, '0', STR_PAD_LEFT) }}
                                                             </div>
                                                         </div>
                                                     </div>

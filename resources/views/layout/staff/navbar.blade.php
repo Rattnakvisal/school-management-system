@@ -84,6 +84,7 @@
                                 $item('admin.subjects.index', 'Subjects', 'book-open'),
                                 $item('admin.time-studies.index', 'Schedule', 'clock-3'),
                                 $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
+                                $item('staff.missions.index', 'Mission Events', 'flag'),
                             ],
                         ],
                         [

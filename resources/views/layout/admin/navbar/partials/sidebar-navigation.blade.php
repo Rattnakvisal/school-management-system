@@ -19,9 +19,11 @@
         $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
     ];
 
-    if (! $isStaffUser) {
+    if (!$isStaffUser) {
         array_unshift($managementItems, $item('admin.admin-staff.index', 'Admin / Staff', 'shield'));
         $managementItems[] = $item('admin.mission.index', 'Mission', 'flag');
+    } else {
+        $managementItems[] = $item('staff.missions.index', 'Mission Events', 'flag');
     }
 
     $sections = [

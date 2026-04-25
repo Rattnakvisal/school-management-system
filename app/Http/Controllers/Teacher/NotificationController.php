@@ -76,10 +76,11 @@ class NotificationController extends Controller
         $teacherTag = '[teacher_id:' . $userId . ']';
         $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request'];
         $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted'];
+        $staffOnlyTypes = ['mission_event_staff'];
 
         if ($role === 'teacher') {
             $query->where('type', '!=', 'teacher_law_request')
-                ->whereNotIn('type', $studentOnlyTypes)
+                ->whereNotIn('type', array_merge($studentOnlyTypes, $staffOnlyTypes))
                 ->where(function ($inner) use ($teacherTag, $teacherOnlyTypes) {
                     $inner->whereNotIn('type', $teacherOnlyTypes)
                         ->orWhere('message', 'like', '%' . $teacherTag . '%');

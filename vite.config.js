@@ -15,6 +15,7 @@ export default defineConfig({
                 'resources/js/admin/teacher.js',
                 'resources/js/admin/settings.js',
                 'resources/js/admin/contact.js',
+                'resources/js/admin/mission.js',
                 'resources/js/admin/subject.js',
                 'resources/js/admin/time-studies.js',
                 'resources/js/admin/teacher-attendance.js',

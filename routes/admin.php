@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\TeacherAttendanceController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\MissionEventController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'admin'])
@@ -69,7 +70,11 @@ Route::middleware(['auth', 'admin'])
             ->name('attendance.teachers.law-requests.approve');
         Route::post('/attendance/teachers/law-requests/{lawRequest}/reject', [TeacherAttendanceController::class, 'rejectLawRequest'])
             ->name('attendance.teachers.law-requests.reject');
-        Route::view('/mission', 'admin.mission')->name('mission.index');
+        Route::get('/mission', [MissionEventController::class, 'index'])->name('mission.index');
+        Route::post('/mission', [MissionEventController::class, 'store'])->name('mission.store');
+        Route::put('/mission/{mission}', [MissionEventController::class, 'update'])->name('mission.update');
+        Route::patch('/mission/{mission}/status', [MissionEventController::class, 'toggleStatus'])->name('mission.status');
+        Route::delete('/mission/{mission}', [MissionEventController::class, 'destroy'])->name('mission.destroy');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
         Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');

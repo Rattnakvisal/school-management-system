@@ -9,7 +9,7 @@
 </head>
 
 <body
-    class="website-home {{ app()->getLocale() === 'km' ? 'khmer-ui' : '[font-family:Manrope,_sans-serif]' }} bg-slate-100 text-slate-900 antialiased"
+    class="website-home {{ app()->getLocale() === 'km' ? 'khmer-ui' : '[font-family:Manrope,_sans-serif]' }} min-h-screen overflow-x-hidden overflow-y-auto bg-slate-100 text-slate-900 antialiased"
     x-data="{
         open: false,
         langDesktopOpen: false,
@@ -73,7 +73,6 @@
         top = window.scrollY > 560;
         setActive();
     });"
-    x-effect="document.body.classList.toggle('overflow-hidden', showBanner)"
     @keydown.escape.window="if (showBanner) closeBanner(); langDesktopOpen = false; langMobileOpen = false">
     @php
         $schoolName = $schoolName ?? 'TechBridge';
