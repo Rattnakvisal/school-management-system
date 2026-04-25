@@ -17,34 +17,42 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::query()->updateOrCreate(
-            ['email' => 'rattnakvisalchun@gmail.com'],
+        $users = [
             [
                 'name' => 'Chun Rattnakvisal',
+                'email' => 'rattnakvisalchun@gmail.com',
                 'phone_number' => '078841050',
                 'password' => 'Wq_76wZtR2aPRmq',
                 'role' => 'admin',
-                'email_verified_at' => now(),
-                'is_active' => true,
             ],
-            ['email' => 'visalchunrathanak@gmail.com'],
             [
                 'name' => 'Chun Rattnakvisal',
+                'email' => 'visalchunrathanak@gmail.com',
                 'phone_number' => '095300551',
                 'password' => 'Wq_76wZtR2aPRmq',
                 'role' => 'staff',
-                'email_verified_at' => now(),
-                'is_active' => true,
             ],
-            ['email' => 'chunrattnakvisal246@gmail.com'],
             [
                 'name' => 'Chun Rattnakvisal',
+                'email' => 'chunrattnakvisal246@gmail.com',
                 'phone_number' => '0762223238',
                 'password' => 'Wq_76wZtR2aPRmq',
-                'role' => 'admin',
-                'email_verified_at' => now(),
-                'is_active' => true,
-            ]
-        );
+                'role' => 'teacher',
+            ],
+        ];
+
+        foreach ($users as $user) {
+            User::query()->updateOrCreate(
+                ['email' => $user['email']],
+                [
+                    'name' => $user['name'],
+                    'phone_number' => $user['phone_number'],
+                    'password' => $user['password'],
+                    'role' => $user['role'],
+                    'email_verified_at' => now(),
+                    'is_active' => true,
+                ]
+            );
+        }
     }
 }
