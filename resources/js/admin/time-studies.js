@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!teacherSelect) return;
 
         const selectedSlot = getClassSlotById(classId, classTimeId);
-        const options = ['<option value="">Unassigned</option>'];
+        const options = ['<option value="">Select teacher</option>'];
 
         const selectedDay = String(selectedSlot?.day_of_week || 'all').toLowerCase();
         const selectedStart = String(selectedSlot?.start_time || '');
@@ -527,10 +527,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // SweetAlert confirmations (same behavior as Student page)
+    const showFormError = (title, message) => {
+        if (hasSwal) {
+            window.Swal.fire({
+                icon: 'error',
+                title,
+                text: message,
+            });
+            return;
+        }
+
+        window.alert(`${title}\n\n${message}`);
+    };
+
+    const getSubjectCreateFormIssue = (form) => {
+        if (!form || form.id !== 'subject_time_create_form') return '';
+
+        const rows = Array.from(form.querySelectorAll('.js-subject-slot-row'));
+        for (const [index, row] of rows.entries()) {
+            const rowNumber = index + 1;
+            const subjectSelect = row.querySelector('.js-subject-form-subject');
+            const classTimeSelect = row.querySelector('.js-subject-form-class-time');
+            const teacherSelect = row.querySelector('.js-subject-form-teacher');
+
+            if (!subjectSelect?.value) {
+                return `Please select a subject for row ${rowNumber}.`;
+            }
+
+            if (!classTimeSelect?.value) {
+                return `Please select an available class time for row ${rowNumber}.`;
+            }
+
+            if (classTimeSelect.selectedOptions?.[0]?.disabled) {
+                return `The class time in row ${rowNumber} is already used. Choose another class time.`;
+            }
+
+            if (teacherSelect?.value && teacherSelect.selectedOptions?.[0]?.disabled) {
+                return `The selected teacher in row ${rowNumber} is busy at this time. Choose another teacher or class time.`;
+            }
+        }
+
+        return '';
+    };
+
     const confirmSubmit = (selector, buildConfig) => {
         document.querySelectorAll(selector).forEach((form) => {
             form.addEventListener('submit', (event) => {
                 if (form.dataset.confirmed === '1') {
+                    return;
+                }
+
+                const formIssue = getSubjectCreateFormIssue(form);
+                if (formIssue) {
+                    event.preventDefault();
+                    showFormError('Cannot Add Subject Time', formIssue);
                     return;
                 }
 

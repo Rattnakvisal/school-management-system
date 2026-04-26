@@ -188,6 +188,15 @@ class TimeStudyController extends Controller
 
         $teacherTimes = SubjectStudyTime::query()
             ->with(['subject.schoolClass', 'schoolClass', 'teacher', 'subject.teacher'])
+            ->where(function ($query) use ($hasSubjectTeacherColumn) {
+                if ($hasSubjectTeacherColumn) {
+                    $query->whereNotNull('teacher_id');
+                }
+
+                $query->orWhereHas('subject', function ($subjectQuery) {
+                    $subjectQuery->whereNotNull('teacher_id');
+                });
+            })
             ->when($search !== '', function ($query) use ($search, $hasSubjectDayColumn) {
                 $query->where(function ($innerQuery) use ($search, $hasSubjectDayColumn) {
                     if ($hasSubjectDayColumn) {

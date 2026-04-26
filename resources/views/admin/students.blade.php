@@ -138,7 +138,7 @@
                                 (Optional)</label>
                             <select id="school_class_id" name="school_class_id"
                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                <option value="">Unassigned</option>
+                                <option value="">Select class</option>
                                 @foreach ($classes as $classOption)
                                     <option value="{{ $classOption->id }}"
                                         {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
@@ -152,7 +152,7 @@
                         </div>
 
                         @if ($hasMajorSubjectColumn)
-                            <div>
+                            <div class="js-major-subject-field">
                                 @php
                                     $createSelectedMajorSubjectIds = old('major_subject_ids');
                                     if (
@@ -508,8 +508,8 @@
 
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                                <div class="max-h-[1200px] overflow-auto">
-                                    <table class="student-table w-full min-w-[1300px] text-left text-sm">
+                                <div class="max-h-[720px] overflow-auto">
+                                    <table class="student-table w-full min-w-[1300px] whitespace-nowrap text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
@@ -836,7 +836,7 @@
                                                                                     id="edit_school_class_id_{{ $student->id }}"
                                                                                     name="school_class_id"
                                                                                     class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                                    <option value="">Unassigned
+                                                                                    <option value="">Select class
                                                                                     </option>
                                                                                     @foreach ($classes as $classOption)
                                                                                         <option
@@ -849,7 +849,7 @@
                                                                             </div>
 
                                                                             @if ($hasMajorSubjectColumn)
-                                                                                <div>
+                                                                                <div class="js-major-subject-field">
                                                                                     @php
                                                                                         $editSelectedMajorSubjectIds = [];
                                                                                         if (

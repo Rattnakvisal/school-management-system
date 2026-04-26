@@ -67,15 +67,15 @@
             <div class="space-y-1.5">
                 @foreach ($section['items'] as $l)
                     <a href="{{ route($l['route']) }}"
-                        class="group relative flex items-center rounded-2xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200/60' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}"
-                        :class="collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-3 py-3'">
+                        class="group relative flex items-center rounded-2xl transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_14px_30px_-18px_rgba(79,70,229,0.8)]' : 'text-slate-700 hover:-translate-y-px hover:bg-white hover:text-slate-900 hover:shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]' }}"
+                        :class="collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3'">
 
                         @if ($l['active'])
                             <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white"></span>
                         @endif
 
                         <span
-                            class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $l['active'] ? 'bg-white/15' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                            class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
                             @include('layout.admin.navbar.partials.sidebar-icon', ['icon' => $l['icon']])
 
                             @if ($l['icon'] === 'mail' && ($l['badge'] ?? 0) > 0)

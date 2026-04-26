@@ -294,17 +294,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const key = String(classId || '');
+        const field = select.closest('.js-major-subject-field');
+        if (field) {
+            field.classList.toggle('hidden', key === '');
+        }
+
         const subjects = key !== ''
             ? (Array.isArray(subjectsByClass[key]) ? subjectsByClass[key] : [])
-            : allSubjects;
+            : [];
         let placeholder = 'Select major subjects';
 
         if (subjects.length > 0 && key !== '') {
             placeholder = 'Select major subjects';
         } else if (subjects.length === 0 && key !== '') {
             placeholder = 'No subjects in selected class';
-        } else if (subjects.length === 0) {
-            placeholder = 'No major subjects available';
+        } else {
+            placeholder = 'Select home class first';
         }
 
         resetSelect(select, placeholder);

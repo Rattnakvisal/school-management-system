@@ -44,6 +44,11 @@
             <div class="study-time-reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
                 style="--sd: 2;">
                 <div class="font-semibold">Please check the form fields and try again.</div>
+                <ul class="mt-2 list-disc space-y-1 pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
@@ -291,7 +296,7 @@
 
                     <!-- Subject Study Time -->
                     <form method="POST" action="{{ route('admin.time-studies.subjects.store') }}"
-                        class="js-create-form mt-6 space-y-4 border-t border-slate-200 pt-6">
+                        id="subject_time_create_form" class="js-create-form mt-6 space-y-4 border-t border-slate-200 pt-6">
                         @csrf
                         <input type="hidden" name="_form" value="create_subject_time">
 
@@ -360,7 +365,7 @@
                                             <select name="subject_slots[{{ $slotIndex }}][teacher_id]"
                                                 data-selected="{{ $rowTeacherId }}"
                                                 class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                <option value="">Unassigned</option>
+                                                <option value="">Select teacher</option>
                                                 @foreach ($teachers as $teacherOption)
                                                     <option value="{{ $teacherOption->id }}"
                                                         {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
@@ -412,7 +417,7 @@
                                         <label class="mb-1 block text-xs font-semibold text-slate-600">Teacher</label>
                                         <select name="subject_slots[__INDEX__][teacher_id]"
                                             class="js-subject-form-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                            <option value="">Unassigned</option>
+                                            <option value="">Select teacher</option>
                                             @foreach ($teachers as $teacherOption)
                                                 <option value="{{ $teacherOption->id }}">
                                                     {{ $teacherOption->name }}
@@ -448,6 +453,14 @@
                     filterOpen: false,
                     activeTab: @js(in_array($tab, ['class', 'subject', 'teacher'], true) ? $tab : 'class'),
                     switchTab(tab) {
+                        if (tab === 'teacher') {
+                            const teacherUrl = new URL(@js(route('admin.time-studies.index')), window.location.origin);
+                            teacherUrl.searchParams.set('tab', 'teacher');
+                            teacherUrl.searchParams.set('per_page', @js((string) $perPage));
+                            window.location.href = teacherUrl.toString();
+                            return;
+                        }
+
                         this.activeTab = tab;
                         const url = new URL(window.location.href);
                         url.searchParams.set('tab', tab);
@@ -1041,7 +1054,7 @@
                                                                             <select name="teacher_id"
                                                                                 data-selected="{{ (string) ($slot->teacher_id ?? null ?: $slot->subject?->teacher_id ?? '') }}"
                                                                                 class="js-subject-edit-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                                <option value="">Unassigned</option>
+                                                                                <option value="">Select teacher</option>
                                                                                 @foreach ($teachers as $teacherOption)
                                                                                     <option
                                                                                         value="{{ $teacherOption->id }}"
