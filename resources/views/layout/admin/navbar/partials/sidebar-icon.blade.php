@@ -59,6 +59,12 @@
         </svg>
     @break
 
+    @case('check')
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="m9.55 17.6-5.3-5.3 1.42-1.42 3.88 3.89 8.78-8.78 1.42 1.42-10.2 10.19Z" />
+        </svg>
+    @break
+
     @case('academic')
     @case('graduation-cap')
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -85,6 +91,18 @@
     @case('clipboard')
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
             <path d="M16 2H8v2H5v18h14V4h-3V2Zm1 18H7V6h10v14Z" />
+        </svg>
+    @break
+
+    @case('document')
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm-1 2.5L17.5 9H13V4.5ZM8 13h8v2H8v-2Zm0 4h8v2H8v-2Z" />
+        </svg>
+    @break
+
+    @case('bell')
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2Z" />
         </svg>
     @break
 

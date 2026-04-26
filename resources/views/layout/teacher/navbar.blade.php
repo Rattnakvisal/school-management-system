@@ -70,7 +70,7 @@
             </div>
 
             {{-- Nav --}}
-            <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+            <nav class="nav-scrollbar flex-1 space-y-6 overflow-y-auto px-3 py-5">
                 @php
                     $item = fn($route, $label, $icon) => [
                         'route' => $route,
@@ -131,9 +131,7 @@
                                         {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
                                         @switch($l['icon'])
                                             @case('home')
-                                                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12 3 2 12h3v9h6v-6h2v6h6v-9h3L12 3Z" />
-                                                </svg>
+                                                @include('layout.admin.navbar.partials.sidebar-icon', ['icon' => 'layout-dashboard'])
                                             @break
 
                                             @case('grid')
@@ -295,7 +293,7 @@
                                     <span class="text-xs text-slate-500">Latest</span>
                                 </div>
 
-                                <div id="teacher-notif-list" class="max-h-80 overflow-auto">
+                                <div id="teacher-notif-list" class="nav-scrollbar max-h-80 overflow-auto">
                                     @forelse (($navNotifs ?? []) as $n)
                                         <a href="{{ trim((string) ($n->url ?? '')) !== '' ? $n->url : route('teacher.notices.index') }}"
                                             class="block px-4 py-3 hover:bg-slate-50">

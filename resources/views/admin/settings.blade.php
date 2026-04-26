@@ -13,15 +13,6 @@
         data-settings-default-tab="{{ $passwordErrors->any() ? 'password' : 'profile' }}">
         <x-admin.page-header reveal-class="reveal" delay="1" icon="settings" title="Admin Settings"
             subtitle="Manage profile details, avatar, and account security.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Students: {{ number_format($stats['students'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--sky">Teachers:
-                    {{ number_format($stats['teachers'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Classes:
-                    {{ number_format($stats['classes'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--amber">Subjects:
-                    {{ number_format($stats['subjects'] ?? 0) }}</span>
-            </x-slot:stats>
             <x-slot:actions>
                 <a href="{{ route('admin.dashboard') }}"
                     class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
@@ -99,7 +90,8 @@
 
                 <div class="min-w-0">
                     <section data-settings-panel="profile" class="space-y-6">
-                        <form method="POST" action="{{ route('admin.settings.profile.update') }}" enctype="multipart/form-data"
+                        <form method="POST" action="{{ route('admin.settings.profile.update') }}"
+                            enctype="multipart/form-data"
                             class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-6">
                             @csrf
                             @method('PUT')
@@ -110,8 +102,7 @@
                                 <div class="relative">
                                     <img id="admin_avatar_preview"
                                         class="h-24 w-24 rounded-full border-4 border-white object-cover shadow-sm"
-                                        src="{{ $admin->avatar_url }}"
-                                        data-fallback="{{ $admin->fallback_avatar_url }}"
+                                        src="{{ $admin->avatar_url }}" data-fallback="{{ $admin->fallback_avatar_url }}"
                                         onerror="this.onerror=null;this.src='{{ $admin->fallback_avatar_url }}';"
                                         alt="admin avatar">
                                     <button type="button" id="trigger_avatar_upload"
@@ -142,7 +133,8 @@
 
                             <div class="mt-5 grid gap-4 md:grid-cols-2">
                                 <div>
-                                    <label for="first_name" class="mb-1 block text-xs font-semibold text-slate-600">First Name
+                                    <label for="first_name" class="mb-1 block text-xs font-semibold text-slate-600">First
+                                        Name
                                         <span class="text-red-500">*</span></label>
                                     <input id="first_name" name="first_name" type="text"
                                         value="{{ old('first_name', $defaultFirstName) }}" required
@@ -153,7 +145,8 @@
                                 </div>
 
                                 <div>
-                                    <label for="last_name" class="mb-1 block text-xs font-semibold text-slate-600">Last Name</label>
+                                    <label for="last_name" class="mb-1 block text-xs font-semibold text-slate-600">Last
+                                        Name</label>
                                     <input id="last_name" name="last_name" type="text"
                                         value="{{ old('last_name', $defaultLastName) }}"
                                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
@@ -163,9 +156,10 @@
                                 </div>
 
                                 <div>
-                                    <label for="email" class="mb-1 block text-xs font-semibold text-slate-600">Email</label>
-                                    <input id="email" name="email" type="email" value="{{ old('email', $admin->email) }}"
-                                        required
+                                    <label for="email"
+                                        class="mb-1 block text-xs font-semibold text-slate-600">Email</label>
+                                    <input id="email" name="email" type="email"
+                                        value="{{ old('email', $admin->email) }}" required
                                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                     @error('email', 'profileUpdate')
                                         <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
@@ -173,7 +167,8 @@
                                 </div>
 
                                 <div>
-                                    <label for="phone_number" class="mb-1 block text-xs font-semibold text-slate-600">Mobile
+                                    <label for="phone_number"
+                                        class="mb-1 block text-xs font-semibold text-slate-600">Mobile
                                         Number</label>
                                     <input id="phone_number" name="phone_number" type="text"
                                         value="{{ old('phone_number', $admin->phone_number) }}"
@@ -217,7 +212,8 @@
 
                             <div class="mt-5 space-y-4">
                                 <div>
-                                    <label for="current_password" class="mb-1 block text-xs font-semibold text-slate-600">Current
+                                    <label for="current_password"
+                                        class="mb-1 block text-xs font-semibold text-slate-600">Current
                                         Password</label>
                                     <input id="current_password" type="password" name="current_password" required
                                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
@@ -239,8 +235,10 @@
 
                                     <div>
                                         <label for="password_confirmation"
-                                            class="mb-1 block text-xs font-semibold text-slate-600">Confirm Password</label>
-                                        <input id="password_confirmation" type="password" name="password_confirmation" required
+                                            class="mb-1 block text-xs font-semibold text-slate-600">Confirm
+                                            Password</label>
+                                        <input id="password_confirmation" type="password" name="password_confirmation"
+                                            required
                                             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                     </div>
                                 </div>
@@ -259,7 +257,8 @@
                         <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-6">
                             <h2 class="text-lg font-semibold text-slate-900">Notifications</h2>
                             <p class="mt-2 text-sm text-slate-600">Unread notifications:
-                                <span class="font-semibold text-indigo-700">{{ number_format($stats['unreadNotifications'] ?? 0) }}</span>
+                                <span
+                                    class="font-semibold text-indigo-700">{{ number_format($stats['unreadNotifications'] ?? 0) }}</span>
                             </p>
                             <p class="mt-1 text-sm text-slate-500">This section is ready for notification preferences.</p>
                         </div>

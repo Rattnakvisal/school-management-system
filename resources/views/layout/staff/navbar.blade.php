@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+            <nav class="nav-scrollbar flex-1 space-y-6 overflow-y-auto px-3 py-5">
                 @php
                     $item = fn($route, $label, $icon, $badge = 0) => [
                         'route' => $route,
@@ -203,7 +203,7 @@
                         <div class="relative" @click.outside="notifOpen = false">
                             <button
                                 class="relative rounded-xl border border-slate-200 bg-white p-2 hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
-                                @click="profileOpen = false; notifOpen = !notifOpen" aria-label="Notifications"
+                                @click="messageOpen = false; profileOpen = false; notifOpen = !notifOpen" aria-label="Notifications"
                                 type="button">
                                 <svg class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2Z" />
@@ -224,7 +224,7 @@
                                     <span class="text-xs text-slate-500">Latest</span>
                                 </div>
 
-                                <div class="max-h-80 overflow-auto">
+                                <div class="nav-scrollbar max-h-80 overflow-auto">
                                     @forelse (($navNotifs ?? []) as $n)
                                         <a href="{{ trim((string) ($n->url ?? '')) !== '' ? $n->url : route('staff.dashboard') }}"
                                             class="block px-4 py-3 hover:bg-slate-50">
@@ -258,10 +258,82 @@
                             </div>
                         </div>
 
+                        <div class="relative" @click.outside="messageOpen = false">
+                            <button
+                                class="relative rounded-xl border border-slate-200 bg-white p-2 hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
+                                @click="notifOpen = false; profileOpen = false; messageOpen = !messageOpen"
+                                aria-label="Messages" type="button">
+                                <svg class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M4 4h16v12H6l-2 2V4Zm2 2v8h12V6H6Z" />
+                                </svg>
+
+                                @if (($contactUnread ?? 0) > 0)
+                                    <span
+                                        class="absolute -right-1 -top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                                        {{ $contactUnread > 99 ? '99+' : $contactUnread }}
+                                    </span>
+                                @endif
+                            </button>
+
+                            <div x-show="messageOpen" x-cloak x-transition.origin.top.right
+                                class="fixed left-3 right-3 top-20 z-[80] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96">
+                                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                                    <div class="text-sm font-bold text-slate-900">Contact Messages</div>
+                                    @if (($contactUnread ?? 0) > 0)
+                                        <span class="text-xs font-semibold text-amber-600">{{ $contactUnread }}
+                                            unread</span>
+                                    @endif
+                                </div>
+
+                                <div class="nav-scrollbar max-h-80 overflow-auto">
+                                    @forelse (($navContacts ?? []) as $contact)
+                                        <a href="{{ route('admin.contacts.index') }}"
+                                            class="block px-4 py-3 hover:bg-slate-50">
+                                            <div class="flex items-start gap-3">
+                                                <span
+                                                    class="mt-2 h-2 w-2 rounded-full {{ $contact->is_read ? 'bg-slate-300' : 'bg-amber-500' }}"></span>
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="flex items-center justify-between gap-2">
+                                                        <div class="truncate text-sm font-semibold text-slate-800">
+                                                            {{ $contact->name }}</div>
+                                                        <div class="shrink-0 text-[11px] text-slate-400">
+                                                            {{ $contact->created_at->diffForHumans() }}</div>
+                                                    </div>
+                                                    <div class="truncate text-xs font-semibold text-slate-600">
+                                                        {{ $contact->subject }}</div>
+                                                    <div class="truncate text-xs text-slate-500">
+                                                        {{ $contact->message }}</div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @empty
+                                        <div class="px-4 py-8 text-center text-sm text-slate-500">No contact messages
+                                            yet.</div>
+                                    @endforelse
+                                </div>
+
+                                <div class="grid gap-2 border-t border-slate-100 px-4 py-3">
+                                    <a href="{{ route('admin.contacts.index') }}"
+                                        class="w-full rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-slate-800">
+                                        Open Contact Inbox
+                                    </a>
+                                    @if (($contactUnread ?? 0) > 0)
+                                        <form method="POST" action="{{ route('admin.contacts.readAll') }}">
+                                            @csrf
+                                            <button
+                                                class="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                                Mark all contact messages as read
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="relative" @click.outside="profileOpen = false">
                             <button
                                 class="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
-                                @click="notifOpen = false; profileOpen = !profileOpen" aria-label="Open profile menu"
+                                @click="notifOpen = false; messageOpen = false; profileOpen = !profileOpen" aria-label="Open profile menu"
                                 type="button">
                                 <img class="h-8 w-8 rounded-full object-cover" src="{{ auth()->user()->avatar_url }}"
                                     onerror="this.onerror=null;this.src='{{ auth()->user()->fallback_avatar_url }}';"
@@ -325,6 +397,7 @@
                 collapsed: false,
                 isDesktop: false,
                 notifOpen: false,
+                messageOpen: false,
                 profileOpen: false,
 
                 get sidebarCollapsed() {
@@ -346,6 +419,7 @@
 
                 closeAll() {
                     this.notifOpen = false;
+                    this.messageOpen = false;
                     this.profileOpen = false;
                 },
 

@@ -508,8 +508,8 @@
 
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                                <div class="max-h-[720px] overflow-auto">
-                                    <table class="student-table w-full min-w-[1300px] whitespace-nowrap text-left text-sm">
+                                <div class="student-table-scroller max-h-[720px] overflow-auto">
+                                    <table class="student-table w-full whitespace-nowrap text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>

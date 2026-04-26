@@ -55,7 +55,7 @@
             </div>
 
             {{-- NAVIGATION --}}
-            <nav class="flex-1 overflow-y-auto px-3 py-4">
+            <nav class="nav-scrollbar flex-1 overflow-y-auto px-3 py-4">
                 @php
                     $item = fn($route, $label, $icon) => [
                         'route' => $route,
@@ -100,7 +100,7 @@
                         <div class="space-y-1.5">
                             @foreach ($section['items'] as $l)
                                 <a href="{{ route($l['route']) }}"
-                                    class="group relative flex items-center rounded-2xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200/60' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}"
+                                    class="group relative flex items-center rounded-2xl transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_14px_30px_-18px_rgba(79,70,229,0.8)]' : 'text-slate-700 hover:-translate-y-px hover:bg-white hover:text-slate-900 hover:shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]' }}"
                                     :class="'gap-3 px-3 py-3'">
 
                                     @if ($l['active'])
@@ -108,16 +108,10 @@
                                     @endif
 
                                     <span
-                                        class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-white' }}">
+                                        class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
                                         @switch($l['icon'])
                                             @case('home')
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
-                                                    viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M3 10.5 12 3l9 7.5" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M5.5 9.5V21h5.5v-6h2v6h5.5V9.5" />
-                                                </svg>
+                                                @include('layout.admin.navbar.partials.sidebar-icon', ['icon' => 'layout-dashboard'])
                                             @break
 
                                             @case('book')
@@ -262,7 +256,7 @@
                                 <span class="text-xs text-slate-500">Latest</span>
                             </div>
 
-                            <div id="student-notif-list" class="max-h-80 overflow-auto">
+                            <div id="student-notif-list" class="nav-scrollbar max-h-80 overflow-auto">
                                 @forelse (($navNotifs ?? []) as $n)
                                     <a href="{{ trim((string) ($n->url ?? '')) !== '' ? $n->url : route('student.notices.index') }}"
                                         class="block px-4 py-3 hover:bg-slate-50">
@@ -305,34 +299,48 @@
 
                     {{-- PROFILE --}}
                     <div class="relative" @click.outside="profileOpen=false">
-                        <button class="group flex items-center gap-2" @click="profileOpen=!profileOpen">
-                            <img class="h-9 w-9 rounded-full border-2 border-indigo-100 transition group-hover:border-indigo-400"
+                        <button
+                            class="group flex max-w-[13rem] items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-2 transition hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100 sm:max-w-none sm:gap-3 sm:px-3"
+                            @click="notifOpen = false; profileOpen=!profileOpen" aria-label="Open profile menu"
+                            type="button">
+                            <img class="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-100 transition group-hover:ring-indigo-300"
                                 src="{{ auth()->user()->avatar_url }}"
                                 onerror="this.onerror=null;this.src='{{ auth()->user()->fallback_avatar_url }}';"
                                 alt="avatar">
 
-                            <svg class="h-4 w-4 text-slate-500 transition-transform duration-200"
+                            <div class="hidden min-w-0 text-left leading-tight sm:block">
+                                <div class="max-w-[10rem] truncate text-sm font-semibold text-slate-900">
+                                    {{ auth()->user()->name }}
+                                </div>
+                                <div class="text-xs text-slate-500 capitalize">{{ auth()->user()->role }}</div>
+                            </div>
+
+                            <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200"
                                 :class="profileOpen ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M6 9l6 6 6-6" />
                             </svg>
                         </button>
 
-                        <div x-show="profileOpen" x-transition.origin.top.right
-                            class="absolute right-0 mt-3 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                        <div x-show="profileOpen" x-cloak x-transition.origin.top.right
+                            class="fixed left-3 right-3 top-20 z-[80] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-3 sm:w-64">
 
-                            <div class="border-b border-slate-100 px-4 py-3">
-                                <div class="text-sm font-semibold text-slate-800">
-                                    {{ auth()->user()->name }}
-                                </div>
-                                <div class="text-xs text-slate-500 capitalize">
-                                    {{ auth()->user()->role }}
+                            <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+                                <img class="h-10 w-10 rounded-full object-cover ring-2 ring-indigo-100"
+                                    src="{{ auth()->user()->avatar_url }}"
+                                    onerror="this.onerror=null;this.src='{{ auth()->user()->fallback_avatar_url }}';"
+                                    alt="avatar">
+                                <div class="min-w-0">
+                                    <div class="truncate text-sm font-bold text-slate-900">
+                                        {{ auth()->user()->name }}
+                                    </div>
+                                    <div class="truncate text-xs text-slate-500">{{ auth()->user()->email }}</div>
                                 </div>
                             </div>
 
                             <a href="{{ route('student.settings') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50">
+                                class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
 
-                                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50">
                                     <svg class="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="currentColor">
                                         <path
                                             d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
@@ -344,17 +352,17 @@
 
                             <div class="border-t border-slate-100"></div>
 
-                            <a href="{{ route('logout') }}"
-                                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition hover:bg-red-50">
+                            <div class="p-2">
+                                <a href="{{ route('logout') }}"
+                                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100">
 
-                                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50">
                                     <svg class="h-4 w-4 text-red-600" viewBox="0 0 24 24" fill="currentColor">
                                         <path
                                             d="M16 13v-2H7V8l-5 4 5 4v-3zM20 3h-8v2h8v14h-8v2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
                                     </svg>
-                                </span>
-                                Logout
-                            </a>
+                                    Logout
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const page = document.getElementById('admin-settings-page');
+    const page = document.getElementById('admin-settings-page') || document.getElementById('student-settings-page');
 
     if (!page) {
         return;

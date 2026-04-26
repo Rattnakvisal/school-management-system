@@ -1,25 +1,38 @@
 @extends('layout.students.navbar')
 
 @section('page')
-    <div class="space-y-6">
-        <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div class="max-w-2xl">
-                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-indigo-500">Grades</p>
-                    <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-900">Your Grade Report</h1>
-                    <p class="mt-3 text-sm leading-6 text-slate-600">
+    <div class="student-stage space-y-6">
+        <section class="student-reveal student-float admin-page-header" style="--sd: 1;">
+            <div class="admin-page-header__main flex flex-wrap items-start gap-4">
+                <div class="admin-page-header__intro space-y-2">
+                    <div class="admin-page-header__title-row flex items-start gap-3">
+                        <span class="admin-page-header__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 4.5h6A1.5 1.5 0 0 1 16.5 6v1H19v13H5V7h2.5V6A1.5 1.5 0 0 1 9 4.5Z" />
+                                <path d="M9 4.5h6v3H9v-3Z" />
+                                <path d="M8.5 13h7" />
+                                <path d="M8.5 16.5h4" />
+                            </svg>
+                        </span>
+                        <div>
+                            <div class="admin-page-header__eyebrow">Grades</div>
+                            <h1 class="admin-page-title text-3xl font-black tracking-tight sm:text-4xl">Your Grade Report</h1>
+                        </div>
+                    </div>
+                    <p class="admin-page-subtitle text-sm">
                         Review the grades your teachers have assigned, track your average, and check feedback for each assessment.
                     </p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-slate-700">
+                <div class="admin-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
+                    <span class="admin-page-stat">
                         Total: {{ number_format($stats['total'] ?? 0) }}
                     </span>
-                    <span class="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-sky-700">
+                    <span class="admin-page-stat admin-page-stat--sky">
                         Subjects: {{ number_format($stats['subjects'] ?? 0) }}
                     </span>
-                    <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
+                    <span class="admin-page-stat admin-page-stat--emerald">
                         Average: {{ isset($stats['average']) ? number_format((float) $stats['average'], 1) . '%' : 'N/A' }}
                     </span>
                 </div>

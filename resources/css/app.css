@@ -305,6 +305,35 @@
         animation: chrome-drop-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
+    .nav-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 transparent;
+        scrollbar-gutter: stable;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-scrollbar::-webkit-scrollbar {
+        width: 0.45rem;
+        height: 0.45rem;
+    }
+
+    .nav-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 999px;
+    }
+
+    .nav-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.78);
+        border: 2px solid transparent;
+        border-radius: 999px;
+        background-clip: padding-box;
+    }
+
+    .nav-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(100, 116, 139, 0.9);
+        background-clip: padding-box;
+    }
+
     [data-page-animate] > * {
         will-change: transform, opacity;
     }
@@ -1320,8 +1349,34 @@
     }
 
     /* Student list table readability */
+    .student-stage .student-table-scroller {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9;
+        scrollbar-gutter: stable;
+    }
+
+    .student-stage .student-table-scroller::-webkit-scrollbar {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+
+    .student-stage .student-table-scroller::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 999px;
+    }
+
+    .student-stage .student-table-scroller::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border: 2px solid #f1f5f9;
+        border-radius: 999px;
+    }
+
+    .student-stage .student-table-scroller::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+
     .student-stage .student-table {
-        min-width: 1180px;
+        min-width: 1120px;
         table-layout: auto;
         border-collapse: separate;
         border-spacing: 0 0.1rem;
@@ -1339,11 +1394,11 @@
     }
 
     .student-stage .student-table .student-col-student {
-        min-width: 240px;
+        min-width: 220px;
     }
 
     .student-stage .student-table .student-col-email {
-        min-width: 240px;
+        min-width: 220px;
     }
 
     .student-stage .student-table .student-col-class {
@@ -1351,11 +1406,11 @@
     }
 
     .student-stage .student-table .student-col-major {
-        min-width: 220px;
+        min-width: 190px;
     }
 
     .student-stage .student-table .student-col-study {
-        min-width: 220px;
+        min-width: 200px;
     }
 
     .student-stage .student-table .student-col-status {
@@ -1367,7 +1422,7 @@
     }
 
     .student-stage .student-table .student-col-actions {
-        min-width: 210px;
+        min-width: 190px;
     }
 
     .student-stage .student-name,
@@ -1379,6 +1434,41 @@
     .student-stage .student-email {
         line-height: 1.4;
         overflow-wrap: anywhere;
+    }
+
+    .student-stage .student-schedule-table tbody td {
+        vertical-align: top;
+    }
+
+    .student-stage .student-table .student-col-day {
+        min-width: 112px;
+    }
+
+    .student-stage .student-table .student-col-time {
+        min-width: 92px;
+    }
+
+    .student-stage .student-table .student-col-subject {
+        min-width: 190px;
+    }
+
+    .student-stage .student-table .student-col-details {
+        min-width: 300px;
+    }
+
+    .student-stage .student-table .student-col-period {
+        min-width: 96px;
+    }
+
+    .student-stage .student-table .student-col-teacher {
+        min-width: 210px;
+    }
+
+    .student-stage .student-schedule-details,
+    .student-stage .student-schedule-table .student-col-subject,
+    .student-stage .student-schedule-table .student-col-teacher,
+    .student-stage .student-schedule-table .student-col-class {
+        white-space: normal;
     }
 
     .admin-stage .admin-staff-table {

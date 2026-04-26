@@ -5,6 +5,7 @@ use App\Http\Controllers\Student\GradeController;
 use App\Http\Controllers\Student\NotificationController;
 use App\Http\Controllers\Student\DashboardController;
 use App\Http\Controllers\Student\LawRequestController;
+use App\Http\Controllers\Student\SettingsController;
 use App\Http\Controllers\Student\SubjectController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,5 +27,6 @@ Route::middleware(['auth', 'role:student'])
         Route::get('/notices', [NotificationController::class, 'index'])->name('notices.index');
         Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
         Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
-        Route::view('/settings', 'student.settings')->name('settings');
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
     });

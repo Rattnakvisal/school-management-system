@@ -1,25 +1,38 @@
 @extends('layout.students.navbar')
 
 @section('page')
-    <div class="space-y-6">
-        <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div class="max-w-2xl">
-                    <p class="text-xs font-bold uppercase tracking-[0.18em] text-indigo-500">Assignments</p>
-                    <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-900">Your Assignment Board</h1>
-                    <p class="mt-3 text-sm leading-6 text-slate-600">
+    <div class="student-stage space-y-6">
+        <section class="student-reveal student-float admin-page-header" style="--sd: 1;">
+            <div class="admin-page-header__main flex flex-wrap items-start gap-4">
+                <div class="admin-page-header__intro space-y-2">
+                    <div class="admin-page-header__title-row flex items-start gap-3">
+                        <span class="admin-page-header__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M8 3.5h8A2.5 2.5 0 0 1 18.5 6v14l-3-1.75L12.5 20l-3-1.75L6.5 20V6A2.5 2.5 0 0 1 9 3.5Z" />
+                                <path d="M9.5 8h5" />
+                                <path d="M9.5 11.5h5" />
+                                <path d="M9.5 15h3" />
+                            </svg>
+                        </span>
+                        <div>
+                            <div class="admin-page-header__eyebrow">Assignments</div>
+                            <h1 class="admin-page-title text-3xl font-black tracking-tight sm:text-4xl">Your Assignment Board</h1>
+                        </div>
+                    </div>
+                    <p class="admin-page-subtitle text-sm">
                         Review the work your teachers posted for you, check deadlines, and stay ahead of upcoming tasks.
                     </p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-slate-700">
+                <div class="admin-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
+                    <span class="admin-page-stat">
                         Total: {{ number_format($stats['total'] ?? 0) }}
                     </span>
-                    <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-amber-700">
+                    <span class="admin-page-stat admin-page-stat--amber">
                         Due Soon: {{ number_format($stats['dueSoon'] ?? 0) }}
                     </span>
-                    <span class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-red-700">
+                    <span class="admin-page-stat admin-page-stat--rose">
                         Overdue: {{ number_format($stats['overdue'] ?? 0) }}
                     </span>
                 </div>

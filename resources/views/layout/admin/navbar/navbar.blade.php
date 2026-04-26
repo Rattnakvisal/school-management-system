@@ -67,7 +67,7 @@
             </div>
 
             {{-- Navigation --}}
-            <div class="flex-1 overflow-y-auto px-3 py-4">
+            <div class="nav-scrollbar flex-1 overflow-y-auto px-3 py-4">
                 @include('layout.admin.navbar.partials.sidebar-navigation', [
                     'contactUnread' => $contactUnread ?? 0,
                 ])
@@ -149,7 +149,7 @@
                                     <span class="text-xs text-slate-500">Latest</span>
                                 </div>
 
-                                <div class="max-h-80 overflow-auto">
+                                <div class="nav-scrollbar max-h-80 overflow-auto">
                                     @forelse(($navNotifs ?? []) as $n)
                                         <a href="{{ $n->url ?? '#' }}" class="block px-4 py-3 hover:bg-slate-50">
                                             <div class="flex items-start gap-3">
@@ -216,7 +216,7 @@
                                     @endif
                                 </div>
 
-                                <div class="max-h-80 overflow-auto">
+                                <div class="nav-scrollbar max-h-80 overflow-auto">
                                     @forelse(($navContacts ?? []) as $contact)
                                         <a href="{{ route('admin.contacts.index') }}"
                                             class="block px-4 py-3 hover:bg-slate-50">
