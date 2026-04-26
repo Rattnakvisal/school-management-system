@@ -5,15 +5,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ $schoolName ?? 'TechBridge Academy' }} | {{ __('home.meta.title_suffix') }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        referrerpolicy="no-referrer" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body
-    class="website-home {{ app()->getLocale() === 'km' ? 'khmer-ui' : '[font-family:Manrope,_sans-serif]' }} min-h-screen overflow-x-hidden overflow-y-auto bg-slate-100 text-slate-900 antialiased"
+    class="website-home [font-family:Manrope,_sans-serif] min-h-screen overflow-x-hidden overflow-y-auto bg-slate-100 text-slate-900 antialiased"
     x-data="{
         open: false,
-        langDesktopOpen: false,
-        langMobileOpen: false,
         top: false,
         active: '#home',
         showBanner: false,
@@ -73,28 +73,24 @@
         top = window.scrollY > 560;
         setActive();
     });"
-    @keydown.escape.window="if (showBanner) closeBanner(); langDesktopOpen = false; langMobileOpen = false">
+    @keydown.escape.window="if (showBanner) closeBanner()">
     @php
         $schoolName = $schoolName ?? 'TechBridge';
         $studentsTotal = $studentsTotal ?? 0;
         $teachersTotal = $teachersTotal ?? 0;
         $dashboardRoute = $dashboardRoute ?? 'home';
 
-        $currentLocale = app()->getLocale();
-        $supportedLocales = config('app.supported_locales', ['en', 'km']);
-        $localeLabels = trans('home.locales');
-        $localeCodeLabels = [
-            'en' => 'EN',
-            'km' => 'KH',
-        ];
-        $currentLocaleLabel = $localeLabels[$currentLocale] ?? strtoupper($currentLocale);
-        $currentLocaleCode = $localeCodeLabels[$currentLocale] ?? strtoupper($currentLocale);
-        $isKhmerLocale = $currentLocale === 'km';
         $links = trans('home.links');
         $features = trans('home.features.items');
         $programs = trans('home.programs.items');
         $steps = trans('home.admission.steps');
-        $heroPoints = trans('home.hero.points');
+        $heroPoints = array_map(
+            fn($point) => [
+                'description' => $point,
+                'icon' => 'check',
+            ],
+            trans('home.hero.points'),
+        );
         $aboutCards = trans('home.about.cards');
         $aboutHighlights = trans('home.about.highlights');
         $facilityCards = trans('home.facilities.items');
@@ -116,6 +112,136 @@
 
             return $item;
         }, trans('home.hero.highlights'));
+
+        $homePageItems = $homePageItems ?? collect();
+        $homeHeroItem = $homePageItems->get('hero', collect())->firstWhere('key', 'main');
+        if ($homeHeroItem) {
+            $heroBadge = $homeHeroItem->subtitle ?: __('home.hero.badge');
+            $heroTitle = $homeHeroItem->title ?: __('home.hero.title');
+            $heroDescription = $homeHeroItem->description ?: __('home.hero.description', ['schoolName' => $schoolName]);
+            $heroImage = $homeHeroItem->image_path
+                ? route('public.storage', ['path' => $homeHeroItem->image_path])
+                : asset('images/school.jpg');
+        } else {
+            $heroBadge = __('home.hero.badge');
+            $heroTitle = __('home.hero.title');
+            $heroDescription = __('home.hero.description', ['schoolName' => $schoolName]);
+            $heroImage = asset('images/school.jpg');
+        }
+
+        $dynamicHeroPoints = $homePageItems
+            ->get('hero_points', collect())
+            ->map(
+                fn($item) => [
+                    'description' => $item->description,
+                    'icon' => $item->icon ?: 'check',
+                ],
+            )
+            ->filter(fn($item) => filled($item['description']))
+            ->values()
+            ->all();
+        if (count($dynamicHeroPoints) > 0) {
+            $heroPoints = $dynamicHeroPoints;
+        }
+
+        $dynamicHeroHighlights = $homePageItems
+            ->get('hero_stats', collect())
+            ->map(function ($item) use ($studentsTotal, $teachersTotal) {
+                $value = match ($item->value) {
+                    'students_total' => number_format($studentsTotal),
+                    'teachers_total' => number_format($teachersTotal),
+                    default => $item->value,
+                };
+
+                return [
+                    'label' => $item->title,
+                    'value' => $value,
+                    'trend' => $item->subtitle,
+                    'icon' => $item->icon,
+                    'color' => $item->color,
+                ];
+            })
+            ->filter(fn($item) => filled($item['label']) && filled($item['value']))
+            ->values()
+            ->all();
+        if (count($dynamicHeroHighlights) > 0) {
+            $heroHighlights = $dynamicHeroHighlights;
+        }
+
+        $dynamicHeroFeatures = $homePageItems
+            ->get('hero_features', collect())
+            ->map(
+                fn($item) => [
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'icon' => $item->icon,
+                ],
+            )
+            ->filter(fn($item) => filled($item['title']) && filled($item['description']))
+            ->values()
+            ->all();
+        $heroStripFeatures = count($dynamicHeroFeatures) > 0 ? $dynamicHeroFeatures : $features;
+
+        $aboutItem = $homePageItems->get('about', collect())->firstWhere('key', 'main');
+        $aboutBadge = $aboutItem?->subtitle ?: __('home.about.badge', ['schoolName' => $schoolName]);
+        $aboutTitle = $aboutItem?->title ?: __('home.about.title');
+        $aboutDescription = $aboutItem?->description ?: __('home.about.description');
+
+        $dynamicAboutHighlights = $homePageItems
+            ->get('about_highlights', collect())
+            ->map(
+                fn($item) => [
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'icon' => $item->icon,
+                ],
+            )
+            ->filter(fn($item) => filled($item['title']) && filled($item['description']))
+            ->values()
+            ->all();
+        if (count($dynamicAboutHighlights) > 0) {
+            $aboutHighlights = $dynamicAboutHighlights;
+        }
+
+        $defaultAboutTones = array_column(trans('home.about.cards'), 'tone');
+        $dynamicAboutCards = $homePageItems
+            ->get('about_cards', collect())
+            ->values()
+            ->map(
+                fn($item, $index) => [
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'icon' => $item->icon,
+                    'tone' => $item->color ?: ($defaultAboutTones[$index] ?? 'bg-cyan-100 text-cyan-700'),
+                ],
+            )
+            ->filter(fn($item) => filled($item['title']) && filled($item['description']))
+            ->values()
+            ->all();
+        if (count($dynamicAboutCards) > 0) {
+            $aboutCards = $dynamicAboutCards;
+        }
+
+        $featureItem = $homePageItems->get('platform_features', collect())->firstWhere('key', 'main');
+        $featureBadge = $featureItem?->subtitle ?: __('home.features.badge');
+        $featureTitle = $featureItem?->title ?: __('home.features.title');
+        $featureTag = $featureItem?->value ?: __('home.features.tag');
+
+        $dynamicFeatures = $homePageItems
+            ->get('platform_feature_cards', collect())
+            ->map(
+                fn($item) => [
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'icon' => $item->icon,
+                ],
+            )
+            ->filter(fn($item) => filled($item['title']) && filled($item['description']))
+            ->values()
+            ->all();
+        if (count($dynamicFeatures) > 0) {
+            $features = $dynamicFeatures;
+        }
     @endphp
 
     <div class="relative isolate overflow-x-hidden">

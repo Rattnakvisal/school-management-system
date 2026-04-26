@@ -13,7 +13,7 @@
                     {{ __('home.admission.title') }}
                 </h2>
 
-                <p class="mt-4 max-w-xl text-slate-100 {{ $isKhmerLocale ? 'text-[15px] leading-9 sm:text-[1.02rem]' : 'text-sm leading-8 sm:text-base' }}">
+                <p class="mt-4 max-w-xl text-slate-100 text-sm leading-8 sm:text-base">
                     {{ __('home.admission.description') }}
                 </p>
 
@@ -21,7 +21,7 @@
                     <p class="text-[11px] font-extrabold uppercase tracking-[0.24em] text-cyan-200">
                         {{ __('home.admission.open_intake_label') }}</p>
                     <p class="mt-2 text-2xl font-semibold">{{ __('home.admission.open_intake_title') }}</p>
-                    <p class="mt-2 text-sm text-slate-200 {{ $isKhmerLocale ? 'leading-8' : 'leading-7' }}">
+                    <p class="mt-2 text-sm text-slate-200 leading-7">
                         {{ __('home.admission.open_intake_description') }}
                     </p>
                 </div>
@@ -55,7 +55,7 @@
                             {{ __('home.admission.step_label', ['number' => str_pad($i + 1, 2, '0', STR_PAD_LEFT)]) }}
                         </p>
                         <p class="mt-2 text-base font-semibold">{{ $s['title'] }}</p>
-                        <p class="mt-2 text-sm text-slate-200 {{ $isKhmerLocale ? 'leading-8' : 'leading-7' }}">{{ $s['description'] }}</p>
+                        <p class="mt-2 text-sm text-slate-200 leading-7">{{ $s['description'] }}</p>
                     </article>
                 @endforeach
             </div>

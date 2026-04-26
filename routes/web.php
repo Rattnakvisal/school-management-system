@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use App\Models\HomePageItem;
 use App\Models\User;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Website\TelegramBotController as WebsiteTelegramBotController;
 use App\Http\Controllers\Website\ContactMessageController as WebsiteContactMessageController;
-use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,7 @@ Route::get('/', function () {
     $studentsTotal = User::where('role', 'student')->count();
     $teachersTotal = User::where('role', 'teacher')->count();
     $dashboardRoute = null;
+    $homePageItems = collect();
 
     if (auth()->check()) {
         $dashboardRoute = match (strtolower(trim((string) auth()->user()->role))) {
@@ -29,26 +31,22 @@ Route::get('/', function () {
         };
     }
 
+    if (Schema::hasTable('home_page_items')) {
+        $homePageItems = HomePageItem::query()
+            ->where('is_active', true)
+            ->orderBy('section')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('section');
+    }
+
     return view('website.home', [
         'studentsTotal' => $studentsTotal,
         'teachersTotal' => $teachersTotal,
         'dashboardRoute' => $dashboardRoute,
+        'homePageItems' => $homePageItems,
     ]);
 })->name('home');
-
-Route::get('/language/{locale}', function (Request $request, string $locale) {
-    abort_unless(in_array($locale, config('app.supported_locales', ['en', 'km']), true), 404);
-
-    $request->session()->put('locale', $locale);
-
-    $previousUrl = url()->previous();
-
-    if (! $previousUrl || $previousUrl === $request->fullUrl()) {
-        return redirect()->route('home');
-    }
-
-    return redirect()->to($previousUrl);
-})->name('language.switch');
 
 Route::get('/storage/{path}', function (string $path) {
     $path = ltrim(str_replace('\\', '/', $path), '/');

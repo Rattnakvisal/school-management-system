@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Khmer:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
 @import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -32,38 +32,6 @@
 
     --ring: 0 0 0 4px rgba(59, 130, 246, 0.18);
     /* blue ring default */
-}
-
-@layer utilities {
-    .website-home.khmer-ui {
-        font-family: "Noto Sans Khmer", "Kantumruy Pro", system-ui, sans-serif;
-    }
-
-    .website-home.khmer-ui p,
-    .website-home.khmer-ui a,
-    .website-home.khmer-ui span,
-    .website-home.khmer-ui button,
-    .website-home.khmer-ui input,
-    .website-home.khmer-ui textarea,
-    .website-home.khmer-ui label,
-    .website-home.khmer-ui summary {
-        font-family: "Noto Sans Khmer", "Kantumruy Pro", system-ui, sans-serif;
-    }
-
-    .website-home.khmer-ui [class*="font-family:Outfit"] {
-        font-family:
-            "Kantumruy Pro", "Noto Sans Khmer", system-ui, sans-serif !important;
-        letter-spacing: -0.01em !important;
-    }
-
-    .website-home.khmer-ui .khmer-display {
-        font-family: "Kantumruy Pro", "Noto Sans Khmer", system-ui, sans-serif;
-    }
-
-    .website-home.khmer-ui .khmer-meta {
-        text-transform: none;
-        letter-spacing: 0.04em;
-    }
 }
 
 @keyframes dash-fade-up {

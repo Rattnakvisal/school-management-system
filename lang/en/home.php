@@ -5,11 +5,6 @@ return [
         'title_suffix' => 'TechBridge Academy',
     ],
 
-    'locales' => [
-        'en' => 'English',
-        'km' => 'Khmer',
-    ],
-
     'links' => [
         ['href' => '#about', 'label' => 'About'],
         ['href' => '#features', 'label' => 'Features'],
@@ -44,7 +39,6 @@ return [
         'open_contact' => 'Open Contact Section',
         'send_message' => 'Send Message',
         'scroll_to_explore' => 'Scroll to Explore',
-        'language' => 'Language',
         'toggle_menu' => 'Toggle Menu',
     ],
 

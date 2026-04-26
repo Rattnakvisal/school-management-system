@@ -19,7 +19,7 @@
                     {{ __('home.facilities.title') }}
                 </h2>
 
-                <p class="mt-4 text-slate-600 {{ $isKhmerLocale ? 'text-[15px] leading-8' : 'text-sm leading-7' }}">
+                <p class="mt-4 text-slate-600 text-sm leading-7">
                     {{ __('home.facilities.description') }}
                 </p>
 
@@ -28,7 +28,7 @@
                         <article data-reveal style="--d:{{ number_format(0.05 * $loop->iteration, 2) }}s"
                             class="home-lift-card home-hover-soft rounded-2xl border border-slate-200 bg-slate-50 p-4">
                             <p class="text-sm font-bold text-slate-900">{{ $facility['title'] }}</p>
-                            <p class="mt-1 text-sm text-slate-600 {{ $isKhmerLocale ? 'leading-8' : 'leading-7' }}">{{ $facility['description'] }}</p>
+                            <p class="mt-1 text-sm text-slate-600 leading-7">{{ $facility['description'] }}</p>
                         </article>
                     @endforeach
                 </div>

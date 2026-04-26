@@ -11,7 +11,7 @@
                 {{ __('home.contact.title') }}
             </h2>
 
-            <p class="mt-3 text-slate-600 {{ $isKhmerLocale ? 'text-[15px] leading-8' : 'text-sm leading-7' }}">
+            <p class="mt-3 text-slate-600 text-sm leading-7">
                 {{ __('home.contact.description') }}
             </p>
 
@@ -115,7 +115,7 @@
                     {{ __('home.contact.campus_label') }}</p>
                 <h3 class="[font-family:Outfit,_sans-serif] mt-4 text-2xl font-semibold">
                     {{ __('home.contact.campus_title') }}</h3>
-                <p class="mt-3 text-cyan-100 {{ $isKhmerLocale ? 'text-[15px] leading-8' : 'text-sm leading-7' }}">
+                <p class="mt-3 text-cyan-100 text-sm leading-7">
                     {{ __('home.contact.campus_text') }}
                 </p>
 

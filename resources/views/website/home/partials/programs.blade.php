@@ -11,7 +11,7 @@
             </h2>
         </div>
 
-        <p class="max-w-xl text-slate-500 {{ $isKhmerLocale ? 'text-[15px] leading-8' : 'text-sm leading-7' }}">
+        <p class="max-w-xl text-slate-500 text-sm leading-7">
             {{ __('home.programs.description') }}
         </p>
     </div>
@@ -36,7 +36,7 @@
                 </div>
 
                 <h3 class="mt-6 text-xl font-semibold text-slate-900">{{ $item['title'] }}</h3>
-                <p class="mt-3 text-sm text-slate-600 {{ $isKhmerLocale ? 'leading-8' : 'leading-7' }}">{{ $item['description'] }}</p>
+                <p class="mt-3 text-sm text-slate-600 leading-7">{{ $item['description'] }}</p>
             </article>
         @endforeach
     </div>
