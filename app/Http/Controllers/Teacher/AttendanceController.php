@@ -11,6 +11,7 @@ use App\Models\StudentLawRequest;
 use App\Models\Subject;
 use App\Models\SubjectStudyTime;
 use App\Models\User;
+use App\Services\TelegramBotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -990,6 +991,59 @@ class AttendanceController extends Controller
             'url' => route('student.law-requests.index'),
             'is_read' => false,
         ]);
+
+        $this->sendStudentLawRequestApprovedTelegramAlert($lawRequest, $teacherName, $displayDate);
+    }
+
+    private function sendStudentLawRequestApprovedTelegramAlert(StudentLawRequest $lawRequest, string $teacherName, string $displayDate): void
+    {
+        $lawRequest->loadMissing(['student.schoolClass', 'schoolClass']);
+
+        $student = $lawRequest->student;
+        $chatId = trim((string) ($student?->telegram_chat_id ?? ''));
+        if ($chatId === '') {
+            return;
+        }
+
+        $studentName = trim((string) ($student?->name ?? 'Student'));
+        $teacherText = trim($teacherName) !== '' ? trim($teacherName) : 'your teacher';
+        $lawType = trim((string) ($lawRequest->law_type ?? ''));
+        $lawTypeLabel = $lawType !== '' ? ucwords(str_replace('_', ' ', $lawType)) : 'Law Request';
+        $subjectText = trim((string) ($lawRequest->subject ?? ''));
+        $subjectTimeText = trim((string) ($lawRequest->subject_time ?? ''));
+        $classLabel = trim((string) (
+            $lawRequest->schoolClass?->display_name
+            ?? $student?->schoolClass?->display_name
+            ?? ''
+        ));
+
+        $lines = [
+            'សេចក្តីជូនដំណឹងពី TechBridge Academy',
+            '',
+            'សូមជម្រាបជូន ' . ($studentName !== '' ? $studentName : 'សិស្ស') . ' ថា សំណើសុំច្បាប់របស់អ្នកត្រូវបានអនុម័ត។',
+            'អ្នកអនុម័ត: ' . $teacherText,
+            'ប្រភេទសំណើ: ' . $lawTypeLabel,
+            'កាលបរិច្ឆេទ: ' . $displayDate,
+        ];
+
+        if ($subjectText !== '') {
+            $lines[] = 'មុខវិជ្ជា: ' . $subjectText;
+        }
+
+        if ($subjectTimeText !== '') {
+            $lines[] = 'ម៉ោងសិក្សា: ' . $subjectTimeText;
+        }
+
+        if ($classLabel !== '') {
+            $lines[] = 'ថ្នាក់: ' . $classLabel;
+        }
+
+        $lines[] = 'ស្ថានភាព: Approved';
+        $lines[] = '';
+        $lines[] = 'សូមអរគុណ🙏';
+        $lines[] = 'TechBridge Academy Team';
+
+        app(TelegramBotService::class)->sendMessage($chatId, implode("\n", $lines));
     }
 
     private function notifyStudentsAttendanceChecked(array $savedStudentRows, $selectedSubject, string $teacherName, string $attendanceDate): void

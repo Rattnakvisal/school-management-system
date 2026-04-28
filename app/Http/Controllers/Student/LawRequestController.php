@@ -133,7 +133,7 @@ class LawRequestController extends Controller
             $resolved['payload']
         ));
 
-        $this->notifyTeachersForLawRequest($student, $lawRequest);
+        $this->notifyTeachersForLawRequest($student, $lawRequest, $resolved['teacher_ids'] ?? []);
 
         return redirect()
             ->route('student.law-requests.index')
@@ -241,15 +241,14 @@ class LawRequestController extends Controller
             ]);
         }
 
-        if ($selectedTimeItems->count() !== 1) {
-            throw ValidationException::withMessages([
-                'subject_time_keys' => 'Choose exactly one subject time so the correct teacher can be notified.',
-            ]);
-        }
-
         $subjectText = $this->trimText((string) ($selectedSubject->name ?? ''), 150);
-        $selectedTimeItem = $selectedTimeItems->first();
-        $teacherId = (int) ($selectedTimeItem['teacher_id'] ?? 0);
+        $teacherIds = $selectedTimeItems
+            ->map(fn($item) => (int) ($item['teacher_id'] ?? 0))
+            ->filter(fn($id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+        $teacherId = count($teacherIds) === 1 ? (int) $teacherIds[0] : null;
         $subjectTimeLabels = $selectedTimeItems
             ->map(function ($item) {
                 return trim((string) ($item['label'] ?? ''));
@@ -272,7 +271,7 @@ class LawRequestController extends Controller
         }
 
         if (Schema::hasColumn('student_law_requests', 'teacher_id')) {
-            $payload['teacher_id'] = $teacherId > 0 ? $teacherId : null;
+            $payload['teacher_id'] = $teacherId !== null && $teacherId > 0 ? $teacherId : null;
         }
 
         if ($hasSubjectColumn) {
@@ -288,17 +287,27 @@ class LawRequestController extends Controller
             'subject' => $subjectText,
             'subject_time' => $subjectTimeText,
             'subject_time_keys' => $selectedTimeKeys,
-            'teacher_id' => $teacherId > 0 ? $teacherId : null,
+            'teacher_id' => $teacherId !== null && $teacherId > 0 ? $teacherId : null,
+            'teacher_ids' => $teacherIds,
         ];
     }
 
-    private function notifyTeachersForLawRequest(?User $student, StudentLawRequest $lawRequest): void
+    private function notifyTeachersForLawRequest(?User $student, StudentLawRequest $lawRequest, array $teacherIds = []): void
     {
         $teacherId = $this->resolveStoredTeacherId($lawRequest);
-        $teacherRecipients = $teacherId !== null
+        $recipientIds = collect($teacherIds)
+            ->map(fn($id) => (int) $id)
+            ->filter(fn($id) => $id > 0);
+
+        if ($teacherId !== null) {
+            $recipientIds->push($teacherId);
+        }
+
+        $recipientIds = $recipientIds->unique()->values()->all();
+        $teacherRecipients = $recipientIds !== []
             ? User::query()
                 ->where('role', 'teacher')
-                ->where('id', $teacherId)
+                ->whereIn('id', $recipientIds)
                 ->get(['id', 'name', 'email'])
             : collect();
         if ($teacherRecipients->isEmpty()) {

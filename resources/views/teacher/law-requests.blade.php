@@ -136,7 +136,7 @@
                                 </div>
                             @endforelse
                         </div>
-                        <p class="text-xs font-medium text-slate-400">Choose one or more time slots.</p>
+                        <p class="text-xs font-medium text-slate-400">Choose one time slot, or select All to include every class time for this subject.</p>
                     </div>
 
                     <div class="space-y-2">

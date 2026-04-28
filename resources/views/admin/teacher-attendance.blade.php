@@ -274,7 +274,7 @@
                                         </td>
                                         <td class="admin-teacher-cell admin-teacher-col-law px-3 py-4">
                                             @if ($hasActiveLawRequest)
-                                                <div class="space-y-1.5">
+                                                <div class="space-y-1.5" data-law-request-content>
                                                     <div class="flex flex-wrap items-center gap-1.5">
                                                         <span data-law-request-badge
                                                             class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap {{ $lawStatusClass }}">

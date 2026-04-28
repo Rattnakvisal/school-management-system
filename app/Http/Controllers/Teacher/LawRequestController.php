@@ -311,12 +311,13 @@ class LawRequestController extends Controller
         $timeKeys = $this->resolveSubjectTimeKeysFromStoredText($subjectTimeText, $options);
 
         if ($timeKeys === []) {
-            $subjectAllKey = 'all:' . $subjectId;
-            $hasSubjectAll = $options->contains(function ($item) use ($subjectAllKey) {
-                return (string) ($item['key'] ?? '') === $subjectAllKey;
-            });
-            if ($hasSubjectAll) {
-                $timeKeys = [$subjectAllKey];
+            if (strcasecmp($subjectTimeText, 'All Times') === 0) {
+                $timeKeys = $options
+                    ->pluck('key')
+                    ->map(fn($key) => (string) $key)
+                    ->filter(fn($key) => $key !== '')
+                    ->values()
+                    ->all();
             } else {
                 $timeKeys = [(string) (($options->first()['key'] ?? ''))];
             }
@@ -544,33 +545,6 @@ class LawRequestController extends Controller
                     'end_time' => '',
                 ],
             ]);
-        }
-
-        foreach ($grouped as $subjectKey => $items) {
-            $subjectId = (int) $subjectKey;
-            if ($subjectId <= 0) {
-                continue;
-            }
-
-            $allKey = 'all:' . $subjectId;
-            $list = collect($items)->values();
-            $hasAllOption = $list->contains(function ($item) use ($allKey) {
-                return (string) ($item['key'] ?? '') === $allKey;
-            });
-
-            if (!$hasAllOption) {
-                $list = collect([[
-                    'key' => $allKey,
-                    'subject_id' => $subjectId,
-                    'label' => 'All Times',
-                    'day_of_week' => 'all',
-                    'period' => 'all',
-                    'start_time' => '',
-                    'end_time' => '',
-                ]])->merge($list)->values();
-            }
-
-            $grouped[$subjectKey] = $list;
         }
 
         return $grouped->map(fn($items) => collect($items)->values());

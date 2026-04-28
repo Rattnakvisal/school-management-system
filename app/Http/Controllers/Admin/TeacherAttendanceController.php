@@ -7,6 +7,7 @@ use App\Models\Notification;
 use App\Models\TeacherAttendance;
 use App\Models\TeacherLawRequest;
 use App\Models\User;
+use App\Services\TelegramBotService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -284,6 +285,8 @@ class TeacherAttendanceController extends Controller
             'is_read' => false,
         ]);
         $notification->save();
+
+        $this->sendTeacherLawRequestApprovedTelegramAlert($lawRequest, $request->user(), $displayDate);
 
         $dateParam = trim((string) $request->input('date', (string) $request->input('attendance_date', '')));
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateParam)) {
@@ -591,6 +594,60 @@ class TeacherAttendanceController extends Controller
                 'is_read' => false,
             ]);
         }
+    }
+
+    private function sendTeacherLawRequestApprovedTelegramAlert(TeacherLawRequest $lawRequest, ?User $approver, string $displayDate): void
+    {
+        $lawRequest->loadMissing('teacher');
+
+        $teacher = $lawRequest->teacher;
+        $chatId = trim((string) ($teacher?->telegram_chat_id ?? ''));
+        if ($chatId === '') {
+            return;
+        }
+
+        $teacherName = trim((string) ($teacher?->name ?? 'Teacher'));
+        $approverName = trim((string) ($approver?->name ?? 'Administrator'));
+        $approverRole = strtolower(trim((string) ($approver?->role ?? 'admin')));
+        $approverLabel = match ($approverRole) {
+            'staff' => 'Staff',
+            'admin' => 'Admin',
+            default => ucfirst($approverRole !== '' ? $approverRole : 'Admin'),
+        };
+        $lawType = trim((string) ($lawRequest->law_type ?? ''));
+        $lawTypeLabel = $lawType !== '' ? ucwords(str_replace('_', ' ', $lawType)) : 'Law Request';
+        $subjectText = trim((string) ($lawRequest->subject ?? ''));
+        $subjectTimeText = trim((string) ($lawRequest->subject_time ?? ''));
+
+        if ($subjectTimeText === '' && str_contains($subjectText, '|')) {
+            [$parsedSubject, $parsedTime] = array_pad(array_map('trim', explode('|', $subjectText, 2)), 2, '');
+            $subjectText = $parsedSubject;
+            $subjectTimeText = $parsedTime;
+        }
+
+        $lines = [
+            'សេចក្តីជូនដំណឹងពី TechBridge Academy',
+            '',
+            'សូមជម្រាបជូន ' . ($teacherName !== '' ? $teacherName : 'លោកគ្រូ/អ្នកគ្រូ') . ' ថា សំណើសុំច្បាប់របស់លោក/អ្នកត្រូវបានអនុម័ត។',
+            'អ្នកអនុម័ត: ' . ($approverName !== '' ? $approverName : 'Administrator') . ' (' . $approverLabel . ')',
+            'ប្រភេទសំណើ: ' . $lawTypeLabel,
+            'កាលបរិច្ឆេទ: ' . $displayDate,
+        ];
+
+        if ($subjectText !== '') {
+            $lines[] = 'មុខវិជ្ជា: ' . $subjectText;
+        }
+
+        if ($subjectTimeText !== '') {
+            $lines[] = 'ម៉ោងសិក្សា: ' . $subjectTimeText;
+        }
+
+        $lines[] = 'ស្ថានភាព: Approved';
+        $lines[] = '';
+        $lines[] = 'សូមអរគុណ🙏';
+        $lines[] = 'TechBridge Academy Team';
+
+        app(TelegramBotService::class)->sendMessage($chatId, implode("\n", $lines));
     }
 
     private function lawRequestActionResponse(Request $request, string $flashType, string $message, array $payload = [], array $routeParams = [])

@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
             : [];
 
     let lastAutoRequestedFor = "";
+    const allTimeOptionKey = "__all_subject_times__";
 
     const queueAlerts = (items) => {
         const alerts = Array.isArray(items) ? items.filter(Boolean) : [];
@@ -153,11 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const getAutoRequestedForDate = () => {
-        const selectedItem = getSelectedTimeItems()[0] || null;
-        const dayKey = String(selectedItem && selectedItem.day_of_week ? selectedItem.day_of_week : "")
-            .toLowerCase()
-            .trim();
-
         const dayMap = {
             sunday: 0,
             monday: 1,
@@ -168,6 +164,15 @@ document.addEventListener("DOMContentLoaded", () => {
             saturday: 6,
         };
 
+        const selectedDays = Array.from(
+            new Set(
+                getSelectedTimeItems()
+                    .map((item) => String(item && item.day_of_week ? item.day_of_week : "").toLowerCase().trim())
+                    .filter((dayKey) => dayKey && dayKey !== "all" && Object.prototype.hasOwnProperty.call(dayMap, dayKey)),
+            ),
+        );
+
+        const dayKey = selectedDays.length === 1 ? selectedDays[0] : "";
         if (!dayKey || dayKey === "all" || !Object.prototype.hasOwnProperty.call(dayMap, dayKey)) {
             return "";
         }
@@ -213,26 +218,61 @@ document.addEventListener("DOMContentLoaded", () => {
         card.classList.toggle("bg-white", !checked);
     };
 
+    const syncAllTimeCard = () => {
+        if (!timeOptionsContainer) {
+            return;
+        }
+
+        const allCheckbox = timeOptionsContainer.querySelector(
+            `input.js-time-all-checkbox[data-time-key="${allTimeOptionKey}"]`,
+        );
+        const allCard = allCheckbox ? allCheckbox.closest(".js-time-card") : null;
+        const realCheckboxes = Array.from(
+            timeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]"),
+        );
+
+        if (!allCheckbox || realCheckboxes.length === 0) {
+            return;
+        }
+
+        const checkedCount = realCheckboxes.filter((checkbox) => checkbox.checked).length;
+        allCheckbox.checked = checkedCount === realCheckboxes.length;
+        allCheckbox.indeterminate = checkedCount > 0 && checkedCount < realCheckboxes.length;
+        setCardState(allCard, checkedCount === realCheckboxes.length);
+    };
+
     const renderTeacherRecipients = () => {
         if (!teacherRecipientList || !teacherRecipientEmpty || !subjectSelect) {
             return;
         }
 
-        const selectedItem = getSelectedTimeItems()[0] || null;
-        const timeKey = String(selectedItem && selectedItem.key ? selectedItem.key : "");
-        const recipients = Array.isArray(teacherRecipientsByTime[timeKey])
-            ? teacherRecipientsByTime[timeKey]
-            : [];
+        const recipientsById = new Map();
+        getSelectedTimeItems().forEach((selectedItem) => {
+            const timeKey = String(selectedItem && selectedItem.key ? selectedItem.key : "");
+            const recipients = Array.isArray(teacherRecipientsByTime[timeKey])
+                ? teacherRecipientsByTime[timeKey]
+                : [];
+
+            recipients.forEach((recipient) => {
+                const recipientId = String(recipient && recipient.id ? recipient.id : "");
+                const recipientName = String(recipient && recipient.name ? recipient.name : "Assigned Teacher");
+                const mapKey = recipientId !== "" ? recipientId : recipientName;
+                recipientsById.set(mapKey, {
+                    id: recipientId,
+                    name: recipientName,
+                });
+            });
+        });
 
         teacherRecipientList.innerHTML = "";
 
-        if (recipients.length === 0) {
+        if (recipientsById.size === 0) {
             teacherRecipientList.classList.add("hidden");
             teacherRecipientEmpty.classList.remove("hidden");
             return;
         }
 
-        recipients.forEach((recipient) => {
+        recipientsById.forEach((recipient) => {
             const chip = document.createElement("span");
             chip.className =
                 "inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700";
@@ -253,7 +293,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const normalizedKeys = Array.isArray(preferredKeys)
             ? preferredKeys.map((key) => String(key || "")).filter((key) => key !== "")
             : [];
-        const selectedKeySet = new Set(normalizedKeys.slice(0, 1));
+        const optionKeys = options
+            .map((item) => String(item && item.key ? item.key : ""))
+            .filter((key) => key !== "");
+        const selectedKeySet = normalizedKeys.includes(allTimeOptionKey)
+            ? new Set(optionKeys)
+            : new Set(normalizedKeys);
 
         timeOptionsContainer.innerHTML = "";
 
@@ -265,6 +310,59 @@ document.addEventListener("DOMContentLoaded", () => {
             timeOptionsContainer.appendChild(emptyState);
             syncRequestedForDate();
             return;
+        }
+
+        if (options.length > 1) {
+            const allOptionId = "student-subject-time-all";
+            const allChecked =
+                optionKeys.length > 0 && optionKeys.every((optionKey) => selectedKeySet.has(optionKey));
+
+            const label = document.createElement("label");
+            label.setAttribute("for", allOptionId);
+            label.className =
+                "js-time-card flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 text-sm transition hover:border-indigo-300 hover:bg-indigo-50/40";
+            label.dataset.timeKey = allTimeOptionKey;
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = allOptionId;
+            checkbox.className =
+                "js-time-all-checkbox mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-300";
+            checkbox.checked = allChecked;
+            checkbox.dataset.timeKey = allTimeOptionKey;
+
+            const textWrap = document.createElement("div");
+            textWrap.className = "min-w-0";
+
+            const title = document.createElement("div");
+            title.className = "font-semibold text-slate-800";
+            title.textContent = "All";
+
+            const meta = document.createElement("div");
+            meta.className = "mt-1 text-xs font-semibold text-slate-500";
+            meta.textContent = "Select every class time for this subject";
+
+            textWrap.appendChild(title);
+            textWrap.appendChild(meta);
+            label.appendChild(checkbox);
+            label.appendChild(textWrap);
+            timeOptionsContainer.appendChild(label);
+            setCardState(label, allChecked);
+
+            checkbox.addEventListener("change", () => {
+                const checked = checkbox.checked;
+                Array.from(
+                    timeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]"),
+                ).forEach((timeCheckbox) => {
+                    timeCheckbox.checked = checked;
+                    setCardState(timeCheckbox.closest(".js-time-card"), checked);
+                });
+
+                checkbox.indeterminate = false;
+                setCardState(label, checked);
+                syncRequestedForDate();
+                renderTeacherRecipients();
+            });
         }
 
         options.forEach((item) => {
@@ -313,24 +411,14 @@ document.addEventListener("DOMContentLoaded", () => {
             setCardState(label, checked);
 
             checkbox.addEventListener("change", () => {
-                if (checkbox.checked) {
-                    Array.from(
-                        timeOptionsContainer.querySelectorAll("input.js-time-checkbox"),
-                    ).forEach((otherCheckbox) => {
-                        if (otherCheckbox !== checkbox) {
-                            otherCheckbox.checked = false;
-                            const otherCard = otherCheckbox.closest(".js-time-card");
-                            setCardState(otherCard, false);
-                        }
-                    });
-                }
-
                 setCardState(label, checkbox.checked);
+                syncAllTimeCard();
                 syncRequestedForDate();
                 renderTeacherRecipients();
             });
         });
 
+        syncAllTimeCard();
         syncRequestedForDate();
         renderTeacherRecipients();
     };

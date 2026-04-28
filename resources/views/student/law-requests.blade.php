@@ -155,7 +155,7 @@
                                 </div>
                             @endforelse
                         </div>
-                        <p class="text-xs font-medium text-slate-400">Choose one class time so the correct teacher receives the notification.</p>
+                        <p class="text-xs font-medium text-slate-400">Choose one class time, or select All to include every class time for this subject.</p>
                     </div>
 
                     <div class="space-y-2">

@@ -226,7 +226,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let lawState = row.querySelector("[data-law-request-state]");
         if (!lawState) {
             const lawCell = row.children[1];
-            const lawContent = lawCell ? lawCell.querySelector(".space-y-1.5") : null;
+            const lawContent = lawCell
+                ? lawCell.querySelector("[data-law-request-content]")
+                : null;
             if (lawContent) {
                 lawState = document.createElement("div");
                 lawState.setAttribute("data-law-request-state", "");
