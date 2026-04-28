@@ -150,6 +150,84 @@ class SettingsController extends Controller
             ->with('success', 'Password updated successfully.');
     }
 
+    public function updateNavbarPage(Request $request)
+    {
+        if (!Schema::hasTable('home_page_items')) {
+            return redirect()
+                ->route('admin.settings')
+                ->with('error', 'Please run migrations before editing the navbar page.');
+        }
+
+        $validated = $request->validateWithBag('navbarPageUpdate', [
+            '_settings_tab' => ['nullable', 'string'],
+            'brand.name' => ['required', 'string', 'max:160'],
+            'brand.description' => ['required', 'string', 'max:220'],
+            'brand.logo' => ['nullable', 'file', 'image', 'max:4096'],
+            'brand.remove_logo' => ['nullable', 'boolean'],
+            'navbar_links' => ['nullable', 'array', 'max:10'],
+            'navbar_links.*.id' => ['nullable', 'integer'],
+            'navbar_links.*.label' => ['nullable', 'string', 'max:120'],
+            'navbar_links.*.href' => ['nullable', 'string', 'max:180'],
+            'navbar_links.*.active' => ['nullable', 'boolean'],
+            'navbar_links.*.delete' => ['nullable', 'boolean'],
+        ]);
+
+        $this->ensureDefaultHomePageItems();
+
+        $brand = HomePageItem::query()->where('section', 'brand')->where('key', 'main')->firstOrFail();
+        $currentLogo = $brand->image_path;
+
+        if ($request->boolean('brand.remove_logo')) {
+            $this->deleteStoredHomeImage($currentLogo);
+            $brand->image_path = null;
+            $currentLogo = null;
+        }
+
+        if ($request->hasFile('brand.logo')) {
+            $path = $request->file('brand.logo')->store('home-page', 'public');
+
+            if ($path !== false) {
+                if ($currentLogo && $currentLogo !== $path) {
+                    $this->deleteStoredHomeImage($currentLogo);
+                }
+
+                $brand->image_path = $path;
+            }
+        }
+
+        $brand->fill([
+            'type' => 'content',
+            'title' => $validated['brand']['name'],
+            'description' => $validated['brand']['description'],
+            'sort_order' => 1,
+            'is_active' => true,
+        ])->save();
+
+        foreach (($validated['navbar_links'] ?? []) as $index => $link) {
+            $key = 'link_' . ($index + 1);
+            $label = trim((string) ($link['label'] ?? ''));
+            $href = trim((string) ($link['href'] ?? ''));
+
+            if (!empty($link['delete']) || ($label === '' && $href === '')) {
+                $this->deleteHomePageItem('navbar_links', $link['id'] ?? null, $key);
+                continue;
+            }
+
+            $this->updateOrCreateHomePageItem('navbar_links', $link['id'] ?? null, $key, [
+                'type' => 'link',
+                'title' => $label,
+                'value' => $href,
+                'sort_order' => $index + 1,
+                'is_active' => !empty($link['active']),
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.settings')
+            ->with('success', 'Navbar page content updated successfully.')
+            ->with('settings_tab', 'navbar-page');
+    }
+
     public function updateHomePage(Request $request)
     {
         if (!Schema::hasTable('home_page_items')) {
@@ -469,11 +547,488 @@ class SettingsController extends Controller
             ->with('settings_tab', 'feature-page');
     }
 
+    public function updateProgramPage(Request $request)
+    {
+        if (!Schema::hasTable('home_page_items')) {
+            return redirect()
+                ->route('admin.settings')
+                ->with('error', 'Please run migrations before editing the program page.');
+        }
+
+        $validated = $request->validateWithBag('programPageUpdate', [
+            '_settings_tab' => ['nullable', 'string'],
+            'program.badge' => ['required', 'string', 'max:160'],
+            'program.title' => ['required', 'string', 'max:240'],
+            'program.description' => ['required', 'string', 'max:900'],
+            'program_cards' => ['nullable', 'array', 'max:8'],
+            'program_cards.*.id' => ['nullable', 'integer'],
+            'program_cards.*.level' => ['nullable', 'string', 'max:120'],
+            'program_cards.*.title' => ['nullable', 'string', 'max:140'],
+            'program_cards.*.description' => ['nullable', 'string', 'max:320'],
+            'program_cards.*.icon' => ['nullable', 'string', 'max:4000'],
+            'program_cards.*.active' => ['nullable', 'boolean'],
+            'program_cards.*.delete' => ['nullable', 'boolean'],
+        ]);
+
+        $this->ensureDefaultHomePageItems();
+
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'programs', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['program']['title'],
+                'subtitle' => $validated['program']['badge'],
+                'description' => $validated['program']['description'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        foreach (($validated['program_cards'] ?? []) as $index => $card) {
+            $key = 'card_' . ($index + 1);
+            $level = trim((string) ($card['level'] ?? ''));
+            $title = trim((string) ($card['title'] ?? ''));
+            $description = trim((string) ($card['description'] ?? ''));
+
+            if (!empty($card['delete']) || ($level === '' && $title === '' && $description === '')) {
+                $this->deleteHomePageItem('program_cards', $card['id'] ?? null, $key);
+                continue;
+            }
+
+            $this->updateOrCreateHomePageItem(
+                'program_cards',
+                $card['id'] ?? null,
+                $key,
+                [
+                    'type' => 'card',
+                    'title' => $title,
+                    'subtitle' => $level,
+                    'description' => $description,
+                    'icon' => $card['icon'] ?? null,
+                    'sort_order' => $index + 1,
+                    'is_active' => !empty($card['active']),
+                ]
+            );
+        }
+
+        return redirect()
+            ->route('admin.settings')
+            ->with('success', 'Program page content updated successfully.')
+            ->with('settings_tab', 'program-page');
+    }
+
+    public function updateFacilityPage(Request $request)
+    {
+        if (!Schema::hasTable('home_page_items')) {
+            return redirect()
+                ->route('admin.settings')
+                ->with('error', 'Please run migrations before editing the facility page.');
+        }
+
+        $validated = $request->validateWithBag('facilityPageUpdate', [
+            '_settings_tab' => ['nullable', 'string'],
+            'facility.badge' => ['required', 'string', 'max:160'],
+            'facility.title' => ['required', 'string', 'max:240'],
+            'facility.description' => ['required', 'string', 'max:900'],
+            'facility.image' => ['nullable', 'file', 'image', 'max:4096'],
+            'facility.remove_image' => ['nullable', 'boolean'],
+            'facility_cards' => ['nullable', 'array', 'max:8'],
+            'facility_cards.*.id' => ['nullable', 'integer'],
+            'facility_cards.*.title' => ['nullable', 'string', 'max:140'],
+            'facility_cards.*.description' => ['nullable', 'string', 'max:320'],
+            'facility_cards.*.icon' => ['nullable', 'string', 'max:4000'],
+            'facility_cards.*.active' => ['nullable', 'boolean'],
+            'facility_cards.*.delete' => ['nullable', 'boolean'],
+        ]);
+
+        $this->ensureDefaultHomePageItems();
+
+        $facility = HomePageItem::query()->where('section', 'facilities')->where('key', 'main')->firstOrFail();
+        $currentImage = $facility->image_path;
+
+        if ($request->boolean('facility.remove_image')) {
+            $this->deleteStoredHomeImage($currentImage);
+            $facility->image_path = null;
+            $currentImage = null;
+        }
+
+        if ($request->hasFile('facility.image')) {
+            $path = $request->file('facility.image')->store('home-page', 'public');
+
+            if ($path !== false) {
+                if ($currentImage && $currentImage !== $path) {
+                    $this->deleteStoredHomeImage($currentImage);
+                }
+
+                $facility->image_path = $path;
+            }
+        }
+
+        $facility->fill([
+            'type' => 'content',
+            'title' => $validated['facility']['title'],
+            'subtitle' => $validated['facility']['badge'],
+            'description' => $validated['facility']['description'],
+            'sort_order' => 1,
+            'is_active' => true,
+        ])->save();
+
+        foreach (($validated['facility_cards'] ?? []) as $index => $card) {
+            $key = 'card_' . ($index + 1);
+            $title = trim((string) ($card['title'] ?? ''));
+            $description = trim((string) ($card['description'] ?? ''));
+
+            if (!empty($card['delete']) || ($title === '' && $description === '')) {
+                $this->deleteHomePageItem('facility_cards', $card['id'] ?? null, $key);
+                continue;
+            }
+
+            $this->updateOrCreateHomePageItem(
+                'facility_cards',
+                $card['id'] ?? null,
+                $key,
+                [
+                    'type' => 'card',
+                    'title' => $title,
+                    'description' => $description,
+                    'icon' => $card['icon'] ?? null,
+                    'sort_order' => $index + 1,
+                    'is_active' => !empty($card['active']),
+                ]
+            );
+        }
+
+        return redirect()
+            ->route('admin.settings')
+            ->with('success', 'Facility page content updated successfully.')
+            ->with('settings_tab', 'facility-page');
+    }
+
+    public function updateAdmissionPage(Request $request)
+    {
+        if (!Schema::hasTable('home_page_items')) {
+            return redirect()->route('admin.settings')->with('error', 'Please run migrations before editing the admission page.');
+        }
+
+        $validated = $request->validateWithBag('admissionPageUpdate', [
+            '_settings_tab' => ['nullable', 'string'],
+            'admission.badge' => ['required', 'string', 'max:160'],
+            'admission.title' => ['required', 'string', 'max:240'],
+            'admission.description' => ['required', 'string', 'max:900'],
+            'intake.label' => ['required', 'string', 'max:160'],
+            'intake.title' => ['required', 'string', 'max:180'],
+            'intake.description' => ['required', 'string', 'max:500'],
+            'admission_steps' => ['nullable', 'array', 'max:8'],
+            'admission_steps.*.id' => ['nullable', 'integer'],
+            'admission_steps.*.title' => ['nullable', 'string', 'max:140'],
+            'admission_steps.*.description' => ['nullable', 'string', 'max:320'],
+            'admission_steps.*.active' => ['nullable', 'boolean'],
+            'admission_steps.*.delete' => ['nullable', 'boolean'],
+        ]);
+
+        $this->ensureDefaultHomePageItems();
+
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'admission', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['admission']['title'],
+                'subtitle' => $validated['admission']['badge'],
+                'description' => $validated['admission']['description'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'admission_intake', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['intake']['title'],
+                'subtitle' => $validated['intake']['label'],
+                'description' => $validated['intake']['description'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        foreach (($validated['admission_steps'] ?? []) as $index => $step) {
+            $key = 'step_' . ($index + 1);
+            $title = trim((string) ($step['title'] ?? ''));
+            $description = trim((string) ($step['description'] ?? ''));
+
+            if (!empty($step['delete']) || ($title === '' && $description === '')) {
+                $this->deleteHomePageItem('admission_steps', $step['id'] ?? null, $key);
+                continue;
+            }
+
+            $this->updateOrCreateHomePageItem('admission_steps', $step['id'] ?? null, $key, [
+                'type' => 'step',
+                'title' => $title,
+                'description' => $description,
+                'sort_order' => $index + 1,
+                'is_active' => !empty($step['active']),
+            ]);
+        }
+
+        return redirect()->route('admin.settings')->with('success', 'Admission page content updated successfully.')->with('settings_tab', 'admission-page');
+    }
+
+    public function updateFaqPage(Request $request)
+    {
+        if (!Schema::hasTable('home_page_items')) {
+            return redirect()->route('admin.settings')->with('error', 'Please run migrations before editing the FAQ page.');
+        }
+
+        $validated = $request->validateWithBag('faqPageUpdate', [
+            '_settings_tab' => ['nullable', 'string'],
+            'faq.badge' => ['required', 'string', 'max:160'],
+            'faq.title' => ['required', 'string', 'max:240'],
+            'faq_help.label' => ['required', 'string', 'max:160'],
+            'faq_help.title' => ['required', 'string', 'max:180'],
+            'faq_help.description' => ['required', 'string', 'max:500'],
+            'faq_items' => ['nullable', 'array', 'max:10'],
+            'faq_items.*.id' => ['nullable', 'integer'],
+            'faq_items.*.question' => ['nullable', 'string', 'max:220'],
+            'faq_items.*.answer' => ['nullable', 'string', 'max:700'],
+            'faq_items.*.active' => ['nullable', 'boolean'],
+            'faq_items.*.delete' => ['nullable', 'boolean'],
+        ]);
+
+        $this->ensureDefaultHomePageItems();
+
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'faq', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['faq']['title'],
+                'subtitle' => $validated['faq']['badge'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'faq_help', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['faq_help']['title'],
+                'subtitle' => $validated['faq_help']['label'],
+                'description' => $validated['faq_help']['description'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        foreach (($validated['faq_items'] ?? []) as $index => $faq) {
+            $key = 'item_' . ($index + 1);
+            $question = trim((string) ($faq['question'] ?? ''));
+            $answer = trim((string) ($faq['answer'] ?? ''));
+
+            if (!empty($faq['delete']) || ($question === '' && $answer === '')) {
+                $this->deleteHomePageItem('faq_items', $faq['id'] ?? null, $key);
+                continue;
+            }
+
+            $this->updateOrCreateHomePageItem('faq_items', $faq['id'] ?? null, $key, [
+                'type' => 'question',
+                'title' => $question,
+                'description' => $answer,
+                'sort_order' => $index + 1,
+                'is_active' => !empty($faq['active']),
+            ]);
+        }
+
+        return redirect()->route('admin.settings')->with('success', 'FAQ page content updated successfully.')->with('settings_tab', 'faq-page');
+    }
+
+    public function updateContactPage(Request $request)
+    {
+        if (!Schema::hasTable('home_page_items')) {
+            return redirect()->route('admin.settings')->with('error', 'Please run migrations before editing the contact page.');
+        }
+
+        $validated = $request->validateWithBag('contactPageUpdate', [
+            '_settings_tab' => ['nullable', 'string'],
+            'contact.badge' => ['required', 'string', 'max:160'],
+            'contact.title' => ['required', 'string', 'max:240'],
+            'contact.description' => ['required', 'string', 'max:900'],
+            'campus.label' => ['required', 'string', 'max:160'],
+            'campus.title' => ['required', 'string', 'max:180'],
+            'campus.description' => ['required', 'string', 'max:500'],
+            'contact_cards' => ['nullable', 'array', 'max:8'],
+            'contact_cards.*.id' => ['nullable', 'integer'],
+            'contact_cards.*.label' => ['nullable', 'string', 'max:120'],
+            'contact_cards.*.value' => ['nullable', 'string', 'max:220'],
+            'contact_cards.*.active' => ['nullable', 'boolean'],
+            'contact_cards.*.delete' => ['nullable', 'boolean'],
+        ]);
+
+        $this->ensureDefaultHomePageItems();
+
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'contact', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['contact']['title'],
+                'subtitle' => $validated['contact']['badge'],
+                'description' => $validated['contact']['description'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'contact_campus', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['campus']['title'],
+                'subtitle' => $validated['campus']['label'],
+                'description' => $validated['campus']['description'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        foreach (($validated['contact_cards'] ?? []) as $index => $card) {
+            $key = 'card_' . ($index + 1);
+            $label = trim((string) ($card['label'] ?? ''));
+            $value = trim((string) ($card['value'] ?? ''));
+
+            if (!empty($card['delete']) || ($label === '' && $value === '')) {
+                $this->deleteHomePageItem('contact_cards', $card['id'] ?? null, $key);
+                continue;
+            }
+
+            $this->updateOrCreateHomePageItem('contact_cards', $card['id'] ?? null, $key, [
+                'type' => 'card',
+                'title' => $label,
+                'value' => $value,
+                'sort_order' => $index + 1,
+                'is_active' => !empty($card['active']),
+            ]);
+        }
+
+        return redirect()->route('admin.settings')->with('success', 'Contact page content updated successfully.')->with('settings_tab', 'contact-page');
+    }
+
+    public function updateFooterPage(Request $request)
+    {
+        if (!Schema::hasTable('home_page_items')) {
+            return redirect()->route('admin.settings')->with('error', 'Please run migrations before editing the footer page.');
+        }
+
+        $validated = $request->validateWithBag('footerPageUpdate', [
+            '_settings_tab' => ['nullable', 'string'],
+            'footer.tagline' => ['required', 'string', 'max:180'],
+            'footer.description' => ['required', 'string', 'max:700'],
+            'footer.explore' => ['required', 'string', 'max:80'],
+            'footer.contact' => ['required', 'string', 'max:80'],
+            'footer.copyright' => ['required', 'string', 'max:160'],
+            'footer.logo' => ['nullable', 'file', 'image', 'max:4096'],
+            'footer.remove_logo' => ['nullable', 'boolean'],
+            'footer_links' => ['nullable', 'array', 'max:8'],
+            'footer_links.*.id' => ['nullable', 'integer'],
+            'footer_links.*.label' => ['nullable', 'string', 'max:120'],
+            'footer_links.*.href' => ['nullable', 'string', 'max:180'],
+            'footer_links.*.active' => ['nullable', 'boolean'],
+            'footer_links.*.delete' => ['nullable', 'boolean'],
+            'footer_contacts' => ['nullable', 'array', 'max:8'],
+            'footer_contacts.*.id' => ['nullable', 'integer'],
+            'footer_contacts.*.label' => ['nullable', 'string', 'max:120'],
+            'footer_contacts.*.value' => ['nullable', 'string', 'max:220'],
+            'footer_contacts.*.active' => ['nullable', 'boolean'],
+            'footer_contacts.*.delete' => ['nullable', 'boolean'],
+        ]);
+
+        $this->ensureDefaultHomePageItems();
+
+        $footer = HomePageItem::query()->where('section', 'footer')->where('key', 'main')->firstOrFail();
+        $currentLogo = $footer->image_path;
+
+        if ($request->boolean('footer.remove_logo')) {
+            $this->deleteStoredHomeImage($currentLogo);
+            $footer->image_path = null;
+            $currentLogo = null;
+        }
+
+        if ($request->hasFile('footer.logo')) {
+            $path = $request->file('footer.logo')->store('home-page', 'public');
+
+            if ($path !== false) {
+                if ($currentLogo && $currentLogo !== $path) {
+                    $this->deleteStoredHomeImage($currentLogo);
+                }
+
+                $footer->image_path = $path;
+            }
+        }
+
+        $footer->fill([
+            'type' => 'content',
+            'title' => $validated['footer']['tagline'],
+            'description' => $validated['footer']['description'],
+            'subtitle' => $validated['footer']['explore'],
+            'value' => $validated['footer']['contact'],
+            'meta' => ['copyright' => $validated['footer']['copyright']],
+            'sort_order' => 1,
+            'is_active' => true,
+        ])->save();
+
+        foreach (($validated['footer_links'] ?? []) as $index => $link) {
+            $key = 'link_' . ($index + 1);
+            $label = trim((string) ($link['label'] ?? ''));
+            $href = trim((string) ($link['href'] ?? ''));
+
+            if (!empty($link['delete']) || ($label === '' && $href === '')) {
+                $this->deleteHomePageItem('footer_links', $link['id'] ?? null, $key);
+                continue;
+            }
+
+            $this->updateOrCreateHomePageItem('footer_links', $link['id'] ?? null, $key, [
+                'type' => 'link',
+                'title' => $label,
+                'value' => $href,
+                'sort_order' => $index + 1,
+                'is_active' => !empty($link['active']),
+            ]);
+        }
+
+        foreach (($validated['footer_contacts'] ?? []) as $index => $contact) {
+            $key = 'contact_' . ($index + 1);
+            $label = trim((string) ($contact['label'] ?? ''));
+            $value = trim((string) ($contact['value'] ?? ''));
+
+            if (!empty($contact['delete']) || ($label === '' && $value === '')) {
+                $this->deleteHomePageItem('footer_contacts', $contact['id'] ?? null, $key);
+                continue;
+            }
+
+            $this->updateOrCreateHomePageItem('footer_contacts', $contact['id'] ?? null, $key, [
+                'type' => 'contact',
+                'title' => $label,
+                'value' => $value,
+                'sort_order' => $index + 1,
+                'is_active' => !empty($contact['active']),
+            ]);
+        }
+
+        return redirect()->route('admin.settings')->with('success', 'Footer page content updated successfully.')->with('settings_tab', 'footer-page');
+    }
+
     private function ensureDefaultHomePageItems(): void
     {
         $hasExistingItems = HomePageItem::query()->exists();
         $featureItems = trans('home.features.items');
+        $programItems = trans('home.programs.items');
+        $facilityItems = trans('home.facilities.items');
+        $admissionSteps = trans('home.admission.steps');
+        $faqItems = trans('home.faq.items');
+        $contactCards = trans('home.contact.cards');
+        $footerLinks = trans('home.footer_links');
+        $navbarLinks = trans('home.links');
         $defaults = [
+            ['brand', 'main', 'content', 'TechBridge', null, __('home.brand.tagline'), null, 1],
             ['hero', 'main', 'content', __('home.hero.title'), __('home.hero.badge'), __('home.hero.description', ['schoolName' => 'TechBridge']), null, 1],
             ['hero_points', 'point_1', 'point', null, null, 'One connected platform for academics, attendance, and communication.', null, 1],
             ['hero_points', 'point_2', 'point', null, null, 'Dedicated dashboards for school leaders, teachers, students, and parents.', null, 2],
@@ -493,6 +1048,15 @@ class SettingsController extends Controller
             ['about_cards', 'card_3', 'card', 'Culture', null, 'Respect, curiosity, responsibility, and integrity shape both learning and leadership.', 'bg-amber-100 text-amber-700', 3],
             ['about_cards', 'card_4', 'card', 'Operations', null, 'Well-structured systems help families and staff receive timely support and clear information.', 'bg-emerald-100 text-emerald-700', 4],
             ['platform_features', 'main', 'content', __('home.features.title'), __('home.features.badge'), null, __('home.features.tag'), 1],
+            ['programs', 'main', 'content', __('home.programs.title'), __('home.programs.badge'), __('home.programs.description'), null, 1],
+            ['facilities', 'main', 'content', __('home.facilities.title'), __('home.facilities.badge'), __('home.facilities.description'), null, 1],
+            ['admission', 'main', 'content', __('home.admission.title'), __('home.admission.badge'), __('home.admission.description'), null, 1],
+            ['admission_intake', 'main', 'content', __('home.admission.open_intake_title'), __('home.admission.open_intake_label'), __('home.admission.open_intake_description'), null, 1],
+            ['faq', 'main', 'content', __('home.faq.title'), __('home.faq.badge'), null, null, 1],
+            ['faq_help', 'main', 'content', __('home.faq.more_help_title'), __('home.faq.more_help_label'), __('home.faq.more_help_text'), null, 1],
+            ['contact', 'main', 'content', __('home.contact.title'), __('home.contact.badge'), __('home.contact.description'), null, 1],
+            ['contact_campus', 'main', 'content', __('home.contact.campus_title'), __('home.contact.campus_label'), __('home.contact.campus_text'), null, 1],
+            ['footer', 'main', 'content', __('home.footer.tagline'), __('home.footer.explore'), __('home.footer.description'), __('home.footer.contact'), 1],
         ];
 
         foreach ($featureItems as $index => $item) {
@@ -508,8 +1072,112 @@ class SettingsController extends Controller
             ];
         }
 
+        foreach ($navbarLinks as $index => $item) {
+            $defaults[] = [
+                'navbar_links',
+                'link_' . ($index + 1),
+                'link',
+                $item['label'] ?? '',
+                null,
+                null,
+                $item['href'] ?? '',
+                $index + 1,
+            ];
+        }
+
+        foreach ($programItems as $index => $item) {
+            $defaults[] = [
+                'program_cards',
+                'card_' . ($index + 1),
+                'card',
+                $item['title'] ?? '',
+                $item['level'] ?? '',
+                $item['description'] ?? '',
+                null,
+                $index + 1,
+            ];
+        }
+
+        foreach ($facilityItems as $index => $item) {
+            $defaults[] = [
+                'facility_cards',
+                'card_' . ($index + 1),
+                'card',
+                $item['title'] ?? '',
+                null,
+                $item['description'] ?? '',
+                null,
+                $index + 1,
+            ];
+        }
+
+        foreach ($admissionSteps as $index => $item) {
+            $defaults[] = [
+                'admission_steps',
+                'step_' . ($index + 1),
+                'step',
+                $item['title'] ?? '',
+                null,
+                $item['description'] ?? '',
+                null,
+                $index + 1,
+            ];
+        }
+
+        foreach ($faqItems as $index => $item) {
+            $defaults[] = [
+                'faq_items',
+                'item_' . ($index + 1),
+                'question',
+                $item['question'] ?? '',
+                null,
+                $item['answer'] ?? '',
+                null,
+                $index + 1,
+            ];
+        }
+
+        foreach ($contactCards as $index => $item) {
+            $defaults[] = [
+                'contact_cards',
+                'card_' . ($index + 1),
+                'card',
+                $item['label'] ?? '',
+                null,
+                null,
+                $item['value'] ?? '',
+                $index + 1,
+            ];
+        }
+
+        foreach ($footerLinks as $index => $item) {
+            $defaults[] = [
+                'footer_links',
+                'link_' . ($index + 1),
+                'link',
+                $item['label'] ?? '',
+                null,
+                null,
+                $item['href'] ?? '',
+                $index + 1,
+            ];
+        }
+
+        foreach ($contactCards as $index => $item) {
+            $defaults[] = [
+                'footer_contacts',
+                'contact_' . ($index + 1),
+                'contact',
+                $item['label'] ?? '',
+                null,
+                null,
+                $item['value'] ?? '',
+                $index + 1,
+            ];
+        }
+
         foreach ($defaults as [$section, $key, $type, $title, $subtitle, $description, $value, $sortOrder]) {
-            if ($hasExistingItems && $key !== 'main') {
+            if ($hasExistingItems && $key !== 'main' && HomePageItem::query()->where('section', $section)->exists()) {
                 continue;
             }
 
@@ -524,6 +1192,9 @@ class SettingsController extends Controller
 
             if ($section === 'about_cards') {
                 $attributes['color'] = $value;
+            } elseif ($section === 'footer' && $key === 'main') {
+                $attributes['value'] = $value;
+                $attributes['meta'] = ['copyright' => __('home.footer.copyright')];
             } else {
                 $attributes['value'] = $value;
             }

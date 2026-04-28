@@ -187,6 +187,26 @@ return [
                 'title' => 'Clubs, Arts, and Sports',
                 'description' => 'Encourage leadership, creativity, confidence, and teamwork beyond the classroom.',
             ],
+            [
+                'level' => 'Early Years',
+                'title' => 'Play-Based Discovery',
+                'description' => 'Support curiosity, language growth, motor skills, and positive classroom routines.',
+            ],
+            [
+                'level' => 'STEM',
+                'title' => 'Science and Technology Pathway',
+                'description' => 'Build problem-solving, digital literacy, experimentation, and practical innovation skills.',
+            ],
+            [
+                'level' => 'Languages',
+                'title' => 'Communication and Literacy',
+                'description' => 'Develop confident reading, writing, speaking, and multilingual communication habits.',
+            ],
+            [
+                'level' => 'Life Skills',
+                'title' => 'Character and Leadership',
+                'description' => 'Strengthen responsibility, collaboration, service, resilience, and personal confidence.',
+            ],
         ],
     ],
 
@@ -207,6 +227,18 @@ return [
             [
                 'title' => 'Library and Activity Spaces',
                 'description' => 'Quiet reading areas and collaborative spaces that support learning and personal development.',
+            ],
+            [
+                'title' => 'Sports and Outdoor Areas',
+                'description' => 'Open spaces for physical education, teamwork, school events, and healthy student activity.',
+            ],
+            [
+                'title' => 'Student Support Rooms',
+                'description' => 'Dedicated areas for guidance, mentoring, counseling, and individual learning support.',
+            ],
+            [
+                'title' => 'Safe Campus Environment',
+                'description' => 'Organized spaces, clear routines, and attentive supervision help students learn with confidence.',
             ],
         ],
     ],

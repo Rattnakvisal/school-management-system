@@ -78,9 +78,16 @@ Route::middleware(['auth', 'admin'])
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
         Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+        Route::put('/settings/navbar-page', [SettingsController::class, 'updateNavbarPage'])->name('settings.navbar-page.update');
         Route::put('/settings/home-page', [SettingsController::class, 'updateHomePage'])->name('settings.home-page.update');
         Route::put('/settings/about-page', [SettingsController::class, 'updateAboutPage'])->name('settings.about-page.update');
         Route::put('/settings/feature-page', [SettingsController::class, 'updateFeaturePage'])->name('settings.feature-page.update');
+        Route::put('/settings/program-page', [SettingsController::class, 'updateProgramPage'])->name('settings.program-page.update');
+        Route::put('/settings/facility-page', [SettingsController::class, 'updateFacilityPage'])->name('settings.facility-page.update');
+        Route::put('/settings/admission-page', [SettingsController::class, 'updateAdmissionPage'])->name('settings.admission-page.update');
+        Route::put('/settings/faq-page', [SettingsController::class, 'updateFaqPage'])->name('settings.faq-page.update');
+        Route::put('/settings/contact-page', [SettingsController::class, 'updateContactPage'])->name('settings.contact-page.update');
+        Route::put('/settings/footer-page', [SettingsController::class, 'updateFooterPage'])->name('settings.footer-page.update');
         // Mark all admin notifications as read
         Route::post('/notifications/read-all', function () {
             \App\Models\Notification::where('is_read', false)->update(['is_read' => true]);

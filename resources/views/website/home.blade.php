@@ -114,6 +114,23 @@
         }, trans('home.hero.highlights'));
 
         $homePageItems = $homePageItems ?? collect();
+        $brandItem = $homePageItems->get('brand', collect())->firstWhere('key', 'main');
+        $schoolName = $brandItem?->title ?: $schoolName;
+        $brandTagline = $brandItem?->description ?: __('home.brand.tagline');
+        $brandLogo = $brandItem?->image_path
+            ? route('public.storage', ['path' => $brandItem->image_path])
+            : asset('images/techbridge-logo-mark.svg');
+
+        $dynamicNavbarLinks = $homePageItems
+            ->get('navbar_links', collect())
+            ->map(fn($item) => ['label' => $item->title, 'href' => $item->value])
+            ->filter(fn($item) => filled($item['label']) && filled($item['href']))
+            ->values()
+            ->all();
+        if (count($dynamicNavbarLinks) > 0) {
+            $links = $dynamicNavbarLinks;
+        }
+
         $homeHeroItem = $homePageItems->get('hero', collect())->firstWhere('key', 'main');
         if ($homeHeroItem) {
             $heroBadge = $homeHeroItem->subtitle ?: __('home.hero.badge');
@@ -241,6 +258,141 @@
             ->all();
         if (count($dynamicFeatures) > 0) {
             $features = $dynamicFeatures;
+        }
+
+        $programItem = $homePageItems->get('programs', collect())->firstWhere('key', 'main');
+        $programBadge = $programItem?->subtitle ?: __('home.programs.badge');
+        $programTitle = $programItem?->title ?: __('home.programs.title');
+        $programDescription = $programItem?->description ?: __('home.programs.description');
+
+        $dynamicPrograms = $homePageItems
+            ->get('program_cards', collect())
+            ->map(
+                fn($item) => [
+                    'level' => $item->subtitle,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'icon' => $item->icon,
+                ],
+            )
+            ->filter(fn($item) => filled($item['level']) && filled($item['title']) && filled($item['description']))
+            ->values()
+            ->all();
+        if (count($dynamicPrograms) > 0) {
+            $programs = $dynamicPrograms;
+        }
+
+        $facilityItem = $homePageItems->get('facilities', collect())->firstWhere('key', 'main');
+        $facilityBadge = $facilityItem?->subtitle ?: __('home.facilities.badge');
+        $facilityTitle = $facilityItem?->title ?: __('home.facilities.title');
+        $facilityDescription = $facilityItem?->description ?: __('home.facilities.description');
+        $facilityImage = $facilityItem?->image_path
+            ? route('public.storage', ['path' => $facilityItem->image_path])
+            : asset('images/study.jpg');
+
+        $dynamicFacilityCards = $homePageItems
+            ->get('facility_cards', collect())
+            ->map(
+                fn($item) => [
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'icon' => $item->icon,
+                ],
+            )
+            ->filter(fn($item) => filled($item['title']) && filled($item['description']))
+            ->values()
+            ->all();
+        if (count($dynamicFacilityCards) > 0) {
+            $facilityCards = $dynamicFacilityCards;
+        }
+
+        $admissionItem = $homePageItems->get('admission', collect())->firstWhere('key', 'main');
+        $admissionBadge = $admissionItem?->subtitle ?: __('home.admission.badge');
+        $admissionTitle = $admissionItem?->title ?: __('home.admission.title');
+        $admissionDescription = $admissionItem?->description ?: __('home.admission.description');
+
+        $admissionIntakeItem = $homePageItems->get('admission_intake', collect())->firstWhere('key', 'main');
+        $admissionIntakeLabel = $admissionIntakeItem?->subtitle ?: __('home.admission.open_intake_label');
+        $admissionIntakeTitle = $admissionIntakeItem?->title ?: __('home.admission.open_intake_title');
+        $admissionIntakeDescription = $admissionIntakeItem?->description ?: __('home.admission.open_intake_description');
+
+        $dynamicSteps = $homePageItems
+            ->get('admission_steps', collect())
+            ->map(fn($item) => ['title' => $item->title, 'description' => $item->description])
+            ->filter(fn($item) => filled($item['title']) && filled($item['description']))
+            ->values()
+            ->all();
+        if (count($dynamicSteps) > 0) {
+            $steps = $dynamicSteps;
+        }
+
+        $faqItem = $homePageItems->get('faq', collect())->firstWhere('key', 'main');
+        $faqBadge = $faqItem?->subtitle ?: __('home.faq.badge');
+        $faqTitle = $faqItem?->title ?: __('home.faq.title');
+
+        $faqHelpItem = $homePageItems->get('faq_help', collect())->firstWhere('key', 'main');
+        $faqHelpLabel = $faqHelpItem?->subtitle ?: __('home.faq.more_help_label');
+        $faqHelpTitle = $faqHelpItem?->title ?: __('home.faq.more_help_title');
+        $faqHelpText = $faqHelpItem?->description ?: __('home.faq.more_help_text');
+
+        $dynamicFaqItems = $homePageItems
+            ->get('faq_items', collect())
+            ->map(fn($item) => ['question' => $item->title, 'answer' => $item->description])
+            ->filter(fn($item) => filled($item['question']) && filled($item['answer']))
+            ->values()
+            ->all();
+        if (count($dynamicFaqItems) > 0) {
+            $faqItems = $dynamicFaqItems;
+        }
+
+        $contactItem = $homePageItems->get('contact', collect())->firstWhere('key', 'main');
+        $contactBadge = $contactItem?->subtitle ?: __('home.contact.badge');
+        $contactTitle = $contactItem?->title ?: __('home.contact.title');
+        $contactDescription = $contactItem?->description ?: __('home.contact.description');
+
+        $contactCampusItem = $homePageItems->get('contact_campus', collect())->firstWhere('key', 'main');
+        $contactCampusLabel = $contactCampusItem?->subtitle ?: __('home.contact.campus_label');
+        $contactCampusTitle = $contactCampusItem?->title ?: __('home.contact.campus_title');
+        $contactCampusText = $contactCampusItem?->description ?: __('home.contact.campus_text');
+
+        $dynamicContactCards = $homePageItems
+            ->get('contact_cards', collect())
+            ->map(fn($item) => ['label' => $item->title, 'value' => $item->value])
+            ->filter(fn($item) => filled($item['label']) && filled($item['value']))
+            ->values()
+            ->all();
+        if (count($dynamicContactCards) > 0) {
+            $contactCards = $dynamicContactCards;
+        }
+
+        $footerItem = $homePageItems->get('footer', collect())->firstWhere('key', 'main');
+        $footerTagline = $footerItem?->title ?: __('home.footer.tagline');
+        $footerDescription = $footerItem?->description ?: __('home.footer.description');
+        $footerExploreLabel = $footerItem?->subtitle ?: __('home.footer.explore');
+        $footerContactLabel = $footerItem?->value ?: __('home.footer.contact');
+        $footerCopyright = $footerItem?->meta['copyright'] ?? __('home.footer.copyright');
+        $footerLogo = $footerItem?->image_path
+            ? route('public.storage', ['path' => $footerItem->image_path])
+            : asset('images/techbridge-logo-mark.svg');
+
+        $dynamicFooterLinks = $homePageItems
+            ->get('footer_links', collect())
+            ->map(fn($item) => ['label' => $item->title, 'href' => $item->value])
+            ->filter(fn($item) => filled($item['label']) && filled($item['href']))
+            ->values()
+            ->all();
+        if (count($dynamicFooterLinks) > 0) {
+            $footerLinks = $dynamicFooterLinks;
+        }
+
+        $footerContacts = $homePageItems
+            ->get('footer_contacts', collect())
+            ->map(fn($item) => ['label' => $item->title, 'value' => $item->value])
+            ->filter(fn($item) => filled($item['value']))
+            ->values()
+            ->all();
+        if (count($footerContacts) === 0) {
+            $footerContacts = $contactCards;
         }
     @endphp
 

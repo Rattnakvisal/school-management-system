@@ -9,7 +9,7 @@
         $adminShellRole = strtolower(trim((string) (auth()->user()?->role ?? 'admin')));
         $adminShellLabel = $adminShellRole === 'staff' ? 'Staff' : 'Admin';
     @endphp
-    <title>{{ $title ?? $adminShellLabel . ' Dashboard' }}</title>
+    <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | ' . $adminShellLabel . ' Dashboard' }}</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         referrerpolicy="no-referrer" />
@@ -37,13 +37,14 @@
             {{-- Header --}}
             <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4 shrink-0">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 min-w-0">
-                    <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                    <img src="{{ $schoolBrandLogo ?? asset('images/techbridge-logo-mark.svg') }}"
+                        alt="{{ $schoolBrandName ?? 'TechBridge Academy' }} logo"
                         class="h-12 w-12 shrink-0 object-contain" />
 
                     <div x-show="!collapsed" x-transition class="min-w-0">
-                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">TechBridge Academy
+                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">{{ $schoolBrandName ?? 'TechBridge Academy' }}
                         </div>
-                        <div class="truncate text-xs text-slate-500">{{ $adminShellLabel }} Dashboard</div>
+                        <div class="truncate text-xs text-slate-500">{{ $schoolBrandTagline ?? $adminShellLabel . ' Dashboard' }}</div>
                     </div>
                 </a>
 
@@ -342,7 +343,7 @@
             </main>
 
             <footer class="px-4 py-4 text-xs text-slate-500 sm:px-6">
-                &copy; {{ date('Y') }} TechBridge Academy &bull; {{ $adminShellLabel }} Panel
+                &copy; {{ date('Y') }} {{ $schoolBrandName ?? 'TechBridge Academy' }} &bull; {{ $adminShellLabel }} Panel
             </footer>
         </div>
     </div>

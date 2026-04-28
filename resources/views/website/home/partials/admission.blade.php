@@ -6,23 +6,23 @@
                 <span
                     class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.28em] text-cyan-100">
                     <span class="h-2 w-2 rounded-full bg-cyan-300"></span>
-                    {{ __('home.admission.badge') }}
+                    {{ $admissionBadge ?? __('home.admission.badge') }}
                 </span>
 
                 <h2 class="[font-family:Outfit,_sans-serif] mt-4 text-3xl font-semibold sm:text-4xl">
-                    {{ __('home.admission.title') }}
+                    {{ $admissionTitle ?? __('home.admission.title') }}
                 </h2>
 
                 <p class="mt-4 max-w-xl text-slate-100 text-sm leading-8 sm:text-base">
-                    {{ __('home.admission.description') }}
+                    {{ $admissionDescription ?? __('home.admission.description') }}
                 </p>
 
                 <div class="home-lift-card mt-6 rounded-[1.75rem] border border-white/10 bg-white/10 p-5 backdrop-blur">
                     <p class="text-[11px] font-extrabold uppercase tracking-[0.24em] text-cyan-200">
-                        {{ __('home.admission.open_intake_label') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">{{ __('home.admission.open_intake_title') }}</p>
+                        {{ $admissionIntakeLabel ?? __('home.admission.open_intake_label') }}</p>
+                    <p class="mt-2 text-2xl font-semibold">{{ $admissionIntakeTitle ?? __('home.admission.open_intake_title') }}</p>
                     <p class="mt-2 text-sm text-slate-200 leading-7">
-                        {{ __('home.admission.open_intake_description') }}
+                        {{ $admissionIntakeDescription ?? __('home.admission.open_intake_description') }}
                     </p>
                 </div>
 

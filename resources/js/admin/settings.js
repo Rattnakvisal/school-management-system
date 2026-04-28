@@ -17,6 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.classList.toggle('bg-indigo-50', active);
                 item.classList.toggle('text-indigo-700', active);
                 item.classList.toggle('text-slate-600', !active);
+
+                if (active) {
+                    const group = item.closest('[data-settings-nav-group]');
+                    if (group) {
+                        group.open = true;
+                    }
+                }
             });
 
             panels.forEach((panel) => {
@@ -137,6 +144,148 @@ document.addEventListener('DOMContentLoaded', () => {
         removeHomeImageField.value = '1';
     });
 
+    const brandLogoInput = page.querySelector('#home_brand_logo_input');
+    const brandLogoPreview = page.querySelector('#home_brand_logo_preview');
+    const uploadBrandLogoBtn = page.querySelector('#upload_home_brand_logo_btn');
+    const deleteBrandLogoBtn = page.querySelector('#delete_home_brand_logo_btn');
+    const removeBrandLogoField = page.querySelector('#remove_home_brand_logo');
+
+    if (
+        brandLogoInput &&
+        brandLogoPreview &&
+        uploadBrandLogoBtn &&
+        deleteBrandLogoBtn &&
+        removeBrandLogoField
+    ) {
+        let currentBrandLogoObjectUrl = null;
+        const defaultBrandLogo = '/images/techbridge-logo-mark.svg';
+
+        const revokeCurrentBrandLogoObjectUrl = () => {
+            if (!currentBrandLogoObjectUrl) {
+                return;
+            }
+
+            URL.revokeObjectURL(currentBrandLogoObjectUrl);
+            currentBrandLogoObjectUrl = null;
+        };
+
+        uploadBrandLogoBtn.addEventListener('click', () => brandLogoInput.click());
+        brandLogoPreview.addEventListener('click', () => brandLogoInput.click());
+
+        brandLogoInput.addEventListener('change', () => {
+            const file = brandLogoInput.files && brandLogoInput.files[0] ? brandLogoInput.files[0] : null;
+            if (!file) {
+                return;
+            }
+
+            revokeCurrentBrandLogoObjectUrl();
+            currentBrandLogoObjectUrl = URL.createObjectURL(file);
+            brandLogoPreview.src = currentBrandLogoObjectUrl;
+            removeBrandLogoField.value = '0';
+        });
+
+        deleteBrandLogoBtn.addEventListener('click', () => {
+            revokeCurrentBrandLogoObjectUrl();
+            brandLogoInput.value = '';
+            brandLogoPreview.src = defaultBrandLogo;
+            removeBrandLogoField.value = '1';
+        });
+    }
+
+    const facilityImageInput = page.querySelector('#facility_image_input');
+    const facilityImagePreview = page.querySelector('#facility_image_preview');
+    const uploadFacilityImageBtn = page.querySelector('#upload_facility_image_btn');
+    const deleteFacilityImageBtn = page.querySelector('#delete_facility_image_btn');
+    const removeFacilityImageField = page.querySelector('#remove_facility_image');
+
+    if (
+        facilityImageInput &&
+        facilityImagePreview &&
+        uploadFacilityImageBtn &&
+        deleteFacilityImageBtn &&
+        removeFacilityImageField
+    ) {
+        let currentFacilityObjectUrl = null;
+        const defaultFacilityImage = '/images/study.jpg';
+
+        const revokeCurrentFacilityObjectUrl = () => {
+            if (!currentFacilityObjectUrl) {
+                return;
+            }
+
+            URL.revokeObjectURL(currentFacilityObjectUrl);
+            currentFacilityObjectUrl = null;
+        };
+
+        uploadFacilityImageBtn.addEventListener('click', () => facilityImageInput.click());
+
+        facilityImageInput.addEventListener('change', () => {
+            const file = facilityImageInput.files && facilityImageInput.files[0] ? facilityImageInput.files[0] : null;
+            if (!file) {
+                return;
+            }
+
+            revokeCurrentFacilityObjectUrl();
+            currentFacilityObjectUrl = URL.createObjectURL(file);
+            facilityImagePreview.src = currentFacilityObjectUrl;
+            removeFacilityImageField.value = '0';
+        });
+
+        deleteFacilityImageBtn.addEventListener('click', () => {
+            revokeCurrentFacilityObjectUrl();
+            facilityImageInput.value = '';
+            facilityImagePreview.src = defaultFacilityImage;
+            removeFacilityImageField.value = '1';
+        });
+    }
+
+    const footerLogoInput = page.querySelector('#footer_logo_input');
+    const footerLogoPreview = page.querySelector('#footer_logo_preview');
+    const uploadFooterLogoBtn = page.querySelector('#upload_footer_logo_btn');
+    const deleteFooterLogoBtn = page.querySelector('#delete_footer_logo_btn');
+    const removeFooterLogoField = page.querySelector('#remove_footer_logo');
+
+    if (
+        footerLogoInput &&
+        footerLogoPreview &&
+        uploadFooterLogoBtn &&
+        deleteFooterLogoBtn &&
+        removeFooterLogoField
+    ) {
+        let currentFooterObjectUrl = null;
+        const defaultFooterLogo = '/images/techbridge-logo-mark.svg';
+
+        const revokeCurrentFooterObjectUrl = () => {
+            if (!currentFooterObjectUrl) {
+                return;
+            }
+
+            URL.revokeObjectURL(currentFooterObjectUrl);
+            currentFooterObjectUrl = null;
+        };
+
+        uploadFooterLogoBtn.addEventListener('click', () => footerLogoInput.click());
+
+        footerLogoInput.addEventListener('change', () => {
+            const file = footerLogoInput.files && footerLogoInput.files[0] ? footerLogoInput.files[0] : null;
+            if (!file) {
+                return;
+            }
+
+            revokeCurrentFooterObjectUrl();
+            currentFooterObjectUrl = URL.createObjectURL(file);
+            footerLogoPreview.src = currentFooterObjectUrl;
+            removeFooterLogoField.value = '0';
+        });
+
+        deleteFooterLogoBtn.addEventListener('click', () => {
+            revokeCurrentFooterObjectUrl();
+            footerLogoInput.value = '';
+            footerLogoPreview.src = defaultFooterLogo;
+            removeFooterLogoField.value = '1';
+        });
+    }
+
     const previewInputs = Array.from(page.querySelectorAll('[data-home-preview-target]'));
 
     previewInputs.forEach((input) => {
@@ -167,6 +316,10 @@ document.addEventListener('DOMContentLoaded', () => {
         card.classList.toggle('border-slate-300', inactive);
         card.classList.toggle('opacity-75', inactive);
         card.querySelectorAll('input[type="text"], textarea').forEach((field) => {
+            field.classList.toggle('bg-slate-100', inactive);
+            field.classList.toggle('text-slate-400', inactive);
+        });
+        card.querySelectorAll('select').forEach((field) => {
             field.classList.toggle('bg-slate-100', inactive);
             field.classList.toggle('text-slate-400', inactive);
         });
@@ -243,6 +396,26 @@ document.addEventListener('DOMContentLoaded', () => {
         card.querySelector('[data-stat-color-select]')?.addEventListener('change', () => syncStatPreview(card));
     });
 
+    page.querySelectorAll('[data-navbar-page-select]').forEach((select) => {
+        const card = select.closest('[data-home-editor-card]');
+        const labelInput = card?.querySelector('[data-navbar-label-input]');
+
+        const syncNavbarLabel = () => {
+            const selectedOption = select.selectedOptions && select.selectedOptions[0] ? select.selectedOptions[0] : null;
+            const label = selectedOption?.dataset.label || selectedOption?.textContent?.trim() || '';
+
+            if (labelInput && label && (!labelInput.value.trim() || labelInput.dataset.syncedFromSelect === 'true')) {
+                labelInput.value = label;
+                labelInput.dataset.syncedFromSelect = 'true';
+            }
+        };
+
+        labelInput?.addEventListener('input', () => {
+            labelInput.dataset.syncedFromSelect = 'false';
+        });
+        select.addEventListener('change', syncNavbarLabel);
+    });
+
     page.querySelectorAll('[data-home-edit-card]').forEach((button) => {
         button.addEventListener('click', () => {
             const card = button.closest('[data-home-editor-card]');
@@ -286,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteField.value = '0';
             }
 
-            card.querySelectorAll('input, textarea').forEach((field) => {
+            card.querySelectorAll('input, textarea, select').forEach((field) => {
                 field.disabled = false;
             });
 
@@ -326,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 removeButton.disabled = false;
             }
 
-            const editable = card.querySelector('input[type="text"], textarea');
+            const editable = card.querySelector('input[type="text"], textarea, select');
             editable?.focus();
             syncAddButtonState(group);
         });
@@ -343,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             deleteField.value = '1';
             card.classList.add('opacity-50', 'ring-2', 'ring-red-100');
-            card.querySelectorAll('input[type="text"], textarea, input[type="checkbox"]').forEach((field) => {
+            card.querySelectorAll('input[type="text"], textarea, select, input[type="checkbox"]').forEach((field) => {
                 field.disabled = true;
             });
             button.textContent = 'Removed';

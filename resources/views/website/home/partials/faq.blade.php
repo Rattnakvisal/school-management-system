@@ -4,11 +4,11 @@
             <span
                 class="inline-flex items-center gap-2 rounded-full bg-cyan-50 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.28em] text-cyan-800 ring-1 ring-cyan-100">
                 <span class="h-2 w-2 rounded-full bg-cyan-500"></span>
-                {{ __('home.faq.badge') }}
+                {{ $faqBadge ?? __('home.faq.badge') }}
             </span>
 
             <h2 class="[font-family:Outfit,_sans-serif] mt-4 text-3xl font-semibold text-slate-950">
-                {{ __('home.faq.title') }}
+                {{ $faqTitle ?? __('home.faq.title') }}
             </h2>
 
             <div class="mt-6 grid gap-3">
@@ -36,12 +36,12 @@
             <div
                 class="home-lift-card rounded-[2rem] border border-slate-900/10 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-900 p-7 text-white shadow-lg">
                 <p class="text-[11px] font-extrabold uppercase tracking-[0.24em] text-cyan-200">
-                    {{ __('home.faq.more_help_label') }}</p>
+                    {{ $faqHelpLabel ?? __('home.faq.more_help_label') }}</p>
                 <h3 class="[font-family:Outfit,_sans-serif] mt-4 text-2xl font-semibold">
-                    {{ __('home.faq.more_help_title') }}
+                    {{ $faqHelpTitle ?? __('home.faq.more_help_title') }}
                 </h3>
                 <p class="mt-4 text-sm leading-7 text-slate-100">
-                    {{ __('home.faq.more_help_text') }}
+                    {{ $faqHelpText ?? __('home.faq.more_help_text') }}
                 </p>
                 <a href="#contact"
                     class="mt-6 inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-cyan-50">

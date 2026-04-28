@@ -105,11 +105,12 @@
                 <div class="hidden md:flex md:items-center md:justify-end">
                     <div class="dashboard-hero-art">
                         <div class="flex flex-col items-center gap-3 text-center">
-                            <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                            <img src="{{ $schoolBrandLogo ?? asset('images/techbridge-logo-mark.svg') }}"
+                                alt="{{ $schoolBrandName ?? 'TechBridge Academy' }} logo"
                                 class="h-32 w-auto dashboard-logo dashboard-logo--enhanced lg:h-44" />
                             <div
                                 class="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.26em] text-white/85">
-                                TechBridge Academy
+                                {{ $schoolBrandName ?? 'TechBridge Academy' }}
                             </div>
                         </div>
                     </div>

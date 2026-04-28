@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\ContactMessage;
+use App\Models\HomePageItem;
 use App\Models\Notification;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,7 +26,16 @@ class AppServiceProvider extends ServiceProvider
             'layout.staff.navbar',
             'layout.teacher.navbar',
             'layout.students.navbar',
+            'admin.dashboard',
         ], function ($view) {
+            $brand = Schema::hasTable('home_page_items')
+                ? HomePageItem::query()->where('section', 'brand')->where('key', 'main')->first()
+                : null;
+            $schoolBrandName = $brand?->title ?: 'TechBridge Academy';
+            $schoolBrandTagline = $brand?->description ?: 'Smart School Management Platform';
+            $schoolBrandLogo = $brand?->image_path
+                ? route('public.storage', ['path' => $brand->image_path])
+                : asset('images/techbridge-logo-mark.svg');
             $role = strtolower((string) (auth()->user()?->role ?? ''));
             $userId = (int) (auth()->id() ?? 0);
             $notifQuery = Notification::query()->latest();
@@ -81,7 +92,10 @@ class AppServiceProvider extends ServiceProvider
             $view->with('navNotifs', $notifs)
                 ->with('navUnread', $unreadCount)
                 ->with('navContacts', $contactMessages)
-                ->with('contactUnread', $contactUnreadCount);
+                ->with('contactUnread', $contactUnreadCount)
+                ->with('schoolBrandName', $schoolBrandName)
+                ->with('schoolBrandTagline', $schoolBrandTagline)
+                ->with('schoolBrandLogo', $schoolBrandLogo);
         });
     }
 }

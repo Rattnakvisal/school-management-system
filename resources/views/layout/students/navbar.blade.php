@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $title ?? 'Student Dashboard' }}</title>
+    <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Student Dashboard' }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -35,11 +35,12 @@
             {{-- Header --}}
             <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4 shrink-0">
                 <a href="{{ route('student.dashboard') }}" class="flex items-center gap-3">
-                    <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                    <img src="{{ $schoolBrandLogo ?? asset('images/techbridge-logo-mark.svg') }}"
+                        alt="{{ $schoolBrandName ?? 'TechBridge Academy' }} logo"
                         class="h-12 w-12 shrink-0 object-contain" />
                     <div class="min-w-0">
-                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">TechBridge Academy</div>
-                        <div class="truncate text-xs text-slate-500">Student Panel</div>
+                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">{{ $schoolBrandName ?? 'TechBridge Academy' }}</div>
+                        <div class="truncate text-xs text-slate-500">{{ $schoolBrandTagline ?? 'Student Panel' }}</div>
                     </div>
                 </a>
 

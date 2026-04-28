@@ -3,7 +3,7 @@
         <div
             class="home-header-shell flex items-center justify-between gap-4 rounded-[2rem] border border-white/80 bg-white/92 px-5 py-4 shadow-[0_24px_70px_-38px_rgba(37,99,235,0.35)] ring-1 ring-slate-200/70 backdrop-blur-2xl">
             <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3 transition hover:opacity-95">
-                <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                <img src="{{ $brandLogo ?? asset('images/techbridge-logo-mark.svg') }}" alt="{{ $schoolName }} logo"
                     class="h-14 w-14 shrink-0 object-contain drop-shadow-[0_18px_30px_-20px_rgba(24,80,200,0.55)]" />
 
                 <div class="min-w-0">
@@ -12,7 +12,7 @@
                         {{ $schoolName }}
                     </p>
                     <p class="mt-1 truncate text-[11px] font-extrabold uppercase tracking-[0.26em] text-slate-500">
-                        {{ __('home.brand.tagline') }}
+                        {{ $brandTagline ?? __('home.brand.tagline') }}
                     </p>
                 </div>
             </a>

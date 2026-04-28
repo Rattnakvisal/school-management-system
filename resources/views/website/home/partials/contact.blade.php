@@ -4,15 +4,15 @@
             <span
                 class="inline-flex items-center gap-2 rounded-full bg-cyan-50 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.28em] text-cyan-800 ring-1 ring-cyan-100">
                 <span class="h-2 w-2 rounded-full bg-cyan-500"></span>
-                {{ __('home.contact.badge') }}
+                {{ $contactBadge ?? __('home.contact.badge') }}
             </span>
 
             <h2 class="[font-family:Outfit,_sans-serif] mt-4 text-3xl font-semibold text-slate-950">
-                {{ __('home.contact.title') }}
+                {{ $contactTitle ?? __('home.contact.title') }}
             </h2>
 
             <p class="mt-3 text-slate-600 text-sm leading-7">
-                {{ __('home.contact.description') }}
+                {{ $contactDescription ?? __('home.contact.description') }}
             </p>
 
             @if (session('contact_success'))
@@ -112,11 +112,11 @@
             <div
                 class="rounded-[2rem] border border-slate-900/10 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-900 p-7 text-white shadow-lg">
                 <p class="text-[11px] font-extrabold uppercase tracking-[0.24em] text-cyan-200">
-                    {{ __('home.contact.campus_label') }}</p>
+                    {{ $contactCampusLabel ?? __('home.contact.campus_label') }}</p>
                 <h3 class="[font-family:Outfit,_sans-serif] mt-4 text-2xl font-semibold">
-                    {{ __('home.contact.campus_title') }}</h3>
+                    {{ $contactCampusTitle ?? __('home.contact.campus_title') }}</h3>
                 <p class="mt-3 text-cyan-100 text-sm leading-7">
-                    {{ __('home.contact.campus_text') }}
+                    {{ $contactCampusText ?? __('home.contact.campus_text') }}
                 </p>
 
                 <div class="mt-6 space-y-3">

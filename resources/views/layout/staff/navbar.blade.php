@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>{{ $title ?? 'Staff Dashboard' }}</title>
+    <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Staff Dashboard' }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -27,12 +27,13 @@
 
             <div class="flex h-20 shrink-0 items-center justify-between border-b border-slate-200/80 px-5">
                 <a href="{{ route('staff.dashboard') }}" class="flex min-w-0 items-center gap-3">
-                    <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                    <img src="{{ $schoolBrandLogo ?? asset('images/techbridge-logo-mark.svg') }}"
+                        alt="{{ $schoolBrandName ?? 'TechBridge Academy' }} logo"
                         class="h-12 w-12 shrink-0 object-contain drop-shadow-[0_12px_24px_-14px_rgba(24,80,200,0.45)]" />
 
                     <div class="min-w-0" x-show="!sidebarCollapsed" x-transition>
-                        <div class="truncate text-lg font-black tracking-tight text-slate-900">TechBridge Academy</div>
-                        <div class="truncate text-xs font-medium text-slate-500">Staff Panel</div>
+                        <div class="truncate text-lg font-black tracking-tight text-slate-900">{{ $schoolBrandName ?? 'TechBridge Academy' }}</div>
+                        <div class="truncate text-xs font-medium text-slate-500">{{ $schoolBrandTagline ?? 'Staff Panel' }}</div>
                     </div>
                 </a>
 
