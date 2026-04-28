@@ -135,6 +135,29 @@
     }
 }
 
+@keyframes admin-loader-swirl {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes admin-loader-dash {
+    0% {
+        stroke-dasharray: 1, 800;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 400, 400;
+        stroke-dashoffset: -200px;
+    }
+
+    100% {
+        stroke-dasharray: 800, 1;
+        stroke-dashoffset: -800px;
+    }
+}
+
 /* subtle logo float + pop animation for dashboard hero */
 @keyframes logo-float {
     0% {
@@ -324,6 +347,52 @@
 
     [data-page-animate] > * {
         will-change: transform, opacity;
+    }
+
+    .admin-swirling-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 100);
+        backdrop-filter: blur(80px);
+        -webkit-backdrop-filter: blur(80px);
+        color: #0f172a;
+        opacity: 1;
+        transition:
+            opacity 360ms ease,
+            visibility 360ms ease;
+        visibility: visible;
+    }
+
+    .admin-loader-hidden .admin-swirling-loader {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    .admin-swirling-loader__icon {
+        width: 4.5rem;
+        height: 4.5rem;
+        color: currentColor;
+    }
+
+    .loading-ui-swirling-circle {
+        transform-origin: center;
+        animation:
+            admin-loader-dash var(--duration, 1.5s) ease-in-out infinite
+                alternate,
+            admin-loader-swirl calc(var(--duration, 1.5s) * 1.333333) linear
+                infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .admin-swirling-loader,
+        .loading-ui-swirling-circle {
+            animation: none !important;
+            transition: none !important;
+        }
     }
 
     .dashboard-stage .dash-reveal {
