@@ -1,21 +1,60 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $studentTotal = max(0, (int) ($stats['total'] ?? 0));
+        $studentStatCards = [
+            [
+                'label' => 'Students',
+                'activeLabel' => 'Total',
+                'active' => $studentTotal,
+                'total' => $studentTotal,
+                'icon' => 'students',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Active',
+                'activeLabel' => 'Active',
+                'active' => (int) ($stats['active'] ?? 0),
+                'total' => $studentTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Inactive',
+                'activeLabel' => 'Inactive',
+                'active' => (int) ($stats['inactive'] ?? 0),
+                'total' => $studentTotal,
+                'icon' => 'inactive',
+                'tone' => 'from-rose-100 to-white text-rose-600',
+            ],
+        ];
+
+        if ($hasClassColumn) {
+            $studentStatCards[] = [
+                'label' => 'Assigned',
+                'activeLabel' => 'Assigned',
+                'active' => (int) ($stats['assigned'] ?? 0),
+                'total' => $studentTotal,
+                'icon' => 'assigned',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ];
+            $studentStatCards[] = [
+                'label' => 'Unassigned',
+                'activeLabel' => 'Waiting',
+                'active' => (int) ($stats['unassigned'] ?? 0),
+                'total' => $studentTotal,
+                'icon' => 'records',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ];
+        }
+    @endphp
+
     <div class="student-stage space-y-6">
         <x-admin.page-header reveal-class="student-reveal" delay="1" icon="students" title="Student Management"
-            subtitle="Create, edit, activate, deactivate, and remove student accounts.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Active:
-                    {{ $stats['active'] }}</span>
-                <span class="admin-page-stat admin-page-stat--rose">Inactive:
-                    {{ $stats['inactive'] }}</span>
-                @if ($hasClassColumn)
-                    <span class="admin-page-stat admin-page-stat--sky">Assigned:
-                        {{ $stats['assigned'] }}</span>
-                @endif
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Create, edit, activate, deactivate, and remove student accounts." />
+
+        <x-admin.stat-cards :cards="$studentStatCards" reveal-class="student-reveal" float-class="student-float" />
 
         @if (session('success'))
             <div class="student-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"

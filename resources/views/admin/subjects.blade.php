@@ -1,19 +1,76 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $subjectTotal = max(0, (int) ($stats['total'] ?? 0));
+        $studentTotal = max(0, (int) ($stats['students'] ?? 0));
+        $subjectStatCards = [
+            [
+                'label' => 'Subjects',
+                'activeLabel' => 'Total',
+                'active' => $subjectTotal,
+                'total' => $subjectTotal,
+                'icon' => 'subjects',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Active',
+                'activeLabel' => 'Active',
+                'active' => (int) ($stats['active'] ?? 0),
+                'total' => $subjectTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Class Links',
+                'activeLabel' => 'Connected',
+                'active' => (int) ($stats['assigned'] ?? 0),
+                'total' => $subjectTotal,
+                'icon' => 'assigned',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+                'barTone' => 'from-sky-500 to-cyan-400',
+                'badgeTone' => 'bg-sky-50 text-sky-700 ring-sky-100',
+                'showPercent' => true,
+                'progressText' => $subjectTotal > 0
+                    ? ((int) ($stats['assigned'] ?? 0)) . ' of ' . $subjectTotal . ' subjects connected'
+                    : 'No subjects yet',
+            ],
+            [
+                'label' => 'Teacher Links',
+                'activeLabel' => 'Connected',
+                'active' => (int) ($stats['withTeacher'] ?? 0),
+                'total' => $subjectTotal,
+                'icon' => 'teachers',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+                'barTone' => 'from-amber-500 to-orange-400',
+                'badgeTone' => 'bg-amber-50 text-amber-700 ring-amber-100',
+                'showPercent' => true,
+                'progressText' => $subjectTotal > 0
+                    ? ((int) ($stats['withTeacher'] ?? 0)) . ' of ' . $subjectTotal . ' subjects with teachers'
+                    : 'No subjects yet',
+            ],
+            [
+                'label' => 'Students Learning',
+                'activeLabel' => 'Students',
+                'active' => (int) ($stats['studentsLearning'] ?? 0),
+                'total' => $studentTotal,
+                'icon' => 'students',
+                'tone' => 'from-violet-100 to-white text-violet-600',
+                'barTone' => 'from-violet-500 to-cyan-400',
+                'badgeTone' => 'bg-violet-50 text-violet-700 ring-violet-100',
+                'showPercent' => true,
+                'progressText' => $studentTotal > 0
+                    ? ((int) ($stats['studentsLearning'] ?? 0)) . ' of ' . $studentTotal . ' students connected'
+                    : 'No students yet',
+            ],
+        ];
+    @endphp
+
     <div class="subject-stage space-y-6">
         <x-admin.page-header reveal-class="subject-reveal" delay="1" icon="subjects" title="Subject Management"
-            subtitle="Create subjects and manage schedules in Time Studies.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Active:
-                    {{ $stats['active'] }}</span>
-                <span class="admin-page-stat admin-page-stat--sky">Assigned:
-                    {{ $stats['assigned'] }}</span>
-                <span class="admin-page-stat admin-page-stat--amber">With Teacher:
-                    {{ $stats['withTeacher'] }}</span>
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Create subjects and manage schedules in Time Studies." />
+
+        <x-admin.stat-cards :cards="$subjectStatCards" reveal-class="subject-reveal" float-class="subject-float" />
 
         @if (session('success'))
             <div class="subject-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
@@ -419,7 +476,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-3 py-3 text-slate-600">
-                                                        {{ $subject->students_count ?? 0 }}</td>
+                                                        {{ $subject->students_learning_count ?? ($subject->students_count ?? 0) }}</td>
                                                     <td class="px-3 py-3">
                                                         @if ($subject->is_active)
                                                             <span
@@ -529,9 +586,11 @@
                                                                             );
                                                                         })
                                                                         ->values();
-                                                                    $subjectStudents = $subject->students
-                                                                        ->sortBy('name')
-                                                                        ->values();
+                                                                    $subjectStudents = $subject->relationLoaded(
+                                                                        'learningStudents',
+                                                                    )
+                                                                        ? $subject->getRelation('learningStudents')
+                                                                        : $subject->students->sortBy('name')->values();
                                                                     $subjectPreviewStudents = $subjectStudents->take(6);
                                                                 @endphp
 

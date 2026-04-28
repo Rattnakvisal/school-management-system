@@ -1,24 +1,71 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $teacherTotal = max(0, (int) ($stats['teachers'] ?? 0));
+        $teacherAttendanceCards = [
+            [
+                'label' => 'Teachers',
+                'activeLabel' => 'Total',
+                'active' => $teacherTotal,
+                'total' => $teacherTotal,
+                'icon' => 'teachers',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Checked',
+                'activeLabel' => 'Done',
+                'active' => (int) ($stats['checked'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'checked',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+            [
+                'label' => 'Present',
+                'activeLabel' => 'Present',
+                'active' => (int) ($stats['present'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'present',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Absent',
+                'activeLabel' => 'Absent',
+                'active' => (int) ($stats['absent'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'absent',
+                'tone' => 'from-rose-100 to-white text-rose-600',
+            ],
+            [
+                'label' => 'Late',
+                'activeLabel' => 'Late',
+                'active' => (int) ($stats['late'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'late',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+            [
+                'label' => 'Not Marked',
+                'activeLabel' => 'Waiting',
+                'active' => (int) ($stats['not_marked'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'not_marked',
+                'tone' => 'from-cyan-100 to-white text-cyan-600',
+            ],
+            [
+                'label' => 'Law Requests',
+                'activeLabel' => 'Requests',
+                'active' => (int) ($stats['law_requests'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'law',
+                'tone' => 'from-violet-100 to-white text-violet-600',
+            ],
+        ];
+    @endphp
+
     <div class="attendence-stage space-y-6">
         <x-admin.page-header reveal-class="attendence-reveal" delay="1" icon="attendance" title="Teacher Attendance Check"
             subtitle="Admin check and update teacher attendance records by date.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Teachers: {{ number_format($stats['teachers'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--sky">Checked:
-                    {{ number_format($stats['checked'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Present:
-                    {{ number_format($stats['present'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--rose">Absent:
-                    {{ number_format($stats['absent'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--amber">Late:
-                    {{ number_format($stats['late'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--cyan">Not Marked:
-                    {{ number_format($stats['not_marked'] ?? 0) }}</span>
-                <span class="admin-page-stat admin-page-stat--indigo">Law Requests:
-                    {{ number_format($stats['law_requests'] ?? 0) }}</span>
-            </x-slot:stats>
             <x-slot:actions>
                 <a href="{{ route('admin.attendance.index') }}"
                     class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
@@ -26,6 +73,104 @@
                 </a>
             </x-slot:actions>
         </x-admin.page-header>
+
+        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7">
+            @foreach ($teacherAttendanceCards as $index => $card)
+                @php
+                    $cardTotal = max(1, (int) ($card['total'] ?? 0));
+                    $cardActive = max(0, (int) ($card['active'] ?? 0));
+                    $progress = (int) round(($cardActive / $cardTotal) * 100);
+                @endphp
+                <div class="teacher-attendance-stat-card attendence-reveal attendence-float min-h-[132px] rounded-[26px] border border-white/80 bg-white/90 p-5 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur"
+                    style="--sd: {{ $index + 2 }};">
+                    <div class="flex items-start justify-between gap-4">
+                        <span
+                            class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br {{ $card['tone'] }}">
+                            @switch($card['icon'])
+                                @case('teachers')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="12" cy="7" r="4" />
+                                        <path d="M6 21v-2a6 6 0 0 1 12 0v2" />
+                                        <path d="M9 11h6" />
+                                    </svg>
+                                @break
+
+                                @case('checked')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                @break
+
+                                @case('present')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M16 21v-2a4 4 0 0 0-8 0v2" />
+                                        <circle cx="12" cy="7" r="4" />
+                                    </svg>
+                                @break
+
+                                @case('absent')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M18 6 6 18" />
+                                        <path d="m6 6 12 12" />
+                                    </svg>
+                                @break
+
+                                @case('late')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path d="M12 7v5l3 2" />
+                                    </svg>
+                                @break
+
+                                @case('not_marked')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M12 17h.01" />
+                                        <path d="M12 13a3 3 0 1 0-3-3" />
+                                        <circle cx="12" cy="12" r="9" />
+                                    </svg>
+                                @break
+
+                                @default
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                        <path d="M14 2v6h6" />
+                                        <path d="M8 13h8" />
+                                        <path d="M8 17h5" />
+                                    </svg>
+                            @endswitch
+                        </span>
+
+                        <span class="text-slate-300" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                            </svg>
+                        </span>
+                    </div>
+
+                    <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+                        <span>{{ number_format($cardActive) }}</span>
+                        <span class="pb-0.5 text-base font-extrabold text-slate-300">/
+                            {{ number_format((int) ($card['total'] ?? 0)) }}</span>
+                    </div>
+                    <div class="mt-1 text-sm font-bold text-slate-600">{{ $card['label'] }}</div>
+                    <div class="mt-1 text-[11px] font-semibold text-slate-400">
+                        {{ $card['activeLabel'] }}: {{ number_format($cardActive) }}
+                    </div>
+                    <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                        <span class="block h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
+                            style="width: {{ min(100, max(0, $progress)) }}%"></span>
+                    </div>
+                </div>
+            @endforeach
+        </section>
 
         @if (session('success'))
             <div class="js-inline-flash attendence-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
@@ -74,23 +219,14 @@
         @endif
 
         <section
-            class="attendence-reveal attendence-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
+            class="dashboard-card dash-hover attendence-reveal attendence-float rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
             style="--sd: 3;" x-data="{ filterOpen: false }">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-700">
-                        Date: {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}
-                    </span>
-                    @if (($status ?? 'all') !== 'all')
-                        <span class="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
-                            Status: {{ $statusLabels[$status] ?? ucfirst((string) $status) }}
-                        </span>
-                    @endif
-                    @if (($search ?? '') !== '')
-                        <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-600">
-                            Search: {{ $search }}
-                        </span>
-                    @endif
+            <div class="dashboard-card-header mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900">Teacher Attendance</h2>
+                    <p class="dashboard-card-meta mt-1 text-xs text-slate-500">
+                        Daily check status and teacher law requests
+                    </p>
                 </div>
 
                 <button type="button" @click="filterOpen = true"
@@ -101,6 +237,22 @@
                     </svg>
                     Filters
                 </button>
+            </div>
+
+            <div class="mb-5 flex flex-wrap items-center gap-2 text-xs font-semibold">
+                <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-700">
+                    Date: {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}
+                </span>
+                @if (($status ?? 'all') !== 'all')
+                    <span class="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
+                        Status: {{ $statusLabels[$status] ?? ucfirst((string) $status) }}
+                    </span>
+                @endif
+                @if (($search ?? '') !== '')
+                    <span class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-600">
+                        Search: {{ $search }}
+                    </span>
+                @endif
             </div>
 
             <div x-show="filterOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[80] bg-slate-900/40"
@@ -193,7 +345,7 @@
                     </div>
                 </div>
 
-                <div class="admin-teacher-attendance-table-wrap overflow-hidden rounded-2xl border border-slate-200">
+                <div class="admin-teacher-attendance-table-wrap overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/60">
                     <div class="admin-teacher-attendance-table-scroller max-h-[620px] overflow-auto">
                         <table class="admin-teacher-attendance-table w-full min-w-[1180px] text-left text-sm">
                             <thead

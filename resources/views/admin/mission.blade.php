@@ -9,22 +9,51 @@
             'high' => 'bg-amber-50 text-amber-700 ring-amber-100',
             'urgent' => 'bg-red-50 text-red-700 ring-red-100',
         ];
+        $missionTotal = max(0, (int) ($stats['total'] ?? 0));
+        $missionStatCards = [
+            [
+                'label' => 'Missions',
+                'activeLabel' => 'Total',
+                'active' => $missionTotal,
+                'total' => $missionTotal,
+                'icon' => 'mission',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Active',
+                'activeLabel' => 'Active',
+                'active' => (int) ($stats['active'] ?? 0),
+                'total' => $missionTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Teachers',
+                'activeLabel' => 'Audience',
+                'active' => (int) ($stats['teacher'] ?? 0),
+                'total' => $missionTotal,
+                'icon' => 'teachers',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+            [
+                'label' => 'Staff',
+                'activeLabel' => 'Audience',
+                'active' => (int) ($stats['staff'] ?? 0),
+                'total' => $missionTotal,
+                'icon' => 'staff',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+        ];
     @endphp
 
     <div class="student-stage space-y-6">
         <x-admin.page-header reveal-class="student-reveal" delay="1" icon="flag" title="Mission Events"
-            subtitle="Create mission events and send them to staff, teachers, or both.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Active: {{ $stats['active'] }}</span>
-                <span class="admin-page-stat admin-page-stat--amber">Teachers: {{ $stats['teacher'] }}</span>
-                <span class="admin-page-stat">Staff: {{ $stats['staff'] }}</span>
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Create mission events and send them to staff, teachers, or both." />
+
+        <x-admin.stat-cards :cards="$missionStatCards" reveal-class="student-reveal" float-class="student-float" />
 
         @if (session('success'))
-            <div
-                class="student-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
+            <div class="student-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
                 style="--sd: 2;">
                 {{ session('success') }}
             </div>
@@ -83,10 +112,8 @@
                         </div>
 
                         <div>
-                            <label for="mission_ends_at"
-                                class="mb-1 block text-xs font-semibold text-slate-600">End</label>
-                            <input id="mission_ends_at" name="ends_at" type="datetime-local"
-                                value="{{ old('ends_at') }}"
+                            <label for="mission_ends_at" class="mb-1 block text-xs font-semibold text-slate-600">End</label>
+                            <input id="mission_ends_at" name="ends_at" type="datetime-local" value="{{ old('ends_at') }}"
                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             @error('ends_at')
                                 <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
@@ -146,8 +173,7 @@
 
             <section
                 class="student-reveal student-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
-                x-data="{ filterOpen: false }"
-                style="--sd: 4;">
+                x-data="{ filterOpen: false }" style="--sd: 4;">
                 <div class="mb-5 flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-black text-slate-900">Mission List</h2>
@@ -155,8 +181,8 @@
                     </div>
                     <button type="button" @click="filterOpen = true"
                         class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
                         </svg>
                         Filters
@@ -242,7 +268,7 @@
                 </aside>
 
                 <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
-                    <div class="max-h-[1200px] overflow-auto">
+                    <div class="student-table-scroller max-h-[720px] overflow-auto">
                         <table class="student-table w-full min-w-[1180px] text-left text-sm">
                             <thead
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -384,8 +410,8 @@
                                                             <label for="edit_mission_title_{{ $mission->id }}"
                                                                 class="mb-1 block text-xs font-semibold text-slate-600">Title</label>
                                                             <input id="edit_mission_title_{{ $mission->id }}"
-                                                                name="title" value="{{ old('title', $mission->title) }}"
-                                                                required
+                                                                name="title"
+                                                                value="{{ old('title', $mission->title) }}" required
                                                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                         </div>
 
@@ -458,7 +484,8 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="flex justify-end gap-2 border-t border-slate-100 px-5 py-4">
+                                                    <div
+                                                        class="flex justify-end gap-2 border-t border-slate-100 px-5 py-4">
                                                         <button type="button" @click="editOpen = false"
                                                             class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
                                                             Cancel

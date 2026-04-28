@@ -1,17 +1,72 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $teacherTotal = max(0, (int) ($stats['total'] ?? 0));
+        $teacherStatCards = [
+            [
+                'label' => 'Teachers',
+                'activeLabel' => 'Total',
+                'active' => $teacherTotal,
+                'total' => $teacherTotal,
+                'icon' => 'teachers',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Active',
+                'activeLabel' => 'Active',
+                'active' => (int) ($stats['active'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Inactive',
+                'activeLabel' => 'Inactive',
+                'active' => (int) ($stats['inactive'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'inactive',
+                'tone' => 'from-rose-100 to-white text-rose-600',
+            ],
+        ];
+        if ($hasGenderColumn ?? false) {
+            $teacherStatCards[] = [
+                'label' => 'Women',
+                'activeLabel' => 'Women',
+                'active' => (int) ($stats['female'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'female',
+                'tone' => 'from-pink-100 to-white text-pink-600',
+                'barTone' => 'from-pink-500 to-rose-400',
+                'badgeTone' => 'bg-pink-50 text-pink-700 ring-pink-100',
+                'showPercent' => true,
+                'progressText' => $teacherTotal > 0
+                    ? ((int) ($stats['female'] ?? 0)) . ' of ' . $teacherTotal . ' teachers'
+                    : 'No teachers yet',
+            ];
+            $teacherStatCards[] = [
+                'label' => 'Men',
+                'activeLabel' => 'Men',
+                'active' => (int) ($stats['male'] ?? 0),
+                'total' => $teacherTotal,
+                'icon' => 'male',
+                'tone' => 'from-blue-100 to-white text-blue-600',
+                'barTone' => 'from-blue-500 to-cyan-400',
+                'badgeTone' => 'bg-blue-50 text-blue-700 ring-blue-100',
+                'showPercent' => true,
+                'progressText' => $teacherTotal > 0
+                    ? ((int) ($stats['male'] ?? 0)) . ' of ' . $teacherTotal . ' teachers'
+                    : 'No teachers yet',
+            ];
+        }
+        $teacherTableColspan = 5 + (($hasPhoneColumn ?? false) ? 1 : 0) + (($hasGenderColumn ?? false) ? 1 : 0);
+    @endphp
+
     <div class="teacher-stage space-y-6">
         <x-admin.page-header reveal-class="teacher-reveal" delay="1" icon="teachers" title="Teacher Management"
-            subtitle="Create, edit, activate, deactivate, and remove teacher accounts.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Active:
-                    {{ $stats['active'] }}</span>
-                <span class="admin-page-stat admin-page-stat--rose">Inactive:
-                    {{ $stats['inactive'] }}</span>
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Create, edit, activate, deactivate, and remove teacher accounts." />
+
+        <x-admin.stat-cards :cards="$teacherStatCards" reveal-class="teacher-reveal" float-class="teacher-float" />
 
         @if (session('success'))
             <div class="teacher-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
@@ -123,6 +178,22 @@
                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
                                 placeholder="+855 12 345 678">
                             @error('phone_number')
+                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
+
+                    @if ($hasGenderColumn ?? false)
+                        <div>
+                            <label for="gender" class="mb-1 block text-xs font-semibold text-slate-600">Gender</label>
+                            <select id="gender" name="gender"
+                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                <option value="" {{ old('gender') === null || old('gender') === '' ? 'selected' : '' }}>
+                                    Not set</option>
+                                <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Women</option>
+                                <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Men</option>
+                            </select>
+                            @error('gender')
                                 <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -339,7 +410,7 @@
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                                 <div class="max-h-[700px] overflow-auto">
-                                    <table class="w-full min-w-[1040px] text-left text-sm">
+                                    <table class="w-full min-w-[1140px] text-left text-sm">
                                         <thead
                                             class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
@@ -347,6 +418,9 @@
                                                 <th class="px-3 py-3 font-semibold">Email</th>
                                                 @if ($hasPhoneColumn ?? false)
                                                     <th class="whitespace-nowrap px-3 py-3 font-semibold">Phone Number</th>
+                                                @endif
+                                                @if ($hasGenderColumn ?? false)
+                                                    <th class="whitespace-nowrap px-3 py-3 font-semibold">Gender</th>
                                                 @endif
                                                 <th class="px-3 py-3 font-semibold">Status</th>
                                                 <th class="whitespace-nowrap px-3 py-3 font-semibold">Created</th>
@@ -375,6 +449,19 @@
                                                         <td
                                                             class="whitespace-nowrap px-3 py-3 tabular-nums text-slate-600">
                                                             {{ $teacher->phone_number ?: '-' }}
+                                                        </td>
+                                                    @endif
+                                                    @if ($hasGenderColumn ?? false)
+                                                        <td class="whitespace-nowrap px-3 py-3 text-slate-600">
+                                                            @if ($teacher->gender === 'female')
+                                                                <span
+                                                                    class="inline-flex items-center rounded-full bg-pink-50 px-2.5 py-1 text-xs font-semibold text-pink-700">Women</span>
+                                                            @elseif ($teacher->gender === 'male')
+                                                                <span
+                                                                    class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">Men</span>
+                                                            @else
+                                                                <span class="text-slate-400">-</span>
+                                                            @endif
                                                         </td>
                                                     @endif
                                                     <td class="px-3 py-3">
@@ -497,6 +584,26 @@
                                                                         </div>
                                                                     @endif
 
+                                                                    @if ($hasGenderColumn ?? false)
+                                                                        <div>
+                                                                            <label for="edit_gender_{{ $teacher->id }}"
+                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Gender</label>
+                                                                            <select id="edit_gender_{{ $teacher->id }}"
+                                                                                name="gender"
+                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                                <option value=""
+                                                                                    {{ empty($teacher->gender) ? 'selected' : '' }}>
+                                                                                    Not set</option>
+                                                                                <option value="female"
+                                                                                    {{ $teacher->gender === 'female' ? 'selected' : '' }}>
+                                                                                    Women</option>
+                                                                                <option value="male"
+                                                                                    {{ $teacher->gender === 'male' ? 'selected' : '' }}>
+                                                                                    Men</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    @endif
+
                                                                     <div>
                                                                         <label for="edit_avatar_image_{{ $teacher->id }}"
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Avatar
@@ -567,7 +674,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="{{ $hasPhoneColumn ?? false ? 6 : 5 }}"
+                                                    <td colspan="{{ $teacherTableColspan }}"
                                                         class="px-3 py-10 text-center text-sm text-slate-500">
                                                         No teachers found.
                                                     </td>

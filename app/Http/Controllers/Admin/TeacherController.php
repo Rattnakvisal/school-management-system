@@ -29,12 +29,15 @@ class TeacherController extends Controller
         $status = $filters['status'];
         $hasStatusColumn = $filters['hasStatusColumn'];
         $hasPhoneColumn = $filters['hasPhoneColumn'];
+        $hasGenderColumn = $filters['hasGenderColumn'];
 
         $baseStatsQuery = User::query()->where('role', 'teacher');
         $stats = [
             'total' => (clone $baseStatsQuery)->count(),
             'active' => $hasStatusColumn ? (clone $baseStatsQuery)->where('is_active', true)->count() : (clone $baseStatsQuery)->count(),
             'inactive' => $hasStatusColumn ? (clone $baseStatsQuery)->where('is_active', false)->count() : 0,
+            'female' => $hasGenderColumn ? (clone $baseStatsQuery)->where('gender', 'female')->count() : 0,
+            'male' => $hasGenderColumn ? (clone $baseStatsQuery)->where('gender', 'male')->count() : 0,
         ];
 
         return view('admin.teachers', [
@@ -44,6 +47,7 @@ class TeacherController extends Controller
             'stats' => $stats,
             'hasStatusColumn' => $hasStatusColumn,
             'hasPhoneColumn' => $hasPhoneColumn,
+            'hasGenderColumn' => $hasGenderColumn,
         ]);
     }
 
@@ -91,6 +95,10 @@ class TeacherController extends Controller
             $rules['phone_number'] = ['nullable', 'string', 'max:30'];
         }
 
+        if ($this->hasGenderColumn()) {
+            $rules['gender'] = ['nullable', 'string', 'in:female,male'];
+        }
+
         $validated = $request->validate($rules);
 
         $avatarResult = $this->resolveAvatarUpload($request);
@@ -107,6 +115,10 @@ class TeacherController extends Controller
 
         if ($this->hasPhoneColumn()) {
             $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
+
+        if ($this->hasGenderColumn()) {
+            $payload['gender'] = $validated['gender'] ?? null;
         }
 
         if ($this->hasStatusColumn()) {
@@ -142,6 +154,10 @@ class TeacherController extends Controller
             $rules['phone_number'] = ['nullable', 'string', 'max:30'];
         }
 
+        if ($this->hasGenderColumn()) {
+            $rules['gender'] = ['nullable', 'string', 'in:female,male'];
+        }
+
         $validated = $request->validate($rules);
 
         $avatarResult = $this->resolveAvatarUpload($request, $teacher);
@@ -153,6 +169,10 @@ class TeacherController extends Controller
 
         if ($this->hasPhoneColumn()) {
             $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
+
+        if ($this->hasGenderColumn()) {
+            $payload['gender'] = $validated['gender'] ?? null;
         }
 
         if ($avatarResult['path'] !== $teacher->avatar) {
@@ -242,6 +262,7 @@ class TeacherController extends Controller
             'status' => in_array($status, ['all', 'active', 'inactive'], true) ? $status : 'all',
             'hasStatusColumn' => $this->hasStatusColumn(),
             'hasPhoneColumn' => $this->hasPhoneColumn(),
+            'hasGenderColumn' => $this->hasGenderColumn(),
         ];
     }
 
@@ -258,6 +279,10 @@ class TeacherController extends Controller
 
                     if ($filters['hasPhoneColumn']) {
                         $inner->orWhere('phone_number', 'like', '%' . $search . '%');
+                    }
+
+                    if ($filters['hasGenderColumn']) {
+                        $inner->orWhere('gender', 'like', '%' . $search . '%');
                     }
                 });
             });
@@ -277,6 +302,11 @@ class TeacherController extends Controller
     private function hasPhoneColumn(): bool
     {
         return Schema::hasColumn('users', 'phone_number');
+    }
+
+    private function hasGenderColumn(): bool
+    {
+        return Schema::hasColumn('users', 'gender');
     }
 
     private function uploadAvatarImage(Request $request, ?User $teacher = null): ?string

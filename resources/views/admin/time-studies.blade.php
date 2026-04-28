@@ -1,22 +1,57 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $classSlotTotal = max(0, (int) ($stats['classSlots'] ?? 0));
+        $subjectSlotTotal = max(0, (int) ($stats['subjectSlots'] ?? 0));
+        $scheduleSlotTotal = $classSlotTotal + $subjectSlotTotal;
+        $classesWithSlots = max(0, (int) ($stats['classesWithSlots'] ?? 0));
+        $subjectsWithSlots = max(0, (int) ($stats['subjectsWithSlots'] ?? 0));
+        $scheduleClassTotal = max(0, (int) ($stats['classes'] ?? 0));
+        $scheduleSubjectTotal = max(0, (int) ($stats['subjects'] ?? 0));
+        $scheduleStatCards = [
+            [
+                'label' => 'Class Slots',
+                'activeLabel' => 'Slots',
+                'active' => $classSlotTotal,
+                'total' => $scheduleSlotTotal,
+                'icon' => 'time',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Subject Slots',
+                'activeLabel' => 'Slots',
+                'active' => $subjectSlotTotal,
+                'total' => $scheduleSlotTotal,
+                'icon' => 'subjects',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+            [
+                'label' => 'Classes With Slots',
+                'activeLabel' => 'Scheduled',
+                'active' => $classesWithSlots,
+                'total' => $scheduleClassTotal,
+                'icon' => 'assigned',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Subjects With Slots',
+                'activeLabel' => 'Scheduled',
+                'active' => $subjectsWithSlots,
+                'total' => $scheduleSubjectTotal,
+                'icon' => 'study',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+        ];
+    @endphp
+
     <div class="study-time-stage space-y-6">
 
         <!-- Header -->
         <x-admin.page-header reveal-class="study-time-reveal" delay="1" icon="time" title="Time Studies"
-            subtitle="Manage class and subject study schedules in one place.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Class Slots: {{ $stats['classSlots'] }}</span>
-                <span class="admin-page-stat admin-page-stat--sky">Subject Slots: {{ $stats['subjectSlots'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">
-                    Classes With Slots: {{ $stats['classesWithSlots'] }}
-                </span>
-                <span class="admin-page-stat admin-page-stat--amber">
-                    Subjects With Slots: {{ $stats['subjectsWithSlots'] }}
-                </span>
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Manage class and subject study schedules in one place." />
+
+        <x-admin.stat-cards :cards="$scheduleStatCards" reveal-class="study-time-reveal" float-class="study-time-float" />
 
         <!-- Alerts (same style as Student page) -->
         @if (session('success'))

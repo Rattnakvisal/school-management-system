@@ -1,19 +1,49 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $classTotal = max(0, (int) ($stats['total'] ?? 0));
+        $classStatCards = [
+            [
+                'label' => 'Classes',
+                'activeLabel' => 'Total',
+                'active' => $classTotal,
+                'total' => $classTotal,
+                'icon' => 'classes',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Active',
+                'activeLabel' => 'Active',
+                'active' => (int) ($stats['active'] ?? 0),
+                'total' => $classTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Inactive',
+                'activeLabel' => 'Inactive',
+                'active' => (int) ($stats['inactive'] ?? 0),
+                'total' => $classTotal,
+                'icon' => 'inactive',
+                'tone' => 'from-rose-100 to-white text-rose-600',
+            ],
+            [
+                'label' => 'With Schedule',
+                'activeLabel' => 'Scheduled',
+                'active' => (int) ($stats['withSchedule'] ?? 0),
+                'total' => $classTotal,
+                'icon' => 'time',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+        ];
+    @endphp
+
     <div class="class-stage space-y-6">
         <x-admin.page-header reveal-class="class-reveal" delay="1" icon="classes" title="Class Management"
-            subtitle="Create, organize, and manage classroom groups.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Active:
-                    {{ $stats['active'] }}</span>
-                <span class="admin-page-stat admin-page-stat--rose">Inactive:
-                    {{ $stats['inactive'] }}</span>
-                <span class="admin-page-stat admin-page-stat--sky">With Schedule:
-                    {{ $stats['withSchedule'] ?? 0 }}</span>
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Create, organize, and manage classroom groups." />
+
+        <x-admin.stat-cards :cards="$classStatCards" reveal-class="class-reveal" float-class="class-float" />
 
         @if (session('success'))
             <div class="class-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"

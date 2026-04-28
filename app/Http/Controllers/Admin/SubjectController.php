@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
 use App\Models\Subject;
+use App\Models\SubjectStudyTime;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -25,7 +26,7 @@ class SubjectController extends Controller
         $teacherId = ctype_digit($teacherIdRaw) ? (int) $teacherIdRaw : null;
 
         $subjectQuery = Subject::query()
-            ->with(['schoolClass', 'teacher', 'students', 'studySchedules.schoolClass', 'studySchedules.teacher'])
+            ->with(['schoolClass', 'teacher', 'students', 'majorStudents:id', 'studySchedules.schoolClass', 'studySchedules.teacher'])
             ->withCount('students')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
@@ -82,6 +83,47 @@ class SubjectController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $pageClassIds = $subjects->getCollection()
+            ->flatMap(function (Subject $subject) {
+                return collect([$subject->school_class_id])
+                    ->merge($subject->studySchedules->pluck('school_class_id'));
+            })
+            ->filter()
+            ->map(static fn($classId) => (int) $classId)
+            ->unique()
+            ->values();
+
+        $studentsByClass = $pageClassIds->isNotEmpty()
+            ? User::query()
+                ->where('role', 'student')
+                ->whereIn('school_class_id', $pageClassIds)
+                ->get(['id', 'school_class_id'])
+                ->groupBy('school_class_id')
+            : collect();
+
+        $subjects->getCollection()->each(function (Subject $subject) use ($studentsByClass) {
+            $classIds = collect([$subject->school_class_id])
+                ->merge($subject->studySchedules->pluck('school_class_id'))
+                ->filter()
+                ->map(static fn($classId) => (int) $classId)
+                ->unique();
+
+            $learningStudents = $classIds
+                ->flatMap(fn(int $classId) => $studentsByClass->get($classId, collect()))
+                ->merge($subject->majorStudents)
+                ->unique('id')
+                ->sortBy('name')
+                ->values();
+
+            $studentIds = $learningStudents
+                ->pluck('id')
+                ->unique()
+                ->values();
+
+            $subject->setAttribute('students_learning_count', $studentIds->count());
+            $subject->setRelation('learningStudents', $learningStudents);
+        });
+
         $classes = SchoolClass::query()
             ->with('studySchedules')
             ->orderBy('name')
@@ -93,12 +135,43 @@ class SubjectController extends Controller
             ->get();
 
         $baseStatsQuery = Subject::query();
+        $connectedClassIds = Subject::query()
+            ->whereNotNull('school_class_id')
+            ->pluck('school_class_id')
+            ->merge(SubjectStudyTime::query()->whereNotNull('school_class_id')->pluck('school_class_id'))
+            ->filter()
+            ->map(static fn($classId) => (int) $classId)
+            ->unique()
+            ->values();
+
         $stats = [
             'total' => (clone $baseStatsQuery)->count(),
             'active' => (clone $baseStatsQuery)->where('is_active', true)->count(),
             'inactive' => (clone $baseStatsQuery)->where('is_active', false)->count(),
-            'assigned' => (clone $baseStatsQuery)->whereNotNull('school_class_id')->count(),
-            'withTeacher' => (clone $baseStatsQuery)->whereNotNull('teacher_id')->count(),
+            'assigned' => (clone $baseStatsQuery)
+                ->where(function ($query) {
+                    $query->whereNotNull('school_class_id')
+                        ->orWhereHas('studySchedules', fn($slotQuery) => $slotQuery->whereNotNull('school_class_id'));
+                })
+                ->count(),
+            'withTeacher' => (clone $baseStatsQuery)
+                ->where(function ($query) {
+                    $query->whereNotNull('teacher_id')
+                        ->orWhereHas('studySchedules', fn($slotQuery) => $slotQuery->whereNotNull('teacher_id'));
+                })
+                ->count(),
+            'students' => User::query()->where('role', 'student')->count(),
+            'studentsLearning' => User::query()
+                ->where('role', 'student')
+                ->where(function ($query) use ($connectedClassIds) {
+                    if ($connectedClassIds->isNotEmpty()) {
+                        $query->whereIn('school_class_id', $connectedClassIds);
+                    }
+
+                    $query->orWhereHas('majorSubjects');
+                })
+                ->distinct('users.id')
+                ->count('users.id'),
         ];
 
         return view('admin.subjects', [

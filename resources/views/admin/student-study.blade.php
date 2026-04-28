@@ -1,25 +1,63 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $studyStudentTotal = max(0, (int) ($stats['students'] ?? 0));
+        $studyStatCards = [
+            [
+                'label' => 'Students',
+                'activeLabel' => 'Students',
+                'active' => $studyStudentTotal,
+                'total' => $studyStudentTotal,
+                'icon' => 'students',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Subjects',
+                'activeLabel' => 'Subjects',
+                'active' => (int) ($stats['subjects'] ?? 0),
+                'total' => max(0, (int) ($stats['subjects'] ?? 0)),
+                'icon' => 'subjects',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Teachers',
+                'activeLabel' => 'Teachers',
+                'active' => (int) ($stats['teachers'] ?? 0),
+                'total' => max(0, (int) ($stats['teachers'] ?? 0)),
+                'icon' => 'teachers',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+        ];
+
+        if ($hasMajorSubjectColumn ?? false) {
+            $studyStatCards[] = [
+                'label' => 'With Major',
+                'activeLabel' => 'Students',
+                'active' => (int) ($stats['withMajorSubject'] ?? 0),
+                'total' => $studyStudentTotal,
+                'icon' => 'assigned',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ];
+        }
+
+        if ($hasClassStudyTimeColumn ?? false) {
+            $studyStatCards[] = [
+                'label' => 'With Study Time',
+                'activeLabel' => 'Students',
+                'active' => (int) ($stats['withStudyTime'] ?? 0),
+                'total' => $studyStudentTotal,
+                'icon' => 'time',
+                'tone' => 'from-cyan-100 to-white text-cyan-600',
+            ];
+        }
+    @endphp
+
     <div class="study-stage space-y-6">
         <x-admin.page-header reveal-class="study-reveal" delay="1" icon="study" title="Student Study"
-            subtitle="Students with selected class time, major subject, teacher, and created dates.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Students: {{ $stats['students'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Subjects:
-                    {{ $stats['subjects'] }}</span>
-                <span class="admin-page-stat admin-page-stat--sky">Teachers:
-                    {{ $stats['teachers'] }}</span>
-                @if ($hasMajorSubjectColumn ?? false)
-                    <span class="admin-page-stat admin-page-stat--indigo">With Major:
-                        {{ $stats['withMajorSubject'] ?? 0 }}</span>
-                @endif
-                @if ($hasClassStudyTimeColumn ?? false)
-                    <span class="admin-page-stat admin-page-stat--cyan">With Study Time:
-                        {{ $stats['withStudyTime'] ?? 0 }}</span>
-                @endif
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Students with selected class time, major subject, teacher, and created dates." />
+
+        <x-admin.stat-cards :cards="$studyStatCards" reveal-class="study-reveal" float-class="study-float" />
 
         <section
             class="study-reveal study-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"

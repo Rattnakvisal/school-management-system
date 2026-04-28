@@ -1,17 +1,53 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $contactTotal = max(0, (int) ($stats['total'] ?? 0));
+        $contactStatCards = [
+            [
+                'label' => 'Messages',
+                'activeLabel' => 'Total',
+                'active' => $contactTotal,
+                'total' => $contactTotal,
+                'icon' => 'contacts',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Unread',
+                'activeLabel' => 'Needs Reply',
+                'active' => (int) ($stats['unread'] ?? 0),
+                'total' => $contactTotal,
+                'icon' => 'contacts',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+                'barTone' => 'from-amber-500 to-orange-400',
+                'badgeTone' => 'bg-amber-50 text-amber-700 ring-amber-100',
+                'showPercent' => true,
+                'progressText' => $contactTotal > 0
+                    ? ((int) ($stats['unread'] ?? 0)) . ' of ' . $contactTotal . ' messages unread'
+                    : 'Inbox is empty',
+            ],
+            [
+                'label' => 'Read',
+                'activeLabel' => 'Handled',
+                'active' => (int) ($stats['read'] ?? 0),
+                'total' => $contactTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+                'barTone' => 'from-emerald-500 to-cyan-400',
+                'badgeTone' => 'bg-emerald-50 text-emerald-700 ring-emerald-100',
+                'showPercent' => true,
+                'progressText' => $contactTotal > 0
+                    ? ((int) ($stats['read'] ?? 0)) . ' of ' . $contactTotal . ' messages read'
+                    : 'Inbox is empty',
+            ],
+        ];
+    @endphp
+
     <div class="contact-stage space-y-6">
         <x-admin.page-header reveal-class="contact-reveal" delay="1" icon="contacts" title="Contact Messages"
-            subtitle="Messages from the home page contact form.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                <span class="admin-page-stat admin-page-stat--amber">Unread:
-                    {{ $stats['unread'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Read:
-                    {{ $stats['read'] }}</span>
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Messages from the home page contact form." />
+
+        <x-admin.stat-cards :cards="$contactStatCards" reveal-class="contact-reveal" float-class="contact-float" />
 
         @if (session('success'))
             <div class="contact-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"

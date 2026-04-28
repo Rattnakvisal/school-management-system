@@ -1,17 +1,57 @@
 @extends('layout.admin.navbar.navbar')
 
 @section('page')
+    @php
+        $accountTotal = max(0, (int) ($stats['total'] ?? 0));
+        $adminStaffStatCards = [
+            [
+                'label' => 'Accounts',
+                'activeLabel' => 'Total',
+                'active' => $accountTotal,
+                'total' => $accountTotal,
+                'icon' => 'staff',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Admins',
+                'activeLabel' => 'Admins',
+                'active' => (int) ($stats['admins'] ?? 0),
+                'total' => $accountTotal,
+                'icon' => 'staff',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+            [
+                'label' => 'Staff',
+                'activeLabel' => 'Staff',
+                'active' => (int) ($stats['staff'] ?? 0),
+                'total' => $accountTotal,
+                'icon' => 'teachers',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+            [
+                'label' => 'Active',
+                'activeLabel' => 'Active',
+                'active' => (int) ($stats['active'] ?? 0),
+                'total' => $accountTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Inactive',
+                'activeLabel' => 'Inactive',
+                'active' => (int) ($stats['inactive'] ?? 0),
+                'total' => $accountTotal,
+                'icon' => 'inactive',
+                'tone' => 'from-rose-100 to-white text-rose-600',
+            ],
+        ];
+    @endphp
+
     <div class="stage admin-stage space-y-6">
         <x-admin.page-header reveal-class="reveal" delay="1" icon="staff" title="Admin / Staff Management"
-            subtitle="Create and manage school administrator and staff accounts.">
-            <x-slot:stats>
-                <span class="admin-page-stat">Total: {{ $stats['total'] }}</span>
-                <span class="admin-page-stat admin-page-stat--sky">Admins: {{ $stats['admins'] }}</span>
-                <span class="admin-page-stat admin-page-stat--amber">Staff: {{ $stats['staff'] }}</span>
-                <span class="admin-page-stat admin-page-stat--emerald">Active: {{ $stats['active'] }}</span>
-                <span class="admin-page-stat admin-page-stat--rose">Inactive: {{ $stats['inactive'] }}</span>
-            </x-slot:stats>
-        </x-admin.page-header>
+            subtitle="Create and manage school administrator and staff accounts." />
+
+        <x-admin.stat-cards :cards="$adminStaffStatCards" />
 
         @if (session('success'))
             <div class="reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"

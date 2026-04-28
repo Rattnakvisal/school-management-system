@@ -505,6 +505,8 @@ class TimeStudyController extends Controller
             ->get();
 
         $stats = [
+            'classes' => $classes->count(),
+            'subjects' => $subjects->count(),
             'classSlots' => ClassStudyTime::query()->count(),
             'subjectSlots' => SubjectStudyTime::query()->count(),
             'classesWithSlots' => ClassStudyTime::query()->distinct('school_class_id')->count('school_class_id'),
