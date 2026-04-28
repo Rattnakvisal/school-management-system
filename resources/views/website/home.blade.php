@@ -72,8 +72,7 @@
     window.addEventListener('scroll', () => {
         top = window.scrollY > 560;
         setActive();
-    });"
-    @keydown.escape.window="if (showBanner) closeBanner()">
+    });" @keydown.escape.window="if (showBanner) closeBanner()">
     @php
         $schoolName = $schoolName ?? 'TechBridge';
         $studentsTotal = $studentsTotal ?? 0;
@@ -192,6 +191,7 @@
                     'title' => $item->title,
                     'description' => $item->description,
                     'icon' => $item->icon,
+                    'color' => $item->color,
                 ],
             )
             ->filter(fn($item) => filled($item['title']) && filled($item['description']))
@@ -211,6 +211,7 @@
                     'title' => $item->title,
                     'description' => $item->description,
                     'icon' => $item->icon,
+                    'color' => $item->color,
                 ],
             )
             ->filter(fn($item) => filled($item['title']) && filled($item['description']))
@@ -229,7 +230,8 @@
                     'title' => $item->title,
                     'description' => $item->description,
                     'icon' => $item->icon,
-                    'tone' => $item->color ?: ($defaultAboutTones[$index] ?? 'bg-cyan-100 text-cyan-700'),
+                    'tone' => $item->color ?: $defaultAboutTones[$index] ?? 'bg-cyan-100 text-cyan-700',
+                    'color' => $item->color,
                 ],
             )
             ->filter(fn($item) => filled($item['title']) && filled($item['description']))
@@ -251,6 +253,7 @@
                     'title' => $item->title,
                     'description' => $item->description,
                     'icon' => $item->icon,
+                    'color' => $item->color,
                 ],
             )
             ->filter(fn($item) => filled($item['title']) && filled($item['description']))
@@ -273,6 +276,7 @@
                     'title' => $item->title,
                     'description' => $item->description,
                     'icon' => $item->icon,
+                    'color' => $item->color,
                 ],
             )
             ->filter(fn($item) => filled($item['level']) && filled($item['title']) && filled($item['description']))
@@ -314,11 +318,12 @@
         $admissionIntakeItem = $homePageItems->get('admission_intake', collect())->firstWhere('key', 'main');
         $admissionIntakeLabel = $admissionIntakeItem?->subtitle ?: __('home.admission.open_intake_label');
         $admissionIntakeTitle = $admissionIntakeItem?->title ?: __('home.admission.open_intake_title');
-        $admissionIntakeDescription = $admissionIntakeItem?->description ?: __('home.admission.open_intake_description');
+        $admissionIntakeDescription =
+            $admissionIntakeItem?->description ?: __('home.admission.open_intake_description');
 
         $dynamicSteps = $homePageItems
             ->get('admission_steps', collect())
-            ->map(fn($item) => ['title' => $item->title, 'description' => $item->description])
+            ->map(fn($item) => ['title' => $item->title, 'description' => $item->description, 'color' => $item->color])
             ->filter(fn($item) => filled($item['title']) && filled($item['description']))
             ->values()
             ->all();

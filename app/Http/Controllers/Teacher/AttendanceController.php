@@ -279,8 +279,8 @@ class AttendanceController extends Controller
         $selectedSubjectId = $subjectIdsForSelectedClass->isNotEmpty()
             ? (
                 ctype_digit($selectedSubjectIdRaw) && $subjectIdsForSelectedClass->contains((int) $selectedSubjectIdRaw)
-                    ? (int) $selectedSubjectIdRaw
-                    : (int) $subjectIdsForSelectedClass->first()
+                ? (int) $selectedSubjectIdRaw
+                : (int) $subjectIdsForSelectedClass->first()
             )
             : null;
         $selectedSubject = $selectedSubjectId !== null
@@ -602,9 +602,9 @@ class AttendanceController extends Controller
             ->with(
                 'success',
                 'Attendance checked successfully for '
-                . $savedCount
-                . ' student(s).'
-                . ($autoExcusedCount > 0 ? (' Auto-excused ' . $autoExcusedCount . ' student(s) due to approved law request.') : '')
+                    . $savedCount
+                    . ' student(s).'
+                    . ($autoExcusedCount > 0 ? (' Auto-excused ' . $autoExcusedCount . ' student(s) due to approved law request.') : '')
             );
     }
 

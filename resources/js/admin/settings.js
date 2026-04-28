@@ -353,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rose: 'bg-rose-500',
         cyan: 'bg-cyan-500',
     };
+    const statColorDefaults = ['#10b981', '#2563eb', '#7c3aed', '#d97706', '#e11d48', '#0891b2'];
 
     const syncStatPreview = (card) => {
         const preview = card.querySelector('[data-stat-preview]');
@@ -362,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const iconSelect = card.querySelector('[data-stat-icon-select]');
-        const colorSelect = card.querySelector('[data-stat-color-select]');
+        const colorSelect = card.querySelector('[data-stat-color-select], [data-stat-color-input]');
         const swatch = card.querySelector('[data-stat-preview-swatch]');
         const text = card.querySelector('[data-stat-preview-text]');
         const icon = iconSelect?.value || preview.dataset.icon || 'graduation';
@@ -370,7 +371,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const detail = statIconDetails[icon] || statIconDetails.graduation;
 
         if (swatch) {
-            swatch.className = `grid h-9 w-9 place-items-center rounded-xl text-white shadow-sm ${statColorClasses[color] || statColorClasses.blue}`;
+            swatch.className = `grid h-9 w-9 place-items-center rounded-xl text-white shadow-sm ${statColorClasses[color] || ''}`;
+            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                swatch.style.backgroundColor = color;
+            } else {
+                swatch.style.backgroundColor = '';
+                swatch.className = `grid h-9 w-9 place-items-center rounded-xl text-white shadow-sm ${statColorClasses[color] || statColorClasses.blue}`;
+            }
             swatch.textContent = detail.symbol;
         }
 
@@ -394,6 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         syncStatPreview(card);
         card.querySelector('[data-stat-icon-select]')?.addEventListener('input', () => syncStatPreview(card));
         card.querySelector('[data-stat-color-select]')?.addEventListener('change', () => syncStatPreview(card));
+        card.querySelector('[data-stat-color-input]')?.addEventListener('input', () => syncStatPreview(card));
     });
 
     page.querySelectorAll('[data-navbar-page-select]').forEach((select) => {
@@ -471,16 +479,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (group === 'hero-stats') {
                 const icons = Object.keys(statIconDetails);
-                const colors = Object.keys(statColorClasses);
                 const iconSelect = card.querySelector('[data-stat-icon-select]');
-                const colorSelect = card.querySelector('[data-stat-color-select]');
+                const colorSelect = card.querySelector('[data-stat-color-select], [data-stat-color-input]');
 
                 if (iconSelect) {
                     iconSelect.value = icons[Math.floor(Math.random() * icons.length)];
                 }
 
                 if (colorSelect) {
-                    colorSelect.value = colors[Math.floor(Math.random() * colors.length)];
+                    colorSelect.value = statColorDefaults[Math.floor(Math.random() * statColorDefaults.length)];
                 }
 
                 syncStatPreview(card);

@@ -255,7 +255,7 @@ class SettingsController extends Controller
             'stats.*.value' => ['nullable', 'string', 'max:40'],
             'stats.*.trend' => ['nullable', 'string', 'max:80'],
             'stats.*.icon' => ['nullable', 'string', 'max:4000'],
-            'stats.*.color' => ['nullable', 'string', 'max:40'],
+            'stats.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'stats.*.active' => ['nullable', 'boolean'],
             'stats.*.delete' => ['nullable', 'boolean'],
             'features' => ['nullable', 'array', 'max:8'],
@@ -263,6 +263,7 @@ class SettingsController extends Controller
             'features.*.title' => ['nullable', 'string', 'max:140'],
             'features.*.description' => ['nullable', 'string', 'max:260'],
             'features.*.icon' => ['nullable', 'string', 'max:4000'],
+            'features.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'features.*.active' => ['nullable', 'boolean'],
             'features.*.delete' => ['nullable', 'boolean'],
         ]);
@@ -366,6 +367,7 @@ class SettingsController extends Controller
                     'title' => $title,
                     'description' => $description,
                     'icon' => $feature['icon'] ?? null,
+                    'color' => $feature['color'] ?? null,
                     'sort_order' => $index + 1,
                     'is_active' => !empty($feature['active']),
                 ]
@@ -396,6 +398,7 @@ class SettingsController extends Controller
             'about_highlights.*.title' => ['nullable', 'string', 'max:120'],
             'about_highlights.*.description' => ['nullable', 'string', 'max:300'],
             'about_highlights.*.icon' => ['nullable', 'string', 'max:4000'],
+            'about_highlights.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'about_highlights.*.active' => ['nullable', 'boolean'],
             'about_highlights.*.delete' => ['nullable', 'boolean'],
             'about_cards' => ['nullable', 'array', 'max:8'],
@@ -403,6 +406,7 @@ class SettingsController extends Controller
             'about_cards.*.title' => ['nullable', 'string', 'max:120'],
             'about_cards.*.description' => ['nullable', 'string', 'max:320'],
             'about_cards.*.icon' => ['nullable', 'string', 'max:4000'],
+            'about_cards.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'about_cards.*.active' => ['nullable', 'boolean'],
             'about_cards.*.delete' => ['nullable', 'boolean'],
         ]);
@@ -435,18 +439,12 @@ class SettingsController extends Controller
                     'title' => $title,
                     'description' => $description,
                     'icon' => $highlight['icon'] ?? null,
+                    'color' => $highlight['color'] ?? null,
                     'sort_order' => $index + 1,
                     'is_active' => !empty($highlight['active']),
                 ]
             );
         }
-
-        $defaultAboutCardTones = [
-            'bg-cyan-100 text-cyan-700',
-            'bg-indigo-100 text-indigo-700',
-            'bg-amber-100 text-amber-700',
-            'bg-emerald-100 text-emerald-700',
-        ];
 
         foreach (($validated['about_cards'] ?? []) as $index => $card) {
             $key = 'card_' . ($index + 1);
@@ -467,7 +465,7 @@ class SettingsController extends Controller
                     'title' => $title,
                     'description' => $description,
                     'icon' => $card['icon'] ?? null,
-                    'color' => $defaultAboutCardTones[$index] ?? $defaultAboutCardTones[0],
+                    'color' => $card['color'] ?? null,
                     'sort_order' => $index + 1,
                     'is_active' => !empty($card['active']),
                 ]
@@ -498,6 +496,7 @@ class SettingsController extends Controller
             'feature_cards.*.title' => ['nullable', 'string', 'max:140'],
             'feature_cards.*.description' => ['nullable', 'string', 'max:320'],
             'feature_cards.*.icon' => ['nullable', 'string', 'max:4000'],
+            'feature_cards.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'feature_cards.*.active' => ['nullable', 'boolean'],
             'feature_cards.*.delete' => ['nullable', 'boolean'],
         ]);
@@ -535,6 +534,7 @@ class SettingsController extends Controller
                     'title' => $title,
                     'description' => $description,
                     'icon' => $card['icon'] ?? null,
+                    'color' => $card['color'] ?? null,
                     'sort_order' => $index + 1,
                     'is_active' => !empty($card['active']),
                 ]
@@ -566,6 +566,7 @@ class SettingsController extends Controller
             'program_cards.*.title' => ['nullable', 'string', 'max:140'],
             'program_cards.*.description' => ['nullable', 'string', 'max:320'],
             'program_cards.*.icon' => ['nullable', 'string', 'max:4000'],
+            'program_cards.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'program_cards.*.active' => ['nullable', 'boolean'],
             'program_cards.*.delete' => ['nullable', 'boolean'],
         ]);
@@ -605,6 +606,7 @@ class SettingsController extends Controller
                     'subtitle' => $level,
                     'description' => $description,
                     'icon' => $card['icon'] ?? null,
+                    'color' => $card['color'] ?? null,
                     'sort_order' => $index + 1,
                     'is_active' => !empty($card['active']),
                 ]
@@ -722,6 +724,7 @@ class SettingsController extends Controller
             'admission_steps.*.id' => ['nullable', 'integer'],
             'admission_steps.*.title' => ['nullable', 'string', 'max:140'],
             'admission_steps.*.description' => ['nullable', 'string', 'max:320'],
+            'admission_steps.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'admission_steps.*.active' => ['nullable', 'boolean'],
             'admission_steps.*.delete' => ['nullable', 'boolean'],
         ]);
@@ -766,6 +769,7 @@ class SettingsController extends Controller
                 'type' => 'step',
                 'title' => $title,
                 'description' => $description,
+                'color' => $step['color'] ?? null,
                 'sort_order' => $index + 1,
                 'is_active' => !empty($step['active']),
             ]);

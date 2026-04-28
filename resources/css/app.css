@@ -34,6 +34,26 @@
     /* blue ring default */
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
+.home-header-shell {
+    animation: navbarDrop 0.45s ease both;
+}
+
+@keyframes navbarDrop {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes dash-fade-up {
     from {
         opacity: 0;
@@ -2640,6 +2660,39 @@
         stroke-linecap: round;
     }
 
+    .contact-label {
+        margin-bottom: 0.25rem;
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        color: #64748b;
+    }
+
+    .contact-input {
+        width: 100%;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    .contact-input:focus {
+        border-color: #818cf8;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    .contact-error {
+        margin-top: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #dc2626;
+    }
     .website-home .home-chatbot-mark__bubble {
         fill: rgba(255, 255, 255, 0.14);
         stroke: rgba(236, 254, 255, 0.65);

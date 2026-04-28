@@ -82,6 +82,18 @@
         $footerLinkLimit = 8;
         $footerContactLimit = 8;
         $navbarLinkLimit = 10;
+        $iconColorValue = function ($value, string $fallback): string {
+            $value = trim((string) $value);
+
+            return preg_match('/^#[0-9A-Fa-f]{6}$/', $value) ? $value : $fallback;
+        };
+        $aboutHighlightColorDefaults = ['#fbbf24', '#34d399', '#38bdf8', '#e879f9'];
+        $aboutCardColorDefaults = ['#e11d48', '#059669', '#0284c7', '#7c3aed'];
+        $heroStatColorDefaults = ['#10b981', '#2563eb', '#7c3aed', '#d97706', '#e11d48', '#0891b2'];
+        $heroFeatureColorDefaults = ['#2563eb', '#0d9488', '#7c3aed', '#d97706'];
+        $featureCardColorDefaults = ['#d97706', '#0d9488', '#0891b2', '#e11d48', '#7c3aed', '#65a30d'];
+        $programCardColorDefaults = ['#2563eb', '#059669', '#d97706', '#c026d3'];
+        $admissionStepColorDefaults = ['#22d3ee', '#f59e0b', '#34d399', '#fb7185'];
         $navbarPageOptions = [
             '#home' => 'Home',
             '#about' => 'About',
@@ -128,6 +140,15 @@
 
         #admin-settings-page .settings-sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
             background: rgba(79, 70, 229, 0.55);
+        }
+
+        #admin-settings-page input[type="color"] {
+            height: 2.5rem;
+            min-width: 3rem;
+            cursor: pointer;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+            padding: 0.25rem;
         }
 
         #admin-settings-page .settings-sidebar-shell {
@@ -955,15 +976,10 @@
                                                     );
                                                     $statColor = old(
                                                         'stats.' . $i . '.color',
-                                                        $statItem?->color ??
-                                                            match ($i) {
-                                                                0 => 'emerald',
-                                                                1 => 'blue',
-                                                                2 => 'violet',
-                                                                3 => 'amber',
-                                                                4 => 'rose',
-                                                                default => 'cyan',
-                                                            },
+                                                        $iconColorValue(
+                                                            $statItem?->color,
+                                                            $heroStatColorDefaults[$i % count($heroStatColorDefaults)],
+                                                        ),
                                                     );
                                                     $showStat =
                                                         filled($statLabel) || filled($statValue) || filled($statTrend);
@@ -1028,29 +1044,14 @@
                                                                 value="{{ $statIcon }}"
                                                                 class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                                         </div>
-                                                        <div>
-                                                            <label
-                                                                class="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                                                                Color
-                                                            </label>
-                                                            <select name="stats[{{ $i }}][color]"
-                                                                data-stat-color-select
-                                                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
-                                                                @foreach ([
-            'emerald' => 'Emerald',
-            'blue' => 'Blue',
-            'violet' => 'Violet',
-            'amber' => 'Amber',
-            'rose' => 'Rose',
-            'cyan' => 'Cyan',
-        ] as $colorValue => $colorLabel)
-                                                                    <option value="{{ $colorValue }}"
-                                                                        @selected($statColor === $colorValue)>
-                                                                        {{ $colorLabel }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
+                                                        <label
+                                                            class="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">
+                                                            <span class="min-w-0 flex-1">Icon color</span>
+                                                            <input name="stats[{{ $i }}][color]"
+                                                                data-stat-color-input
+                                                                type="color" value="{{ $statColor }}"
+                                                                class="h-10 w-12 rounded-md border border-slate-300 bg-white p-1">
+                                                        </label>
                                                     </div>
                                                 </div>
                                             @endfor
@@ -1085,6 +1086,13 @@
                                                 $heroFeatureIcon = old(
                                                     'features.' . $i . '.icon',
                                                     $heroFeatureItem?->icon ?? '',
+                                                );
+                                                $heroFeatureColor = old(
+                                                    'features.' . $i . '.color',
+                                                    $iconColorValue(
+                                                        $heroFeatureItem?->color,
+                                                        $heroFeatureColorDefaults[$i % count($heroFeatureColorDefaults)],
+                                                    ),
                                                 );
                                                 $showHeroFeature =
                                                     filled($heroFeatureTitle) || filled($heroFeatureDescription);
@@ -1134,6 +1142,13 @@
                                                     placeholder='Icon name, <i class="fa-solid fa-school"></i>, or SVG'
                                                     value="{{ $heroFeatureIcon }}"
                                                     class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                                <label
+                                                    class="mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">
+                                                    <span class="min-w-0 flex-1">Icon color</span>
+                                                    <input name="features[{{ $i }}][color]"
+                                                        type="color" value="{{ $heroFeatureColor }}"
+                                                        class="h-10 w-12 rounded-md border border-slate-300 bg-white p-1">
+                                                </label>
                                             </div>
                                         @endfor
                                     </div>
@@ -1233,6 +1248,13 @@
                                                         'about_highlights.' . $i . '.icon',
                                                         $aboutHighlightItem?->icon ?? '',
                                                     );
+                                                    $aboutHighlightColor = old(
+                                                        'about_highlights.' . $i . '.color',
+                                                        $iconColorValue(
+                                                            $aboutHighlightItem?->color,
+                                                            $aboutHighlightColorDefaults[$i % count($aboutHighlightColorDefaults)],
+                                                        ),
+                                                    );
                                                     $showAboutHighlight =
                                                         filled($aboutHighlightTitle) ||
                                                         filled($aboutHighlightDescription);
@@ -1288,6 +1310,13 @@
                                                         placeholder='Icon name, <i class="fa-solid fa-school"></i>, or SVG'
                                                         value="{{ $aboutHighlightIcon }}"
                                                         class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                                    <label
+                                                        class="mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">
+                                                        <span class="min-w-0 flex-1">Icon color</span>
+                                                        <input name="about_highlights[{{ $i }}][color]"
+                                                            type="color" value="{{ $aboutHighlightColor }}"
+                                                            class="h-10 w-12 rounded-md border border-slate-300 bg-white p-1">
+                                                    </label>
                                                 </div>
                                             @endfor
                                         </div>
@@ -1320,6 +1349,13 @@
                                                     $aboutCardIcon = old(
                                                         'about_cards.' . $i . '.icon',
                                                         $aboutCardItem?->icon ?? '',
+                                                    );
+                                                    $aboutCardColor = old(
+                                                        'about_cards.' . $i . '.color',
+                                                        $iconColorValue(
+                                                            $aboutCardItem?->color,
+                                                            $aboutCardColorDefaults[$i % count($aboutCardColorDefaults)],
+                                                        ),
                                                     );
                                                     $showAboutCard =
                                                         filled($aboutCardTitle) || filled($aboutCardDescription);
@@ -1372,6 +1408,13 @@
                                                         placeholder='Icon name, <i class="fa-solid fa-school"></i>, or SVG'
                                                         value="{{ $aboutCardIcon }}"
                                                         class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                                    <label
+                                                        class="mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">
+                                                        <span class="min-w-0 flex-1">Icon color</span>
+                                                        <input name="about_cards[{{ $i }}][color]"
+                                                            type="color" value="{{ $aboutCardColor }}"
+                                                            class="h-10 w-12 rounded-md border border-slate-300 bg-white p-1">
+                                                    </label>
                                                 </div>
                                             @endfor
                                         </div>
@@ -1473,6 +1516,13 @@
                                                     'feature_cards.' . $i . '.icon',
                                                     $platformFeatureItem?->icon ?? '',
                                                 );
+                                                $platformFeatureColor = old(
+                                                    'feature_cards.' . $i . '.color',
+                                                    $iconColorValue(
+                                                        $platformFeatureItem?->color,
+                                                        $featureCardColorDefaults[$i % count($featureCardColorDefaults)],
+                                                    ),
+                                                );
                                                 $showPlatformFeature =
                                                     filled($platformFeatureTitle) ||
                                                     filled($platformFeatureDescription);
@@ -1522,6 +1572,13 @@
                                                     placeholder='Icon name, <i class="fa-solid fa-school"></i>, or SVG'
                                                     value="{{ $platformFeatureIcon }}"
                                                     class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                                <label
+                                                    class="mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">
+                                                    <span class="min-w-0 flex-1">Icon color</span>
+                                                    <input name="feature_cards[{{ $i }}][color]"
+                                                        type="color" value="{{ $platformFeatureColor }}"
+                                                        class="h-10 w-12 rounded-md border border-slate-300 bg-white p-1">
+                                                </label>
                                             </div>
                                         @endfor
                                     </div>
@@ -1625,6 +1682,13 @@
                                                     'program_cards.' . $i . '.icon',
                                                     $programItem?->icon ?? '',
                                                 );
+                                                $programColor = old(
+                                                    'program_cards.' . $i . '.color',
+                                                    $iconColorValue(
+                                                        $programItem?->color,
+                                                        $programCardColorDefaults[$i % count($programCardColorDefaults)],
+                                                    ),
+                                                );
                                                 $showProgram =
                                                     filled($programLevel) ||
                                                     filled($programTitle) ||
@@ -1678,6 +1742,13 @@
                                                     placeholder='Icon name, <i class="fa-solid fa-book-open"></i>, or SVG'
                                                     value="{{ $programIcon }}"
                                                     class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                                <label
+                                                    class="mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">
+                                                    <span class="min-w-0 flex-1">Icon color</span>
+                                                    <input name="program_cards[{{ $i }}][color]"
+                                                        type="color" value="{{ $programColor }}"
+                                                        class="h-10 w-12 rounded-md border border-slate-300 bg-white p-1">
+                                                </label>
                                             </div>
                                         @endfor
                                     </div>
@@ -1924,6 +1995,13 @@
                                                     'admission_steps.' . $i . '.description',
                                                     $step?->description ?? '',
                                                 );
+                                                $stepColor = old(
+                                                    'admission_steps.' . $i . '.color',
+                                                    $iconColorValue(
+                                                        $step?->color,
+                                                        $admissionStepColorDefaults[$i % count($admissionStepColorDefaults)],
+                                                    ),
+                                                );
                                                 $showStep = filled($stepTitle) || filled($stepDescription);
                                             @endphp
                                             <div data-home-editor-card data-addable-card="admission-steps"
@@ -1956,6 +2034,13 @@
                                                     class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold">
                                                 <textarea name="admission_steps[{{ $i }}][description]" rows="3" placeholder="Step description"
                                                     class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">{{ $stepDescription }}</textarea>
+                                                <label
+                                                    class="mt-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600">
+                                                    <span class="min-w-0 flex-1">Icon color</span>
+                                                    <input name="admission_steps[{{ $i }}][color]"
+                                                        type="color" value="{{ $stepColor }}"
+                                                        class="h-10 w-12 rounded-md border border-slate-300 bg-white p-1">
+                                                </label>
                                             </div>
                                         @endfor
                                     </div>
