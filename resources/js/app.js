@@ -232,6 +232,10 @@ const bindShellLoaderEvents = () => {
     });
 
     document.addEventListener("submit", (event) => {
+        if (event.defaultPrevented) {
+            return;
+        }
+
         const form = event.target;
         if (!(form instanceof HTMLFormElement)) {
             return;

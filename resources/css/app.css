@@ -355,9 +355,9 @@
         z-index: 9999;
         display: grid;
         place-items: center;
-        background: rgba(255, 255, 255, 100);
-        backdrop-filter: blur(80px);
-        -webkit-backdrop-filter: blur(80px);
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(50px);
+        -webkit-backdrop-filter: blur(50px);
         color: #0f172a;
         opacity: 1;
         transition:
