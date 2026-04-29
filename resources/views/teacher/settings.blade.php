@@ -17,6 +17,48 @@
         $excused = (int) ($selectedDateSummary['excused'] ?? 0);
         $total = max(0, $present + $absent + $late + $excused);
         $presentPct = $total ? round(($present / $total) * 100) : 0;
+        $teacherSettingsStatCards = [
+            [
+                'label' => 'Classes',
+                'activeLabel' => 'Assigned',
+                'active' => (int) ($stats['classes'] ?? 0),
+                'total' => (int) ($stats['classes'] ?? 0),
+                'icon' => 'classes',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Subjects',
+                'activeLabel' => 'Teaching',
+                'active' => (int) ($stats['subjects'] ?? 0),
+                'total' => (int) ($stats['subjects'] ?? 0),
+                'icon' => 'subjects',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+            [
+                'label' => 'Students',
+                'activeLabel' => 'Linked',
+                'active' => (int) ($stats['students'] ?? 0),
+                'total' => (int) ($stats['students'] ?? 0),
+                'icon' => 'students',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Checked Today',
+                'activeLabel' => 'Today',
+                'active' => (int) ($stats['checkedToday'] ?? 0),
+                'total' => (int) ($stats['students'] ?? 0),
+                'icon' => 'attendance',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+            [
+                'label' => 'Checked Week',
+                'activeLabel' => 'This week',
+                'active' => (int) ($stats['checkedThisWeek'] ?? 0),
+                'total' => (int) ($stats['students'] ?? 0),
+                'icon' => 'active',
+                'tone' => 'from-cyan-100 to-white text-cyan-600',
+            ],
+        ];
     @endphp
 
     <div id="teacher-settings-page" class="teacher-stage teacher-settings-stage space-y-6"
@@ -31,18 +73,6 @@
                         Manage your profile, password, and attendance shortcuts.
                     </p>
                 </div>
-
-                <div class="teacher-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="admin-page-stat">Classes: {{ number_format($stats['classes'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--indigo">Subjects:
-                        {{ number_format($stats['subjects'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Students:
-                        {{ number_format($stats['students'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Checked Today:
-                        {{ number_format($stats['checkedToday'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--amber">Checked This Week:
-                        {{ number_format($stats['checkedThisWeek'] ?? 0) }}</span>
-                </div>
             </div>
 
             <div class="mt-5">
@@ -54,6 +84,9 @@
                 @endif
             </div>
         </section>
+
+        <x-admin.stat-cards :cards="$teacherSettingsStatCards" reveal-class="teacher-reveal" float-class="teacher-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" />
 
         @if (session('success'))
             <div class="teacher-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"

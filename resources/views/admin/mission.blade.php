@@ -50,7 +50,8 @@
         <x-admin.page-header reveal-class="student-reveal" delay="1" icon="flag" title="Mission Events"
             subtitle="Create mission events and send them to staff, teachers, or both." />
 
-        <x-admin.stat-cards :cards="$missionStatCards" reveal-class="student-reveal" float-class="student-float" />
+        <x-admin.stat-cards :cards="$missionStatCards" reveal-class="student-reveal" float-class="student-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success'))
             <div class="student-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"

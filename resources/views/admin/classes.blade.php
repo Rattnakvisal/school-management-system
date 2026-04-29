@@ -43,7 +43,8 @@
         <x-admin.page-header reveal-class="class-reveal" delay="1" icon="classes" title="Class Management"
             subtitle="Create, organize, and manage classroom groups." />
 
-        <x-admin.stat-cards :cards="$classStatCards" reveal-class="class-reveal" float-class="class-float" />
+        <x-admin.stat-cards :cards="$classStatCards" reveal-class="class-reveal" float-class="class-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success'))
             <div class="class-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"

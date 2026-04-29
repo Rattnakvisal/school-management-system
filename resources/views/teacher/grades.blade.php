@@ -18,9 +18,47 @@
             $isEditing && $editingGrade?->graded_at ? $editingGrade->graded_at->format('Y-m-d') : now()->toDateString(),
         );
         $remarksValue = (string) old('remarks', $isEditing ? (string) ($editingGrade->remarks ?? '') : '');
+        $gradeTotal = max(0, (int) ($stats['total'] ?? 0));
+        $gradeAverage = isset($stats['average']) ? (float) $stats['average'] : null;
+        $teacherGradeStatCards = [
+            [
+                'label' => 'Grades',
+                'activeLabel' => 'Posted',
+                'active' => $gradeTotal,
+                'total' => $gradeTotal,
+                'icon' => 'grades',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Students',
+                'activeLabel' => 'Graded',
+                'active' => (int) ($stats['students'] ?? 0),
+                'total' => (int) ($stats['students'] ?? 0),
+                'icon' => 'students',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Subjects',
+                'activeLabel' => 'With grades',
+                'active' => (int) ($stats['subjects'] ?? 0),
+                'total' => (int) ($stats['subjects'] ?? 0),
+                'icon' => 'subjects',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+            [
+                'label' => 'Average',
+                'activeLabel' => 'Overall',
+                'active' => $gradeAverage !== null ? (int) round($gradeAverage) : 0,
+                'total' => 100,
+                'displayActive' => $gradeAverage !== null ? number_format($gradeAverage, 1) . '%' : 'N/A',
+                'hideTotal' => true,
+                'icon' => 'average',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+        ];
     @endphp
 
-    <div class="teacher-grade-stage space-y-6">
+    <div class="teacher-stage teacher-grade-stage space-y-6">
         <section class="admin-page-header teacher-page-header">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div class="min-w-0">
@@ -29,18 +67,11 @@
                         Record student grades and automatically notify each student when a new grade is assigned.
                     </p>
                 </div>
-
-                <div class="teacher-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="admin-page-stat">Total: {{ number_format($stats['total'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--indigo">Students:
-                        {{ number_format($stats['students'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Subjects:
-                        {{ number_format($stats['subjects'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Average:
-                        {{ isset($stats['average']) ? number_format((float) $stats['average'], 1) . '%' : 'N/A' }}</span>
-                </div>
             </div>
         </section>
+
+        <x-admin.stat-cards :cards="$teacherGradeStatCards" reveal-class="teacher-reveal" float-class="teacher-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success'))
             <div class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">

@@ -51,7 +51,8 @@
         <x-admin.page-header reveal-class="study-time-reveal" delay="1" icon="time" title="Time Studies"
             subtitle="Manage class and subject study schedules in one place." />
 
-        <x-admin.stat-cards :cards="$scheduleStatCards" reveal-class="study-time-reveal" float-class="study-time-float" />
+        <x-admin.stat-cards :cards="$scheduleStatCards" reveal-class="study-time-reveal" float-class="study-time-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         <!-- Alerts (same style as Student page) -->
         @if (session('success'))

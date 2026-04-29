@@ -9,6 +9,32 @@
             'dayLabels' => $dayOptions ?? [],
             'selectedDay' => $selectedDay ?? 'all',
         ];
+        $teacherScheduleStatCards = [
+            [
+                'label' => 'Classes',
+                'activeLabel' => 'Assigned',
+                'active' => (int) ($stats['classes'] ?? 0),
+                'total' => (int) ($stats['classes'] ?? 0),
+                'icon' => 'classes',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Class Slots',
+                'activeLabel' => 'Slots',
+                'active' => (int) ($stats['classSlots'] ?? 0),
+                'total' => (int) (($stats['classSlots'] ?? 0) + ($stats['subjectSlots'] ?? 0)),
+                'icon' => 'time',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+            [
+                'label' => 'Subject Slots',
+                'activeLabel' => 'Teaching',
+                'active' => (int) ($stats['subjectSlots'] ?? 0),
+                'total' => (int) (($stats['classSlots'] ?? 0) + ($stats['subjectSlots'] ?? 0)),
+                'icon' => 'subjects',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+        ];
     @endphp
 
     <div class="teacher-time-stage space-y-6">
@@ -19,14 +45,6 @@
                     <p class="admin-page-subtitle mt-1 text-sm">
                         View your teaching list by day, time, subject, and class.
                     </p>
-                </div>
-
-                <div class="teacher-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="admin-page-stat">Classes: {{ number_format($stats['classes'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Class Slots:
-                        {{ number_format($stats['classSlots'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--indigo">Subject Slots:
-                        {{ number_format($stats['subjectSlots'] ?? 0) }}</span>
                 </div>
             </div>
 
@@ -58,6 +76,9 @@
 
             <p id="schedule-live-hint" class="mt-3 text-xs font-semibold text-slate-500">Checking live schedule...</p>
         </section>
+
+        <x-admin.stat-cards :cards="$teacherScheduleStatCards" reveal-class="teacher-time-reveal" float-class="teacher-time-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" />
 
         <section class="teacher-time-reveal teacher-time-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
             style="--sd: 2;" x-data="{ filterOpen: false, tab: 'teach' }">

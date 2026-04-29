@@ -19,9 +19,44 @@
             'due_at',
             $isEditing && $editingAssignment?->due_at ? $editingAssignment->due_at->format('Y-m-d') : '',
         );
+        $assignmentTotal = max(0, (int) ($stats['total'] ?? 0));
+        $teacherAssignmentStatCards = [
+            [
+                'label' => 'Assignments',
+                'activeLabel' => 'Posted',
+                'active' => $assignmentTotal,
+                'total' => $assignmentTotal,
+                'icon' => 'assignment',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Students',
+                'activeLabel' => 'Assigned',
+                'active' => (int) ($stats['students'] ?? 0),
+                'total' => (int) ($stats['students'] ?? 0),
+                'icon' => 'students',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Subjects',
+                'activeLabel' => 'Available',
+                'active' => (int) ($stats['subjects'] ?? 0),
+                'total' => (int) ($stats['subjects'] ?? 0),
+                'icon' => 'subjects',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+            [
+                'label' => 'Due Soon',
+                'activeLabel' => 'Next 7 days',
+                'active' => (int) ($stats['dueSoon'] ?? 0),
+                'total' => $assignmentTotal,
+                'icon' => 'pending',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+        ];
     @endphp
 
-    <div class="teacher-assignment-stage space-y-6">
+    <div class="teacher-stage teacher-assignment-stage space-y-6">
         <section class="admin-page-header teacher-page-header">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div class="min-w-0">
@@ -30,18 +65,11 @@
                         Create assignments for your students and send an alert as soon as they are posted.
                     </p>
                 </div>
-
-                <div class="teacher-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="admin-page-stat">Total: {{ number_format($stats['total'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--indigo">Students:
-                        {{ number_format($stats['students'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Subjects:
-                        {{ number_format($stats['subjects'] ?? 0) }}</span>
-                    <span class="admin-page-stat admin-page-stat--amber">Due Soon:
-                        {{ number_format($stats['dueSoon'] ?? 0) }}</span>
-                </div>
             </div>
         </section>
+
+        <x-admin.stat-cards :cards="$teacherAssignmentStatCards" reveal-class="teacher-reveal" float-class="teacher-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success'))
             <div class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">

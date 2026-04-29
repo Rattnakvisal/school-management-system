@@ -3,9 +3,10 @@
     'revealClass' => 'reveal',
     'floatClass' => 'float-card',
     'delayStart' => 2,
+    'gridClass' => 'grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
 ])
 
-<section class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+<section class="{{ $gridClass }}">
     @foreach ($cards as $index => $card)
         @php
             $cardTotal = max(1, (int) ($card['total'] ?? 0));
@@ -18,6 +19,9 @@
             $barTone = (string) ($card['barTone'] ?? 'from-indigo-500 to-cyan-400');
             $showPercent = (bool) ($card['showPercent'] ?? false);
             $progressText = (string) ($card['progressText'] ?? ($visibleTotal > 0 ? number_format($cardActive) . ' of ' . number_format($visibleTotal) . ' complete' : 'No records yet'));
+            $displayActive = (string) ($card['displayActive'] ?? number_format($cardActive));
+            $displayTotal = (string) ($card['displayTotal'] ?? number_format($visibleTotal));
+            $hideTotal = (bool) ($card['hideTotal'] ?? false);
         @endphp
 
         <div class="{{ $revealClass }} {{ $floatClass }} min-h-[132px] rounded-[26px] border border-white/80 bg-white/90 p-5 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur"
@@ -122,6 +126,54 @@
                             </svg>
                         @break
 
+                        @case('assignment')
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M8 3.5h8A2.5 2.5 0 0 1 18.5 6v14l-3-1.75L12.5 20l-3-1.75L6.5 20V6A2.5 2.5 0 0 1 9 3.5Z" />
+                                <path d="M9.5 8h5" />
+                                <path d="M9.5 11.5h5" />
+                            </svg>
+                        @break
+
+                        @case('grades')
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 4.5h6A1.5 1.5 0 0 1 16.5 6v1H19v13H5V7h2.5V6A1.5 1.5 0 0 1 9 4.5Z" />
+                                <path d="M9 4.5h6v3H9v-3Z" />
+                                <path d="M8.5 13h7" />
+                                <path d="M8.5 16.5h4" />
+                            </svg>
+                        @break
+
+                        @case('average')
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 3v18" />
+                                <path d="m17 8-5-5-5 5" />
+                                <path d="M5 21h14" />
+                            </svg>
+                        @break
+
+                        @case('pending')
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 7v5l3 3" />
+                            </svg>
+                        @break
+
+                        @case('attendance')
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M8 6h13" />
+                                <path d="M8 12h13" />
+                                <path d="M8 18h13" />
+                                <path d="m3 6 1 1 2-2" />
+                                <path d="m3 12 1 1 2-2" />
+                                <path d="m3 18 1 1 2-2" />
+                            </svg>
+                        @break
+
                         @case('contacts')
                             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -168,16 +220,18 @@
             </div>
 
             <div class="mt-5 flex items-end gap-1 text-2xl font-black text-slate-950">
-                <span>{{ number_format($cardActive) }}</span>
-                <span class="pb-0.5 text-base font-extrabold text-slate-300">/
-                    {{ number_format($visibleTotal) }}</span>
+                <span>{{ $displayActive }}</span>
+                @unless ($hideTotal)
+                    <span class="pb-0.5 text-base font-extrabold text-slate-300">/
+                        {{ $displayTotal }}</span>
+                @endunless
             </div>
             <div class="mt-1 text-sm font-bold text-slate-600">{{ $card['label'] ?? 'Total' }}</div>
             <div class="mt-1 text-[11px] font-semibold text-slate-400">
                 @if ($showPercent)
                     {{ $progressText }}
                 @else
-                    {{ $card['activeLabel'] ?? 'Active' }}: {{ number_format($cardActive) }}
+                    {{ $card['activeLabel'] ?? 'Active' }}: {{ $displayActive }}
                 @endif
             </div>
             <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">

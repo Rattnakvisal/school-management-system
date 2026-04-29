@@ -4,6 +4,45 @@
     @php
         $selectedClass = collect($classes ?? [])->firstWhere('id', (int) ($classId ?? 0));
         $selectedSubject = collect($subjectsForSelectedClass ?? [])->firstWhere('id', (int) ($subjectId ?? 0));
+        $attendancePresent = (int) ($summary['present'] ?? 0);
+        $attendanceAbsent = (int) ($summary['absent'] ?? 0);
+        $attendanceLate = (int) ($summary['late'] ?? 0);
+        $attendanceExcused = (int) ($summary['excused'] ?? 0);
+        $attendanceTotal = max(0, $attendancePresent + $attendanceAbsent + $attendanceLate + $attendanceExcused);
+        $teacherAttendanceStatCards = [
+            [
+                'label' => 'Present',
+                'activeLabel' => 'Marked',
+                'active' => $attendancePresent,
+                'total' => $attendanceTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Absent',
+                'activeLabel' => 'Marked',
+                'active' => $attendanceAbsent,
+                'total' => $attendanceTotal,
+                'icon' => 'inactive',
+                'tone' => 'from-rose-100 to-white text-rose-600',
+            ],
+            [
+                'label' => 'Late',
+                'activeLabel' => 'Marked',
+                'active' => $attendanceLate,
+                'total' => $attendanceTotal,
+                'icon' => 'pending',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+            [
+                'label' => 'Excused',
+                'activeLabel' => 'Marked',
+                'active' => $attendanceExcused,
+                'total' => $attendanceTotal,
+                'icon' => 'attendance',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+        ];
     @endphp
 
     <div class="teacher-time-stage space-y-6">
@@ -34,6 +73,9 @@
                 {{ $errors->first() }}
             </div>
         @endif
+
+        <x-admin.stat-cards :cards="$teacherAttendanceStatCards" reveal-class="teacher-time-reveal" float-class="teacher-time-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         <section class="teacher-time-reveal teacher-time-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
             style="--sd: 3;" x-data="{ filterOpen: false, showClassGrid: {{ ($classId ?? '') === '' ? 'true' : 'false' }} }">

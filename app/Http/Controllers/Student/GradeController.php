@@ -42,6 +42,7 @@ class GradeController extends Controller
         return view('student.grades', [
             'grades' => $grades,
             'stats' => $stats,
+            'classLabel' => $student->schoolClass?->display_name ?? 'No class assigned',
         ]);
     }
 }

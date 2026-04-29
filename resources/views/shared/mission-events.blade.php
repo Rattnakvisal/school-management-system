@@ -6,6 +6,19 @@
         'high' => 'bg-amber-50 text-amber-700 ring-amber-100',
         'urgent' => 'bg-red-50 text-red-700 ring-red-100',
     ];
+    $missionTotal = (int) (is_object($missions) && method_exists($missions, 'total')
+        ? $missions->total()
+        : collect($missions ?? [])->count());
+    $missionStatCards = [
+        [
+            'label' => 'Mission Events',
+            'activeLabel' => 'Active',
+            'active' => $missionTotal,
+            'total' => $missionTotal,
+            'icon' => 'mission',
+            'tone' => 'from-indigo-100 to-white text-indigo-600',
+        ],
+    ];
 @endphp
 
 <div class="student-stage space-y-6">
@@ -29,11 +42,11 @@
                 <p class="admin-page-subtitle mt-2 text-sm">{{ $subtitle }}</p>
             </div>
 
-            <div class="admin-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold sm:gap-3">
-                <span class="admin-page-stat admin-page-stat--emerald">Active: {{ $missions->total() }}</span>
-            </div>
         </div>
     </section>
+
+    <x-admin.stat-cards :cards="$missionStatCards" reveal-class="student-reveal" float-class="student-float"
+        grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
     <section class="student-reveal student-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
         style="--sd: 2;">

@@ -14,10 +14,37 @@
         $selectedTimeKeys = array_values(array_unique(array_filter(array_map('strval', (array) ($formValues['subject_time_keys'] ?? [])))));
         $subjectTimeMap = $subjectTimeOptionsBySubject ?? [];
         $initialTimeOptions = $subjectTimeMap[$selectedSubjectId] ?? [];
+        $lawRequestTotal = ($lawRequests ?? collect())->count();
+        $teacherLawRequestStatCards = [
+            [
+                'label' => 'Requests',
+                'activeLabel' => 'Submitted',
+                'active' => $lawRequestTotal,
+                'total' => $lawRequestTotal,
+                'icon' => 'records',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Pending',
+                'activeLabel' => 'Waiting review',
+                'active' => ($lawRequests ?? collect())->where('status', 'pending')->count(),
+                'total' => $lawRequestTotal,
+                'icon' => 'pending',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+            ],
+            [
+                'label' => 'Approved',
+                'activeLabel' => 'Accepted',
+                'active' => ($lawRequests ?? collect())->where('status', 'approved')->count(),
+                'total' => $lawRequestTotal,
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+        ];
     @endphp
 
     <div class="teacher-time-stage space-y-6">
-        <section class="admin-page-header teacher-page-header">
+        <section class="teacher-time-reveal admin-page-header teacher-page-header" style="--sd: 1;">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div class="min-w-0">
                     <h1 class="admin-page-title text-3xl font-black tracking-tight">Teacher Law Requests</h1>
@@ -25,16 +52,11 @@
                         Submit a law request and track your request status.
                     </p>
                 </div>
-
-                <div class="teacher-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="admin-page-stat">Total: {{ number_format(($lawRequests ?? collect())->count()) }}</span>
-                    <span class="admin-page-stat admin-page-stat--amber">Pending:
-                        {{ number_format(($lawRequests ?? collect())->where('status', 'pending')->count()) }}</span>
-                    <span class="admin-page-stat admin-page-stat--emerald">Approved:
-                        {{ number_format(($lawRequests ?? collect())->where('status', 'approved')->count()) }}</span>
-                </div>
             </div>
         </section>
+
+        <x-admin.stat-cards :cards="$teacherLawRequestStatCards" reveal-class="teacher-time-reveal" float-class="teacher-time-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" />
 
         @if (session('success'))
             <div class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">

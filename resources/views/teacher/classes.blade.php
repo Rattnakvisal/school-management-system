@@ -1,6 +1,36 @@
 @extends('layout.teacher.navbar')
 
 @section('page')
+    @php
+        $classTotal = max(0, (int) ($stats['classes'] ?? 0));
+        $teacherClassStatCards = [
+            [
+                'label' => 'Classes',
+                'activeLabel' => 'Assigned',
+                'active' => $classTotal,
+                'total' => $classTotal,
+                'icon' => 'classes',
+                'tone' => 'from-indigo-100 to-white text-indigo-600',
+            ],
+            [
+                'label' => 'Students',
+                'activeLabel' => 'Linked',
+                'active' => (int) ($stats['students'] ?? 0),
+                'total' => (int) ($stats['students'] ?? 0),
+                'icon' => 'students',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
+            [
+                'label' => 'Subjects',
+                'activeLabel' => 'Teaching',
+                'active' => (int) ($stats['subjects'] ?? 0),
+                'total' => (int) ($stats['subjects'] ?? 0),
+                'icon' => 'subjects',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+            ],
+        ];
+    @endphp
+
     <div class="teacher-classes-stage space-y-6">
         <section class="teacher-classes-reveal admin-page-header teacher-page-header" style="--sd: 1;">
             <div class="flex flex-wrap items-start justify-between gap-4">
@@ -8,20 +38,11 @@
                     <h1 class="admin-page-title text-3xl font-black tracking-tight">My Classes</h1>
                     <p class="admin-page-subtitle mt-1 text-sm">View classes you teach and open class details.</p>
                 </div>
-
-                <div class="teacher-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="admin-page-stat">
-                        Classes: {{ number_format($stats['classes'] ?? 0) }}
-                    </span>
-                    <span class="admin-page-stat admin-page-stat--sky">
-                        Students: {{ number_format($stats['students'] ?? 0) }}
-                    </span>
-                    <span class="admin-page-stat admin-page-stat--indigo">
-                        Subjects: {{ number_format($stats['subjects'] ?? 0) }}
-                    </span>
-                </div>
             </div>
         </section>
+
+        <x-admin.stat-cards :cards="$teacherClassStatCards" reveal-class="teacher-classes-reveal" float-class="teacher-classes-float"
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" />
 
         <section
             class="teacher-classes-reveal teacher-classes-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"

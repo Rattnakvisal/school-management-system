@@ -47,6 +47,7 @@ class AssignmentController extends Controller
         return view('student.assignments', [
             'assignments' => $assignments,
             'stats' => $stats,
+            'classLabel' => $student->schoolClass?->display_name ?? 'No class assigned',
         ]);
     }
 }
