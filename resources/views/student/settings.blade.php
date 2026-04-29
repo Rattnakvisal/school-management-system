@@ -7,10 +7,12 @@
         $nameParts = preg_split('/\s+/', trim((string) $student->name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
         $firstName = $nameParts[0] ?? 'Student';
         $lastName = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '';
-        $majorSubjects = $student->relationLoaded('majorSubjects') && $student->majorSubjects->isNotEmpty()
-            ? $student->majorSubjects
-            : ($student->majorSubject ? collect([$student->majorSubject]) : collect());
-        $majorSubjectLabel = $majorSubjects->pluck('name')->filter()->join(', ') ?: 'No major subject';
+        $majorSubjects =
+            $student->relationLoaded('majorSubjects') && $student->majorSubjects->isNotEmpty()
+                ? $student->majorSubjects
+                : ($student->majorSubject
+                    ? collect([$student->majorSubject])
+                    : collect());
     @endphp
 
     <div id="student-settings-page" class="student-stage space-y-6"
@@ -39,15 +41,6 @@
                     <p class="admin-page-subtitle max-w-2xl text-sm">
                         Manage your profile details, account security, and student portal notifications.
                     </p>
-                </div>
-
-                <div
-                    class="admin-page-header__stats flex flex-wrap items-center gap-2 text-xs font-semibold sm:ml-auto sm:justify-end">
-                    <span class="admin-page-stat admin-page-stat--emerald">Major:
-                        {{ \Illuminate\Support\Str::limit($majorSubjectLabel, 48) }}</span>
-                    <span class="admin-page-stat admin-page-stat--sky">Role: {{ ucfirst((string) $student->role) }}</span>
-                    <span class="admin-page-stat admin-page-stat--amber">ID:
-                        {{ $student->formatted_id ?? $student->id }}</span>
                 </div>
             </div>
         </section>
@@ -125,8 +118,7 @@
                                 <div class="relative">
                                     <img id="student_avatar_preview"
                                         class="h-24 w-24 rounded-full border-4 border-white object-cover shadow-sm"
-                                        src="{{ $student->avatar_url }}"
-                                        data-fallback="{{ $student->fallback_avatar_url }}"
+                                        src="{{ $student->avatar_url }}" data-fallback="{{ $student->fallback_avatar_url }}"
                                         onerror="this.onerror=null;this.src='{{ $student->fallback_avatar_url }}';"
                                         alt="student avatar">
                                 </div>
@@ -230,10 +222,10 @@
 
                                 <div class="grid gap-4 md:grid-cols-2">
                                     <div>
-                                        <label for="password"
-                                            class="mb-1 block text-xs font-semibold text-slate-600">New Password</label>
-                                        <input id="password" type="password" name="password" autocomplete="new-password"
-                                            required
+                                        <label for="password" class="mb-1 block text-xs font-semibold text-slate-600">New
+                                            Password</label>
+                                        <input id="password" type="password" name="password"
+                                            autocomplete="new-password" required
                                             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                         @error('password', 'passwordUpdate')
                                             <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
@@ -242,7 +234,8 @@
 
                                     <div>
                                         <label for="password_confirmation"
-                                            class="mb-1 block text-xs font-semibold text-slate-600">Confirm Password</label>
+                                            class="mb-1 block text-xs font-semibold text-slate-600">Confirm
+                                            Password</label>
                                         <input id="password_confirmation" type="password" name="password_confirmation"
                                             autocomplete="new-password" required
                                             class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">

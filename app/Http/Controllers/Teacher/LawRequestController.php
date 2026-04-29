@@ -43,7 +43,8 @@ class LawRequestController extends Controller
         $defaultLawType = old('law_type', (string) ($editingRequest?->law_type ?? array_key_first($lawTypes)));
         $defaultSubjectId = old('subject_id', (string) ($selectionDefaults['subject_id'] ?? 'all'));
         $defaultTimeKeys = $this->normalizeSubjectTimeKeys(old('subject_time_keys', $editingRequest ? ($selectionDefaults['subject_time_keys'] ?? []) : []));
-        $defaultRequestedFor = old('requested_for', $editingRequest?->requested_for?->toDateString() ?? '');
+        $defaultRequestedFor = old('requested_for', $editingRequest?->requested_for?->toDateString() ?? now()->toDateString());
+        $defaultRequestedUntil = old('requested_until', $editingRequest?->requested_until?->toDateString() ?? $defaultRequestedFor);
         $defaultReason = old('reason', (string) ($editingRequest?->reason ?? ''));
 
         if ($defaultSubjectId === '') {
@@ -100,6 +101,7 @@ class LawRequestController extends Controller
                 'subject_id' => $defaultSubjectId,
                 'subject_time_keys' => $defaultTimeKeys,
                 'requested_for' => $defaultRequestedFor,
+                'requested_until' => $defaultRequestedUntil,
                 'reason' => $defaultReason,
             ],
         ]);
@@ -122,9 +124,7 @@ class LawRequestController extends Controller
         $notificationDate = $lawRequest->requested_for
             ? $lawRequest->requested_for->toDateString()
             : now()->toDateString();
-        $requestedForText = $lawRequest->requested_for
-            ? Carbon::parse($lawRequest->requested_for)->format('M d, Y')
-            : '';
+        $requestedForText = $this->formatRequestedDateRange($lawRequest);
         $notificationSchedule = $this->buildRequestedForScheduleText($lawRequest);
 
         $notification = new Notification([
@@ -213,7 +213,8 @@ class LawRequestController extends Controller
             'subject_id' => ['required', 'string', Rule::in($subjectKeys)],
             'subject_time_keys' => ['required', 'array', 'min:1'],
             'subject_time_keys.*' => ['required', 'string', Rule::in($timeKeys)],
-            'requested_for' => ['nullable', 'date'],
+            'requested_for' => ['required', 'date'],
+            'requested_until' => ['required', 'date', 'after_or_equal:requested_for'],
             'reason' => ['required', 'string', 'max:5000'],
         ]);
 
@@ -264,6 +265,7 @@ class LawRequestController extends Controller
             'law_type' => $validated['law_type'],
             'subject' => $subjectText,
             'requested_for' => $validated['requested_for'] ?? null,
+            'requested_until' => $validated['requested_until'] ?? ($validated['requested_for'] ?? null),
             'reason' => trim((string) ($validated['reason'] ?? '')),
         ];
         if ($hasSubjectTimeColumn) {
@@ -403,9 +405,7 @@ class LawRequestController extends Controller
 
     private function buildRequestedForScheduleText(TeacherLawRequest $lawRequest): string
     {
-        $requestedForText = $lawRequest->requested_for
-            ? Carbon::parse($lawRequest->requested_for)->format('M d, Y')
-            : '';
+        $requestedForText = $this->formatRequestedDateRange($lawRequest);
         $subjectTimeText = trim((string) ($lawRequest->subject_time ?? ''));
 
         if ($subjectTimeText === '' && str_contains(trim((string) ($lawRequest->subject ?? '')), '|')) {
@@ -418,6 +418,22 @@ class LawRequestController extends Controller
         ]);
 
         return trim(implode(' | ', $parts));
+    }
+
+    private function formatRequestedDateRange(TeacherLawRequest $lawRequest): string
+    {
+        $from = $lawRequest->requested_for ? Carbon::parse($lawRequest->requested_for)->format('M d, Y') : '';
+        $until = $lawRequest->requested_until ? Carbon::parse($lawRequest->requested_until)->format('M d, Y') : '';
+
+        if ($from === '') {
+            return $until;
+        }
+
+        if ($until === '' || $until === $from) {
+            return $from;
+        }
+
+        return $from . ' - ' . $until;
     }
 
     private function teacherSubjectTimes(int $teacherId, $subjectOptions)

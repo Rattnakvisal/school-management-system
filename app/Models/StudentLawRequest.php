@@ -16,6 +16,7 @@ class StudentLawRequest extends Model
         'subject',
         'subject_time',
         'requested_for',
+        'requested_until',
         'reason',
         'status',
         'teacher_note',
@@ -29,6 +30,7 @@ class StudentLawRequest extends Model
      */
     protected $casts = [
         'requested_for' => 'date',
+        'requested_until' => 'date',
         'subject_id' => 'integer',
         'teacher_id' => 'integer',
         'reviewed_at' => 'datetime',

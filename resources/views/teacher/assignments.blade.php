@@ -281,7 +281,7 @@
                                                 $dueClass = 'border-amber-200 bg-amber-50 text-amber-700';
                                             }
                                         @endphp
-                                        <tr id="assignment-{{ $assignment->id }}" x-data="{ detailOpen: false }"
+                                        <tr id="assignment-{{ $assignment->id }}" x-data="{ detailOpen: false, editOpen: false }"
                                             class="align-top hover:bg-slate-50/80 {{ $isEditing && (int) $editingAssignment->id === (int) $assignment->id ? 'bg-indigo-50/40' : '' }}">
                                             <td class="px-3 py-3">
                                                 <div class="font-semibold text-slate-900">{{ $assignment->title }}</div>
@@ -457,10 +457,154 @@
                                             </td>
                                             <td class="px-3 py-3">
                                                 <div class="flex justify-end">
-                                                    <a href="{{ route('teacher.assignments.index', ['edit' => $assignment->id]) }}"
+                                                    <button type="button" @click="editOpen = true"
                                                         class="inline-flex items-center rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
                                                         Edit
-                                                    </a>
+                                                    </button>
+                                                </div>
+
+                                                <div x-show="editOpen" x-cloak x-transition.opacity
+                                                    class="fixed inset-0 z-[80] bg-slate-900/40" @click="editOpen = false"></div>
+                                                <div x-show="editOpen" x-cloak x-transition
+                                                    class="fixed inset-x-3 top-6 z-[81] mx-auto max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:top-10">
+                                                    <form method="POST"
+                                                        action="{{ route('teacher.assignments.update', $assignment) }}"
+                                                        class="js-assignment-edit-form flex max-h-[calc(100vh-3rem)] flex-col"
+                                                        data-assignment="{{ $assignment->title }}">
+                                                        @csrf
+                                                        @method('PUT')
+
+                                                        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+                                                            <div class="min-w-0">
+                                                                <h3 class="truncate text-2xl font-black text-slate-900">Edit Assignment</h3>
+                                                                <p class="mt-2 text-sm text-slate-500">Update the assignment details and recipients.</p>
+                                                            </div>
+                                                            <button type="button" @click="editOpen = false"
+                                                                class="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-slate-200 text-xl font-bold text-slate-600 hover:bg-slate-50"
+                                                                aria-label="Close edit assignment">
+                                                                &times;
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+                                                            <div class="space-y-2">
+                                                                <label for="edit_assignment_title_{{ $assignment->id }}" class="text-sm font-semibold text-slate-700">Title</label>
+                                                                <input id="edit_assignment_title_{{ $assignment->id }}" name="title" type="text"
+                                                                    value="{{ $assignment->title }}" maxlength="255"
+                                                                    class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                            </div>
+
+                                                            <div class="grid gap-5 sm:grid-cols-2">
+                                                                <div class="space-y-2">
+                                                                    <label for="edit_assignment_subject_id_{{ $assignment->id }}" class="text-sm font-semibold text-slate-700">Subject</label>
+                                                                    <select id="edit_assignment_subject_id_{{ $assignment->id }}" name="subject_id"
+                                                                        class="js-assignment-edit-subject w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                        <option value="">General assignment</option>
+                                                                        @foreach ($subjectOptions as $subject)
+                                                                            <option value="{{ $subject['id'] }}" @selected((int) ($assignment->subject_id ?? 0) === (int) $subject['id'])>
+                                                                                {{ $subject['name'] }}
+                                                                                {{ $subject['code'] !== '' ? ' (' . $subject['code'] . ')' : '' }}
+                                                                                {{ $subject['class_label'] !== '' ? ' | ' . $subject['class_label'] : '' }}
+                                                                            </option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+
+                                                                <div class="space-y-2">
+                                                                    <label for="edit_assignment_due_at_{{ $assignment->id }}" class="text-sm font-semibold text-slate-700">Due Date</label>
+                                                                    <input id="edit_assignment_due_at_{{ $assignment->id }}" type="date" name="due_at"
+                                                                        value="{{ $assignment->due_at?->format('Y-m-d') }}"
+                                                                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="space-y-2">
+                                                                <label for="edit_assignment_description_{{ $assignment->id }}" class="text-sm font-semibold text-slate-700">Description</label>
+                                                                <textarea id="edit_assignment_description_{{ $assignment->id }}" name="description" rows="5" maxlength="5000"
+                                                                    class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $assignment->description }}</textarea>
+                                                            </div>
+
+                                                            <div class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                                                    <div>
+                                                                        <h4 class="text-sm font-black text-slate-900">Student List</h4>
+                                                                        <p class="mt-1 text-xs font-medium text-slate-500">Choose the recipients for this assignment.</p>
+                                                                    </div>
+                                                                    <div class="js-assignment-edit-count rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                                                                        0 selected
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+                                                                    <input type="text" placeholder="Search by student or class"
+                                                                        class="js-assignment-edit-search w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                    <button type="button"
+                                                                        class="js-assignment-edit-select-visible inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                                                                        Select visible
+                                                                    </button>
+                                                                    <button type="button"
+                                                                        class="js-assignment-edit-clear-visible inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                                                                        Clear visible
+                                                                    </button>
+                                                                </div>
+
+                                                                <div class="max-h-[22rem] space-y-3 overflow-auto pr-1">
+                                                                    @php
+                                                                        $assignmentStudentIds = $assignment->students->pluck('id')->map(fn($id) => (int) $id)->all();
+                                                                    @endphp
+                                                                    @foreach ($studentOptions as $student)
+                                                                        @php
+                                                                            $editSubjectIds = implode(',', $student['subject_ids'] ?? []);
+                                                                            $editSubjectNames = collect($student['subject_names'] ?? [])->take(3)->all();
+                                                                            $editChecked = in_array((int) $student['id'], $assignmentStudentIds, true);
+                                                                        @endphp
+                                                                        <label data-edit-student-card
+                                                                            data-student-name="{{ strtolower($student['name']) }}"
+                                                                            data-student-class="{{ strtolower($student['class_label']) }}"
+                                                                            data-subject-ids="{{ $editSubjectIds }}"
+                                                                            class="flex cursor-pointer items-start gap-3 rounded-2xl border {{ $editChecked ? 'border-indigo-300 bg-indigo-50/70' : 'border-slate-200 bg-white' }} px-4 py-3 transition hover:border-indigo-300 hover:bg-indigo-50/50">
+                                                                            <input type="checkbox" name="student_ids[]" value="{{ $student['id'] }}"
+                                                                                {{ $editChecked ? 'checked' : '' }}
+                                                                                class="js-assignment-edit-checkbox mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
+                                                                            <div class="min-w-0 flex-1">
+                                                                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                                                                    <div class="text-sm font-semibold text-slate-900">{{ $student['name'] }}</div>
+                                                                                    <span class="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
+                                                                                        {{ $student['class_label'] }}
+                                                                                    </span>
+                                                                                </div>
+                                                                                @if ($editSubjectNames !== [])
+                                                                                    <div class="mt-2 flex flex-wrap gap-1.5">
+                                                                                        @foreach ($editSubjectNames as $subjectName)
+                                                                                            <span class="rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                                                                                                {{ $subjectName }}
+                                                                                            </span>
+                                                                                        @endforeach
+                                                                                        @if (count($student['subject_names'] ?? []) > count($editSubjectNames))
+                                                                                            <span class="text-[11px] font-semibold text-slate-400">
+                                                                                                +{{ count($student['subject_names'] ?? []) - count($editSubjectNames) }} more
+                                                                                            </span>
+                                                                                        @endif
+                                                                                    </div>
+                                                                                @endif
+                                                                            </div>
+                                                                        </label>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
+                                                            <button type="button" @click="editOpen = false"
+                                                                class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                                                                Cancel
+                                                            </button>
+                                                            <button type="submit"
+                                                                class="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-500">
+                                                                Save Changes
+                                                            </button>
+                                                        </div>
+                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>
@@ -600,6 +744,108 @@
             }
 
             queueAlerts(alertQueue);
+
+            const setupAssignmentStudentPicker = (targetForm) => {
+                if (!targetForm) {
+                    return;
+                }
+
+                const targetSubject = targetForm.querySelector('.js-assignment-edit-subject');
+                const targetSearch = targetForm.querySelector('.js-assignment-edit-search');
+                const targetSelectVisible = targetForm.querySelector('.js-assignment-edit-select-visible');
+                const targetClearVisible = targetForm.querySelector('.js-assignment-edit-clear-visible');
+                const targetCount = targetForm.querySelector('.js-assignment-edit-count');
+                const targetCards = Array.from(targetForm.querySelectorAll('[data-edit-student-card]'));
+
+                const readTargetSubjectIds = (card) => {
+                    return String(card.dataset.subjectIds || '')
+                        .split(',')
+                        .map((value) => Number(value.trim()))
+                        .filter((value) => Number.isFinite(value) && value > 0);
+                };
+
+                const updateTargetSelection = () => {
+                    const checkedCount = targetCards.filter((card) => {
+                        const checkbox = card.querySelector('.js-assignment-edit-checkbox');
+                        return checkbox && checkbox.checked;
+                    }).length;
+
+                    if (targetCount) {
+                        targetCount.textContent = `${checkedCount} selected`;
+                    }
+
+                    targetCards.forEach((card) => {
+                        const checkbox = card.querySelector('.js-assignment-edit-checkbox');
+                        if (!checkbox) {
+                            return;
+                        }
+
+                        card.classList.toggle('border-indigo-300', checkbox.checked);
+                        card.classList.toggle('bg-indigo-50/70', checkbox.checked);
+                        card.classList.toggle('border-slate-200', !checkbox.checked);
+                        card.classList.toggle('bg-white', !checkbox.checked);
+                    });
+                };
+
+                const applyTargetFilters = () => {
+                    const subjectId = Number(targetSubject?.value || 0) || 0;
+                    const searchValue = String(targetSearch?.value || '').trim().toLowerCase();
+
+                    targetCards.forEach((card) => {
+                        const name = String(card.dataset.studentName || '');
+                        const classLabel = String(card.dataset.studentClass || '');
+                        const subjectIds = readTargetSubjectIds(card);
+                        const matchesSubject = subjectId === 0 || subjectIds.includes(subjectId);
+                        const matchesSearch = searchValue === '' || name.includes(searchValue) || classLabel.includes(searchValue);
+                        const visible = matchesSubject && matchesSearch;
+
+                        card.classList.toggle('hidden', !visible);
+                    });
+                };
+
+                targetCards.forEach((card) => {
+                    card.querySelector('.js-assignment-edit-checkbox')?.addEventListener('change', updateTargetSelection);
+                });
+
+                targetSubject?.addEventListener('change', applyTargetFilters);
+                targetSearch?.addEventListener('input', applyTargetFilters);
+
+                targetSelectVisible?.addEventListener('click', () => {
+                    targetCards.forEach((card) => {
+                        if (card.classList.contains('hidden')) {
+                            return;
+                        }
+
+                        const checkbox = card.querySelector('.js-assignment-edit-checkbox');
+                        if (checkbox) {
+                            checkbox.checked = true;
+                        }
+                    });
+
+                    updateTargetSelection();
+                });
+
+                targetClearVisible?.addEventListener('click', () => {
+                    targetCards.forEach((card) => {
+                        if (card.classList.contains('hidden')) {
+                            return;
+                        }
+
+                        const checkbox = card.querySelector('.js-assignment-edit-checkbox');
+                        if (checkbox) {
+                            checkbox.checked = false;
+                        }
+                    });
+
+                    updateTargetSelection();
+                });
+
+                targetForm.dataset.confirmed = '1';
+                applyTargetFilters();
+                updateTargetSelection();
+            };
+
+            document.querySelectorAll('.js-assignment-edit-form').forEach(setupAssignmentStudentPicker);
 
             if (!form) {
                 return;

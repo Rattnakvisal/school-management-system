@@ -1,11 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
     const subjectSelect = document.getElementById("subject");
-    const timeOptionsContainer = document.getElementById("subject_time_options");
+    const timeOptionsContainer = document.getElementById(
+        "subject_time_options",
+    );
     const requestedForInput = document.getElementById("requested_for");
-    const teacherRecipientList = document.getElementById("teacher_recipient_list");
-    const teacherRecipientEmpty = document.getElementById("teacher_recipient_empty");
+    const requestedUntilInput = document.getElementById("requested_until");
+    const teacherRecipientList = document.getElementById(
+        "teacher_recipient_list",
+    );
+    const teacherRecipientEmpty = document.getElementById(
+        "teacher_recipient_empty",
+    );
     const dataNode = document.getElementById("student-law-request-data");
-    const submitForm = document.querySelector(".js-student-law-request-submit-form");
+    const submitForm = document.querySelector(
+        ".js-student-law-request-submit-form",
+    );
     const deleteForms = Array.from(
         document.querySelectorAll(".js-student-law-request-delete-form"),
     );
@@ -19,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
             subject_id: "",
             subject_time_keys: [],
             requested_for: "",
+            requested_until: "",
         },
         flash: {
             success: "",
@@ -36,11 +46,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 ...parsed,
                 formDefaults: {
                     ...defaultPageData.formDefaults,
-                    ...(parsed.formDefaults && typeof parsed.formDefaults === "object" ? parsed.formDefaults : {}),
+                    ...(parsed.formDefaults &&
+                    typeof parsed.formDefaults === "object"
+                        ? parsed.formDefaults
+                        : {}),
                 },
                 flash: {
                     ...defaultPageData.flash,
-                    ...(parsed.flash && typeof parsed.flash === "object" ? parsed.flash : {}),
+                    ...(parsed.flash && typeof parsed.flash === "object"
+                        ? parsed.flash
+                        : {}),
                 },
             };
         } catch (error) {
@@ -61,7 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
             : {};
 
     const defaultTimeKeys =
-        pageData.formDefaults && Array.isArray(pageData.formDefaults.subject_time_keys)
+        pageData.formDefaults &&
+        Array.isArray(pageData.formDefaults.subject_time_keys)
             ? pageData.formDefaults.subject_time_keys
             : [];
 
@@ -113,10 +129,14 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         if (hasSwal) {
-            return window.Swal.fire(config).then((result) => Boolean(result && result.isConfirmed));
+            return window.Swal.fire(config).then((result) =>
+                Boolean(result && result.isConfirmed),
+            );
         }
 
-        return Promise.resolve(window.confirm(`${config.title}\n\n${config.text}`));
+        return Promise.resolve(
+            window.confirm(`${config.title}\n\n${config.text}`),
+        );
     };
 
     const formatDate = (date) => {
@@ -126,34 +146,48 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${year}-${month}-${day}`;
     };
 
-    const getSubjectOptions = () => {
-        if (!subjectSelect) {
+    const getSubjectOptions = (targetSubjectSelect = subjectSelect) => {
+        if (!targetSubjectSelect) {
             return [];
         }
 
-        const subjectId = String(subjectSelect.value || "");
+        const subjectId = String(targetSubjectSelect.value || "");
         const options = subjectTimeMap[subjectId];
         return Array.isArray(options) ? options : [];
     };
 
-    const getSelectedTimeItems = () => {
-        if (!timeOptionsContainer) {
+    const getSelectedTimeItems = (
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+    ) => {
+        if (!targetTimeOptionsContainer) {
             return [];
         }
 
         const checkedKeys = Array.from(
-            timeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]:checked"),
+            targetTimeOptionsContainer.querySelectorAll(
+                "input.js-time-checkbox[data-time-key]:checked",
+            ),
         )
             .map((checkbox) => String(checkbox.dataset.timeKey || ""))
             .filter((key) => key !== "");
 
-        const options = getSubjectOptions();
+        const options = getSubjectOptions(targetSubjectSelect);
         return checkedKeys
-            .map((key) => options.find((item) => String(item && item.key ? item.key : "") === key) || null)
+            .map(
+                (key) =>
+                    options.find(
+                        (item) =>
+                            String(item && item.key ? item.key : "") === key,
+                    ) || null,
+            )
             .filter(Boolean);
     };
 
-    const getAutoRequestedForDate = () => {
+    const getAutoRequestedForDate = (
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+    ) => {
         const dayMap = {
             sunday: 0,
             monday: 1,
@@ -166,19 +200,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const selectedDays = Array.from(
             new Set(
-                getSelectedTimeItems()
-                    .map((item) => String(item && item.day_of_week ? item.day_of_week : "").toLowerCase().trim())
-                    .filter((dayKey) => dayKey && dayKey !== "all" && Object.prototype.hasOwnProperty.call(dayMap, dayKey)),
+                getSelectedTimeItems(
+                    targetSubjectSelect,
+                    targetTimeOptionsContainer,
+                )
+                    .map((item) =>
+                        String(item && item.day_of_week ? item.day_of_week : "")
+                            .toLowerCase()
+                            .trim(),
+                    )
+                    .filter(
+                        (dayKey) =>
+                            dayKey &&
+                            dayKey !== "all" &&
+                            Object.prototype.hasOwnProperty.call(
+                                dayMap,
+                                dayKey,
+                            ),
+                    ),
             ),
         );
 
         const dayKey = selectedDays.length === 1 ? selectedDays[0] : "";
-        if (!dayKey || dayKey === "all" || !Object.prototype.hasOwnProperty.call(dayMap, dayKey)) {
+        if (
+            !dayKey ||
+            dayKey === "all" ||
+            !Object.prototype.hasOwnProperty.call(dayMap, dayKey)
+        ) {
             return "";
         }
 
         const today = new Date();
-        const nextDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const nextDate = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+        );
         const targetDay = dayMap[dayKey];
         const delta = (targetDay - nextDate.getDay() + 7) % 7;
         nextDate.setDate(nextDate.getDate() + delta);
@@ -186,25 +243,60 @@ document.addEventListener("DOMContentLoaded", () => {
         return formatDate(nextDate);
     };
 
-    const syncRequestedForDate = () => {
-        if (!requestedForInput) {
+    const syncDateRange = (fromInput, untilInput) => {
+        if (!fromInput || !untilInput || !fromInput.value) {
             return;
         }
 
-        const autoDate = getAutoRequestedForDate();
-        if (autoDate === "") {
-            if (requestedForInput.value === lastAutoRequestedFor) {
-                requestedForInput.value = "";
+        if (!untilInput.value || untilInput.value < fromInput.value) {
+            untilInput.value = fromInput.value;
+        }
+    };
+
+    const syncRequestedForDate = (
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+        targetRequestedForInput = requestedForInput,
+        lastAutoRef = null,
+        targetRequestedUntilInput = requestedUntilInput,
+    ) => {
+        const getLastAuto = () =>
+            lastAutoRef ? lastAutoRef.value : lastAutoRequestedFor;
+        const setLastAuto = (value) => {
+            if (lastAutoRef) {
+                lastAutoRef.value = value;
+                return;
             }
-            lastAutoRequestedFor = "";
+
+            lastAutoRequestedFor = value;
+        };
+
+        if (!targetRequestedForInput) {
             return;
         }
 
-        if (requestedForInput.value === "" || requestedForInput.value === lastAutoRequestedFor) {
-            requestedForInput.value = autoDate;
+        const autoDate = getAutoRequestedForDate(
+            targetSubjectSelect,
+            targetTimeOptionsContainer,
+        );
+        if (autoDate === "") {
+            if (targetRequestedForInput.value === getLastAuto()) {
+                targetRequestedForInput.value = "";
+            }
+            setLastAuto("");
+            syncDateRange(targetRequestedForInput, targetRequestedUntilInput);
+            return;
         }
 
-        lastAutoRequestedFor = autoDate;
+        if (
+            targetRequestedForInput.value === "" ||
+            targetRequestedForInput.value === getLastAuto()
+        ) {
+            targetRequestedForInput.value = autoDate;
+        }
+
+        setLastAuto(autoDate);
+        syncDateRange(targetRequestedForInput, targetRequestedUntilInput);
     };
 
     const setCardState = (card, checked) => {
@@ -218,44 +310,87 @@ document.addEventListener("DOMContentLoaded", () => {
         card.classList.toggle("bg-white", !checked);
     };
 
-    const syncAllTimeCard = () => {
-        if (!timeOptionsContainer) {
+    const makeTimeOptionId = (prefix, optionKey, targetTimeOptionsContainer) => {
+        const scope = String(
+            targetTimeOptionsContainer && targetTimeOptionsContainer.id
+                ? targetTimeOptionsContainer.id
+                : "main",
+        ).replace(/[^a-zA-Z0-9_-]/g, "-");
+        const safeKey = String(optionKey || "option").replace(
+            /[^a-zA-Z0-9_-]/g,
+            "-",
+        );
+
+        return `${prefix}-${scope}-${safeKey}`;
+    };
+
+    const syncAllTimeCard = (
+        targetTimeOptionsContainer = timeOptionsContainer,
+    ) => {
+        if (!targetTimeOptionsContainer) {
             return;
         }
 
-        const allCheckbox = timeOptionsContainer.querySelector(
+        const allCheckbox = targetTimeOptionsContainer.querySelector(
             `input.js-time-all-checkbox[data-time-key="${allTimeOptionKey}"]`,
         );
-        const allCard = allCheckbox ? allCheckbox.closest(".js-time-card") : null;
+        const allCard = allCheckbox
+            ? allCheckbox.closest(".js-time-card")
+            : null;
         const realCheckboxes = Array.from(
-            timeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]"),
+            targetTimeOptionsContainer.querySelectorAll(
+                "input.js-time-checkbox[data-time-key]",
+            ),
         );
 
         if (!allCheckbox || realCheckboxes.length === 0) {
             return;
         }
 
-        const checkedCount = realCheckboxes.filter((checkbox) => checkbox.checked).length;
+        const checkedCount = realCheckboxes.filter(
+            (checkbox) => checkbox.checked,
+        ).length;
         allCheckbox.checked = checkedCount === realCheckboxes.length;
-        allCheckbox.indeterminate = checkedCount > 0 && checkedCount < realCheckboxes.length;
+        allCheckbox.indeterminate =
+            checkedCount > 0 && checkedCount < realCheckboxes.length;
         setCardState(allCard, checkedCount === realCheckboxes.length);
     };
 
-    const renderTeacherRecipients = () => {
-        if (!teacherRecipientList || !teacherRecipientEmpty || !subjectSelect) {
+    const renderTeacherRecipients = (
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+        targetTeacherRecipientList = teacherRecipientList,
+        targetTeacherRecipientEmpty = teacherRecipientEmpty,
+    ) => {
+        if (
+            !targetTeacherRecipientList ||
+            !targetTeacherRecipientEmpty ||
+            !targetSubjectSelect
+        ) {
             return;
         }
 
         const recipientsById = new Map();
-        getSelectedTimeItems().forEach((selectedItem) => {
-            const timeKey = String(selectedItem && selectedItem.key ? selectedItem.key : "");
+        getSelectedTimeItems(
+            targetSubjectSelect,
+            targetTimeOptionsContainer,
+        ).forEach((selectedItem) => {
+            const timeKey = String(
+                selectedItem && selectedItem.key ? selectedItem.key : "",
+            );
             const recipients = Array.isArray(teacherRecipientsByTime[timeKey])
                 ? teacherRecipientsByTime[timeKey]
                 : [];
 
             recipients.forEach((recipient) => {
-                const recipientId = String(recipient && recipient.id ? recipient.id : "");
-                const recipientName = String(recipient && recipient.name ? recipient.name : "Assigned Teacher");
+                const recipientId = String(
+                    recipient && recipient.id ? recipient.id : "",
+                );
+                const recipientName = String(
+                    recipient && recipient.name
+                        ? recipient.name
+                        : "Assigned Teacher",
+                );
                 const mapKey = recipientId !== "" ? recipientId : recipientName;
                 recipientsById.set(mapKey, {
                     id: recipientId,
@@ -264,11 +399,11 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        teacherRecipientList.innerHTML = "";
+        targetTeacherRecipientList.innerHTML = "";
 
         if (recipientsById.size === 0) {
-            teacherRecipientList.classList.add("hidden");
-            teacherRecipientEmpty.classList.remove("hidden");
+            targetTeacherRecipientList.classList.add("hidden");
+            targetTeacherRecipientEmpty.classList.remove("hidden");
             return;
         }
 
@@ -276,22 +411,37 @@ document.addEventListener("DOMContentLoaded", () => {
             const chip = document.createElement("span");
             chip.className =
                 "inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700";
-            chip.textContent = String(recipient && recipient.name ? recipient.name : "Assigned Teacher");
-            teacherRecipientList.appendChild(chip);
+            chip.textContent = String(
+                recipient && recipient.name
+                    ? recipient.name
+                    : "Assigned Teacher",
+            );
+            targetTeacherRecipientList.appendChild(chip);
         });
 
-        teacherRecipientList.classList.remove("hidden");
-        teacherRecipientEmpty.classList.add("hidden");
+        targetTeacherRecipientList.classList.remove("hidden");
+        targetTeacherRecipientEmpty.classList.add("hidden");
     };
 
-    const renderTimeOptions = (preferredKeys) => {
-        if (!timeOptionsContainer) {
+    const renderTimeOptions = (
+        preferredKeys,
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+        targetRequestedForInput = requestedForInput,
+        lastAutoRef = null,
+        targetRequestedUntilInput = requestedUntilInput,
+        targetTeacherRecipientList = teacherRecipientList,
+        targetTeacherRecipientEmpty = teacherRecipientEmpty,
+    ) => {
+        if (!targetTimeOptionsContainer) {
             return;
         }
 
-        const options = getSubjectOptions();
+        const options = getSubjectOptions(targetSubjectSelect);
         const normalizedKeys = Array.isArray(preferredKeys)
-            ? preferredKeys.map((key) => String(key || "")).filter((key) => key !== "")
+            ? preferredKeys
+                  .map((key) => String(key || ""))
+                  .filter((key) => key !== "")
             : [];
         const optionKeys = options
             .map((item) => String(item && item.key ? item.key : ""))
@@ -300,22 +450,39 @@ document.addEventListener("DOMContentLoaded", () => {
             ? new Set(optionKeys)
             : new Set(normalizedKeys);
 
-        timeOptionsContainer.innerHTML = "";
+        targetTimeOptionsContainer.innerHTML = "";
 
         if (options.length === 0) {
             const emptyState = document.createElement("div");
             emptyState.className =
                 "rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500";
             emptyState.textContent = "No time available";
-            timeOptionsContainer.appendChild(emptyState);
-            syncRequestedForDate();
+            targetTimeOptionsContainer.appendChild(emptyState);
+            syncRequestedForDate(
+                targetSubjectSelect,
+                targetTimeOptionsContainer,
+                targetRequestedForInput,
+                lastAutoRef,
+                targetRequestedUntilInput,
+            );
+            renderTeacherRecipients(
+                targetSubjectSelect,
+                targetTimeOptionsContainer,
+                targetTeacherRecipientList,
+                targetTeacherRecipientEmpty,
+            );
             return;
         }
 
         if (options.length > 1) {
-            const allOptionId = "student-subject-time-all";
+            const allOptionId = makeTimeOptionId(
+                "student-subject-time",
+                "all",
+                targetTimeOptionsContainer,
+            );
             const allChecked =
-                optionKeys.length > 0 && optionKeys.every((optionKey) => selectedKeySet.has(optionKey));
+                optionKeys.length > 0 &&
+                optionKeys.every((optionKey) => selectedKeySet.has(optionKey));
 
             const label = document.createElement("label");
             label.setAttribute("for", allOptionId);
@@ -346,31 +513,55 @@ document.addEventListener("DOMContentLoaded", () => {
             textWrap.appendChild(meta);
             label.appendChild(checkbox);
             label.appendChild(textWrap);
-            timeOptionsContainer.appendChild(label);
+            targetTimeOptionsContainer.appendChild(label);
             setCardState(label, allChecked);
 
             checkbox.addEventListener("change", () => {
                 const checked = checkbox.checked;
                 Array.from(
-                    timeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]"),
+                    targetTimeOptionsContainer.querySelectorAll(
+                        "input.js-time-checkbox[data-time-key]",
+                    ),
                 ).forEach((timeCheckbox) => {
                     timeCheckbox.checked = checked;
-                    setCardState(timeCheckbox.closest(".js-time-card"), checked);
+                    setCardState(
+                        timeCheckbox.closest(".js-time-card"),
+                        checked,
+                    );
                 });
 
                 checkbox.indeterminate = false;
                 setCardState(label, checked);
-                syncRequestedForDate();
-                renderTeacherRecipients();
+                syncRequestedForDate(
+                    targetSubjectSelect,
+                    targetTimeOptionsContainer,
+                    targetRequestedForInput,
+                    lastAutoRef,
+                    targetRequestedUntilInput,
+                );
+                renderTeacherRecipients(
+                    targetSubjectSelect,
+                    targetTimeOptionsContainer,
+                    targetTeacherRecipientList,
+                    targetTeacherRecipientEmpty,
+                );
             });
         }
 
         options.forEach((item) => {
             const optionKey = String(item && item.key ? item.key : "");
             const optionLabel = String(item && item.label ? item.label : "");
-            const optionDay = String(item && item.day_of_week ? item.day_of_week : "");
-            const teacherName = String(item && item.teacher_name ? item.teacher_name : "");
-            const optionId = `student-subject-time-${optionKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+            const optionDay = String(
+                item && item.day_of_week ? item.day_of_week : "",
+            );
+            const teacherName = String(
+                item && item.teacher_name ? item.teacher_name : "",
+            );
+            const optionId = makeTimeOptionId(
+                "student-subject-time",
+                optionKey,
+                targetTimeOptionsContainer,
+            );
             const checked = selectedKeySet.has(optionKey);
 
             const label = document.createElement("label");
@@ -406,21 +597,43 @@ document.addEventListener("DOMContentLoaded", () => {
             textWrap.appendChild(meta);
             label.appendChild(checkbox);
             label.appendChild(textWrap);
-            timeOptionsContainer.appendChild(label);
+            targetTimeOptionsContainer.appendChild(label);
 
             setCardState(label, checked);
 
             checkbox.addEventListener("change", () => {
                 setCardState(label, checkbox.checked);
-                syncAllTimeCard();
-                syncRequestedForDate();
-                renderTeacherRecipients();
+                syncAllTimeCard(targetTimeOptionsContainer);
+                syncRequestedForDate(
+                    targetSubjectSelect,
+                    targetTimeOptionsContainer,
+                    targetRequestedForInput,
+                    lastAutoRef,
+                    targetRequestedUntilInput,
+                );
+                renderTeacherRecipients(
+                    targetSubjectSelect,
+                    targetTimeOptionsContainer,
+                    targetTeacherRecipientList,
+                    targetTeacherRecipientEmpty,
+                );
             });
         });
 
-        syncAllTimeCard();
-        syncRequestedForDate();
-        renderTeacherRecipients();
+        syncAllTimeCard(targetTimeOptionsContainer);
+        syncRequestedForDate(
+            targetSubjectSelect,
+            targetTimeOptionsContainer,
+            targetRequestedForInput,
+            lastAutoRef,
+            targetRequestedUntilInput,
+        );
+        renderTeacherRecipients(
+            targetSubjectSelect,
+            targetTimeOptionsContainer,
+            targetTeacherRecipientList,
+            targetTeacherRecipientEmpty,
+        );
     };
 
     if (submitForm) {
@@ -467,6 +680,105 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document
+        .querySelectorAll(".js-student-law-request-edit-form")
+        .forEach((editForm) => {
+            const editSubjectSelect = editForm.querySelector(
+                ".js-edit-student-law-subject",
+            );
+            const editTimeOptionsContainer = editForm.querySelector(
+                ".js-edit-student-law-time-options",
+            );
+            const editRequestedForInput = editForm.querySelector(
+                '[name="requested_for"]',
+            );
+            const editRequestedUntilInput = editForm.querySelector(
+                '[name="requested_until"]',
+            );
+            const editTeacherRecipientList = editForm.querySelector(
+                ".js-edit-teacher-recipient-list",
+            );
+            const editTeacherRecipientEmpty = editForm.querySelector(
+                ".js-edit-teacher-recipient-empty",
+            );
+            const lastEditAutoRequestedFor = { value: "" };
+            let selectedTimeKeys = [];
+
+            try {
+                selectedTimeKeys = JSON.parse(
+                    editSubjectSelect?.dataset.selectedTimeKeys || "[]",
+                );
+            } catch (error) {
+                selectedTimeKeys = [];
+            }
+
+            if (!Array.isArray(selectedTimeKeys)) {
+                selectedTimeKeys = [];
+            }
+
+            if (editSubjectSelect && editTimeOptionsContainer) {
+                renderTimeOptions(
+                    selectedTimeKeys,
+                    editSubjectSelect,
+                    editTimeOptionsContainer,
+                    editRequestedForInput,
+                    lastEditAutoRequestedFor,
+                    editRequestedUntilInput,
+                    editTeacherRecipientList,
+                    editTeacherRecipientEmpty,
+                );
+
+                editSubjectSelect.addEventListener("change", () => {
+                    if (editRequestedForInput) {
+                        editRequestedForInput.value = "";
+                    }
+                    lastEditAutoRequestedFor.value = "";
+                    renderTimeOptions(
+                        [],
+                        editSubjectSelect,
+                        editTimeOptionsContainer,
+                        editRequestedForInput,
+                        lastEditAutoRequestedFor,
+                        editRequestedUntilInput,
+                        editTeacherRecipientList,
+                        editTeacherRecipientEmpty,
+                    );
+                });
+            }
+
+            if (editRequestedForInput) {
+                editRequestedForInput.addEventListener("input", () => {
+                    if (
+                        editRequestedForInput.value !==
+                        lastEditAutoRequestedFor.value
+                    ) {
+                        lastEditAutoRequestedFor.value = "";
+                    }
+                    syncDateRange(
+                        editRequestedForInput,
+                        editRequestedUntilInput,
+                    );
+                });
+
+                editRequestedForInput.addEventListener("change", () => {
+                    if (
+                        editRequestedForInput.value !==
+                        lastEditAutoRequestedFor.value
+                    ) {
+                        lastEditAutoRequestedFor.value = "";
+                    }
+                    syncDateRange(
+                        editRequestedForInput,
+                        editRequestedUntilInput,
+                    );
+                });
+            }
+
+            editRequestedUntilInput?.addEventListener("change", () => {
+                syncDateRange(editRequestedForInput, editRequestedUntilInput);
+            });
+        });
+
     const alertQueue = [];
     const flash = pageData.flash || {};
 
@@ -498,21 +810,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (requestedForInput) {
-        requestedForInput.addEventListener("input", () => {
-            if (requestedForInput.value !== lastAutoRequestedFor) {
-                lastAutoRequestedFor = "";
-            }
-        });
-
-        requestedForInput.addEventListener("change", () => {
-            if (requestedForInput.value !== lastAutoRequestedFor) {
-                lastAutoRequestedFor = "";
-            }
-        });
-    }
-
-    if (subjectSelect) {
+    if (subjectSelect && timeOptionsContainer) {
         const initialSubjectId = String(
             pageData.formDefaults && pageData.formDefaults.subject_id
                 ? pageData.formDefaults.subject_id
@@ -523,8 +821,27 @@ document.addEventListener("DOMContentLoaded", () => {
             subjectSelect.value = initialSubjectId;
         }
 
-            renderTimeOptions(defaultTimeKeys);
-        renderTeacherRecipients();
+        renderTimeOptions(defaultTimeKeys);
+
+        if (requestedForInput) {
+            requestedForInput.addEventListener("input", () => {
+                if (requestedForInput.value !== lastAutoRequestedFor) {
+                    lastAutoRequestedFor = "";
+                }
+                syncDateRange(requestedForInput, requestedUntilInput);
+            });
+
+            requestedForInput.addEventListener("change", () => {
+                if (requestedForInput.value !== lastAutoRequestedFor) {
+                    lastAutoRequestedFor = "";
+                }
+                syncDateRange(requestedForInput, requestedUntilInput);
+            });
+        }
+
+        requestedUntilInput?.addEventListener("change", () => {
+            syncDateRange(requestedForInput, requestedUntilInput);
+        });
 
         subjectSelect.addEventListener("change", () => {
             if (requestedForInput) {

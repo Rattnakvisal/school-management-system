@@ -17,9 +17,11 @@
         $studentStatPanelClass =
             'rounded-[26px] border border-white/80 bg-white/90 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] ring-1 ring-slate-200 backdrop-blur';
         $selectedSubjectId = (string) ($formValues['subject_id'] ?? '');
-        $selectedTimeKeys = array_values(array_unique(array_filter(array_map('strval', (array) ($formValues['subject_time_keys'] ?? [])))));
+        $selectedTimeKeys = array_values(
+            array_unique(array_filter(array_map('strval', (array) ($formValues['subject_time_keys'] ?? [])))),
+        );
         $subjectTimeMap = $subjectTimeOptionsBySubject ?? [];
-        $initialTimeOptions = $selectedSubjectId !== '' ? ($subjectTimeMap[$selectedSubjectId] ?? []) : [];
+        $initialTimeOptions = $selectedSubjectId !== '' ? $subjectTimeMap[$selectedSubjectId] ?? [] : [];
     @endphp
 
     <div class="student-stage space-y-6">
@@ -147,19 +149,22 @@
         </section>
 
         @if (session('success'))
-            <div class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+            <div
+                class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('warning'))
-            <div class="js-inline-flash rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+            <div
+                class="js-inline-flash rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
                 {{ session('warning') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="js-inline-flash rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            <div
+                class="js-inline-flash rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
                 {{ session('error') }}
             </div>
         @endif
@@ -171,17 +176,20 @@
         @endif
 
         <div class="grid gap-6 xl:grid-cols-12">
-            <section class="student-reveal student-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5"
+            <section
+                class="student-reveal student-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5"
                 style="--sd: 2;">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <h2 class="text-lg font-black text-slate-900">{{ $isEditing ? 'Edit Request' : 'Create Request' }}</h2>
+                        <h2 class="text-lg font-black text-slate-900">{{ $isEditing ? 'Edit Request' : 'Create Request' }}
+                        </h2>
                         <p class="mt-1 text-xs font-semibold text-slate-500">
                             {{ $isEditing ? 'Update your pending request and save changes.' : 'Choose subject, class time, and let the date fill automatically from the schedule.' }}
                         </p>
                     </div>
 
-                    <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-indigo-700">
+                    <span
+                        class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-indigo-700">
                         Teacher Alert Enabled
                     </span>
                 </div>
@@ -215,7 +223,10 @@
                                 @php
                                     $className = trim((string) ($subjectOption->class_name ?? ''));
                                     $classSection = trim((string) ($subjectOption->class_section ?? ''));
-                                    $classDisplay = $className !== '' ? ($className . ($classSection !== '' ? ' - ' . $classSection : '')) : '';
+                                    $classDisplay =
+                                        $className !== ''
+                                            ? $className . ($classSection !== '' ? ' - ' . $classSection : '')
+                                            : '';
                                 @endphp
                                 <option value="{{ $subjectOption->id }}"
                                     {{ $selectedSubjectId === (string) $subjectOption->id ? 'selected' : '' }}>
@@ -242,8 +253,9 @@
                                     class="js-time-card flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 text-sm transition hover:border-indigo-300 hover:bg-indigo-50/40 {{ $isChecked ? 'border-indigo-300 bg-indigo-50' : 'border-slate-200 bg-white' }}"
                                     data-day-of-week="{{ (string) ($timeOption['day_of_week'] ?? '') }}"
                                     data-time-key="{{ $timeKey }}">
-                                    <input type="checkbox" name="subject_time_keys[]"
-                                        value="{{ $timeKey }}"
+                                    <input type="checkbox" name="subject_time_keys[]" value="{{ $timeKey }}"
+                                        data-time-key="{{ $timeKey }}"
+                                        data-day-of-week="{{ (string) ($timeOption['day_of_week'] ?? '') }}"
                                         {{ $isChecked ? 'checked' : '' }}
                                         class="js-time-checkbox mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
                                     <div class="min-w-0">
@@ -255,21 +267,32 @@
                                     </div>
                                 </label>
                             @empty
-                                <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">
+                                <div
+                                    class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500">
                                     No time available
                                 </div>
                             @endforelse
                         </div>
-                        <p class="text-xs font-medium text-slate-400">Choose one class time, or select All to include every class time for this subject.</p>
+                        <p class="text-xs font-medium text-slate-400">Choose one class time, or select All to include every
+                            class time for this subject.</p>
                     </div>
 
-                    <div class="space-y-2">
-                        <label for="requested_for" class="text-sm font-semibold text-slate-700">Requested For Date</label>
-                        <input id="requested_for" type="date" name="requested_for"
-                            value="{{ (string) ($formValues['requested_for'] ?? '') }}"
-                            class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                        <p class="text-xs font-medium text-slate-400">
-                            The date can auto-fill from the selected class day. You can still change it manually.
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-2">
+                            <label for="requested_for" class="text-sm font-semibold text-slate-700">From Date</label>
+                            <input id="requested_for" type="date" name="requested_for"
+                                value="{{ (string) ($formValues['requested_for'] ?? now()->toDateString()) }}"
+                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="requested_until" class="text-sm font-semibold text-slate-700">Until Date</label>
+                            <input id="requested_until" type="date" name="requested_until"
+                                value="{{ (string) ($formValues['requested_until'] ?? ($formValues['requested_for'] ?? now()->toDateString())) }}"
+                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                        </div>
+                        <p class="text-xs font-medium text-slate-400 sm:col-span-2">
+                            The from date can auto-fill from the selected class day. You can still change both dates
+                            manually.
                         </p>
                     </div>
 
@@ -281,11 +304,13 @@
                     </div>
 
                     <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                        <div class="text-xs font-bold uppercase tracking-wide text-slate-500">Teachers Who Will Be Notified</div>
+                        <div class="text-xs font-bold uppercase tracking-wide text-slate-500">Teachers Who Will Be Notified
+                        </div>
                         @if ($teacherRecipients->isNotEmpty())
                             <div id="teacher_recipient_list" class="mt-3 flex flex-wrap gap-2">
                                 @foreach ($teacherRecipients as $teacherRecipient)
-                                    <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                                    <span
+                                        class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
                                         {{ $teacherRecipient->name }}
                                     </span>
                                 @endforeach
@@ -303,7 +328,7 @@
 
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <button type="submit"
-                            class="inline-flex w-full flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-slate-900 px-4 py-3 text-sm font-bold text-white transition hover:from-indigo-500 hover:to-slate-800">
+                            class="inline-flex w-full flex-1 items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-500">
                             {{ $isEditing ? 'Update Law Request' : 'Submit Law Request' }}
                         </button>
                         @if ($isEditing)
@@ -316,7 +341,8 @@
                 </form>
             </section>
 
-            <section class="student-reveal student-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7"
+            <section
+                class="student-reveal student-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7"
                 style="--sd: 3;">
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h2 class="text-lg font-black text-slate-900">Request History</h2>
@@ -325,12 +351,14 @@
 
                 <div class="overflow-hidden rounded-2xl border border-slate-200">
                     <div class="max-h-[620px] overflow-auto">
-                        <table class="w-full min-w-[980px] text-left text-sm">
-                            <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                        <table class="w-full min-w-[980px] lg:min-w-[1100px] text-left text-sm">
+                            <thead
+                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
                                     <th class="px-3 py-3 font-semibold">Type</th>
                                     <th class="px-3 py-3 font-semibold">Subject</th>
-                                    <th class="px-3 py-3 font-semibold">Requested For</th>
+                                    <th class="px-3 py-3 font-semibold">From Date</th>
+                                    <th class="px-3 py-3 font-semibold">Until Date</th>
                                     <th class="px-3 py-3 font-semibold">Status</th>
                                     <th class="px-3 py-3 font-semibold">Submitted</th>
                                     <th class="px-3 py-3 font-semibold">Action</th>
@@ -340,51 +368,113 @@
                                 @forelse ($lawRequests as $lawRequest)
                                     @php
                                         $statusKey = strtolower((string) ($lawRequest->status ?? 'pending'));
-                                        $statusClass = $statusStyles[$statusKey] ?? 'border-slate-200 bg-slate-50 text-slate-700';
-                                        $typeLabel = $lawTypes[$lawRequest->law_type] ?? ucfirst(str_replace('_', ' ', (string) $lawRequest->law_type));
+                                        $statusClass =
+                                            $statusStyles[$statusKey] ?? 'border-slate-200 bg-slate-50 text-slate-700';
+                                        $typeLabel =
+                                            $lawTypes[$lawRequest->law_type] ??
+                                            ucfirst(str_replace('_', ' ', (string) $lawRequest->law_type));
                                         $canManage = $statusKey === 'pending';
-                                        $subjectTimeParts = array_values(array_filter(array_map('trim', explode(',', (string) ($lawRequest->subject_time ?? ''))), fn($value) => $value !== ''));
+                                        $subjectText = trim((string) ($lawRequest->subject ?? ''));
+                                        $subjectTimeText = trim((string) ($lawRequest->subject_time ?? ''));
+                                        $subjectTimeParts = array_values(
+                                            array_filter(
+                                                array_map(
+                                                    'trim',
+                                                    explode(',', $subjectTimeText),
+                                                ),
+                                                fn($value) => $value !== '',
+                                            ),
+                                        );
+                                        $requestedForText = $lawRequest->requested_for
+                                            ? $lawRequest->requested_for->format('M d, Y')
+                                            : 'N/A';
+                                        $requestedUntilText = $lawRequest->requested_until
+                                            ? $lawRequest->requested_until->format('M d, Y')
+                                            : '';
+                                        $requestedUntilDisplay =
+                                            $requestedUntilText !== '' ? $requestedUntilText : $requestedForText;
+                                        $editSubjectId = (string) ((int) ($lawRequest->subject_id ?? 0) ?: '');
+                                        $hasEditSubject = $editSubjectId !== '' && collect($subjectOptions ?? [])->contains(
+                                            fn($subjectOption) => (string) ($subjectOption->id ?? '') === $editSubjectId,
+                                        );
+
+                                        if (!$hasEditSubject && $subjectText !== '') {
+                                            $matchedSubject = collect($subjectOptions ?? [])->first(function ($subjectOption) use ($subjectText) {
+                                                return strcasecmp(trim((string) ($subjectOption->name ?? '')), $subjectText) === 0;
+                                            });
+                                            $editSubjectId = $matchedSubject ? (string) $matchedSubject->id : '';
+                                        }
+
+                                        if ($editSubjectId === '') {
+                                            $firstSubject = collect($subjectOptions ?? [])->first();
+                                            $editSubjectId = $firstSubject ? (string) $firstSubject->id : '';
+                                        }
+
+                                        $editTimeOptions = $editSubjectId !== '' ? $subjectTimeMap[$editSubjectId] ?? [] : [];
+                                        $editTimeKeys = [];
+                                        foreach ($subjectTimeParts as $subjectTimePart) {
+                                            foreach ($editTimeOptions as $timeOption) {
+                                                $timeLabel = trim((string) ($timeOption['label'] ?? ''));
+                                                $timeKey = trim((string) ($timeOption['key'] ?? ''));
+                                                if (
+                                                    strcasecmp($timeLabel, $subjectTimePart) === 0 ||
+                                                    strcasecmp($timeKey, $subjectTimePart) === 0
+                                                ) {
+                                                    $editTimeKeys[] = $timeKey;
+                                                }
+                                            }
+                                        }
+                                        $editTimeKeys = array_values(array_unique(array_filter($editTimeKeys, fn($key) => $key !== '')));
                                     @endphp
-                                    <tr class="{{ $isEditing && (int) ($editingRequest->id ?? 0) === (int) $lawRequest->id ? 'bg-indigo-50/40' : 'hover:bg-slate-50/80' }}">
+                                    <tr x-data="{ editOpen: false }"
+                                        class="align-top {{ $isEditing && (int) ($editingRequest->id ?? 0) === (int) $lawRequest->id ? 'bg-indigo-50/40' : 'hover:bg-slate-50/80' }}">
                                         <td class="px-3 py-3 font-semibold text-slate-900">{{ $typeLabel }}</td>
                                         <td class="px-3 py-3">
-                                            <div class="font-semibold text-slate-900">{{ $lawRequest->subject ?: 'N/A' }}</div>
+                                            <div class="font-semibold text-slate-900">{{ $subjectText !== '' ? $subjectText : 'N/A' }}
+                                            </div>
                                             <div class="mt-1 text-xs font-semibold text-sky-600">
                                                 Teacher: {{ $lawRequest->teacher?->name ?: 'Not assigned' }}
                                             </div>
-                                            <div class="mt-1 text-xs text-slate-500 line-clamp-2">{{ $lawRequest->reason }}</div>
+                                            <div class="mt-1 text-xs text-slate-500 line-clamp-2">
+                                                {{ $lawRequest->reason }}</div>
                                         </td>
                                         <td class="px-3 py-3 text-slate-700">
                                             <div class="font-semibold text-slate-900">
-                                                {{ $lawRequest->requested_for?->format('M d, Y') ?? 'N/A' }}
+                                                {{ $requestedForText }}
                                             </div>
                                             @if ($subjectTimeParts !== [])
                                                 <div class="mt-2 flex flex-wrap gap-1.5">
                                                     @foreach ($subjectTimeParts as $subjectTimePart)
-                                                        <span class="inline-flex rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                                                        <span
+                                                            class="inline-flex rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
                                                             {{ $subjectTimePart }}
                                                         </span>
                                                     @endforeach
                                                 </div>
                                             @endif
                                         </td>
+                                        <td class="px-3 py-3 text-slate-700">
+                                            <div class="font-semibold text-slate-900">{{ $requestedUntilDisplay }}</div>
+                                        </td>
                                         <td class="px-3 py-3">
-                                            <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">
+                                            <span
+                                                class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">
                                                 {{ ucfirst($statusKey) }}
                                             </span>
                                         </td>
-                                        <td class="px-3 py-3 text-slate-700">{{ $lawRequest->created_at?->format('M d, Y h:i A') }}</td>
+                                        <td class="px-3 py-3 text-slate-700">
+                                            {{ $lawRequest->created_at?->format('M d, Y h:i A') }}</td>
                                         <td class="px-3 py-3">
                                             @if ($canManage)
                                                 <div class="flex flex-wrap items-center gap-2">
-                                                    <a href="{{ route('student.law-requests.index', ['edit' => $lawRequest->id]) }}"
+                                                    <button type="button" @click="editOpen = true"
                                                         class="inline-flex items-center rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
                                                         Edit
-                                                    </a>
+                                                    </button>
                                                     <form method="POST"
                                                         action="{{ route('student.law-requests.destroy', $lawRequest) }}"
                                                         class="js-student-law-request-delete-form"
-                                                        data-request-label="{{ $typeLabel }} for {{ $lawRequest->requested_for?->format('M d, Y') ?? 'selected date' }}">
+                                                        data-request-label="{{ $typeLabel }} for {{ $requestedForText }}">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"
@@ -393,14 +483,162 @@
                                                         </button>
                                                     </form>
                                                 </div>
+
+                                                <div x-show="editOpen" x-cloak x-transition.opacity
+                                                    class="fixed inset-0 z-[80] bg-slate-900/40"
+                                                    @click="editOpen = false"></div>
+                                                <div x-show="editOpen" x-cloak x-transition
+                                                    class="fixed inset-x-3 top-6 z-[81] mx-auto max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:top-10">
+                                                    <form method="POST"
+                                                        action="{{ route('student.law-requests.update', $lawRequest) }}"
+                                                        class="js-student-law-request-edit-form flex max-h-[calc(100vh-3rem)] flex-col"
+                                                        data-request-label="{{ $subjectText !== '' ? $subjectText : ('Request #' . $lawRequest->id) }}">
+                                                        @csrf
+                                                        @method('PUT')
+
+                                                        <div
+                                                            class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+                                                            <div class="min-w-0">
+                                                                <h3 class="truncate text-2xl font-black text-slate-900">
+                                                                    Edit Request</h3>
+                                                                <p class="mt-2 text-sm text-slate-500">
+                                                                    Update your pending law request details.
+                                                                </p>
+                                                            </div>
+                                                            <button type="button" @click="editOpen = false"
+                                                                class="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-slate-200 text-xl font-bold text-slate-600 hover:bg-slate-50"
+                                                                aria-label="Close edit request">
+                                                                &times;
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
+                                                            <div class="space-y-2">
+                                                                <label for="edit_student_law_type_{{ $lawRequest->id }}"
+                                                                    class="text-sm font-semibold text-slate-700">Law
+                                                                    Type</label>
+                                                                <select id="edit_student_law_type_{{ $lawRequest->id }}"
+                                                                    name="law_type"
+                                                                    class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                    @foreach ($lawTypes as $typeKey => $typeLabel)
+                                                                        <option value="{{ $typeKey }}"
+                                                                            @selected((string) ($lawRequest->law_type ?? '') === (string) $typeKey)>
+                                                                            {{ $typeLabel }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="space-y-2">
+                                                                <label for="edit_student_subject_{{ $lawRequest->id }}"
+                                                                    class="text-sm font-semibold text-slate-700">Subject</label>
+                                                                <select id="edit_student_subject_{{ $lawRequest->id }}"
+                                                                    name="subject_id"
+                                                                    class="js-edit-student-law-subject w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                                    data-selected-time-keys='@json($editTimeKeys)'>
+                                                                    @forelse ($subjectOptions ?? [] as $subjectOption)
+                                                                        @php
+                                                                            $className = trim((string) ($subjectOption->class_name ?? ''));
+                                                                            $classSection = trim((string) ($subjectOption->class_section ?? ''));
+                                                                            $classDisplay =
+                                                                                $className !== ''
+                                                                                    ? $className . ($classSection !== '' ? ' - ' . $classSection : '')
+                                                                                    : '';
+                                                                        @endphp
+                                                                        <option value="{{ $subjectOption->id }}"
+                                                                            @selected($editSubjectId === (string) $subjectOption->id)>
+                                                                            {{ $subjectOption->name }}
+                                                                            {{ !empty($subjectOption->code) ? ' (' . $subjectOption->code . ')' : '' }}
+                                                                            {{ $classDisplay !== '' ? ' | ' . $classDisplay : '' }}
+                                                                        </option>
+                                                                    @empty
+                                                                        <option value="">No subject available</option>
+                                                                    @endforelse
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="space-y-2">
+                                                                <div class="text-sm font-semibold text-slate-700">Subject
+                                                                    Time</div>
+                                                                <div id="edit_student_subject_time_options_{{ $lawRequest->id }}"
+                                                                    class="js-edit-student-law-time-options grid gap-2 sm:grid-cols-2">
+                                                                </div>
+                                                                <p class="text-xs font-medium text-slate-400">
+                                                                    Choose one class time, or select All to include every
+                                                                    class time for this subject.
+                                                                </p>
+                                                            </div>
+
+                                                            <div class="grid gap-5 sm:grid-cols-2">
+                                                                <div class="space-y-2">
+                                                                    <label
+                                                                        for="edit_student_requested_for_{{ $lawRequest->id }}"
+                                                                        class="text-sm font-semibold text-slate-700">From
+                                                                        Date</label>
+                                                                    <input
+                                                                        id="edit_student_requested_for_{{ $lawRequest->id }}"
+                                                                        type="date" name="requested_for"
+                                                                        value="{{ $lawRequest->requested_for?->toDateString() ?? now()->toDateString() }}"
+                                                                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                </div>
+                                                                <div class="space-y-2">
+                                                                    <label
+                                                                        for="edit_student_requested_until_{{ $lawRequest->id }}"
+                                                                        class="text-sm font-semibold text-slate-700">Until
+                                                                        Date</label>
+                                                                    <input
+                                                                        id="edit_student_requested_until_{{ $lawRequest->id }}"
+                                                                        type="date" name="requested_until"
+                                                                        value="{{ $lawRequest->requested_until?->toDateString() ?? ($lawRequest->requested_for?->toDateString() ?? now()->toDateString()) }}"
+                                                                        class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="space-y-2">
+                                                                <label for="edit_student_reason_{{ $lawRequest->id }}"
+                                                                    class="text-sm font-semibold text-slate-700">Reason</label>
+                                                                <textarea id="edit_student_reason_{{ $lawRequest->id }}" name="reason" rows="6" maxlength="5000"
+                                                                    class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                                                    placeholder="Explain why you need an attendance law request...">{{ $lawRequest->reason }}</textarea>
+                                                            </div>
+
+                                                            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                                                                <div
+                                                                    class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                                                                    Teachers Who Will Be Notified
+                                                                </div>
+                                                                <div
+                                                                    class="js-edit-teacher-recipient-list mt-3 hidden flex-wrap gap-2">
+                                                                </div>
+                                                                <div
+                                                                    class="js-edit-teacher-recipient-empty mt-2 text-sm text-slate-500">
+                                                                    No teacher is assigned to this subject time yet. Your
+                                                                    request will still be saved.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
+                                                            <button type="button" @click="editOpen = false"
+                                                                class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                                                                Cancel
+                                                            </button>
+                                                            <button type="submit"
+                                                                class="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-500">
+                                                                Save Changes
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             @else
-                                                <span class="text-xs font-semibold text-slate-400">Locked after review</span>
+                                                <span class="text-xs font-semibold text-slate-400">Locked after
+                                                    review</span>
                                             @endif
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-3 py-10 text-center text-sm text-slate-500">
+                                        <td colspan="7" class="px-3 py-10 text-center text-sm text-slate-500">
                                             No law requests submitted yet.
                                         </td>
                                     </tr>

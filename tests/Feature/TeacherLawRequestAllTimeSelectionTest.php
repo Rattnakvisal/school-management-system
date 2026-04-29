@@ -69,6 +69,7 @@ test('teacher can submit law request for all selected subject times', function (
                 'slot:' . $afternoonSlotId,
             ],
             'requested_for' => '2026-05-04',
+            'requested_until' => '2026-05-04',
             'reason' => 'Need to request all subject times.',
         ]);
 

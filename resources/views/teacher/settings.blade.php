@@ -17,48 +17,6 @@
         $excused = (int) ($selectedDateSummary['excused'] ?? 0);
         $total = max(0, $present + $absent + $late + $excused);
         $presentPct = $total ? round(($present / $total) * 100) : 0;
-        $teacherSettingsStatCards = [
-            [
-                'label' => 'Classes',
-                'activeLabel' => 'Assigned',
-                'active' => (int) ($stats['classes'] ?? 0),
-                'total' => (int) ($stats['classes'] ?? 0),
-                'icon' => 'classes',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Subjects',
-                'activeLabel' => 'Teaching',
-                'active' => (int) ($stats['subjects'] ?? 0),
-                'total' => (int) ($stats['subjects'] ?? 0),
-                'icon' => 'subjects',
-                'tone' => 'from-sky-100 to-white text-sky-600',
-            ],
-            [
-                'label' => 'Students',
-                'activeLabel' => 'Linked',
-                'active' => (int) ($stats['students'] ?? 0),
-                'total' => (int) ($stats['students'] ?? 0),
-                'icon' => 'students',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-            ],
-            [
-                'label' => 'Checked Today',
-                'activeLabel' => 'Today',
-                'active' => (int) ($stats['checkedToday'] ?? 0),
-                'total' => (int) ($stats['students'] ?? 0),
-                'icon' => 'attendance',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-            ],
-            [
-                'label' => 'Checked Week',
-                'activeLabel' => 'This week',
-                'active' => (int) ($stats['checkedThisWeek'] ?? 0),
-                'total' => (int) ($stats['students'] ?? 0),
-                'icon' => 'active',
-                'tone' => 'from-cyan-100 to-white text-cyan-600',
-            ],
-        ];
     @endphp
 
     <div id="teacher-settings-page" class="teacher-stage teacher-settings-stage space-y-6"
@@ -84,9 +42,6 @@
                 @endif
             </div>
         </section>
-
-        <x-admin.stat-cards :cards="$teacherSettingsStatCards" reveal-class="teacher-reveal" float-class="teacher-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" />
 
         @if (session('success'))
             <div class="teacher-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
@@ -277,7 +232,8 @@
                             <div class="flex flex-wrap items-center justify-between gap-3">
                                 <div>
                                     <h2 class="text-lg font-semibold text-slate-900">Check Attendance</h2>
-                                    <p class="mt-1 text-sm text-slate-500">Pick a class and date to jump into attendance quickly.</p>
+                                    <p class="mt-1 text-sm text-slate-500">Pick a class and date to jump into attendance
+                                        quickly.</p>
                                 </div>
 
                                 <a href="{{ route('teacher.attendance.index') }}"
@@ -286,7 +242,8 @@
                                 </a>
                             </div>
 
-                            <div class="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3">
+                            <div
+                                class="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3">
                                 <span class="text-xs font-semibold text-slate-600">Quick date:</span>
                                 <button type="button" data-teacher-date-quick="today"
                                     class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
@@ -299,10 +256,12 @@
 
                                 <div class="ml-auto flex flex-wrap items-center gap-2">
                                     <span class="text-xs font-semibold text-slate-600">Selected:</span>
-                                    <span class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">
+                                    <span
+                                        class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">
                                         {{ $selectedClass?->display_name ?? 'N/A' }}
                                     </span>
-                                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">
+                                    <span
+                                        class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">
                                         {{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}
                                     </span>
                                 </div>
@@ -312,16 +271,19 @@
                                 class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
                                 <div class="grid gap-3 md:grid-cols-12">
                                     <div class="md:col-span-4">
-                                        <label for="teacher_class_query" class="mb-1 block text-xs font-semibold text-slate-600">
+                                        <label for="teacher_class_query"
+                                            class="mb-1 block text-xs font-semibold text-slate-600">
                                             Search Class
                                         </label>
-                                        <input id="teacher_class_query" type="text" placeholder="Type to filter classes..."
+                                        <input id="teacher_class_query" type="text"
+                                            placeholder="Type to filter classes..."
                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                         <p class="mt-1 text-[11px] text-slate-500">Tip: type 10A, Grade, or room name.</p>
                                     </div>
 
                                     <div class="md:col-span-4">
-                                        <label for="teacher_class_id" class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
+                                        <label for="teacher_class_id"
+                                            class="mb-1 block text-xs font-semibold text-slate-600">Class</label>
                                         <select id="teacher_class_id" name="class_id"
                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                             @foreach ($classes as $classOption)
@@ -334,8 +296,10 @@
                                     </div>
 
                                     <div class="md:col-span-3">
-                                        <label for="teacher_attendance_date" class="mb-1 block text-xs font-semibold text-slate-600">Date</label>
-                                        <input id="teacher_attendance_date" type="date" name="date" value="{{ $selectedDate }}"
+                                        <label for="teacher_attendance_date"
+                                            class="mb-1 block text-xs font-semibold text-slate-600">Date</label>
+                                        <input id="teacher_attendance_date" type="date" name="date"
+                                            value="{{ $selectedDate }}"
                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                     </div>
 
@@ -351,16 +315,20 @@
                             <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                                 <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
                                     <div class="text-xs font-semibold text-slate-500">Checked (Selected Date)</div>
-                                    <div class="mt-1 text-sm font-black text-slate-900">{{ number_format($stats['selectedDateChecked'] ?? 0) }}</div>
+                                    <div class="mt-1 text-sm font-black text-slate-900">
+                                        {{ number_format($stats['selectedDateChecked'] ?? 0) }}</div>
                                     <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                                        <div class="h-full rounded-full bg-indigo-500" style="width: {{ min(100, $presentPct) }}%"></div>
+                                        <div class="h-full rounded-full bg-indigo-500"
+                                            style="width: {{ min(100, $presentPct) }}%"></div>
                                     </div>
-                                    <div class="mt-1 text-[11px] font-semibold text-slate-500">Present rate: {{ $presentPct }}%</div>
+                                    <div class="mt-1 text-[11px] font-semibold text-slate-500">Present rate:
+                                        {{ $presentPct }}%</div>
                                 </div>
 
                                 <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3">
                                     <div class="text-xs font-semibold text-emerald-700">Present</div>
-                                    <div class="mt-1 text-sm font-black text-emerald-800">{{ number_format($present) }}</div>
+                                    <div class="mt-1 text-sm font-black text-emerald-800">{{ number_format($present) }}
+                                    </div>
                                 </div>
 
                                 <div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-3">
@@ -384,7 +352,8 @@
                                 <div class="mt-2 overflow-hidden rounded-2xl border border-slate-200">
                                     <div class="max-h-[360px] overflow-auto">
                                         <table class="w-full min-w-[760px] text-left text-sm">
-                                            <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                            <thead
+                                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                 <tr>
                                                     <th class="px-3 py-3 font-semibold">Student</th>
                                                     <th class="px-3 py-3 font-semibold">Class</th>
@@ -400,7 +369,8 @@
                                                         $statusKey = strtolower((string) ($item->status ?? 'unknown'));
                                                         $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
                                                         $badge = match ($statusKey) {
-                                                            'present' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                                            'present'
+                                                                => 'border-emerald-200 bg-emerald-50 text-emerald-700',
                                                             'absent' => 'border-rose-200 bg-rose-50 text-rose-700',
                                                             'late' => 'border-amber-200 bg-amber-50 text-amber-700',
                                                             'excused' => 'border-sky-200 bg-sky-50 text-sky-700',
@@ -409,17 +379,24 @@
                                                     @endphp
                                                     <tr class="align-top hover:bg-slate-50/80">
                                                         <td class="px-3 py-3">
-                                                            <div class="font-semibold text-slate-900">{{ $item->student?->name ?? 'Student' }}</div>
-                                                            <div class="text-xs text-slate-500">{{ $item->student?->email ?? '-' }}</div>
+                                                            <div class="font-semibold text-slate-900">
+                                                                {{ $item->student?->name ?? 'Student' }}</div>
+                                                            <div class="text-xs text-slate-500">
+                                                                {{ $item->student?->email ?? '-' }}</div>
                                                         </td>
-                                                        <td class="px-3 py-3 text-slate-700">{{ $item->schoolClass?->display_name ?: 'N/A' }}</td>
-                                                        <td class="px-3 py-3 text-slate-700">{{ optional($item->attendance_date)->format('M d, Y') ?? '-' }}</td>
+                                                        <td class="px-3 py-3 text-slate-700">
+                                                            {{ $item->schoolClass?->display_name ?: 'N/A' }}</td>
+                                                        <td class="px-3 py-3 text-slate-700">
+                                                            {{ optional($item->attendance_date)->format('M d, Y') ?? '-' }}
+                                                        </td>
                                                         <td class="px-3 py-3">
-                                                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold {{ $badge }}">
+                                                            <span
+                                                                class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold {{ $badge }}">
                                                                 {{ $statusLabel }}
                                                             </span>
                                                         </td>
-                                                        <td class="px-3 py-3 text-slate-700">{{ optional($item->checked_at)->diffForHumans() ?? '-' }}</td>
+                                                        <td class="px-3 py-3 text-slate-700">
+                                                            {{ optional($item->checked_at)->diffForHumans() ?? '-' }}</td>
                                                         <td class="px-3 py-3">
                                                             <div class="flex justify-end">
                                                                 <a href="{{ route('teacher.attendance.index', ['class_id' => $item->school_class_id, 'date' => optional($item->attendance_date)->toDateString()]) }}"
@@ -432,8 +409,10 @@
                                                 @empty
                                                     <tr>
                                                         <td colspan="6" class="px-3 py-10">
-                                                            <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
-                                                                <div class="text-sm font-bold text-slate-900">No attendance checks yet</div>
+                                                            <div
+                                                                class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+                                                                <div class="text-sm font-bold text-slate-900">No attendance
+                                                                    checks yet</div>
                                                                 <div class="mt-1 text-xs text-slate-500">
                                                                     Use the form above to start checking attendance quickly.
                                                                 </div>

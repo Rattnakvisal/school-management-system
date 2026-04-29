@@ -27,6 +27,7 @@ class GradeController extends Controller
 
         $subjectOptions = $this->resolveTeacherSubjects($teacher);
         $studentOptions = $this->resolveTeacherStudents($teacher, $subjectOptions);
+        $assessmentTitleOptions = $this->assessmentTitleOptions();
         $classOptions = $studentOptions
             ->map(function (array $student): array {
                 return [
@@ -78,11 +79,38 @@ class GradeController extends Controller
             'subjects' => $subjectOptions->count(),
             'average' => $averagePercentage !== null ? round((float) $averagePercentage, 1) : null,
         ];
+        $gradeDetails = (clone $gradeQuery)
+            ->latest('graded_at')
+            ->latest('created_at')
+            ->get()
+            ->map(function (Grade $grade): array {
+                $score = (float) ($grade->score ?? 0);
+                $maxScore = (float) ($grade->max_score ?? 0);
+                $percentage = $maxScore > 0 ? round(($score / $maxScore) * 100, 1) : 0;
+
+                return [
+                    'id' => (int) $grade->id,
+                    'student_id' => (int) $grade->student_id,
+                    'subject_id' => (int) ($grade->subject_id ?? 0),
+                    'subject_name' => trim((string) ($grade->subject?->name ?? 'General result')),
+                    'title' => trim((string) $grade->title),
+                    'score' => number_format($score, 2),
+                    'max_score' => number_format($maxScore, 2),
+                    'percentage' => number_format($percentage, 1),
+                    'grade_letter' => trim((string) $grade->grade_letter),
+                    'remarks' => trim((string) ($grade->remarks ?? '')),
+                    'graded_at' => $grade->graded_at?->format('M d, Y') ?? '',
+                    'graded_month' => $grade->graded_at?->format('Y-m') ?? '',
+                ];
+            })
+            ->values();
 
         return view('teacher.grades', [
             'subjectOptions' => $subjectOptions,
             'studentOptions' => $studentOptions,
             'classOptions' => $classOptions,
+            'assessmentTitleOptions' => $assessmentTitleOptions,
+            'gradeDetails' => $gradeDetails,
             'grades' => $grades,
             'stats' => $stats,
             'editingGrade' => $editingGrade,
@@ -115,7 +143,7 @@ class GradeController extends Controller
         abort_unless($teacher instanceof User, 403);
         abort_unless((int) $grade->teacher_id === (int) $teacher->id, 403);
 
-        [$validated, $studentOptions] = $this->validateGradeRequest($request, $teacher);
+        [$validated, $studentOptions] = $this->validateGradeRequest($request, $teacher, $grade);
 
         DB::transaction(function () use ($grade, $validated): void {
             $grade->update($validated);
@@ -127,17 +155,18 @@ class GradeController extends Controller
             ->with('grade_action', 'updated');
     }
 
-    private function validateGradeRequest(Request $request, User $teacher): array
+    private function validateGradeRequest(Request $request, User $teacher, ?Grade $currentGrade = null): array
     {
         $subjectOptions = $this->resolveTeacherSubjects($teacher);
         $studentOptions = $this->resolveTeacherStudents($teacher, $subjectOptions);
         $allowedSubjectIds = $subjectOptions->pluck('id')->map(fn ($id) => (int) $id)->all();
         $allowedStudentIds = $studentOptions->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $assessmentTitleOptions = $this->assessmentTitleOptions();
 
         $validated = $request->validate([
             'student_id' => ['required', 'integer', Rule::in($allowedStudentIds)],
             'subject_id' => ['nullable', 'integer', Rule::in($allowedSubjectIds)],
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', Rule::in($assessmentTitleOptions)],
             'score' => ['required', 'numeric', 'min:0'],
             'max_score' => ['required', 'numeric', 'gt:0'],
             'graded_at' => ['required', 'date'],
@@ -168,6 +197,32 @@ class GradeController extends Controller
             ]);
         }
 
+        $gradedAt = Carbon::parse((string) $validated['graded_at']);
+        $duplicateQuery = Grade::query()
+            ->where('teacher_id', (int) $teacher->id)
+            ->where('student_id', $studentId)
+            ->where('title', trim((string) $validated['title']))
+            ->whereBetween('graded_at', [
+                $gradedAt->copy()->startOfMonth()->toDateString(),
+                $gradedAt->copy()->endOfMonth()->toDateString(),
+            ]);
+
+        if ($selectedSubjectId > 0) {
+            $duplicateQuery->where('subject_id', $selectedSubjectId);
+        } else {
+            $duplicateQuery->whereNull('subject_id');
+        }
+
+        if ($currentGrade instanceof Grade) {
+            $duplicateQuery->where('id', '!=', (int) $currentGrade->id);
+        }
+
+        if ($duplicateQuery->exists()) {
+            throw ValidationException::withMessages([
+                'title' => 'This student already has a ' . trim((string) $validated['title']) . ' grade for this subject in ' . $gradedAt->format('F Y') . '. Please edit the existing grade instead.',
+            ]);
+        }
+
         return [[
             'teacher_id' => (int) $teacher->id,
             'student_id' => $studentId,
@@ -177,8 +232,18 @@ class GradeController extends Controller
             'max_score' => $maxScore,
             'grade_letter' => $this->gradeLetter($score, $maxScore),
             'remarks' => trim((string) ($validated['remarks'] ?? '')) ?: null,
-            'graded_at' => Carbon::parse((string) $validated['graded_at'])->toDateString(),
+            'graded_at' => $gradedAt->toDateString(),
         ], $studentOptions];
+    }
+
+    private function assessmentTitleOptions(): array
+    {
+        return [
+            'Homework Assignment',
+            'Quiz',
+            'Midterm',
+            'Final',
+        ];
     }
 
     private function sendGradeNotification(User $teacher, Grade $grade, string $action): void

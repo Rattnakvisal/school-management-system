@@ -26,35 +26,15 @@
         $notifications = collect($notifications ?? ($navNotifs ?? []))->map($normalizeNotification);
         $unreadCount = (int) ($unreadCount ?? ($navUnread ?? 0));
         $totalCount = $notifications->count();
-        $teacherNoticeStatCards = [
-            [
-                'label' => 'Notifications',
-                'activeLabel' => 'Total',
-                'active' => $totalCount,
-                'total' => $totalCount,
-                'icon' => 'contacts',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Unread',
-                'activeLabel' => 'Needs review',
-                'active' => $unreadCount,
-                'total' => $totalCount,
-                'icon' => 'pending',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-            ],
-        ];
     @endphp
 
     <div class="teacher-stage space-y-6">
-        <x-admin.stat-cards :cards="$teacherNoticeStatCards" reveal-class="teacher-reveal" float-class="teacher-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2" />
-
         <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div class="mb-4 flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-bold text-slate-900">Recent notifications</h2>
-                    <p class="mt-1 text-sm text-slate-500">Review the latest teacher alerts, approvals, and attendance updates.</p>
+                    <p class="mt-1 text-sm text-slate-500">Review the latest teacher alerts, approvals, and attendance
+                        updates.</p>
                 </div>
             </div>
 

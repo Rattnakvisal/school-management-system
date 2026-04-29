@@ -78,6 +78,7 @@ test('student can submit law request for all subject times and notify each assig
                 'slot:' . $afternoonSlotId,
             ],
             'requested_for' => '2026-05-04',
+            'requested_until' => '2026-05-04',
             'reason' => 'Need to request the full subject day.',
         ]);
 

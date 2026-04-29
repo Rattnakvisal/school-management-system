@@ -38,12 +38,18 @@ class LawRequestController extends Controller
         $editIdRaw = trim((string) $request->query('edit', ''));
         if (ctype_digit($editIdRaw)) {
             $editingRequest = $lawRequests->firstWhere('id', (int) $editIdRaw);
+            if ($editingRequest && strtolower((string) ($editingRequest->status ?? 'pending')) !== 'pending') {
+                return redirect()
+                    ->route('student.law-requests.index')
+                    ->with('warning', 'Approved or rejected requests can no longer be edited.');
+            }
         }
 
         $selectionDefaults = $this->resolveSelectionFromRequest($editingRequest, $subjectOptions, $subjectTimeOptionsBySubject);
         $defaultSubjectId = old('subject_id', (string) ($selectionDefaults['subject_id'] ?? ''));
         $defaultTimeKeys = $this->normalizeSubjectTimeKeys(old('subject_time_keys', $selectionDefaults['subject_time_keys'] ?? []));
-        $defaultRequestedFor = old('requested_for', $editingRequest?->requested_for?->toDateString() ?? '');
+        $defaultRequestedFor = old('requested_for', $editingRequest?->requested_for?->toDateString() ?? now()->toDateString());
+        $defaultRequestedUntil = old('requested_until', $editingRequest?->requested_until?->toDateString() ?? $defaultRequestedFor);
         $defaultReason = old('reason', (string) ($editingRequest?->reason ?? ''));
         $subjectTimeMap = $subjectTimeOptionsBySubject
             ->map(function ($items) {
@@ -107,6 +113,7 @@ class LawRequestController extends Controller
                 'subject_id' => $defaultSubjectId,
                 'subject_time_keys' => $defaultTimeKeys,
                 'requested_for' => $defaultRequestedFor,
+                'requested_until' => $defaultRequestedUntil,
                 'reason' => $defaultReason,
             ],
         ]);
@@ -151,7 +158,7 @@ class LawRequestController extends Controller
         if (strtolower((string) ($lawRequest->status ?? 'pending')) !== 'pending') {
             return redirect()
                 ->route('student.law-requests.index')
-                ->with('warning', 'Only pending law requests can be updated.');
+                ->with('warning', 'Approved or rejected requests can no longer be edited.');
         }
 
         $resolved = $this->validateAndBuildPayload($request, $student, $this->lawTypes());
@@ -215,7 +222,8 @@ class LawRequestController extends Controller
             'subject_id' => ['required', 'string', Rule::in($subjectKeys)],
             'subject_time_keys' => ['required', 'array', 'min:1'],
             'subject_time_keys.*' => ['required', 'string', Rule::in($timeKeys)],
-            'requested_for' => ['nullable', 'date'],
+            'requested_for' => ['required', 'date'],
+            'requested_until' => ['required', 'date', 'after_or_equal:requested_for'],
             'reason' => ['required', 'string', 'max:5000'],
         ]);
 
@@ -265,6 +273,10 @@ class LawRequestController extends Controller
             'requested_for' => $validated['requested_for'] ?? null,
             'reason' => trim((string) ($validated['reason'] ?? '')),
         ];
+
+        if (Schema::hasColumn('student_law_requests', 'requested_until')) {
+            $payload['requested_until'] = $validated['requested_until'] ?? ($validated['requested_for'] ?? null);
+        }
 
         if (Schema::hasColumn('student_law_requests', 'subject_id')) {
             $payload['subject_id'] = (int) $selectedSubjectKey;
@@ -461,9 +473,7 @@ class LawRequestController extends Controller
 
     private function buildRequestedForScheduleText(StudentLawRequest $lawRequest): string
     {
-        $requestedForText = $lawRequest->requested_for
-            ? Carbon::parse($lawRequest->requested_for)->format('M d, Y')
-            : '';
+        $requestedForText = $this->formatRequestedDateRange($lawRequest);
         $subjectText = trim((string) ($lawRequest->subject ?? ''));
         $subjectTimeText = trim((string) ($lawRequest->subject_time ?? ''));
 
@@ -474,6 +484,22 @@ class LawRequestController extends Controller
         ]);
 
         return trim(implode(' | ', $parts));
+    }
+
+    private function formatRequestedDateRange(StudentLawRequest $lawRequest): string
+    {
+        $from = $lawRequest->requested_for ? Carbon::parse($lawRequest->requested_for)->format('M d, Y') : '';
+        $until = $lawRequest->requested_until ? Carbon::parse($lawRequest->requested_until)->format('M d, Y') : '';
+
+        if ($from === '') {
+            return $until;
+        }
+
+        if ($until === '' || $until === $from) {
+            return $from;
+        }
+
+        return $from . ' - ' . $until;
     }
 
     private function resolveStoredSubjectId(StudentLawRequest $lawRequest): ?int

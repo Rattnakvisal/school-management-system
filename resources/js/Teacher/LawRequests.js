@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const subjectSelect = document.getElementById("subject");
     const timeOptionsContainer = document.getElementById("subject_time_options");
     const requestedForInput = document.getElementById("requested_for");
+    const requestedUntilInput = document.getElementById("requested_until");
     const dataNode = document.getElementById("teacher-law-request-data");
     const submitForm = document.querySelector(".js-law-request-submit-form");
     const deleteForms = Array.from(
@@ -17,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
             subject_id: "all",
             subject_time_keys: [],
             requested_for: "",
+            requested_until: "",
         },
         flash: {
             success: "",
@@ -115,22 +117,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${year}-${month}-${day}`;
     };
 
-    const getSubjectOptions = () => {
-        const subjectId = String(subjectSelect.value || "all");
+    const getSubjectOptions = (targetSubjectSelect = subjectSelect) => {
+        const subjectId = String(targetSubjectSelect?.value || "all");
         const options = subjectTimeMap[subjectId];
         return Array.isArray(options) ? options : [];
     };
 
-    const getSelectedTimeItems = () => {
+    const getSelectedTimeItems = (
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+    ) => {
         const checkedKeys = Array.from(
-                timeOptionsContainer.querySelectorAll(
+                targetTimeOptionsContainer.querySelectorAll(
                     "input.js-time-checkbox[data-time-key]:checked",
                 ),
             )
             .map((checkbox) => String(checkbox.dataset.timeKey || ""))
             .filter((key) => key !== "");
 
-        const options = getSubjectOptions();
+        const options = getSubjectOptions(targetSubjectSelect);
         return checkedKeys
             .map((key) => {
                 return options.find((item) => String(item && item.key ? item.key : "") === key) || null;
@@ -138,7 +143,10 @@ document.addEventListener("DOMContentLoaded", () => {
             .filter(Boolean);
     };
 
-    const getAutoRequestedForDate = () => {
+    const getAutoRequestedForDate = (
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+    ) => {
         const dayMap = {
             sunday: 0,
             monday: 1,
@@ -151,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const selectedDays = Array.from(
             new Set(
-                getSelectedTimeItems()
+                getSelectedTimeItems(targetSubjectSelect, targetTimeOptionsContainer)
                     .map((item) => String(item && item.day_of_week ? item.day_of_week : "").toLowerCase().trim())
                     .filter((dayKey) => dayKey && dayKey !== "all" && Object.prototype.hasOwnProperty.call(dayMap, dayKey)),
             ),
@@ -171,28 +179,56 @@ document.addEventListener("DOMContentLoaded", () => {
         return formatDate(nextDate);
     };
 
-    const syncRequestedForDate = () => {
-        if (!requestedForInput) {
+    const syncRequestedForDate = (
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+        targetRequestedForInput = requestedForInput,
+        lastAutoRef = null,
+        targetRequestedUntilInput = requestedUntilInput,
+    ) => {
+        const getLastAuto = () => lastAutoRef ? lastAutoRef.value : lastAutoRequestedFor;
+        const setLastAuto = (value) => {
+            if (lastAutoRef) {
+                lastAutoRef.value = value;
+                return;
+            }
+
+            lastAutoRequestedFor = value;
+        };
+
+        if (!targetRequestedForInput) {
             return;
         }
 
-        const autoDate = getAutoRequestedForDate();
+        const autoDate = getAutoRequestedForDate(targetSubjectSelect, targetTimeOptionsContainer);
         if (autoDate === "") {
-            if (requestedForInput.value === lastAutoRequestedFor) {
-                requestedForInput.value = "";
+            if (targetRequestedForInput.value === getLastAuto()) {
+                targetRequestedForInput.value = "";
             }
-            lastAutoRequestedFor = "";
+            setLastAuto("");
+            syncDateRange(targetRequestedForInput, targetRequestedUntilInput);
             return;
         }
 
         if (
-            requestedForInput.value === "" ||
-            requestedForInput.value === lastAutoRequestedFor
+            targetRequestedForInput.value === "" ||
+            targetRequestedForInput.value === getLastAuto()
         ) {
-            requestedForInput.value = autoDate;
+            targetRequestedForInput.value = autoDate;
         }
 
-        lastAutoRequestedFor = autoDate;
+        setLastAuto(autoDate);
+        syncDateRange(targetRequestedForInput, targetRequestedUntilInput);
+    };
+
+    const syncDateRange = (fromInput, untilInput) => {
+        if (!fromInput || !untilInput || !fromInput.value) {
+            return;
+        }
+
+        if (!untilInput.value || untilInput.value < fromInput.value) {
+            untilInput.value = fromInput.value;
+        }
     };
 
     const setCardState = (card, checked) => {
@@ -206,17 +242,17 @@ document.addEventListener("DOMContentLoaded", () => {
         card.classList.toggle("bg-white", !checked);
     };
 
-    const syncAllTimeCard = () => {
-        if (!timeOptionsContainer) {
+    const syncAllTimeCard = (targetTimeOptionsContainer = timeOptionsContainer) => {
+        if (!targetTimeOptionsContainer) {
             return;
         }
 
-        const allCheckbox = timeOptionsContainer.querySelector(
+        const allCheckbox = targetTimeOptionsContainer.querySelector(
             `input.js-time-all-checkbox[data-time-key="${allTimeOptionKey}"]`,
         );
         const allCard = allCheckbox ? allCheckbox.closest(".js-time-card") : null;
         const realCheckboxes = Array.from(
-            timeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]"),
+            targetTimeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]"),
         );
 
         if (!allCheckbox || realCheckboxes.length === 0) {
@@ -229,8 +265,15 @@ document.addEventListener("DOMContentLoaded", () => {
         setCardState(allCard, checkedCount === realCheckboxes.length);
     };
 
-    const renderTimeOptions = (preferredKeys) => {
-        const options = getSubjectOptions();
+    const renderTimeOptions = (
+        preferredKeys,
+        targetSubjectSelect = subjectSelect,
+        targetTimeOptionsContainer = timeOptionsContainer,
+        targetRequestedForInput = requestedForInput,
+        lastAutoRef = null,
+        targetRequestedUntilInput = requestedUntilInput,
+    ) => {
+        const options = getSubjectOptions(targetSubjectSelect);
         const normalizedKeys = Array.isArray(preferredKeys) ?
             preferredKeys.map((key) => String(key || "")).filter((key) => key !== "") : [];
         const optionKeys = options
@@ -240,19 +283,19 @@ document.addEventListener("DOMContentLoaded", () => {
             ? new Set(optionKeys)
             : new Set(normalizedKeys);
 
-        timeOptionsContainer.innerHTML = "";
+        targetTimeOptionsContainer.innerHTML = "";
 
         if (options.length === 0) {
             const emptyState = document.createElement("div");
             emptyState.className =
                 "rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-500";
             emptyState.textContent = "No time available";
-            timeOptionsContainer.appendChild(emptyState);
-            syncRequestedForDate();
+            targetTimeOptionsContainer.appendChild(emptyState);
+            syncRequestedForDate(targetSubjectSelect, targetTimeOptionsContainer, targetRequestedForInput, lastAutoRef, targetRequestedUntilInput);
             return;
         }
 
-        if (options.length > 1 && String(subjectSelect.value || "") !== "all") {
+        if (options.length > 1 && String(targetSubjectSelect.value || "") !== "all") {
             const allOptionId = "teacher-subject-time-all";
             const allChecked =
                 optionKeys.length > 0 && optionKeys.every((optionKey) => selectedKeySet.has(optionKey));
@@ -286,13 +329,13 @@ document.addEventListener("DOMContentLoaded", () => {
             textWrap.appendChild(meta);
             label.appendChild(checkbox);
             label.appendChild(textWrap);
-            timeOptionsContainer.appendChild(label);
+            targetTimeOptionsContainer.appendChild(label);
             setCardState(label, allChecked);
 
             checkbox.addEventListener("change", () => {
                 const checked = checkbox.checked;
                 Array.from(
-                    timeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]"),
+                    targetTimeOptionsContainer.querySelectorAll("input.js-time-checkbox[data-time-key]"),
                 ).forEach((timeCheckbox) => {
                     timeCheckbox.checked = checked;
                     setCardState(timeCheckbox.closest(".js-time-card"), checked);
@@ -300,7 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 checkbox.indeterminate = false;
                 setCardState(label, checked);
-                syncRequestedForDate();
+                syncRequestedForDate(targetSubjectSelect, targetTimeOptionsContainer, targetRequestedForInput, lastAutoRef, targetRequestedUntilInput);
             });
         }
 
@@ -344,19 +387,19 @@ document.addEventListener("DOMContentLoaded", () => {
             textWrap.appendChild(title);
             label.appendChild(checkbox);
             label.appendChild(textWrap);
-            timeOptionsContainer.appendChild(label);
+            targetTimeOptionsContainer.appendChild(label);
 
             setCardState(label, checked);
 
             checkbox.addEventListener("change", () => {
                 setCardState(label, checkbox.checked);
-                syncAllTimeCard();
-                syncRequestedForDate();
+                syncAllTimeCard(targetTimeOptionsContainer);
+                syncRequestedForDate(targetSubjectSelect, targetTimeOptionsContainer, targetRequestedForInput, lastAutoRef, targetRequestedUntilInput);
             });
         });
 
-        syncAllTimeCard();
-        syncRequestedForDate();
+        syncAllTimeCard(targetTimeOptionsContainer);
+        syncRequestedForDate(targetSubjectSelect, targetTimeOptionsContainer, targetRequestedForInput, lastAutoRef, targetRequestedUntilInput);
     };
 
     const flash = pageData.flash || {};
@@ -464,6 +507,73 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document.querySelectorAll(".js-law-request-edit-form").forEach((editForm) => {
+        const editSubjectSelect = editForm.querySelector(".js-edit-law-subject");
+        const editTimeOptionsContainer = editForm.querySelector(".js-edit-law-time-options");
+        const editRequestedForInput = editForm.querySelector('[name="requested_for"]');
+        const editRequestedUntilInput = editForm.querySelector('[name="requested_until"]');
+        const lastEditAutoRequestedFor = { value: "" };
+        let selectedTimeKeys = [];
+
+        try {
+            selectedTimeKeys = JSON.parse(editSubjectSelect?.dataset.selectedTimeKeys || "[]");
+        } catch (error) {
+            selectedTimeKeys = [];
+        }
+
+        if (!Array.isArray(selectedTimeKeys)) {
+            selectedTimeKeys = [];
+        }
+
+        if (editSubjectSelect && editTimeOptionsContainer) {
+            renderTimeOptions(
+                selectedTimeKeys,
+                editSubjectSelect,
+                editTimeOptionsContainer,
+                editRequestedForInput,
+                lastEditAutoRequestedFor,
+                editRequestedUntilInput,
+            );
+
+            editSubjectSelect.addEventListener("change", () => {
+                if (editRequestedForInput) {
+                    editRequestedForInput.value = "";
+                }
+                lastEditAutoRequestedFor.value = "";
+                renderTimeOptions(
+                    [],
+                    editSubjectSelect,
+                    editTimeOptionsContainer,
+                    editRequestedForInput,
+                    lastEditAutoRequestedFor,
+                    editRequestedUntilInput,
+                );
+            });
+        }
+
+        if (editRequestedForInput) {
+            editRequestedForInput.addEventListener("input", () => {
+                if (editRequestedForInput.value !== lastEditAutoRequestedFor.value) {
+                    lastEditAutoRequestedFor.value = "";
+                }
+                syncDateRange(editRequestedForInput, editRequestedUntilInput);
+            });
+
+            editRequestedForInput.addEventListener("change", () => {
+                if (editRequestedForInput.value !== lastEditAutoRequestedFor.value) {
+                    lastEditAutoRequestedFor.value = "";
+                }
+                syncDateRange(editRequestedForInput, editRequestedUntilInput);
+            });
+        }
+
+        editRequestedUntilInput?.addEventListener("change", () => {
+            syncDateRange(editRequestedForInput, editRequestedUntilInput);
+        });
+
+        editForm.dataset.confirmed = "1";
+    });
+
     if (subjectSelect && timeOptionsContainer) {
         const initialSubjectId = String(
             pageData.formDefaults && pageData.formDefaults.subject_id ?
@@ -483,14 +593,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (requestedForInput.value !== lastAutoRequestedFor) {
                     lastAutoRequestedFor = "";
                 }
+                syncDateRange(requestedForInput, requestedUntilInput);
             });
 
             requestedForInput.addEventListener("change", () => {
                 if (requestedForInput.value !== lastAutoRequestedFor) {
                     lastAutoRequestedFor = "";
                 }
+                syncDateRange(requestedForInput, requestedUntilInput);
             });
         }
+
+        requestedUntilInput?.addEventListener("change", () => {
+            syncDateRange(requestedForInput, requestedUntilInput);
+        });
 
         subjectSelect.addEventListener("change", () => {
             if (requestedForInput) {
