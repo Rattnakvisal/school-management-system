@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $schoolName ?? 'TechBridge Academy' }} | {{ __('home.meta.title_suffix') }}</title>
+    <title>{{ $schoolName ?? 'TechBridge Academy' }} | {{ \App\Support\HomePageContent::text('meta.title_suffix') }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         referrerpolicy="no-referrer" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -12,95 +12,35 @@
 
 <body
     class="website-home [font-family:Manrope,_sans-serif] min-h-screen overflow-x-hidden overflow-y-auto bg-slate-100 text-slate-900 antialiased"
-    x-data="{
-        open: false,
-        top: false,
-        active: '#home',
-        showBanner: false,
-        bannerStorageKey: 'website_home_banner_hidden_until',
-        setActive() {
-            const ids = ['#home', '#about', '#features', '#programs', '#facilities', '#admission', '#faq', '#contact'];
-            const y = window.scrollY + 140;
-    
-            for (let i = ids.length - 1; i >= 0; i--) {
-                const el = document.querySelector(ids[i]);
-                if (el && el.offsetTop <= y) {
-                    this.active = ids[i];
-                    break;
-                }
-            }
-        },
-        initBanner() {
-            const forceBanner = new URLSearchParams(window.location.search).get('banner') === '1';
-    
-            try {
-                if (forceBanner) {
-                    window.localStorage.removeItem(this.bannerStorageKey);
-                }
-    
-                const raw = window.localStorage.getItem(this.bannerStorageKey);
-                const hiddenUntil = raw ? Number(raw) : 0;
-    
-                if (!Number.isNaN(hiddenUntil) && hiddenUntil > Date.now()) {
-                    this.showBanner = false;
-                    return;
-                }
-            } catch (_) {}
-    
-            setTimeout(() => {
-                this.showBanner = true;
-            }, 280);
-        },
-        closeBanner(remember = false) {
-            this.showBanner = false;
-    
-            if (remember) {
-                try {
-                    window.localStorage.setItem(this.bannerStorageKey, String(Date.now() + (24 * 60 * 60 * 1000)));
-                } catch (_) {}
-            }
-        },
-        openProgramsFromBanner() {
-            this.closeBanner();
-            const target = document.querySelector('#programs');
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-    }" x-init="setActive();
-    initBanner();
-    window.addEventListener('scroll', () => {
-        top = window.scrollY > 560;
-        setActive();
-    });" @keydown.escape.window="if (showBanner) closeBanner()">
+    x-data="websiteHomePage()" @keydown.escape.window="if (showBanner) closeBanner()">
     @php
         $schoolName = $schoolName ?? 'TechBridge';
         $studentsTotal = $studentsTotal ?? 0;
         $teachersTotal = $teachersTotal ?? 0;
         $dashboardRoute = $dashboardRoute ?? 'home';
 
-        $links = trans('home.links');
-        $features = trans('home.features.items');
-        $programs = trans('home.programs.items');
-        $steps = trans('home.admission.steps');
+        $links = \App\Support\HomePageContent::get('links');
+        $features = \App\Support\HomePageContent::get('features.items');
+        $programs = \App\Support\HomePageContent::get('programs.items');
+        $steps = \App\Support\HomePageContent::get('admission.steps');
         $heroPoints = array_map(
             fn($point) => [
                 'description' => $point,
                 'icon' => 'check',
             ],
-            trans('home.hero.points'),
+            \App\Support\HomePageContent::get('hero.points'),
         );
-        $aboutCards = trans('home.about.cards');
-        $aboutHighlights = trans('home.about.highlights');
-        $facilityCards = trans('home.facilities.items');
-        $faqItems = trans('home.faq.items');
-        $footerLinks = trans('home.footer_links');
-        $contactCards = trans('home.contact.cards');
+        $aboutCards = \App\Support\HomePageContent::get('about.cards');
+        $aboutHighlights = \App\Support\HomePageContent::get('about.highlights');
+        $facilityCards = \App\Support\HomePageContent::get('facilities.items');
+        $faqItems = \App\Support\HomePageContent::get('faq.items');
+        $footerLinks = \App\Support\HomePageContent::get('footer_links');
+        $contactCards = \App\Support\HomePageContent::get('contact.cards');
         $chatbotAnswers = array_map(function (array $item) use ($schoolName) {
             $item['answer'] = str_replace(':schoolName', $schoolName, $item['answer']);
 
             return $item;
-        }, trans('home.chatbot.answers'));
+        }, \App\Support\HomePageContent::get('chatbot.answers'));
 
         $heroHighlights = array_map(function (array $item) use ($studentsTotal, $teachersTotal) {
             $item['value'] = match ($item['value']) {
@@ -110,12 +50,12 @@
             };
 
             return $item;
-        }, trans('home.hero.highlights'));
+        }, \App\Support\HomePageContent::get('hero.highlights'));
 
         $homePageItems = $homePageItems ?? collect();
         $brandItem = $homePageItems->get('brand', collect())->firstWhere('key', 'main');
         $schoolName = $brandItem?->title ?: $schoolName;
-        $brandTagline = $brandItem?->description ?: __('home.brand.tagline');
+        $brandTagline = $brandItem?->description ?: \App\Support\HomePageContent::text('brand.tagline');
         $brandLogo = $brandItem?->image_path
             ? route('public.storage', ['path' => $brandItem->image_path])
             : asset('images/techbridge-logo-mark.svg');
@@ -132,16 +72,16 @@
 
         $homeHeroItem = $homePageItems->get('hero', collect())->firstWhere('key', 'main');
         if ($homeHeroItem) {
-            $heroBadge = $homeHeroItem->subtitle ?: __('home.hero.badge');
-            $heroTitle = $homeHeroItem->title ?: __('home.hero.title');
-            $heroDescription = $homeHeroItem->description ?: __('home.hero.description', ['schoolName' => $schoolName]);
+            $heroBadge = $homeHeroItem->subtitle ?: \App\Support\HomePageContent::text('hero.badge');
+            $heroTitle = $homeHeroItem->title ?: \App\Support\HomePageContent::text('hero.title');
+            $heroDescription = $homeHeroItem->description ?: \App\Support\HomePageContent::text('hero.description', ['schoolName' => $schoolName]);
             $heroImage = $homeHeroItem->image_path
                 ? route('public.storage', ['path' => $homeHeroItem->image_path])
                 : asset('images/school.jpg');
         } else {
-            $heroBadge = __('home.hero.badge');
-            $heroTitle = __('home.hero.title');
-            $heroDescription = __('home.hero.description', ['schoolName' => $schoolName]);
+            $heroBadge = \App\Support\HomePageContent::text('hero.badge');
+            $heroTitle = \App\Support\HomePageContent::text('hero.title');
+            $heroDescription = \App\Support\HomePageContent::text('hero.description', ['schoolName' => $schoolName]);
             $heroImage = asset('images/school.jpg');
         }
 
@@ -200,9 +140,9 @@
         $heroStripFeatures = count($dynamicHeroFeatures) > 0 ? $dynamicHeroFeatures : $features;
 
         $aboutItem = $homePageItems->get('about', collect())->firstWhere('key', 'main');
-        $aboutBadge = $aboutItem?->subtitle ?: __('home.about.badge', ['schoolName' => $schoolName]);
-        $aboutTitle = $aboutItem?->title ?: __('home.about.title');
-        $aboutDescription = $aboutItem?->description ?: __('home.about.description');
+        $aboutBadge = $aboutItem?->subtitle ?: \App\Support\HomePageContent::text('about.badge', ['schoolName' => $schoolName]);
+        $aboutTitle = $aboutItem?->title ?: \App\Support\HomePageContent::text('about.title');
+        $aboutDescription = $aboutItem?->description ?: \App\Support\HomePageContent::text('about.description');
 
         $dynamicAboutHighlights = $homePageItems
             ->get('about_highlights', collect())
@@ -221,7 +161,7 @@
             $aboutHighlights = $dynamicAboutHighlights;
         }
 
-        $defaultAboutTones = array_column(trans('home.about.cards'), 'tone');
+        $defaultAboutTones = array_column(\App\Support\HomePageContent::get('about.cards'), 'tone');
         $dynamicAboutCards = $homePageItems
             ->get('about_cards', collect())
             ->values()
@@ -242,9 +182,9 @@
         }
 
         $featureItem = $homePageItems->get('platform_features', collect())->firstWhere('key', 'main');
-        $featureBadge = $featureItem?->subtitle ?: __('home.features.badge');
-        $featureTitle = $featureItem?->title ?: __('home.features.title');
-        $featureTag = $featureItem?->value ?: __('home.features.tag');
+        $featureBadge = $featureItem?->subtitle ?: \App\Support\HomePageContent::text('features.badge');
+        $featureTitle = $featureItem?->title ?: \App\Support\HomePageContent::text('features.title');
+        $featureTag = $featureItem?->value ?: \App\Support\HomePageContent::text('features.tag');
 
         $dynamicFeatures = $homePageItems
             ->get('platform_feature_cards', collect())
@@ -264,9 +204,9 @@
         }
 
         $programItem = $homePageItems->get('programs', collect())->firstWhere('key', 'main');
-        $programBadge = $programItem?->subtitle ?: __('home.programs.badge');
-        $programTitle = $programItem?->title ?: __('home.programs.title');
-        $programDescription = $programItem?->description ?: __('home.programs.description');
+        $programBadge = $programItem?->subtitle ?: \App\Support\HomePageContent::text('programs.badge');
+        $programTitle = $programItem?->title ?: \App\Support\HomePageContent::text('programs.title');
+        $programDescription = $programItem?->description ?: \App\Support\HomePageContent::text('programs.description');
 
         $dynamicPrograms = $homePageItems
             ->get('program_cards', collect())
@@ -287,9 +227,9 @@
         }
 
         $facilityItem = $homePageItems->get('facilities', collect())->firstWhere('key', 'main');
-        $facilityBadge = $facilityItem?->subtitle ?: __('home.facilities.badge');
-        $facilityTitle = $facilityItem?->title ?: __('home.facilities.title');
-        $facilityDescription = $facilityItem?->description ?: __('home.facilities.description');
+        $facilityBadge = $facilityItem?->subtitle ?: \App\Support\HomePageContent::text('facilities.badge');
+        $facilityTitle = $facilityItem?->title ?: \App\Support\HomePageContent::text('facilities.title');
+        $facilityDescription = $facilityItem?->description ?: \App\Support\HomePageContent::text('facilities.description');
         $facilityImage = $facilityItem?->image_path
             ? route('public.storage', ['path' => $facilityItem->image_path])
             : asset('images/study.jpg');
@@ -311,15 +251,15 @@
         }
 
         $admissionItem = $homePageItems->get('admission', collect())->firstWhere('key', 'main');
-        $admissionBadge = $admissionItem?->subtitle ?: __('home.admission.badge');
-        $admissionTitle = $admissionItem?->title ?: __('home.admission.title');
-        $admissionDescription = $admissionItem?->description ?: __('home.admission.description');
+        $admissionBadge = $admissionItem?->subtitle ?: \App\Support\HomePageContent::text('admission.badge');
+        $admissionTitle = $admissionItem?->title ?: \App\Support\HomePageContent::text('admission.title');
+        $admissionDescription = $admissionItem?->description ?: \App\Support\HomePageContent::text('admission.description');
 
         $admissionIntakeItem = $homePageItems->get('admission_intake', collect())->firstWhere('key', 'main');
-        $admissionIntakeLabel = $admissionIntakeItem?->subtitle ?: __('home.admission.open_intake_label');
-        $admissionIntakeTitle = $admissionIntakeItem?->title ?: __('home.admission.open_intake_title');
+        $admissionIntakeLabel = $admissionIntakeItem?->subtitle ?: \App\Support\HomePageContent::text('admission.open_intake_label');
+        $admissionIntakeTitle = $admissionIntakeItem?->title ?: \App\Support\HomePageContent::text('admission.open_intake_title');
         $admissionIntakeDescription =
-            $admissionIntakeItem?->description ?: __('home.admission.open_intake_description');
+            $admissionIntakeItem?->description ?: \App\Support\HomePageContent::text('admission.open_intake_description');
 
         $dynamicSteps = $homePageItems
             ->get('admission_steps', collect())
@@ -332,13 +272,13 @@
         }
 
         $faqItem = $homePageItems->get('faq', collect())->firstWhere('key', 'main');
-        $faqBadge = $faqItem?->subtitle ?: __('home.faq.badge');
-        $faqTitle = $faqItem?->title ?: __('home.faq.title');
+        $faqBadge = $faqItem?->subtitle ?: \App\Support\HomePageContent::text('faq.badge');
+        $faqTitle = $faqItem?->title ?: \App\Support\HomePageContent::text('faq.title');
 
         $faqHelpItem = $homePageItems->get('faq_help', collect())->firstWhere('key', 'main');
-        $faqHelpLabel = $faqHelpItem?->subtitle ?: __('home.faq.more_help_label');
-        $faqHelpTitle = $faqHelpItem?->title ?: __('home.faq.more_help_title');
-        $faqHelpText = $faqHelpItem?->description ?: __('home.faq.more_help_text');
+        $faqHelpLabel = $faqHelpItem?->subtitle ?: \App\Support\HomePageContent::text('faq.more_help_label');
+        $faqHelpTitle = $faqHelpItem?->title ?: \App\Support\HomePageContent::text('faq.more_help_title');
+        $faqHelpText = $faqHelpItem?->description ?: \App\Support\HomePageContent::text('faq.more_help_text');
 
         $dynamicFaqItems = $homePageItems
             ->get('faq_items', collect())
@@ -351,14 +291,14 @@
         }
 
         $contactItem = $homePageItems->get('contact', collect())->firstWhere('key', 'main');
-        $contactBadge = $contactItem?->subtitle ?: __('home.contact.badge');
-        $contactTitle = $contactItem?->title ?: __('home.contact.title');
-        $contactDescription = $contactItem?->description ?: __('home.contact.description');
+        $contactBadge = $contactItem?->subtitle ?: \App\Support\HomePageContent::text('contact.badge');
+        $contactTitle = $contactItem?->title ?: \App\Support\HomePageContent::text('contact.title');
+        $contactDescription = $contactItem?->description ?: \App\Support\HomePageContent::text('contact.description');
 
         $contactCampusItem = $homePageItems->get('contact_campus', collect())->firstWhere('key', 'main');
-        $contactCampusLabel = $contactCampusItem?->subtitle ?: __('home.contact.campus_label');
-        $contactCampusTitle = $contactCampusItem?->title ?: __('home.contact.campus_title');
-        $contactCampusText = $contactCampusItem?->description ?: __('home.contact.campus_text');
+        $contactCampusLabel = $contactCampusItem?->subtitle ?: \App\Support\HomePageContent::text('contact.campus_label');
+        $contactCampusTitle = $contactCampusItem?->title ?: \App\Support\HomePageContent::text('contact.campus_title');
+        $contactCampusText = $contactCampusItem?->description ?: \App\Support\HomePageContent::text('contact.campus_text');
 
         $dynamicContactCards = $homePageItems
             ->get('contact_cards', collect())
@@ -371,11 +311,11 @@
         }
 
         $footerItem = $homePageItems->get('footer', collect())->firstWhere('key', 'main');
-        $footerTagline = $footerItem?->title ?: __('home.footer.tagline');
-        $footerDescription = $footerItem?->description ?: __('home.footer.description');
-        $footerExploreLabel = $footerItem?->subtitle ?: __('home.footer.explore');
-        $footerContactLabel = $footerItem?->value ?: __('home.footer.contact');
-        $footerCopyright = $footerItem?->meta['copyright'] ?? __('home.footer.copyright');
+        $footerTagline = $footerItem?->title ?: \App\Support\HomePageContent::text('footer.tagline');
+        $footerDescription = $footerItem?->description ?: \App\Support\HomePageContent::text('footer.description');
+        $footerExploreLabel = $footerItem?->subtitle ?: \App\Support\HomePageContent::text('footer.explore');
+        $footerContactLabel = $footerItem?->value ?: \App\Support\HomePageContent::text('footer.contact');
+        $footerCopyright = $footerItem?->meta['copyright'] ?? \App\Support\HomePageContent::text('footer.copyright');
         $footerLogo = $footerItem?->image_path
             ? route('public.storage', ['path' => $footerItem->image_path])
             : asset('images/techbridge-logo-mark.svg');
@@ -432,7 +372,7 @@
         @include('website.home.partials.chatbot')
     </div>
 
-    @vite(['resources/js/chat-bot.js'])
+    @vite(['resources/js/website/home/chat-bot.js'])
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </body>
 

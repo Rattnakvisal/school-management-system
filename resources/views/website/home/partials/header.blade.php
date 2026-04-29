@@ -1,37 +1,7 @@
 {{-- =========================
     Sticky Auto-Hide Navbar
 ========================= --}}
-<header x-data="{
-    open: false,
-    active: window.location.hash || '#home',
-    scrolled: false,
-    showNavbar: true,
-    lastScrollY: window.scrollY,
-
-    handleScroll() {
-        this.scrolled = window.scrollY > 20;
-
-        if (window.scrollY > this.lastScrollY && window.scrollY > 120) {
-            this.showNavbar = false;
-            this.open = false;
-        } else {
-            this.showNavbar = true;
-        }
-
-        this.lastScrollY = window.scrollY;
-
-        const sections = document.querySelectorAll('section[id]');
-
-        sections.forEach(section => {
-            const top = section.offsetTop - 140;
-            const bottom = top + section.offsetHeight;
-
-            if (window.scrollY >= top && window.scrollY < bottom) {
-                this.active = '#' + section.id;
-            }
-        });
-    }
-}" @scroll.window="handleScroll()"
+<header x-data="websiteHomeHeader()" @scroll.window="handleScroll()"
     class="fixed inset-x-0 top-0 z-50 px-4 pt-4 transition-transform duration-300 sm:px-6 lg:pt-5"
     :class="showNavbar ? 'translate-y-0' : '-translate-y-full'">
     {{-- Navbar Container --}}
@@ -52,7 +22,7 @@
                         {{ $schoolName }}
                     </p>
                     <p class="mt-1 truncate text-[11px] font-extrabold uppercase tracking-[0.26em] text-slate-500">
-                        {{ $brandTagline ?? __('home.brand.tagline') }}
+                        {{ $brandTagline ?? \App\Support\HomePageContent::text('brand.tagline') }}
                     </p>
                 </div>
             </a>
@@ -86,7 +56,7 @@
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M3 12h7V3H3v9Zm11 9h7v-7h-7v7Zm0-18v7h7V3h-7ZM3 21h7v-5H3v5Z" />
                         </svg>
-                        {{ __('home.actions.dashboard') }}
+                        {{ \App\Support\HomePageContent::text('actions.dashboard') }}
                     </a>
                 @else
                     <a href="{{ route('login') }}"
@@ -96,13 +66,13 @@
                             <path d="M10 17l5-5-5-5" />
                             <path d="M15 12H3" />
                         </svg>
-                        {{ __('home.actions.login') }}
+                        {{ \App\Support\HomePageContent::text('actions.login') }}
                     </a>
                 @endauth
 
                 {{-- Mobile Menu Button --}}
                 <button type="button" @click="open = !open" :aria-expanded="open.toString()"
-                    aria-label="{{ __('home.actions.toggle_menu') }}"
+                    aria-label="{{ \App\Support\HomePageContent::text('actions.toggle_menu') }}"
                     class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700 lg:hidden">
                     <svg x-show="!open" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
@@ -143,12 +113,12 @@
                     @auth
                         <a href="{{ route($dashboardRoute) }}"
                             class="home-header-cta inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 text-center text-sm font-bold text-white shadow-lg">
-                            {{ __('home.actions.dashboard') }}
+                            {{ \App\Support\HomePageContent::text('actions.dashboard') }}
                         </a>
                     @else
                         <a href="{{ route('login') }}"
                             class="home-header-cta inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-3 text-center text-sm font-bold text-white shadow-lg">
-                            {{ __('home.actions.login') }}
+                            {{ \App\Support\HomePageContent::text('actions.login') }}
                         </a>
                     @endauth
                 </div>

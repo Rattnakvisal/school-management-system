@@ -8,7 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const schoolName = (chatbot.dataset.schoolName || "TechBridge Academy").trim();
+    const schoolName = (
+        chatbot.dataset.schoolName || "TechBridge Academy"
+    ).trim();
     const toggle = document.getElementById("chatbot-toggle");
     const panel = document.getElementById("chatbot-panel");
     const form = document.getElementById("chatbot-form");
@@ -104,7 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const answers = parseJson(chatbot.dataset.answers, defaultAnswers);
     const thinkingText = chatbot.dataset.thinking || "Typing...";
     const emptyQuestionText =
-        chatbot.dataset.emptyQuestion || "Please type a question so I can help you.";
+        chatbot.dataset.emptyQuestion ||
+        "Please type a question so I can help you.";
     const fallbackAnswerText =
         chatbot.dataset.fallbackAnswer ||
         "I can help with admission, programs, contact details, office hours, and platform features. Please ask one of those topics.";

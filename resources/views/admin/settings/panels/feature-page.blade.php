@@ -28,21 +28,21 @@
                                             <label for="platform_feature_badge"
                                                 class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Badge</label>
                                             <input id="platform_feature_badge" name="feature[badge]" type="text"
-                                                value="{{ old('feature.badge', $platformFeature?->subtitle ?? __('home.features.badge')) }}"
+                                                value="{{ old('feature.badge', $platformFeature?->subtitle ?? \App\Support\HomePageContent::text('features.badge')) }}"
                                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                         </div>
                                         <div>
                                             <label for="platform_feature_tag"
                                                 class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Tag</label>
                                             <input id="platform_feature_tag" name="feature[tag]" type="text"
-                                                value="{{ old('feature.tag', $platformFeature?->value ?? __('home.features.tag')) }}"
+                                                value="{{ old('feature.tag', $platformFeature?->value ?? \App\Support\HomePageContent::text('features.tag')) }}"
                                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                         </div>
                                         <div class="md:col-span-2">
                                             <label for="platform_feature_title"
                                                 class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Headline</label>
                                             <textarea id="platform_feature_title" name="feature[title]" rows="3"
-                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('feature.title', $platformFeature?->title ?? __('home.features.title')) }}</textarea>
+                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('feature.title', $platformFeature?->title ?? \App\Support\HomePageContent::text('features.title')) }}</textarea>
                                         </div>
                                     </div>
                                 </div>

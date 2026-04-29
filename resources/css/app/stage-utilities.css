@@ -1,0 +1,1868 @@
+/* ================================
+   Better base tokens + consistency
+================================== */
+@layer utilities {
+    .layout-rail {
+        animation: chrome-slide-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .layout-topbar {
+        animation: chrome-drop-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .nav-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 transparent;
+        scrollbar-gutter: stable;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-scrollbar::-webkit-scrollbar {
+        width: 0.45rem;
+        height: 0.45rem;
+    }
+
+    .nav-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 999px;
+    }
+
+    .nav-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.78);
+        border: 2px solid transparent;
+        border-radius: 999px;
+        background-clip: padding-box;
+    }
+
+    .nav-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(100, 116, 139, 0.9);
+        background-clip: padding-box;
+    }
+
+    [data-page-animate] > * {
+        will-change: transform, opacity;
+    }
+
+    .admin-swirling-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: #0f172a;
+        opacity: 1;
+        transition:
+            opacity 360ms ease,
+            visibility 360ms ease;
+        visibility: visible;
+    }
+
+    .admin-loader-hidden .admin-swirling-loader {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    .admin-swirling-loader__icon {
+        width: 4.5rem;
+        height: 4.5rem;
+        color: currentColor;
+    }
+
+    .loading-ui-swirling-circle {
+        transform-origin: center;
+        animation:
+            admin-loader-dash var(--duration, 1.5s) ease-in-out infinite
+                alternate,
+            admin-loader-swirl calc(var(--duration, 1.5s) * 1.333333) linear
+                infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .admin-swirling-loader,
+        .loading-ui-swirling-circle {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+
+    .dashboard-stage .dash-reveal {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+        animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--d, 0) * 90ms);
+        will-change: transform, opacity;
+    }
+
+    .dashboard-stage .dash-hover {
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease;
+    }
+
+    .dashboard-stage .dash-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    .dashboard-stage .dashboard-card {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .dashboard-stage .dashboard-card-header {
+        align-items: flex-start;
+    }
+
+    .dashboard-stage .dashboard-card-meta {
+        max-width: 100%;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .dashboard-stage .dashboard-chart-box {
+        min-width: 0;
+    }
+
+    .dashboard-stage .dashboard-chart-box canvas {
+        max-width: 100% !important;
+    }
+
+    .dashboard-stage .dash-ring {
+        opacity: 0;
+        animation: dash-pop 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--d, 0) * 90ms);
+        will-change: transform, opacity;
+    }
+
+    .dashboard-stage .dash-bar {
+        height: var(--h, 0%);
+        transform: scaleY(0);
+        transform-origin: bottom;
+        animation: dash-grow-y 900ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        animation-delay: calc(var(--d, 0) * 70ms);
+    }
+
+    .dashboard-stage .dash-line-path {
+        stroke-dasharray: 1200;
+        stroke-dashoffset: 1200;
+        animation: dash-draw 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--d, 0) * 100ms);
+    }
+
+    /* Dashboard hero logo styling */
+    .dashboard-stage .dashboard-logo {
+        display: inline-block;
+        transform-origin: center bottom;
+        animation:
+            logo-float 4200ms ease-in-out infinite,
+            logo-pop 420ms cubic-bezier(0.2, 0.9, 0.2, 1) 120ms both;
+        will-change: transform, opacity;
+        cursor: default;
+        transition:
+            transform 220ms ease,
+            filter 220ms ease;
+        filter: drop-shadow(0 10px 24px rgba(15, 23, 42, 0.12));
+    }
+
+    .dashboard-stage .dashboard-hero-art {
+        position: relative;
+        isolation: isolate;
+        border-radius: 1.2rem;
+        padding: 0.25rem 0.1rem;
+    }
+
+    .dashboard-stage .dashboard-hero-art::before {
+        content: "";
+        position: absolute;
+        inset: 8% 2% 5%;
+        border-radius: 1rem;
+        background: radial-gradient(
+            circle at 72% 34%,
+            rgba(255, 255, 255, 0.26),
+            rgba(255, 255, 255, 0) 62%
+        );
+        filter: blur(1px);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .dashboard-stage .dashboard-logo--enhanced {
+        max-width: min(22rem, 42vw);
+    }
+
+    .dashboard-stage .dashboard-logo__orb {
+        animation: logo-orb-drift 6200ms ease-in-out infinite;
+    }
+
+    .dashboard-stage .dashboard-logo__orb--b {
+        animation-delay: 600ms;
+    }
+
+    .dashboard-stage .dashboard-logo__panel {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: logo-panel-float 4600ms ease-in-out infinite;
+    }
+
+    .dashboard-stage .dashboard-logo__panel--right {
+        animation-delay: 700ms;
+    }
+
+    .dashboard-stage .dashboard-logo__bar {
+        transform-box: fill-box;
+        transform-origin: bottom;
+        animation: dash-grow-y 1100ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .dashboard-stage .dashboard-logo__bar--a {
+        animation-delay: 220ms;
+    }
+
+    .dashboard-stage .dashboard-logo__bar--b {
+        animation-delay: 300ms;
+    }
+
+    .dashboard-stage .dashboard-logo__bar--c {
+        animation-delay: 380ms;
+    }
+
+    .dashboard-stage .dashboard-logo__bar--d {
+        animation-delay: 460ms;
+    }
+
+    .dashboard-stage .dashboard-logo__cap {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: logo-panel-float 4200ms ease-in-out infinite 420ms;
+    }
+
+    .dashboard-stage .dashboard-logo__tassel {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: logo-tassel-swing 1600ms ease-in-out infinite 360ms;
+    }
+
+    .dashboard-stage .dashboard-logo__sparkles {
+        animation: logo-spark-blink 3000ms ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dashboard-stage .dashboard-logo {
+            animation: none !important;
+        }
+
+        .dashboard-stage .dashboard-logo__orb,
+        .dashboard-stage .dashboard-logo__panel,
+        .dashboard-stage .dashboard-logo__bar,
+        .dashboard-stage .dashboard-logo__cap,
+        .dashboard-stage .dashboard-logo__tassel,
+        .dashboard-stage .dashboard-logo__sparkles {
+            animation: none !important;
+        }
+    }
+
+    /* =========================================
+     Unified "stage" patterns (less repetition)
+  ========================================== */
+    .stage {
+        position: relative;
+    }
+
+    .student-stage,
+    .teacher-stage,
+    .teacher-classes-stage,
+    .teacher-time-stage,
+    .class-stage,
+    .subject-stage,
+    .study-stage,
+    .contact-stage,
+    .study-time-stage,
+    .attendence-stage {
+        position: relative;
+    }
+
+    .stage .reveal {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+        animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--sd, 0) * 100ms);
+        will-change: transform, opacity;
+    }
+
+    .student-stage .student-reveal,
+    .teacher-stage .teacher-reveal,
+    .teacher-classes-stage .teacher-classes-reveal,
+    .teacher-time-stage .teacher-time-reveal,
+    .class-stage .class-reveal,
+    .subject-stage .subject-reveal,
+    .study-stage .study-reveal,
+    .contact-stage .contact-reveal,
+    .study-time-stage .study-time-reveal,
+    .attendence-stage .attendence-reveal {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+        animation: dash-fade-up 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation-delay: calc(var(--sd, 0) * 100ms);
+        will-change: transform, opacity;
+    }
+
+    .stage .float-card {
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease;
+    }
+
+    .student-stage .student-float,
+    .teacher-stage .teacher-float,
+    .teacher-classes-stage .teacher-classes-float,
+    .teacher-time-stage .teacher-time-float,
+    .class-stage .class-float,
+    .subject-stage .subject-float,
+    .study-stage .study-float,
+    .contact-stage .contact-float,
+    .study-time-stage .study-time-float,
+    .attendence-stage .attendence-float {
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease;
+    }
+
+    .stage .float-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .student-stage .student-float:hover,
+    .teacher-stage .teacher-float:hover,
+    .teacher-classes-stage .teacher-classes-float:hover,
+    .teacher-time-stage .teacher-time-float:hover,
+    .class-stage .class-float:hover,
+    .subject-stage .subject-float:hover,
+    .study-stage .study-float:hover,
+    .contact-stage .contact-float:hover,
+    .study-time-stage .study-time-float:hover,
+    .attendence-stage .attendence-float:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stage .status-dot {
+        animation: student-pulse 2s ease-in-out infinite;
+    }
+
+    .student-stage .status-dot,
+    .teacher-stage .status-dot,
+    .teacher-time-stage .status-dot,
+    .class-stage .status-dot,
+    .subject-stage .status-dot,
+    .study-stage .status-dot,
+    .contact-stage .status-dot,
+    .study-time-stage .status-dot,
+    .attendence-stage .status-dot {
+        animation: student-pulse 2s ease-in-out infinite;
+    }
+
+    /* ======================
+     Page header (upgrade)
+  ======================= */
+    .admin-page-header {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        background: linear-gradient(
+            135deg,
+            #f8fafc 0%,
+            #eef2ff 55%,
+            #f5f3ff 100%
+        );
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* subtle glow bubble */
+    .admin-page-header::after {
+        content: "";
+        position: absolute;
+        right: -4rem;
+        top: -4rem;
+        width: 14rem;
+        height: 14rem;
+        border-radius: 9999px;
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(99, 102, 241, 0.22),
+            transparent 60%
+        );
+        pointer-events: none;
+        filter: blur(1px);
+    }
+
+    .admin-page-title {
+        color: var(--text);
+        letter-spacing: -0.02em;
+    }
+
+    /* Student page title sizing (fixes "My Subjects" header scale) */
+    .student-stage .admin-page-title {
+        font-size: clamp(1.9rem, 3.4vw, 2.35rem);
+        line-height: 1.05;
+    }
+
+    .admin-page-header--iconic {
+        position: relative;
+    }
+
+    .admin-page-header__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0.9rem;
+        border: 1px solid #c7d2fe;
+        background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 100%);
+        color: #4338ca;
+        box-shadow: 0 10px 18px -16px rgba(67, 56, 202, 0.6);
+        flex-shrink: 0;
+    }
+
+    .admin-page-header__icon svg {
+        width: 1.22rem;
+        height: 1.22rem;
+    }
+
+    .admin-page-header__eyebrow {
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #6366f1;
+    }
+
+    .admin-page-subtitle {
+        color: var(--text-soft);
+    }
+
+    .admin-page-header__main {
+        position: relative;
+        z-index: 1;
+    }
+
+    .admin-page-header__intro {
+        min-width: 0;
+        flex: 1 1 20rem;
+    }
+
+    .admin-page-header__title-row {
+        align-items: flex-start;
+    }
+
+    .admin-page-header__stats {
+        width: 100%;
+        margin-top: 0.25rem;
+        justify-content: flex-start;
+    }
+
+    .admin-page-header__stats .admin-page-stat {
+        max-width: 100%;
+    }
+
+    @media (min-width: 1440px) {
+        .admin-page-header__main {
+            flex-wrap: nowrap;
+        }
+
+        .admin-page-header__stats {
+            width: auto;
+            max-width: min(100%, 46rem);
+            margin-left: auto;
+            justify-content: flex-end;
+        }
+    }
+
+    .teacher-page-header {
+        border-color: #d9e2f2;
+        background: linear-gradient(
+            128deg,
+            #f8fafc 0%,
+            #eef2ff 52%,
+            #ecfeff 100%
+        );
+        padding: clamp(1.2rem, 2vw, 1.6rem);
+    }
+
+    /* Enhanced dashboard header tweaks */
+    .dashboard-stage .admin-page-header {
+        padding: clamp(1.25rem, 2.2vw, 2rem);
+        background: linear-gradient(
+            90deg,
+            #5b21b6 0%,
+            #6366f1 45%,
+            #06b6d4 100%
+        );
+        color: #fff;
+        border: 0;
+        box-shadow:
+            0 18px 40px -28px rgba(15, 23, 42, 0.55),
+            0 6px 18px -8px rgba(99, 102, 241, 0.12);
+    }
+
+    .dashboard-stage .admin-page-header::after {
+        right: -6rem;
+        top: -6rem;
+        width: 18rem;
+        height: 18rem;
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(255, 255, 255, 0.12),
+            transparent 60%
+        );
+        filter: blur(6px);
+    }
+
+    .dashboard-stage .admin-page-title {
+        font-size: clamp(1.9rem, 3.4vw, 2.35rem);
+        line-height: 1.05;
+        color: #fff;
+        text-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+    }
+
+    .dashboard-stage .admin-page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        opacity: 0.95;
+    }
+
+    .dashboard-stage .admin-page-header__icon {
+        border-color: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        box-shadow: 0 10px 18px -16px rgba(15, 23, 42, 0.45);
+    }
+
+    .dashboard-stage .admin-page-header__eyebrow {
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+    .dashboard-stage .admin-page-header__actions {
+        margin-left: 0;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .dashboard-stage .admin-page-header__actions .rounded-xl {
+        box-shadow: 0 10px 24px -24px rgba(0, 0, 0, 0.25);
+    }
+
+    .dashboard-stage .admin-page-stat {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.18);
+        color: #fff;
+    }
+
+    @media (min-width: 1280px) {
+        .dashboard-stage .admin-page-header__actions {
+            margin-left: auto;
+            justify-content: flex-end;
+        }
+    }
+
+    .teacher-page-header .admin-page-title {
+        font-size: clamp(1.75rem, 2.7vw, 2.35rem);
+        line-height: 1.1;
+    }
+
+    .teacher-page-header .admin-page-subtitle {
+        max-width: 46rem;
+    }
+
+    .teacher-page-header__stats {
+        margin-left: auto;
+        justify-content: flex-end;
+    }
+
+    .teacher-page-header__actions {
+        margin-left: auto;
+        width: fit-content;
+        justify-content: flex-end;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero {
+        border: 0;
+        background: linear-gradient(
+            132deg,
+            #4c1d95 0%,
+            #4338ca 34%,
+            #2563eb 66%,
+            #0891b2 100%
+        );
+        color: #fff;
+        box-shadow:
+            0 18px 40px -28px rgba(15, 23, 42, 0.48),
+            0 10px 24px -16px rgba(37, 99, 235, 0.28);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero::after {
+        right: -7rem;
+        top: -7rem;
+        width: 20rem;
+        height: 20rem;
+        background: radial-gradient(
+            circle at 35% 35%,
+            rgba(255, 255, 255, 0.14),
+            rgba(255, 255, 255, 0) 65%
+        );
+        filter: blur(10px);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .admin-page-title {
+        color: #fff;
+        text-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .admin-page-subtitle {
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .admin-page-stat {
+        border-color: rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(12px);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art {
+        width: min(100%, 19.5rem);
+        margin-left: auto;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__panel {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.16) 0%,
+            rgba(255, 255, 255, 0.08) 100%
+        );
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 18px 40px -24px rgba(15, 23, 42, 0.28);
+        padding: 1rem;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__panel::before {
+        content: "";
+        position: absolute;
+        inset: 12% 12% auto auto;
+        width: 7rem;
+        height: 7rem;
+        border-radius: 9999px;
+        background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.22),
+            rgba(255, 255, 255, 0) 70%
+        );
+        pointer-events: none;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__badge {
+        position: absolute;
+        left: 1rem;
+        top: 1rem;
+        z-index: 1;
+        border-radius: 9999px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        background: rgba(255, 255, 255, 0.16);
+        padding: 0.35rem 0.65rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__frame {
+        position: relative;
+        padding-top: 1rem;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__svg {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__footer {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__foot-card {
+        border-radius: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.65rem 0.75rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__foot-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.72);
+    }
+
+    .dashboard-stage .teacher-dashboard-hero .teacher-hero-art__foot-value {
+        margin-top: 0.25rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        line-height: 1.15;
+        color: rgba(255, 255, 255, 0.96);
+    }
+
+    @media (max-width: 640px) {
+        .admin-page-header__icon {
+            width: 2.35rem;
+            height: 2.35rem;
+            border-radius: 0.75rem;
+        }
+
+        .admin-page-header__icon svg {
+            width: 1.08rem;
+            height: 1.08rem;
+        }
+    }
+
+    /* ==================================
+     Better pills (stat badges)
+  =================================== */
+    .admin-page-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 9999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.86);
+        backdrop-filter: blur(6px);
+        padding: 0.4rem 0.8rem;
+        color: #334155;
+        box-shadow: 0 8px 18px -18px rgba(15, 23, 42, 0.55);
+    }
+
+    .admin-page-stat--emerald {
+        border-color: #bbf7d0;
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .admin-page-stat--rose {
+        border-color: #fecdd3;
+        background: #fff1f2;
+        color: #be123c;
+    }
+
+    .admin-page-stat--sky {
+        border-color: #bae6fd;
+        background: #f0f9ff;
+        color: #075985;
+    }
+
+    .admin-page-stat--amber {
+        border-color: #fde68a;
+        background: #fffbeb;
+        color: #a16207;
+    }
+
+    .admin-page-stat--indigo {
+        border-color: #c7d2fe;
+        background: #eef2ff;
+        color: #4338ca;
+    }
+
+    .admin-page-stat--cyan {
+        border-color: #a5f3fc;
+        background: #ecfeff;
+        color: #0e7490;
+    }
+
+    /* ==================================
+     Inputs / Focus (more modern)
+  =================================== */
+    .stage input:not([type="checkbox"]):not([type="file"]),
+    .stage select,
+    .stage textarea {
+        border-color: var(--border);
+        background: #fcfdff;
+        color: var(--text);
+        transition:
+            border-color 180ms ease,
+            box-shadow 180ms ease,
+            background-color 180ms ease;
+    }
+
+    .stage input:not([type="checkbox"]):not([type="file"]):focus,
+    .stage select:focus,
+    .stage textarea:focus {
+        background: #fff;
+        border-color: rgba(59, 130, 246, 0.55);
+        box-shadow: var(--ring);
+        outline: none;
+    }
+
+    .stage input[type="file"] {
+        border-style: dashed;
+        background: #f8fbff;
+    }
+
+    .stage input[type="checkbox"] {
+        accent-color: var(--stage-accent, #3b82f6);
+    }
+
+    /* ======================
+     Buttons (micro polish)
+  ======================= */
+    .stage button {
+        transition:
+            transform 180ms ease,
+            box-shadow 180ms ease,
+            filter 180ms ease;
+    }
+
+    .stage button:hover {
+        filter: brightness(1.02);
+        box-shadow: 0 14px 24px -22px rgba(15, 23, 42, 0.55);
+    }
+
+    .stage button:active {
+        transform: translateY(1px);
+        box-shadow: none;
+    }
+
+    /* ==================================
+     Tables (cleaner â€œcardsâ€, sticky head)
+  =================================== */
+    .stage .overflow-x-auto {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+        padding: 0.35rem;
+    }
+
+    .stage table {
+        min-width: 980px;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+    .stage thead th {
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        position: sticky;
+        top: 0;
+        background: rgba(248, 251, 255, 0.92);
+        backdrop-filter: blur(6px);
+        z-index: 10;
+    }
+
+    .stage tbody tr {
+        transition:
+            transform 180ms ease,
+            box-shadow 180ms ease;
+    }
+
+    .stage tbody td {
+        background: rgba(255, 255, 255, 0.96);
+        border-top: 1px solid var(--border-2);
+        border-bottom: 1px solid var(--border-2);
+    }
+
+    .stage tbody td:first-child {
+        border-left: 1px solid var(--border-2);
+        border-top-left-radius: 0.9rem;
+        border-bottom-left-radius: 0.9rem;
+    }
+
+    .stage tbody td:last-child {
+        border-right: 1px solid var(--border-2);
+        border-top-right-radius: 0.9rem;
+        border-bottom-right-radius: 0.9rem;
+    }
+
+    .stage tbody tr:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 26px -24px rgba(15, 23, 42, 0.55);
+    }
+
+    .stage tbody tr:hover td {
+        background: #f7faff;
+    }
+
+    .stage .pagination,
+    .stage nav[role="navigation"] {
+        border-top: 1px solid var(--border-2);
+        padding-top: 0.85rem;
+    }
+
+    .class-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .teacher-assignment-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .admin-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .admin-stage .max-h-\[1200px\]::-webkit-scrollbar,
+    .student-stage .max-h-\[720px\]::-webkit-scrollbar,
+    .teacher-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .subject-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .study-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .contact-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .study-time-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .teacher-time-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .teacher-classes-stage .max-h-\[700px\]::-webkit-scrollbar,
+    .attendence-stage .max-h-\[700px\]::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .class-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .teacher-assignment-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .admin-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .admin-stage .max-h-\[1200px\]::-webkit-scrollbar-thumb,
+    .student-stage .max-h-\[720px\]::-webkit-scrollbar-thumb,
+    .teacher-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .subject-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .study-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .contact-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .study-time-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .teacher-time-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .teacher-classes-stage .max-h-\[700px\]::-webkit-scrollbar-thumb,
+    .attendence-stage .max-h-\[700px\]::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 999px;
+        border: 2px solid #f8fafc;
+    }
+
+    .class-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .teacher-assignment-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .admin-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .admin-stage .max-h-\[1200px\]::-webkit-scrollbar-track,
+    .student-stage .max-h-\[720px\]::-webkit-scrollbar-track,
+    .teacher-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .subject-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .study-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .contact-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .study-time-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .teacher-time-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .teacher-classes-stage .max-h-\[700px\]::-webkit-scrollbar-track,
+    .attendence-stage .max-h-\[700px\]::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    .class-stage .max-h-\[700px\],
+    .teacher-assignment-stage .max-h-\[700px\],
+    .admin-stage .max-h-\[700px\],
+    .admin-stage .max-h-\[1200px\],
+    .student-stage .max-h-\[720px\],
+    .teacher-stage .max-h-\[700px\],
+    .subject-stage .max-h-\[700px\],
+    .study-stage .max-h-\[700px\],
+    .contact-stage .max-h-\[700px\],
+    .study-time-stage .max-h-\[700px\],
+    .teacher-time-stage .max-h-\[700px\],
+    .teacher-classes-stage .max-h-\[700px\],
+    .attendence-stage .max-h-\[700px\] {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+    }
+
+    .study-time-stage .max-h-\[800px\]::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .study-time-stage .max-h-\[800px\]::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 999px;
+        border: 2px solid #f8fafc;
+    }
+
+    .study-time-stage .max-h-\[800px\]::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    .study-time-stage .max-h-\[800px\] {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+    }
+
+    /* Teacher history tables use 44rem containers; match Law Requests scrollbar styling */
+    .teacher-assignment-stage .max-h-\[44rem\]::-webkit-scrollbar,
+    .teacher-grade-stage .max-h-\[44rem\]::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .teacher-assignment-stage .max-h-\[44rem\]::-webkit-scrollbar-thumb,
+    .teacher-grade-stage .max-h-\[44rem\]::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 999px;
+        border: 2px solid #f8fafc;
+    }
+
+    .teacher-assignment-stage .max-h-\[44rem\]::-webkit-scrollbar-track,
+    .teacher-grade-stage .max-h-\[44rem\]::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    .teacher-assignment-stage .max-h-\[44rem\],
+    .teacher-grade-stage .max-h-\[44rem\] {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+    }
+
+    /* Match attendance table scrollbar (620px) to other stages */
+    .class-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .admin-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .student-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .teacher-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .subject-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .study-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .contact-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .study-time-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .teacher-time-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .teacher-classes-stage .max-h-\[620px\]::-webkit-scrollbar,
+    .attendence-stage .max-h-\[620px\]::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .class-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .teacher-assignment-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .admin-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .student-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .teacher-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .subject-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .study-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .contact-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .study-time-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .teacher-time-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .teacher-classes-stage .max-h-\[620px\]::-webkit-scrollbar-thumb,
+    .attendence-stage .max-h-\[620px\]::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 999px;
+        border: 2px solid #f8fafc;
+    }
+
+    .class-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .teacher-assignment-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .admin-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .student-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .teacher-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .subject-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .study-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .contact-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .study-time-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .teacher-time-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .teacher-classes-stage .max-h-\[620px\]::-webkit-scrollbar-track,
+    .attendence-stage .max-h-\[620px\]::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    .class-stage .max-h-\[620px\],
+    .teacher-assignment-stage .max-h-\[620px\],
+    .admin-stage .max-h-\[620px\],
+    .student-stage .max-h-\[620px\],
+    .teacher-stage .max-h-\[620px\],
+    .subject-stage .max-h-\[620px\],
+    .study-stage .max-h-\[620px\],
+    .contact-stage .max-h-\[620px\],
+    .study-time-stage .max-h-\[620px\],
+    .teacher-time-stage .max-h-\[620px\],
+    .teacher-classes-stage .max-h-\[620px\],
+    .attendence-stage .max-h-\[620px\] {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+    }
+
+    /* Student list table readability */
+    .student-stage .student-table-scroller {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #f1f5f9;
+        scrollbar-gutter: stable;
+    }
+
+    .student-stage .student-table-scroller::-webkit-scrollbar {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+
+    .student-stage .student-table-scroller::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 999px;
+    }
+
+    .student-stage .student-table-scroller::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border: 2px solid #f1f5f9;
+        border-radius: 999px;
+    }
+
+    .student-stage .student-table-scroller::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+
+    .student-stage .student-table {
+        min-width: 1120px;
+        table-layout: auto;
+        border-collapse: separate;
+        border-spacing: 0 0.1rem;
+    }
+
+    .student-stage .student-table thead th {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .student-stage .student-table tbody td {
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+        vertical-align: middle;
+    }
+
+    .student-stage .student-table .student-col-student {
+        min-width: 220px;
+    }
+
+    .student-stage .student-table .student-col-email {
+        min-width: 220px;
+    }
+
+    .student-stage .student-table .student-col-class {
+        min-width: 130px;
+    }
+
+    .student-stage .student-table .student-col-major {
+        min-width: 190px;
+    }
+
+    .student-stage .student-table .student-col-study {
+        min-width: 200px;
+    }
+
+    .student-stage .student-table .student-col-status {
+        min-width: 120px;
+    }
+
+    .student-stage .student-table .student-col-created {
+        min-width: 120px;
+    }
+
+    .student-stage .student-table .student-col-actions {
+        min-width: 190px;
+    }
+
+    .student-stage .student-name,
+    .student-stage .student-major-name {
+        line-height: 1.35;
+        white-space: normal;
+    }
+
+    .student-stage .student-email {
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .student-stage .student-schedule-table tbody td {
+        vertical-align: top;
+    }
+
+    .student-stage .student-table .student-col-day {
+        min-width: 112px;
+    }
+
+    .student-stage .student-table .student-col-time {
+        min-width: 92px;
+    }
+
+    .student-stage .student-table .student-col-subject {
+        min-width: 190px;
+    }
+
+    .student-stage .student-table .student-col-details {
+        min-width: 300px;
+    }
+
+    .student-stage .student-table .student-col-period {
+        min-width: 96px;
+    }
+
+    .student-stage .student-table .student-col-teacher {
+        min-width: 210px;
+    }
+
+    .student-stage .student-schedule-details,
+    .student-stage .student-schedule-table .student-col-subject,
+    .student-stage .student-schedule-table .student-col-teacher,
+    .student-stage .student-schedule-table .student-col-class {
+        white-space: normal;
+    }
+
+    .admin-stage .admin-staff-table {
+        min-width: 1180px;
+        table-layout: auto;
+        border-collapse: separate;
+        border-spacing: 0 0.1rem;
+    }
+
+    .admin-stage .admin-staff-table thead th {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .admin-stage .admin-staff-table tbody td {
+        border-top: 0;
+        border-bottom: 0;
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+        vertical-align: middle;
+    }
+
+    .admin-stage .admin-staff-table tbody tr:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .admin-stage .admin-staff-table tbody tr:hover td {
+        background: transparent;
+    }
+
+    .admin-stage .admin-staff-table .student-col-student {
+        min-width: 240px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-email {
+        min-width: 260px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-phone {
+        min-width: 150px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-class {
+        min-width: 110px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-status {
+        min-width: 120px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-created {
+        min-width: 120px;
+    }
+
+    .admin-stage .admin-staff-table .student-col-actions {
+        min-width: 210px;
+    }
+
+    .admin-stage .student-name {
+        line-height: 1.35;
+        white-space: normal;
+    }
+
+    .admin-stage .student-email {
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    /* Teacher classes table readability */
+    .teacher-classes-stage table {
+        min-width: 1020px;
+    }
+
+    .teacher-time-stage table {
+        min-width: 980px;
+    }
+
+    /* Teacher settings polish */
+    .teacher-settings-stage .teacher-settings-panel {
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(
+                130% 120% at 110% -10%,
+                rgba(99, 102, 241, 0.08),
+                transparent 58%
+            ),
+            linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+        box-shadow: 0 22px 38px -34px rgba(15, 23, 42, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-hero {
+        background: linear-gradient(
+            125deg,
+            #eef2ff 0%,
+            #f8fafc 48%,
+            #ecfeff 100%
+        );
+    }
+
+    .teacher-settings-stage .teacher-settings-hero::after {
+        background: radial-gradient(
+            circle at 20% 20%,
+            rgba(79, 70, 229, 0.24),
+            transparent 64%
+        );
+    }
+
+    .teacher-settings-stage .teacher-settings-profile-head {
+        border: 1px solid #dbeafe;
+        border-radius: 1rem;
+        padding: 0.9rem;
+        background: linear-gradient(
+            120deg,
+            #f0f9ff 0%,
+            #eef2ff 55%,
+            #f8fafc 100%
+        );
+    }
+
+    .teacher-settings-stage .teacher-settings-form-card {
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease;
+        box-shadow: 0 12px 24px -26px rgba(15, 23, 42, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-form-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 34px -30px rgba(15, 23, 42, 0.5);
+    }
+
+    .teacher-settings-stage .teacher-settings-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        letter-spacing: 0.01em;
+    }
+
+    .teacher-settings-stage .teacher-settings-section-dot {
+        height: 0.55rem;
+        width: 0.55rem;
+        border-radius: 9999px;
+        background: linear-gradient(180deg, #6366f1, #4f46e5);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16);
+    }
+
+    .teacher-settings-stage .teacher-settings-check-form {
+        background: linear-gradient(
+            120deg,
+            rgba(224, 231, 255, 0.55) 0%,
+            rgba(240, 249, 255, 0.88) 45%,
+            rgba(248, 250, 252, 0.9) 100%
+        );
+    }
+
+    .teacher-settings-stage .teacher-settings-inline-kpi {
+        transition:
+            transform 180ms ease,
+            box-shadow 180ms ease;
+        box-shadow: 0 10px 20px -22px rgba(15, 23, 42, 0.5);
+    }
+
+    .teacher-settings-stage .teacher-settings-inline-kpi:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 28px -24px rgba(15, 23, 42, 0.52);
+    }
+
+    .teacher-settings-stage .teacher-settings-mini-stat {
+        transition:
+            transform 200ms ease,
+            box-shadow 200ms ease;
+        box-shadow: 0 10px 20px -24px rgba(15, 23, 42, 0.55);
+    }
+
+    .teacher-settings-stage .teacher-settings-mini-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 28px -24px rgba(15, 23, 42, 0.55);
+    }
+
+    .teacher-settings-stage .teacher-settings-class-card {
+        transition:
+            transform 200ms ease,
+            box-shadow 200ms ease,
+            border-color 200ms ease;
+    }
+
+    .teacher-settings-stage .teacher-settings-class-card:hover {
+        transform: translateY(-2px);
+        border-color: #c7d2fe;
+        box-shadow: 0 16px 30px -26px rgba(79, 70, 229, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-kpi {
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease;
+        box-shadow: 0 12px 24px -24px rgba(15, 23, 42, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-kpi:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 30px -24px rgba(15, 23, 42, 0.45);
+    }
+
+    .teacher-settings-stage .teacher-settings-table-wrap {
+        background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+    }
+
+    .teacher-settings-stage .teacher-settings-cta {
+        box-shadow: 0 14px 24px -24px rgba(79, 70, 229, 0.6);
+    }
+
+    .teacher-settings-stage .teacher-settings-cta:hover {
+        box-shadow: 0 22px 30px -24px rgba(79, 70, 229, 0.6);
+    }
+
+    .teacher-classes-stage td,
+    .teacher-classes-stage th {
+        vertical-align: top;
+    }
+
+    .teacher-time-stage td,
+    .teacher-time-stage th {
+        vertical-align: top;
+    }
+
+    .teacher-time-stage .teacher-attendance-table-wrap,
+    .teacher-time-stage .teacher-attendance-table-scroller,
+    .teacher-time-stage .teacher-attendance-table {
+        min-width: 0;
+    }
+
+    .attendence-stage .admin-teacher-attendance-table {
+        min-width: 0;
+    }
+
+    .attendence-stage .dashboard-card {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .attendence-stage .dashboard-card-header {
+        align-items: flex-start;
+    }
+
+    .attendence-stage .dashboard-card-meta {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .attendence-stage .dash-hover {
+        transition:
+            transform 220ms ease,
+            box-shadow 220ms ease;
+    }
+
+    .attendence-stage .dash-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    .attendence-stage .admin-teacher-attendance-table th,
+    .attendence-stage .admin-teacher-attendance-table td {
+        vertical-align: top;
+    }
+
+    .attendence-stage .admin-teacher-col-teacher {
+        width: 16rem;
+        min-width: 16rem;
+    }
+
+    .attendence-stage .admin-teacher-col-law {
+        width: 20rem;
+        min-width: 20rem;
+    }
+
+    .attendence-stage .admin-teacher-col-current {
+        width: 9.5rem;
+        min-width: 9.5rem;
+    }
+
+    .attendence-stage .admin-teacher-col-check {
+        width: 18rem;
+        min-width: 18rem;
+    }
+
+    .attendence-stage .admin-teacher-col-remark {
+        width: 17rem;
+        min-width: 17rem;
+    }
+
+    .attendence-stage .admin-teacher-col-checked {
+        width: 11rem;
+        min-width: 11rem;
+    }
+
+    .attendence-stage .admin-teacher-status-grid {
+        align-items: center;
+    }
+
+    .attendence-stage .admin-teacher-cell .max-w-sm {
+        max-width: 18rem;
+    }
+
+    /* ==============================
+     Define per-stage accent easily
+  =============================== */
+    .student-stage {
+        --stage-accent: #6366f1;
+    }
+
+    .teacher-stage {
+        --stage-accent: #0ea5e9;
+    }
+
+    .teacher-settings-stage {
+        --stage-accent: #4f46e5;
+    }
+
+    .teacher-classes-stage {
+        --stage-accent: #4f46e5;
+    }
+
+    .teacher-time-stage {
+        --stage-accent: #2563eb;
+    }
+
+    .class-stage {
+        --stage-accent: #10b981;
+    }
+
+    .subject-stage {
+        --stage-accent: #f59e0b;
+    }
+
+    .study-stage {
+        --stage-accent: #ec4899;
+    }
+
+    .contact-stage {
+        --stage-accent: #22c55e;
+    }
+
+    /* âœ… NEW: Time Studies accent */
+    .study-time-stage {
+        --stage-accent: #8b5cf6;
+        /* violet */
+    }
+
+    /* âœ… NEW: Attendance stage */
+    .attendence-stage {
+        --stage-accent: #ef4444;
+        /* red */
+    }
+
+    /* Optional: use accent ring per stage */
+    .student-stage {
+        --ring: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+
+    .teacher-stage {
+        --ring: 0 0 0 4px rgba(14, 165, 233, 0.2);
+    }
+
+    .teacher-settings-stage {
+        --ring: 0 0 0 4px rgba(79, 70, 229, 0.2);
+    }
+
+    .teacher-classes-stage {
+        --ring: 0 0 0 4px rgba(79, 70, 229, 0.2);
+    }
+
+    .teacher-time-stage {
+        --ring: 0 0 0 4px rgba(37, 99, 235, 0.2);
+    }
+
+    .class-stage {
+        --ring: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    .subject-stage {
+        --ring: 0 0 0 4px rgba(245, 158, 11, 0.2);
+    }
+
+    .study-stage {
+        --ring: 0 0 0 4px rgba(236, 72, 153, 0.2);
+    }
+
+    .contact-stage {
+        --ring: 0 0 0 4px rgba(34, 197, 94, 0.2);
+    }
+
+    /* NEW: Time Studies ring */
+    .study-time-stage {
+        --ring: 0 0 0 4px rgba(139, 92, 246, 0.2);
+    }
+
+    .attendence-stage {
+        --ring: 0 0 0 4px rgba(239, 68, 68, 0.18);
+    }
+
+    /* ==============================
+     Mobile tweaks
+  =============================== */
+    @media (max-width: 1024px) {
+        .admin-page-header {
+            padding: 1.2rem;
+        }
+
+        .teacher-page-header .admin-page-title {
+            font-size: clamp(1.55rem, 5vw, 2rem);
+        }
+
+        .teacher-page-header__actions {
+            margin-left: 0;
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .teacher-settings-stage .teacher-settings-cta {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stage .overflow-x-auto {
+            padding: 0.2rem;
+            border-radius: 0.85rem;
+        }
+
+        .student-stage .student-table {
+            min-width: 980px;
+            table-layout: auto;
+        }
+
+        .teacher-settings-stage .teacher-settings-panel {
+            border-radius: 1.25rem;
+        }
+
+        .dashboard-stage .dashboard-card {
+            padding: 1rem;
+        }
+
+        .dashboard-stage .dashboard-card-meta {
+            text-align: left;
+        }
+
+        .teacher-classes-stage .max-h-\[560px\],
+        .teacher-time-stage .max-h-\[560px\],
+        .teacher-time-stage .max-h-\[620px\],
+        .teacher-settings-stage .max-h-\[360px\],
+        .teacher-settings-stage .max-h-\[560px\],
+        .teacher-settings-stage .max-h-\[620px\] {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+
+    @media (max-width: 1280px) {
+        .study-stage .admin-page-header__main,
+        .study-time-stage .admin-page-header__main {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .study-stage .admin-page-header__intro,
+        .study-time-stage .admin-page-header__intro {
+            flex: 0 1 auto;
+            width: 100%;
+        }
+
+        .study-stage .admin-page-header__stats,
+        .study-time-stage .admin-page-header__stats {
+            width: 100%;
+            max-width: none;
+            margin-left: 0;
+            justify-content: flex-start;
+        }
+
+        .study-stage .admin-page-title,
+        .study-time-stage .admin-page-title,
+        .student-stage .admin-page-title {
+            font-size: clamp(1.85rem, 5.8vw, 2.35rem);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .teacher-page-header__stats,
+        .teacher-page-header__actions {
+            margin-left: 0;
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .teacher-time-stage .admin-page-stat,
+        .teacher-classes-stage .admin-page-stat,
+        .teacher-settings-stage .admin-page-stat {
+            max-width: 100%;
+            white-space: normal;
+            line-height: 1.2;
+        }
+
+        .teacher-time-stage .teacher-attendance-table-wrap {
+            overflow: visible;
+            border-radius: 1.5rem;
+            background: transparent;
+            border-color: transparent;
+        }
+
+        .teacher-time-stage .teacher-attendance-table-scroller {
+            max-height: none;
+            overflow: visible;
+            background: transparent;
+        }
+
+        .teacher-time-stage .teacher-attendance-table {
+            display: block;
+            min-width: 0;
+            background: transparent;
+        }
+
+        .teacher-time-stage .teacher-attendance-table thead {
+            display: none;
+        }
+
+        .teacher-time-stage .teacher-attendance-table tbody {
+            display: grid;
+            gap: 0.85rem;
+            background: transparent;
+        }
+
+        .teacher-time-stage
+            .teacher-attendance-table
+            tbody
+            tr.teacher-attendance-row {
+            display: block;
+            overflow: hidden;
+            border: 1px solid #dbe3f0;
+            border-radius: 1.25rem;
+            background: #ffffff;
+            box-shadow: 0 12px 24px -24px rgba(15, 23, 42, 0.35);
+        }
+
+        .teacher-time-stage
+            .teacher-attendance-table
+            tbody
+            tr.teacher-attendance-row
+            td.teacher-attendance-cell {
+            display: block;
+            padding: 0.85rem 1rem;
+            border: 0;
+        }
+
+        .teacher-time-stage
+            .teacher-attendance-table
+            tbody
+            tr.teacher-attendance-row
+            td.teacher-attendance-cell
+            + td.teacher-attendance-cell {
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .teacher-time-stage .teacher-attendance-cell::before {
+            content: attr(data-cell-label);
+            display: block;
+            margin-bottom: 0.55rem;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        .teacher-time-stage .teacher-attendance-cell .max-w-xs {
+            max-width: 100%;
+        }
+
+        .teacher-time-stage .teacher-attendance-cell .truncate {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            overflow-wrap: anywhere;
+        }
+
+        .teacher-time-stage .teacher-attendance-cell input[type="text"] {
+            width: 100%;
+        }
+
+        .teacher-time-stage
+            .js-attendance-submit-form
+            > .flex:first-of-type
+            button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .teacher-time-stage table:not(.teacher-attendance-table),
+        .teacher-classes-stage table {
+            min-width: 860px;
+        }
+
+        .teacher-settings-stage table {
+            min-width: 720px;
+        }
+
+        .dashboard-stage .dashboard-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dashboard-stage .dashboard-chart-box {
+            height: 220px !important;
+        }
+
+        .dashboard-stage .dashboard-chart-box--tall {
+            height: 250px !important;
+        }
+
+        .dashboard-stage .dashboard-chart-box--medium {
+            height: 240px !important;
+        }
+
+        .dashboard-stage .dashboard-summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .study-stage .admin-page-header,
+        .study-time-stage .admin-page-header {
+            padding: 1rem;
+        }
+
+        .study-stage .admin-page-header__title-row,
+        .study-time-stage .admin-page-header__title-row {
+            gap: 0.65rem;
+        }
+
+        .study-stage .admin-page-stat,
+        .study-time-stage .admin-page-stat {
+            white-space: normal;
+            line-height: 1.2;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.72rem;
+        }
+    }
+}

@@ -14,17 +14,17 @@
             <span
                 class="relative inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.28em] text-indigo-700 ring-1 ring-indigo-100">
                 <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
-                {{ $contactBadge ?? __('home.contact.badge') }}
+                {{ $contactBadge ?? \App\Support\HomePageContent::text('contact.badge') }}
             </span>
 
             {{-- Title --}}
             <h2 class="relative mt-4 text-3xl font-semibold text-slate-950">
-                {{ $contactTitle ?? __('home.contact.title') }}
+                {{ $contactTitle ?? \App\Support\HomePageContent::text('contact.title') }}
             </h2>
 
             {{-- Description --}}
             <p class="relative mt-3 text-sm leading-7 text-slate-600">
-                {{ $contactDescription ?? __('home.contact.description') }}
+                {{ $contactDescription ?? \App\Support\HomePageContent::text('contact.description') }}
             </p>
 
             {{-- Success Message --}}
@@ -42,10 +42,10 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="contact_name" class="contact-label">
-                            {{ __('home.contact.form.name') }}
+                            {{ \App\Support\HomePageContent::text('contact.form.name') }}
                         </label>
                         <input id="contact_name" name="name" type="text" value="{{ old('name') }}"
-                            class="contact-input" placeholder="{{ __('home.contact.form.name_placeholder') }}">
+                            class="contact-input" placeholder="{{ \App\Support\HomePageContent::text('contact.form.name_placeholder') }}">
                         @error('name')
                             <p class="contact-error">{{ $message }}</p>
                         @enderror
@@ -53,10 +53,10 @@
 
                     <div>
                         <label for="contact_phone" class="contact-label">
-                            {{ __('home.contact.form.phone') }}
+                            {{ \App\Support\HomePageContent::text('contact.form.phone') }}
                         </label>
                         <input id="contact_phone" name="phone" type="text" value="{{ old('phone') }}"
-                            class="contact-input" placeholder="{{ __('home.contact.form.phone_placeholder') }}">
+                            class="contact-input" placeholder="{{ \App\Support\HomePageContent::text('contact.form.phone_placeholder') }}">
                         @error('phone')
                             <p class="contact-error">{{ $message }}</p>
                         @enderror
@@ -66,10 +66,10 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="contact_email" class="contact-label">
-                            {{ __('home.contact.form.email') }}
+                            {{ \App\Support\HomePageContent::text('contact.form.email') }}
                         </label>
                         <input id="contact_email" name="email" type="email" value="{{ old('email') }}"
-                            class="contact-input" placeholder="{{ __('home.contact.form.email_placeholder') }}">
+                            class="contact-input" placeholder="{{ \App\Support\HomePageContent::text('contact.form.email_placeholder') }}">
                         @error('email')
                             <p class="contact-error">{{ $message }}</p>
                         @enderror
@@ -77,10 +77,10 @@
 
                     <div>
                         <label for="contact_subject" class="contact-label">
-                            {{ __('home.contact.form.subject') }}
+                            {{ \App\Support\HomePageContent::text('contact.form.subject') }}
                         </label>
                         <input id="contact_subject" name="subject" type="text" value="{{ old('subject') }}"
-                            class="contact-input" placeholder="{{ __('home.contact.form.subject_placeholder') }}">
+                            class="contact-input" placeholder="{{ \App\Support\HomePageContent::text('contact.form.subject_placeholder') }}">
                         @error('subject')
                             <p class="contact-error">{{ $message }}</p>
                         @enderror
@@ -89,10 +89,10 @@
 
                 <div>
                     <label for="contact_message" class="contact-label">
-                        {{ __('home.contact.form.message') }}
+                        {{ \App\Support\HomePageContent::text('contact.form.message') }}
                     </label>
                     <textarea id="contact_message" name="message" rows="5" class="contact-input"
-                        placeholder="{{ __('home.contact.form.message_placeholder') }}">{{ old('message') }}</textarea>
+                        placeholder="{{ \App\Support\HomePageContent::text('contact.form.message_placeholder') }}">{{ old('message') }}</textarea>
                     @error('message')
                         <p class="contact-error">{{ $message }}</p>
                     @enderror
@@ -101,7 +101,7 @@
                 {{-- Submit Button --}}
                 <button type="submit"
                     class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition duration-200 hover:-translate-y-0.5 hover:shadow-xl">
-                    {{ __('home.actions.send_message') }}
+                    {{ \App\Support\HomePageContent::text('actions.send_message') }}
 
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M5 12h14M13 5l7 7-7 7" />
@@ -110,7 +110,7 @@
 
                 @if ($errors->any())
                     <p class="text-xs font-semibold text-red-600">
-                        {{ __('home.contact.form_error') }}
+                        {{ \App\Support\HomePageContent::text('contact.form_error') }}
                     </p>
                 @endif
             </form>
@@ -136,15 +136,15 @@
                     </div>
 
                     <p class="mt-5 text-[11px] font-extrabold uppercase tracking-[0.24em] text-blue-200">
-                        {{ $contactCampusLabel ?? __('home.contact.campus_label') }}
+                        {{ $contactCampusLabel ?? \App\Support\HomePageContent::text('contact.campus_label') }}
                     </p>
 
                     <h3 class="mt-4 text-2xl font-semibold">
-                        {{ $contactCampusTitle ?? __('home.contact.campus_title') }}
+                        {{ $contactCampusTitle ?? \App\Support\HomePageContent::text('contact.campus_title') }}
                     </h3>
 
                     <p class="mt-3 text-sm leading-7 text-slate-100">
-                        {{ $contactCampusText ?? __('home.contact.campus_text') }}
+                        {{ $contactCampusText ?? \App\Support\HomePageContent::text('contact.campus_text') }}
                     </p>
 
                     {{-- Contact Cards --}}
@@ -177,12 +177,12 @@
                         @guest
                             <a href="{{ route('login') }}"
                                 class="block rounded-2xl border border-white/20 px-4 py-3 text-center text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-white/10">
-                                {{ __('home.actions.login') }}
+                                {{ \App\Support\HomePageContent::text('actions.login') }}
                             </a>
                         @else
                             <a href="{{ route($dashboardRoute) }}"
                                 class="block rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg transition duration-200 hover:-translate-y-0.5 hover:shadow-xl">
-                                {{ __('home.actions.open_dashboard') }}
+                                {{ \App\Support\HomePageContent::text('actions.open_dashboard') }}
                             </a>
                         @endguest
                     </div>

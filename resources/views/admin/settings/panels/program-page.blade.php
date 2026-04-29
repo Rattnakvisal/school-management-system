@@ -28,20 +28,20 @@
                                             <label for="program_badge"
                                                 class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Badge</label>
                                             <input id="program_badge" name="program[badge]" type="text"
-                                                value="{{ old('program.badge', $programSection?->subtitle ?? __('home.programs.badge')) }}"
+                                                value="{{ old('program.badge', $programSection?->subtitle ?? \App\Support\HomePageContent::text('programs.badge')) }}"
                                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                         </div>
                                         <div class="md:col-span-2">
                                             <label for="program_title"
                                                 class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Headline</label>
                                             <textarea id="program_title" name="program[title]" rows="2"
-                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('program.title', $programSection?->title ?? __('home.programs.title')) }}</textarea>
+                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('program.title', $programSection?->title ?? \App\Support\HomePageContent::text('programs.title')) }}</textarea>
                                         </div>
                                         <div class="md:col-span-2">
                                             <label for="program_description"
                                                 class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Description</label>
                                             <textarea id="program_description" name="program[description]" rows="3"
-                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('program.description', $programSection?->description ?? __('home.programs.description')) }}</textarea>
+                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('program.description', $programSection?->description ?? \App\Support\HomePageContent::text('programs.description')) }}</textarea>
                                         </div>
                                     </div>
                                 </div>

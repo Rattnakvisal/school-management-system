@@ -1,0 +1,120 @@
+.teacher-calendar__day {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    color: #64748b;
+    background: rgba(248, 250, 252, 0.88);
+    transition:
+        transform 200ms ease,
+        background-color 200ms ease,
+        color 200ms ease,
+        box-shadow 200ms ease;
+}
+
+.teacher-calendar__day--muted {
+    color: transparent;
+    background: transparent;
+}
+
+.teacher-calendar__day--active {
+    background: #ff4d4f;
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 10px 18px -12px rgba(239, 68, 68, 0.9);
+}
+
+.teacher-hero-art {
+    animation: dash-fade-up 760ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+    transform-origin: center;
+}
+
+.teacher-stat-pill {
+    animation: dash-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.teacher-stat-pill:nth-child(1) {
+    animation-delay: 120ms;
+}
+
+.teacher-stat-pill:nth-child(2) {
+    animation-delay: 200ms;
+}
+
+.teacher-stat-pill:nth-child(3) {
+    animation-delay: 280ms;
+}
+
+.teacher-chart-shell {
+    transform: translateZ(0);
+}
+
+.teacher-progress-fill {
+    transform-origin: left center;
+    box-shadow: 0 10px 16px -14px rgba(59, 130, 246, 0.7);
+}
+
+.teacher-lesson--live {
+    border-color: #c7d2fe !important;
+    background: linear-gradient(
+        135deg,
+        rgba(238, 242, 255, 0.98),
+        rgba(255, 255, 255, 0.98)
+    );
+    box-shadow: 0 18px 32px -26px rgba(79, 70, 229, 0.38);
+}
+
+.teacher-lesson__status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 7rem;
+    border-radius: 9999px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition:
+        background-color 180ms ease,
+        color 180ms ease,
+        box-shadow 180ms ease,
+        transform 180ms ease;
+}
+
+.teacher-lesson__status--default {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.teacher-lesson__status--upcoming {
+    background: #fef3c7;
+    color: #b45309;
+    box-shadow: 0 8px 18px -14px rgba(245, 158, 11, 0.7);
+}
+
+.teacher-lesson__status--live {
+    background: #dbeafe;
+    color: #1d4ed8;
+    box-shadow: 0 10px 20px -14px rgba(37, 99, 235, 0.65);
+    transform: translateY(-1px);
+}
+
+.teacher-lesson__status--done {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .teacher-hero-art,
+    .teacher-stat-pill {
+        animation: none !important;
+    }
+
+    .teacher-calendar__day,
+    .teacher-lesson__status,
+    .teacher-progress-fill {
+        transition: none !important;
+    }
+}

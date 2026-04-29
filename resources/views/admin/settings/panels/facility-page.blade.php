@@ -50,20 +50,20 @@
                                                 <label for="facility_badge"
                                                     class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Badge</label>
                                                 <input id="facility_badge" name="facility[badge]" type="text"
-                                                    value="{{ old('facility.badge', $facilitySection?->subtitle ?? __('home.facilities.badge')) }}"
+                                                    value="{{ old('facility.badge', $facilitySection?->subtitle ?? \App\Support\HomePageContent::text('facilities.badge')) }}"
                                                     class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                             </div>
                                             <div class="md:col-span-2">
                                                 <label for="facility_title"
                                                     class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Headline</label>
                                                 <textarea id="facility_title" name="facility[title]" rows="2"
-                                                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('facility.title', $facilitySection?->title ?? __('home.facilities.title')) }}</textarea>
+                                                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('facility.title', $facilitySection?->title ?? \App\Support\HomePageContent::text('facilities.title')) }}</textarea>
                                             </div>
                                             <div class="md:col-span-2">
                                                 <label for="facility_description"
                                                     class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Description</label>
                                                 <textarea id="facility_description" name="facility[description]" rows="3"
-                                                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('facility.description', $facilitySection?->description ?? __('home.facilities.description')) }}</textarea>
+                                                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('facility.description', $facilitySection?->description ?? \App\Support\HomePageContent::text('facilities.description')) }}</textarea>
                                             </div>
                                         </div>
                                     </div>

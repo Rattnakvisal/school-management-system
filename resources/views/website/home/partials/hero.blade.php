@@ -135,18 +135,18 @@
                 <span data-reveal data-first style="--d:.06s"
                     class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.24em] text-blue-700 ring-1 ring-blue-100">
                     <span class="h-2 w-2 rounded-full bg-blue-500"></span>
-                    {{ $heroBadge ?? __('home.hero.badge') }}
+                    {{ $heroBadge ?? \App\Support\HomePageContent::text('hero.badge') }}
                 </span>
 
                 {{-- Title --}}
                 <h1 data-reveal data-first style="--d:.12s"
                     class="[font-family:Outfit,_sans-serif] mt-7 max-w-3xl text-4xl font-semibold leading-[0.98] tracking-[-0.04em] text-slate-950 sm:text-5xl lg:text-[4.15rem]">
-                    {{ $heroTitle ?? __('home.hero.title') }}
+                    {{ $heroTitle ?? \App\Support\HomePageContent::text('hero.title') }}
                 </h1>
 
                 {{-- Description --}}
                 <p data-reveal data-first style="--d:.18s" class="mt-6 max-w-xl text-lg leading-8 text-slate-500">
-                    {{ $heroDescription ?? __('home.hero.description', ['schoolName' => $schoolName]) }}
+                    {{ $heroDescription ?? \App\Support\HomePageContent::text('hero.description', ['schoolName' => $schoolName]) }}
                 </p>
 
                 {{-- Action Buttons --}}
@@ -154,7 +154,7 @@
                     @auth
                         <a href="{{ route($dashboardRoute) }}"
                             class="home-hero-button home-hero-button--primary home-cta inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-3.5 text-sm font-bold text-white shadow-[0_20px_34px_-22px_rgba(37,99,235,0.8)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_40px_-22px_rgba(37,99,235,0.8)]">
-                            {{ __('home.actions.open_dashboard') }}
+                            {{ \App\Support\HomePageContent::text('actions.open_dashboard') }}
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M5 12h14M13 5l7 7-7 7" />
                             </svg>
@@ -162,12 +162,12 @@
                     @else
                         <a href="#contact"
                             class="home-hero-button home-hero-button--primary home-cta inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-3.5 text-sm font-bold text-white shadow-[0_20px_34px_-22px_rgba(37,99,235,0.8)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_40px_-22px_rgba(37,99,235,0.8)]">
-                            {{ __('home.actions.contact_admissions') }}
+                            {{ \App\Support\HomePageContent::text('actions.contact_admissions') }}
                         </a>
 
                         <a href="#programs"
                             class="home-hero-button home-hero-button--secondary inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/90 px-6 py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:text-slate-950">
-                            {{ __('home.actions.explore_programs') }}
+                            {{ \App\Support\HomePageContent::text('actions.explore_programs') }}
                         </a>
                     @endauth
                 </div>
@@ -206,8 +206,8 @@
                     {{-- Main Image --}}
                     <div
                         class="home-hero-media-shell relative overflow-hidden rounded-[3rem] border border-white/80 bg-white/80 p-3 shadow-[0_30px_60px_-30px_rgba(37,99,235,0.35)] backdrop-blur lg:rounded-[40%]">
-                        <img src="{{ $heroImage ?? asset('images/school.jpg') }}" alt="{{ __('home.hero.image_alt') }}"
-                            class="h-[24rem] w-full rounded-[2.4rem] object-cover sm:h-[28rem] lg:h-[34rem] lg:rounded-[38%]" />
+                        <img src="{{ $heroImage ?? asset('images/school.jpg') }}" alt="{{ \App\Support\HomePageContent::text('hero.image_alt') }}"
+                            class="home-hero-image h-[24rem] w-full rounded-[2.4rem] object-cover sm:h-[28rem] lg:h-[34rem] lg:rounded-[38%]" />
 
                         <div
                             class="absolute inset-3 rounded-[2.4rem] bg-gradient-to-tr from-slate-950/25 via-transparent to-transparent lg:rounded-[38%]">
@@ -235,17 +235,16 @@
                                     };
 
                                 $statIconStyle = $heroIconToneStyle($statColor);
-                                $statColorClass =
-                                    $statIconStyle
-                                        ? ''
-                                        : ([
+                                $statColorClass = $statIconStyle
+                                    ? ''
+                                    : [
                                             'emerald' => 'bg-gradient-to-br from-emerald-500 to-teal-500',
                                             'blue' => 'bg-gradient-to-br from-blue-600 to-indigo-500',
                                             'violet' => 'bg-gradient-to-br from-violet-600 to-fuchsia-500',
                                             'amber' => 'bg-gradient-to-br from-amber-500 to-orange-500',
                                             'rose' => 'bg-gradient-to-br from-rose-500 to-pink-500',
                                             'cyan' => 'bg-gradient-to-br from-cyan-500 to-sky-500',
-                                        ][$statColor] ?? 'bg-gradient-to-br from-blue-600 to-indigo-500');
+                                        ][$statColor] ?? 'bg-gradient-to-br from-blue-600 to-indigo-500';
                             @endphp
 
                             <article data-reveal style="--d:{{ number_format(0.08 * $loop->iteration, 2) }}s"
@@ -263,7 +262,7 @@
                                             {{ $item['value'] }}
                                         </p>
                                         <p class="mt-1 text-xs font-semibold text-emerald-500">
-                                            {{ $item['trend'] ?? '+' . (4 + $loop->iteration * 2) . '% ' . __('home.hero.trend_suffix') }}
+                                            {{ $item['trend'] ?? '+' . (4 + $loop->iteration * 2) . '% ' . \App\Support\HomePageContent::text('hero.trend_suffix') }}
                                         </p>
                                     </div>
                                 </div>

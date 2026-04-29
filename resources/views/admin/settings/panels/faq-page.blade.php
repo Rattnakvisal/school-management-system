@@ -10,26 +10,26 @@
                                         class="inline-flex rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-700">FAQ</span>
                                     <div class="mt-4 grid gap-4 md:grid-cols-2">
                                         <input name="faq[badge]" type="text"
-                                            value="{{ old('faq.badge', $faqSection?->subtitle ?? __('home.faq.badge')) }}"
+                                            value="{{ old('faq.badge', $faqSection?->subtitle ?? \App\Support\HomePageContent::text('faq.badge')) }}"
                                             placeholder="Badge"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">
                                         <textarea name="faq[title]" rows="2" placeholder="Title"
-                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold">{{ old('faq.title', $faqSection?->title ?? __('home.faq.title')) }}</textarea>
+                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold">{{ old('faq.title', $faqSection?->title ?? \App\Support\HomePageContent::text('faq.title')) }}</textarea>
                                     </div>
                                 </div>
                                 <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                                     <h3 class="text-base font-black text-slate-900">Help Card</h3>
                                     <div class="mt-4 grid gap-4 md:grid-cols-2">
                                         <input name="faq_help[label]" type="text"
-                                            value="{{ old('faq_help.label', $faqHelp?->subtitle ?? __('home.faq.more_help_label')) }}"
+                                            value="{{ old('faq_help.label', $faqHelp?->subtitle ?? \App\Support\HomePageContent::text('faq.more_help_label')) }}"
                                             placeholder="Label"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">
                                         <input name="faq_help[title]" type="text"
-                                            value="{{ old('faq_help.title', $faqHelp?->title ?? __('home.faq.more_help_title')) }}"
+                                            value="{{ old('faq_help.title', $faqHelp?->title ?? \App\Support\HomePageContent::text('faq.more_help_title')) }}"
                                             placeholder="Title"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">
                                         <textarea name="faq_help[description]" rows="3" placeholder="Description"
-                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">{{ old('faq_help.description', $faqHelp?->description ?? __('home.faq.more_help_text')) }}</textarea>
+                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">{{ old('faq_help.description', $faqHelp?->description ?? \App\Support\HomePageContent::text('faq.more_help_text')) }}</textarea>
                                     </div>
                                 </div>
                                 <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">

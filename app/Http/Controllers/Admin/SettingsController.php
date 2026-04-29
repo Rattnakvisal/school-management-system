@@ -1023,17 +1023,17 @@ class SettingsController extends Controller
     private function ensureDefaultHomePageItems(): void
     {
         $hasExistingItems = HomePageItem::query()->exists();
-        $featureItems = trans('home.features.items');
-        $programItems = trans('home.programs.items');
-        $facilityItems = trans('home.facilities.items');
-        $admissionSteps = trans('home.admission.steps');
-        $faqItems = trans('home.faq.items');
-        $contactCards = trans('home.contact.cards');
-        $footerLinks = trans('home.footer_links');
-        $navbarLinks = trans('home.links');
+        $featureItems = \App\Support\HomePageContent::get('features.items');
+        $programItems = \App\Support\HomePageContent::get('programs.items');
+        $facilityItems = \App\Support\HomePageContent::get('facilities.items');
+        $admissionSteps = \App\Support\HomePageContent::get('admission.steps');
+        $faqItems = \App\Support\HomePageContent::get('faq.items');
+        $contactCards = \App\Support\HomePageContent::get('contact.cards');
+        $footerLinks = \App\Support\HomePageContent::get('footer_links');
+        $navbarLinks = \App\Support\HomePageContent::get('links');
         $defaults = [
-            ['brand', 'main', 'content', 'TechBridge', null, __('home.brand.tagline'), null, 1],
-            ['hero', 'main', 'content', __('home.hero.title'), __('home.hero.badge'), __('home.hero.description', ['schoolName' => 'TechBridge']), null, 1],
+            ['brand', 'main', 'content', 'TechBridge', null, \App\Support\HomePageContent::text('brand.tagline'), null, 1],
+            ['hero', 'main', 'content', \App\Support\HomePageContent::text('hero.title'), \App\Support\HomePageContent::text('hero.badge'), \App\Support\HomePageContent::text('hero.description', ['schoolName' => 'TechBridge']), null, 1],
             ['hero_points', 'point_1', 'point', null, null, 'One connected platform for academics, attendance, and communication.', null, 1],
             ['hero_points', 'point_2', 'point', null, null, 'Dedicated dashboards for school leaders, teachers, students, and parents.', null, 2],
             ['hero_points', 'point_3', 'point', null, null, 'A more efficient admissions and operations process with reduced paperwork and better visibility.', null, 3],
@@ -1044,23 +1044,23 @@ class SettingsController extends Controller
             ['hero_features', 'feature_2', 'feature', 'Attendance and Reporting', null, 'Record daily attendance with accurate history and reporting tools ready for review or export.', null, 2],
             ['hero_features', 'feature_3', 'feature', 'Grades and Academic Progress', null, 'Capture assessment results, monitor student progress, and generate clear academic summaries.', null, 3],
             ['hero_features', 'feature_4', 'feature', 'Announcements and Communication', null, 'Share important notices and school updates quickly with students, teachers, and parents.', null, 4],
-            ['about', 'main', 'content', __('home.about.title'), __('home.about.badge', ['schoolName' => 'TechBridge']), __('home.about.description'), null, 1],
+            ['about', 'main', 'content', \App\Support\HomePageContent::text('about.title'), \App\Support\HomePageContent::text('about.badge', ['schoolName' => 'TechBridge']), \App\Support\HomePageContent::text('about.description'), null, 1],
             ['about_highlights', 'highlight_1', 'highlight', 'Leadership', null, 'We prepare students to lead with confidence, character, knowledge, and purpose.', null, 1],
             ['about_highlights', 'highlight_2', 'highlight', 'Transparency', null, 'Progress, updates, and next steps remain visible and easy to understand across the school community.', null, 2],
             ['about_cards', 'card_1', 'card', 'Mission', null, 'To empower every learner through quality education, discipline, confidence, and care.', 'bg-cyan-100 text-cyan-700', 1],
             ['about_cards', 'card_2', 'card', 'Vision', null, 'To build a modern learning environment where technology and personal guidance work hand in hand.', 'bg-indigo-100 text-indigo-700', 2],
             ['about_cards', 'card_3', 'card', 'Culture', null, 'Respect, curiosity, responsibility, and integrity shape both learning and leadership.', 'bg-amber-100 text-amber-700', 3],
             ['about_cards', 'card_4', 'card', 'Operations', null, 'Well-structured systems help families and staff receive timely support and clear information.', 'bg-emerald-100 text-emerald-700', 4],
-            ['platform_features', 'main', 'content', __('home.features.title'), __('home.features.badge'), null, __('home.features.tag'), 1],
-            ['programs', 'main', 'content', __('home.programs.title'), __('home.programs.badge'), __('home.programs.description'), null, 1],
-            ['facilities', 'main', 'content', __('home.facilities.title'), __('home.facilities.badge'), __('home.facilities.description'), null, 1],
-            ['admission', 'main', 'content', __('home.admission.title'), __('home.admission.badge'), __('home.admission.description'), null, 1],
-            ['admission_intake', 'main', 'content', __('home.admission.open_intake_title'), __('home.admission.open_intake_label'), __('home.admission.open_intake_description'), null, 1],
-            ['faq', 'main', 'content', __('home.faq.title'), __('home.faq.badge'), null, null, 1],
-            ['faq_help', 'main', 'content', __('home.faq.more_help_title'), __('home.faq.more_help_label'), __('home.faq.more_help_text'), null, 1],
-            ['contact', 'main', 'content', __('home.contact.title'), __('home.contact.badge'), __('home.contact.description'), null, 1],
-            ['contact_campus', 'main', 'content', __('home.contact.campus_title'), __('home.contact.campus_label'), __('home.contact.campus_text'), null, 1],
-            ['footer', 'main', 'content', __('home.footer.tagline'), __('home.footer.explore'), __('home.footer.description'), __('home.footer.contact'), 1],
+            ['platform_features', 'main', 'content', \App\Support\HomePageContent::text('features.title'), \App\Support\HomePageContent::text('features.badge'), null, \App\Support\HomePageContent::text('features.tag'), 1],
+            ['programs', 'main', 'content', \App\Support\HomePageContent::text('programs.title'), \App\Support\HomePageContent::text('programs.badge'), \App\Support\HomePageContent::text('programs.description'), null, 1],
+            ['facilities', 'main', 'content', \App\Support\HomePageContent::text('facilities.title'), \App\Support\HomePageContent::text('facilities.badge'), \App\Support\HomePageContent::text('facilities.description'), null, 1],
+            ['admission', 'main', 'content', \App\Support\HomePageContent::text('admission.title'), \App\Support\HomePageContent::text('admission.badge'), \App\Support\HomePageContent::text('admission.description'), null, 1],
+            ['admission_intake', 'main', 'content', \App\Support\HomePageContent::text('admission.open_intake_title'), \App\Support\HomePageContent::text('admission.open_intake_label'), \App\Support\HomePageContent::text('admission.open_intake_description'), null, 1],
+            ['faq', 'main', 'content', \App\Support\HomePageContent::text('faq.title'), \App\Support\HomePageContent::text('faq.badge'), null, null, 1],
+            ['faq_help', 'main', 'content', \App\Support\HomePageContent::text('faq.more_help_title'), \App\Support\HomePageContent::text('faq.more_help_label'), \App\Support\HomePageContent::text('faq.more_help_text'), null, 1],
+            ['contact', 'main', 'content', \App\Support\HomePageContent::text('contact.title'), \App\Support\HomePageContent::text('contact.badge'), \App\Support\HomePageContent::text('contact.description'), null, 1],
+            ['contact_campus', 'main', 'content', \App\Support\HomePageContent::text('contact.campus_title'), \App\Support\HomePageContent::text('contact.campus_label'), \App\Support\HomePageContent::text('contact.campus_text'), null, 1],
+            ['footer', 'main', 'content', \App\Support\HomePageContent::text('footer.tagline'), \App\Support\HomePageContent::text('footer.explore'), \App\Support\HomePageContent::text('footer.description'), \App\Support\HomePageContent::text('footer.contact'), 1],
         ];
 
         foreach ($featureItems as $index => $item) {
@@ -1198,7 +1198,7 @@ class SettingsController extends Controller
                 $attributes['color'] = $value;
             } elseif ($section === 'footer' && $key === 'main') {
                 $attributes['value'] = $value;
-                $attributes['meta'] = ['copyright' => __('home.footer.copyright')];
+                $attributes['meta'] = ['copyright' => \App\Support\HomePageContent::text('footer.copyright')];
             } else {
                 $attributes['value'] = $value;
             }

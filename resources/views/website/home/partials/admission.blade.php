@@ -32,15 +32,15 @@
                 <span
                     class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.28em] text-blue-100">
                     <span class="h-2 w-2 rounded-full bg-blue-300"></span>
-                    {{ $admissionBadge ?? __('home.admission.badge') }}
+                    {{ $admissionBadge ?? \App\Support\HomePageContent::text('admission.badge') }}
                 </span>
 
                 <h2 class="mt-5 text-3xl font-semibold sm:text-4xl">
-                    {{ $admissionTitle ?? __('home.admission.title') }}
+                    {{ $admissionTitle ?? \App\Support\HomePageContent::text('admission.title') }}
                 </h2>
 
                 <p class="mt-4 max-w-xl text-sm leading-8 text-slate-100 sm:text-base">
-                    {{ $admissionDescription ?? __('home.admission.description') }}
+                    {{ $admissionDescription ?? \App\Support\HomePageContent::text('admission.description') }}
                 </p>
 
                 {{-- Intake Card --}}
@@ -60,15 +60,15 @@
                     </div>
 
                     <p class="relative mt-4 text-[11px] font-extrabold uppercase tracking-[0.24em] text-blue-200">
-                        {{ $admissionIntakeLabel ?? __('home.admission.open_intake_label') }}
+                        {{ $admissionIntakeLabel ?? \App\Support\HomePageContent::text('admission.open_intake_label') }}
                     </p>
 
                     <p class="relative mt-2 text-2xl font-semibold">
-                        {{ $admissionIntakeTitle ?? __('home.admission.open_intake_title') }}
+                        {{ $admissionIntakeTitle ?? \App\Support\HomePageContent::text('admission.open_intake_title') }}
                     </p>
 
                     <p class="relative mt-2 text-sm leading-7 text-slate-200">
-                        {{ $admissionIntakeDescription ?? __('home.admission.open_intake_description') }}
+                        {{ $admissionIntakeDescription ?? \App\Support\HomePageContent::text('admission.open_intake_description') }}
                     </p>
 
                     <div
@@ -81,7 +81,7 @@
                     @guest
                         <a href="{{ route('login') }}"
                             class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition duration-200 hover:-translate-y-0.5 hover:shadow-xl">
-                            {{ __('home.actions.apply_now') }}
+                            {{ \App\Support\HomePageContent::text('actions.apply_now') }}
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M5 12h14M13 5l7 7-7 7" />
                             </svg>
@@ -89,7 +89,7 @@
                     @else
                         <a href="{{ route($dashboardRoute) }}"
                             class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition duration-200 hover:-translate-y-0.5 hover:shadow-xl">
-                            {{ __('home.actions.continue_dashboard') }}
+                            {{ \App\Support\HomePageContent::text('actions.continue_dashboard') }}
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M5 12h14M13 5l7 7-7 7" />
                             </svg>
@@ -125,7 +125,7 @@
                         </div>
 
                         <p class="relative mt-4 text-[11px] font-extrabold uppercase tracking-[0.24em] text-blue-200">
-                            {{ __('home.admission.step_label', ['number' => str_pad($i + 1, 2, '0', STR_PAD_LEFT)]) }}
+                            {{ \App\Support\HomePageContent::text('admission.step_label', ['number' => str_pad($i + 1, 2, '0', STR_PAD_LEFT)]) }}
                         </p>
 
                         <p class="relative mt-2 text-base font-semibold text-white">

@@ -53,10 +53,10 @@
         ========================= --}}
         <div data-reveal class="lg:col-span-7">
             <div
-                class="group relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/70 p-3 shadow-xl backdrop-blur">
+                class="home-image-card group relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/70 p-3 shadow-xl backdrop-blur">
 
-                <img src="{{ $facilityImage ?? asset('images/study.jpg') }}" alt="{{ __('home.facilities.image_alt') }}"
-                    class="h-80 w-full rounded-[1.6rem] object-cover transition duration-500 group-hover:scale-105 lg:h-[32rem]" />
+                <img src="{{ $facilityImage ?? asset('images/study.jpg') }}" alt="{{ \App\Support\HomePageContent::text('facilities.image_alt') }}"
+                    class="home-image-card__media h-80 w-full rounded-[1.6rem] object-cover transition duration-500 group-hover:scale-105 lg:h-[32rem]" />
 
                 {{-- Overlay --}}
                 <div class="absolute inset-3 rounded-[1.6rem] bg-gradient-to-tr from-slate-950/40 via-transparent"></div>
@@ -64,11 +64,11 @@
                 {{-- Floating Label --}}
                 <div class="absolute bottom-8 left-8 rounded-2xl bg-white/90 px-5 py-4 shadow-lg backdrop-blur">
                     <p class="text-xs font-extrabold uppercase tracking-[0.22em] text-indigo-700">
-                        {{ $facilityBadge ?? __('home.facilities.badge') }}
+                        {{ $facilityBadge ?? \App\Support\HomePageContent::text('facilities.badge') }}
                     </p>
 
                     <p class="mt-1 text-lg font-bold text-slate-950">
-                        {{ $facilityTitle ?? __('home.facilities.title') }}
+                        {{ $facilityTitle ?? \App\Support\HomePageContent::text('facilities.title') }}
                     </p>
                 </div>
             </div>
@@ -87,17 +87,17 @@
                 <span
                     class="relative inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.28em] text-indigo-700 ring-1 ring-indigo-100">
                     <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
-                    {{ $facilityBadge ?? __('home.facilities.badge') }}
+                    {{ $facilityBadge ?? \App\Support\HomePageContent::text('facilities.badge') }}
                 </span>
 
                 {{-- Title --}}
                 <h2 class="mt-4 text-3xl font-semibold text-slate-950">
-                    {{ $facilityTitle ?? __('home.facilities.title') }}
+                    {{ $facilityTitle ?? \App\Support\HomePageContent::text('facilities.title') }}
                 </h2>
 
                 {{-- Description --}}
                 <p class="mt-4 text-sm leading-7 text-slate-600">
-                    {{ $facilityDescription ?? __('home.facilities.description') }}
+                    {{ $facilityDescription ?? \App\Support\HomePageContent::text('facilities.description') }}
                 </p>
 
                 {{-- =========================

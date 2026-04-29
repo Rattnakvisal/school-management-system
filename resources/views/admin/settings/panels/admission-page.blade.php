@@ -11,28 +11,28 @@
                                     <h3 class="mt-3 text-base font-black text-slate-900">Admission Section</h3>
                                     <div class="mt-4 grid gap-4 md:grid-cols-2">
                                         <input name="admission[badge]" type="text"
-                                            value="{{ old('admission.badge', $admissionSection?->subtitle ?? __('home.admission.badge')) }}"
+                                            value="{{ old('admission.badge', $admissionSection?->subtitle ?? \App\Support\HomePageContent::text('admission.badge')) }}"
                                             placeholder="Badge"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                         <textarea name="admission[title]" rows="2" placeholder="Title"
-                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('admission.title', $admissionSection?->title ?? __('home.admission.title')) }}</textarea>
+                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('admission.title', $admissionSection?->title ?? \App\Support\HomePageContent::text('admission.title')) }}</textarea>
                                         <textarea name="admission[description]" rows="3" placeholder="Description"
-                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('admission.description', $admissionSection?->description ?? __('home.admission.description')) }}</textarea>
+                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('admission.description', $admissionSection?->description ?? \App\Support\HomePageContent::text('admission.description')) }}</textarea>
                                     </div>
                                 </div>
                                 <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                                     <h3 class="text-base font-black text-slate-900">Open Intake Card</h3>
                                     <div class="mt-4 grid gap-4 md:grid-cols-2">
                                         <input name="intake[label]" type="text"
-                                            value="{{ old('intake.label', $admissionIntake?->subtitle ?? __('home.admission.open_intake_label')) }}"
+                                            value="{{ old('intake.label', $admissionIntake?->subtitle ?? \App\Support\HomePageContent::text('admission.open_intake_label')) }}"
                                             placeholder="Label"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                         <input name="intake[title]" type="text"
-                                            value="{{ old('intake.title', $admissionIntake?->title ?? __('home.admission.open_intake_title')) }}"
+                                            value="{{ old('intake.title', $admissionIntake?->title ?? \App\Support\HomePageContent::text('admission.open_intake_title')) }}"
                                             placeholder="Title"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                         <textarea name="intake[description]" rows="3" placeholder="Description"
-                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('intake.description', $admissionIntake?->description ?? __('home.admission.open_intake_description')) }}</textarea>
+                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('intake.description', $admissionIntake?->description ?? \App\Support\HomePageContent::text('admission.open_intake_description')) }}</textarea>
                                     </div>
                                 </div>
                                 <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">

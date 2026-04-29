@@ -124,7 +124,8 @@
                             $iconStyle = $aboutIconToneStyle($highlight['color'] ?? null);
                             $iconTone = $iconStyle
                                 ? ''
-                                : (($highlight['color'] ?? null) ?: $aboutHighlightIconTones[$loop->index % count($aboutHighlightIconTones)]);
+                                : ($highlight['color'] ?? null ?:
+                                $aboutHighlightIconTones[$loop->index % count($aboutHighlightIconTones)]);
                         @endphp
 
                         <div
@@ -135,8 +136,7 @@
                             </div>
 
                             {{-- Icon same style as Academic Programs --}}
-                            <div
-                                class="relative mb-3 flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconTone }} shadow-md transition duration-300 group-hover:scale-110 [&_svg]:h-5 [&_svg]:w-5"
+                            <div class="relative mb-3 flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconTone }} shadow-md transition duration-300 group-hover:scale-110 [&_svg]:h-5 [&_svg]:w-5"
                                 @if ($iconStyle) style="{{ $iconStyle }}" @endif>
                                 {!! $aboutIconSvg($highlight['icon'] ?? null, $loop->index) !!}
                             </div>
@@ -169,7 +169,8 @@
                         $legacyTone = $card['color'] ?? ($card['tone'] ?? null);
                         $iconTone = $iconStyle
                             ? ''
-                            : ($legacyTone ?: $aboutCardIconTones[$loop->index % count($aboutCardIconTones)]);
+                            : ($legacyTone ?:
+                            $aboutCardIconTones[$loop->index % count($aboutCardIconTones)]);
                     @endphp
 
                     <article data-reveal style="--d:{{ number_format(0.06 * $loop->iteration, 2) }}s"
@@ -180,8 +181,7 @@
                         </div>
 
                         {{-- Icon same style as Academic Programs --}}
-                        <div
-                            class="relative flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconTone }} shadow-md transition duration-300 group-hover:scale-110 [&_svg]:h-5 [&_svg]:w-5"
+                        <div class="relative flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconTone }} shadow-md transition duration-300 group-hover:scale-110 [&_svg]:h-5 [&_svg]:w-5"
                             @if ($iconStyle) style="{{ $iconStyle }}" @endif>
                             {!! $aboutIconSvg($card['icon'] ?? null, $loop->index) !!}
                         </div>
@@ -204,24 +204,3 @@
 
     </div>
 </section>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const elements = document.querySelectorAll("[data-reveal]");
-
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = 1;
-                    entry.target.style.transform = "translateY(0)";
-                }
-            });
-        });
-
-        elements.forEach(el => {
-            el.style.opacity = 0;
-            el.style.transform = "translateY(20px)";
-            el.style.transition = "all 0.6s ease";
-            observer.observe(el);
-        });
-    });
-</script>

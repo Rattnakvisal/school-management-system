@@ -1,0 +1,303 @@
+
+@source '../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../../storage/framework/views/*.php';
+@source '../../**/*.blade.php';
+@source '../../**/*.js';
+
+@theme {
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+}
+
+:root {
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+    --surface-2: #f1f5f9;
+    --border: #dbe3f0;
+    --border-2: #e2e8f0;
+
+    --text: #0f172a;
+    --text-soft: #475569;
+    --muted: #64748b;
+
+    --shadow-sm: 0 10px 20px -18px rgba(15, 23, 42, 0.45);
+    --shadow-md: 0 18px 30px -24px rgba(15, 23, 42, 0.5);
+
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+
+    --ring: 0 0 0 4px rgba(59, 130, 246, 0.18);
+    /* blue ring default */
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.home-header-shell {
+    animation: navbarDrop 0.45s ease both;
+}
+
+@keyframes navbarDrop {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes dash-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes dash-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.86) rotate(-10deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes dash-grow-y {
+    from {
+        transform: scaleY(0);
+    }
+
+    to {
+        transform: scaleY(1);
+    }
+}
+
+@keyframes dash-draw {
+    from {
+        stroke-dashoffset: 1200;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes student-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.35);
+        opacity: 0.5;
+    }
+}
+
+@keyframes chrome-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(-16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes chrome-drop-in {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes admin-loader-swirl {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes admin-loader-dash {
+    0% {
+        stroke-dasharray: 1, 800;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 400, 400;
+        stroke-dashoffset: -200px;
+    }
+
+    100% {
+        stroke-dasharray: 800, 1;
+        stroke-dashoffset: -800px;
+    }
+}
+
+/* subtle logo float + pop animation for dashboard hero */
+@keyframes logo-float {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(-2deg) scale(1.02);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes logo-pop {
+    from {
+        transform: scale(0.96);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes logo-orb-drift {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.78;
+    }
+
+    50% {
+        transform: translateY(-6px) translateX(2px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0.78;
+    }
+}
+
+@keyframes logo-panel-float {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes logo-spark-blink {
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 0.9;
+    }
+}
+
+@keyframes logo-tassel-swing {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(1.4px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* Person bob + arm wave animations for dashboard SVG */
+@keyframes person-bob {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-6px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes person-wave {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-18deg);
+    }
+
+    50% {
+        transform: rotate(6deg);
+    }
+
+    75% {
+        transform: rotate(-10deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@layer utilities {
+    .dashboard-stage .dashboard-person {
+        transform-origin: center bottom;
+        transform-box: fill-box;
+        animation: person-bob 3000ms ease-in-out infinite;
+        will-change: transform;
+    }
+
+    .dashboard-stage .dashboard-person .person-arm {
+        transform-origin: 100% 20%;
+        transform-box: fill-box;
+        animation: person-wave 2200ms ease-in-out infinite 600ms;
+        will-change: transform;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dashboard-stage .dashboard-person,
+        .dashboard-stage .dashboard-person .person-arm {
+            animation: none !important;
+        }
+    }
+}

@@ -1,8 +1,7 @@
 {{-- =========================
-    Footer Section (White)
+    Footer Section
 ========================= --}}
 <footer class="relative text-slate-700">
-
     {{-- Top Glow --}}
     <div class="absolute inset-x-0 top-0 h-40"></div>
 
@@ -25,13 +24,13 @@
                         </h3>
 
                         <p class="text-sm text-slate-500">
-                            {{ $footerTagline ?? __('home.footer.tagline') }}
+                            {{ $footerTagline ?? \App\Support\HomePageContent::text('footer.tagline') }}
                         </p>
                     </div>
                 </div>
 
                 <p class="mt-5 max-w-xl text-sm leading-7 text-slate-600">
-                    {{ $footerDescription ?? __('home.footer.description') }}
+                    {{ $footerDescription ?? \App\Support\HomePageContent::text('footer.description') }}
                 </p>
 
                 {{-- Social Icons --}}
@@ -50,7 +49,7 @@
             ========================= --}}
             <div>
                 <h4 class="text-[11px] font-extrabold uppercase tracking-[0.24em] text-indigo-600">
-                    {{ $footerExploreLabel ?? __('home.footer.explore') }}
+                    {{ $footerExploreLabel ?? \App\Support\HomePageContent::text('footer.explore') }}
                 </h4>
 
                 <ul class="mt-5 space-y-3 text-sm">
@@ -70,7 +69,7 @@
             ========================= --}}
             <div>
                 <h4 class="text-[11px] font-extrabold uppercase tracking-[0.24em] text-indigo-600">
-                    {{ $footerContactLabel ?? __('home.footer.contact') }}
+                    {{ $footerContactLabel ?? \App\Support\HomePageContent::text('footer.contact') }}
                 </h4>
 
                 <ul class="mt-5 space-y-3 text-sm text-slate-600">
@@ -91,25 +90,6 @@
                     @endforeach
                 </ul>
             </div>
-
         </div>
-
-        {{-- =========================
-            Bottom Bar
-        ========================= --}}
-        <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 sm:flex-row">
-
-            <p class="text-sm text-slate-500">
-                © {{ date('Y') }} {{ $schoolName }}.
-                {{ $footerCopyright ?? __('home.footer.copyright') }}
-            </p>
-
-            <div class="flex gap-4 text-sm text-slate-500">
-                <a href="#" class="transition hover:text-indigo-600">Privacy</a>
-                <a href="#" class="transition hover:text-indigo-600">Terms</a>
-            </div>
-
-        </div>
-
     </div>
 </footer>

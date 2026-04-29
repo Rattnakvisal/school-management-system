@@ -34,14 +34,14 @@
                                             <label for="home_about_title"
                                                 class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Headline</label>
                                             <input id="home_about_title" name="about[title]" type="text"
-                                                value="{{ old('about.title', $homeAbout?->title ?? __('home.about.title')) }}"
+                                                value="{{ old('about.title', $homeAbout?->title ?? \App\Support\HomePageContent::text('about.title')) }}"
                                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                         </div>
                                         <div class="md:col-span-2">
                                             <label for="home_about_description"
                                                 class="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Description</label>
                                             <textarea id="home_about_description" name="about[description]" rows="4"
-                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('about.description', $homeAbout?->description ?? __('home.about.description')) }}</textarea>
+                                                class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('about.description', $homeAbout?->description ?? \App\Support\HomePageContent::text('about.description')) }}</textarea>
                                         </div>
                                     </div>
                                 </div>

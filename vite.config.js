@@ -8,7 +8,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/js/chat-bot.js',
+                'resources/js/website/home/chat-bot.js',
                 'resources/js/admin/classes.js',
                 'resources/js/admin/admin-staff.js',
                 'resources/js/admin/students.js',

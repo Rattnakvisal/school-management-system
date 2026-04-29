@@ -57,16 +57,16 @@
             <span
                 class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.28em] text-indigo-700 ring-1 ring-indigo-100">
                 <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
-                {{ $programBadge ?? __('home.programs.badge') }}
+                {{ $programBadge ?? \App\Support\HomePageContent::text('programs.badge') }}
             </span>
 
             <h2 class="[font-family:Outfit,_sans-serif] mt-4 text-3xl font-semibold text-slate-950 sm:text-4xl">
-                {{ $programTitle ?? __('home.programs.title') }}
+                {{ $programTitle ?? \App\Support\HomePageContent::text('programs.title') }}
             </h2>
         </div>
 
         <p class="max-w-xl text-sm leading-7 text-slate-500">
-            {{ $programDescription ?? __('home.programs.description') }}
+            {{ $programDescription ?? \App\Support\HomePageContent::text('programs.description') }}
         </p>
     </div>
 

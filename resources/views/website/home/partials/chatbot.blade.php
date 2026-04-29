@@ -1,25 +1,25 @@
 <button x-show="top" x-cloak x-transition @click="window.scrollTo({ top: 0, behavior: 'smooth' })" type="button"
     class="fixed bottom-24 right-5 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800"
-    aria-label="{{ __('home.back_to_top') }}">
+    aria-label="{{ \App\Support\HomePageContent::text('back_to_top') }}">
     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="m18 15-6-6-6 6" />
     </svg>
 </button>
 
 <div id="school-chatbot" data-school-name="{{ $schoolName }}"
-    data-quick-questions='@json(trans('home.chatbot.quick_questions'))' data-answers='@json($chatbotAnswers)'
-    data-thinking="{{ __('home.chatbot.thinking') }}" data-empty-question="{{ __('home.chatbot.empty_question') }}"
-    data-fallback-answer="{{ __('home.chatbot.fallback_answer') }}"
-    data-welcome="{{ __('home.chatbot.welcome', ['schoolName' => $schoolName]) }}"
+    data-quick-questions='@json(\App\Support\HomePageContent::get('chatbot.quick_questions'))' data-answers='@json($chatbotAnswers)'
+    data-thinking="{{ \App\Support\HomePageContent::text('chatbot.thinking') }}" data-empty-question="{{ \App\Support\HomePageContent::text('chatbot.empty_question') }}"
+    data-fallback-answer="{{ \App\Support\HomePageContent::text('chatbot.fallback_answer') }}"
+    data-welcome="{{ \App\Support\HomePageContent::text('chatbot.welcome', ['schoolName' => $schoolName]) }}"
     class="fixed bottom-5 right-5 z-50">
     <div
         class="home-chatbot-chip pointer-events-none hidden items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-slate-700 md:inline-flex">
         <span class="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-        {{ __('home.chatbot.chip', ['schoolName' => $schoolName]) }}
+        {{ \App\Support\HomePageContent::text('chatbot.chip', ['schoolName' => $schoolName]) }}
     </div>
     <button id="chatbot-toggle" type="button"
         class="home-chatbot-toggle inline-flex h-16 w-16 items-center justify-center rounded-full text-white shadow-xl transition focus:outline-none focus:ring-4 focus:ring-cyan-200"
-        aria-expanded="false" aria-controls="chatbot-panel" aria-label="{{ __('home.chatbot.toggle_label') }}">
+        aria-expanded="false" aria-controls="chatbot-panel" aria-label="{{ \App\Support\HomePageContent::text('chatbot.toggle_label') }}">
         <span class="home-chatbot-toggle__status" aria-hidden="true"></span>
         <span class="home-chatbot-mark text-cyan-50" aria-hidden="true">
             <svg class="h-10 w-10" viewBox="0 0 40 40" fill="none">
@@ -79,9 +79,9 @@
                 </span>
                 <div>
                     <p class="text-[11px] font-extrabold uppercase tracking-[0.22em] text-cyan-300">
-                        {{ __('home.chatbot.assistant_label') }}
+                        {{ \App\Support\HomePageContent::text('chatbot.assistant_label') }}
                     </p>
-                    <h3 class="mt-1 text-sm font-semibold">{{ __('home.chatbot.title') }}</h3>
+                    <h3 class="mt-1 text-sm font-semibold">{{ \App\Support\HomePageContent::text('chatbot.title') }}</h3>
                 </div>
             </div>
         </header>
@@ -93,10 +93,10 @@
             <form id="chatbot-form" class="flex items-center gap-2">
                 <input id="chatbot-input" type="text"
                     class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
-                    placeholder="{{ __('home.chatbot.input_placeholder') }}" autocomplete="off">
+                    placeholder="{{ \App\Support\HomePageContent::text('chatbot.input_placeholder') }}" autocomplete="off">
                 <button type="submit"
                     class="rounded-xl bg-cyan-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-cyan-500">
-                    {{ __('home.chatbot.send') }}
+                    {{ \App\Support\HomePageContent::text('chatbot.send') }}
                 </button>
             </form>
         </div>

@@ -11,28 +11,28 @@
                                         Admissions</span>
                                     <div class="mt-4 grid gap-4 md:grid-cols-2">
                                         <input name="contact[badge]" type="text"
-                                            value="{{ old('contact.badge', $contactSection?->subtitle ?? __('home.contact.badge')) }}"
+                                            value="{{ old('contact.badge', $contactSection?->subtitle ?? \App\Support\HomePageContent::text('contact.badge')) }}"
                                             placeholder="Badge"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">
                                         <textarea name="contact[title]" rows="2" placeholder="Title"
-                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold">{{ old('contact.title', $contactSection?->title ?? __('home.contact.title')) }}</textarea>
+                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold">{{ old('contact.title', $contactSection?->title ?? \App\Support\HomePageContent::text('contact.title')) }}</textarea>
                                         <textarea name="contact[description]" rows="3" placeholder="Description"
-                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">{{ old('contact.description', $contactSection?->description ?? __('home.contact.description')) }}</textarea>
+                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">{{ old('contact.description', $contactSection?->description ?? \App\Support\HomePageContent::text('contact.description')) }}</textarea>
                                     </div>
                                 </div>
                                 <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                                     <h3 class="text-base font-black text-slate-900">Campus Information Card</h3>
                                     <div class="mt-4 grid gap-4 md:grid-cols-2">
                                         <input name="campus[label]" type="text"
-                                            value="{{ old('campus.label', $contactCampus?->subtitle ?? __('home.contact.campus_label')) }}"
+                                            value="{{ old('campus.label', $contactCampus?->subtitle ?? \App\Support\HomePageContent::text('contact.campus_label')) }}"
                                             placeholder="Label"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">
                                         <input name="campus[title]" type="text"
-                                            value="{{ old('campus.title', $contactCampus?->title ?? __('home.contact.campus_title')) }}"
+                                            value="{{ old('campus.title', $contactCampus?->title ?? \App\Support\HomePageContent::text('contact.campus_title')) }}"
                                             placeholder="Title"
                                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">
                                         <textarea name="campus[description]" rows="3" placeholder="Description"
-                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">{{ old('campus.description', $contactCampus?->description ?? __('home.contact.campus_text')) }}</textarea>
+                                            class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">{{ old('campus.description', $contactCampus?->description ?? \App\Support\HomePageContent::text('contact.campus_text')) }}</textarea>
                                     </div>
                                 </div>
                                 <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">

@@ -68,7 +68,7 @@
                                                         description</label>
                                                     <input id="home_brand_description" name="brand[description]"
                                                         type="text"
-                                                        value="{{ old('brand.description', $homeBrand?->description ?? __('home.brand.tagline')) }}"
+                                                        value="{{ old('brand.description', $homeBrand?->description ?? \App\Support\HomePageContent::text('brand.tagline')) }}"
                                                         class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                                 </div>
                                             </div>

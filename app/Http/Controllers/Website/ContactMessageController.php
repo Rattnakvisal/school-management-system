@@ -12,19 +12,19 @@ class ContactMessageController extends Controller
     public function store(Request $request)
     {
         $messages = [
-            'required' => __('home.validation.required'),
-            'string' => __('home.validation.string'),
-            'email' => __('home.validation.email'),
-            'max.string' => __('home.validation.max_string'),
-            'min.string' => __('home.validation.min_string'),
+            'required' => \App\Support\HomePageContent::text('validation.required'),
+            'string' => \App\Support\HomePageContent::text('validation.string'),
+            'email' => \App\Support\HomePageContent::text('validation.email'),
+            'max.string' => \App\Support\HomePageContent::text('validation.max_string'),
+            'min.string' => \App\Support\HomePageContent::text('validation.min_string'),
         ];
 
         $attributes = [
-            'name' => __('home.contact.form.name'),
-            'email' => __('home.contact.form.email'),
-            'phone' => __('home.contact.form.phone'),
-            'subject' => __('home.contact.form.subject'),
-            'message' => __('home.contact.form.message'),
+            'name' => \App\Support\HomePageContent::text('contact.form.name'),
+            'email' => \App\Support\HomePageContent::text('contact.form.email'),
+            'phone' => \App\Support\HomePageContent::text('contact.form.phone'),
+            'subject' => \App\Support\HomePageContent::text('contact.form.subject'),
+            'message' => \App\Support\HomePageContent::text('contact.form.message'),
         ];
 
         $validator = Validator::make($request->all(), [
@@ -55,6 +55,6 @@ class ContactMessageController extends Controller
         ]);
 
         return redirect(route('home') . '#contact')
-            ->with('contact_success', __('home.contact.success'));
+            ->with('contact_success', \App\Support\HomePageContent::text('contact.success'));
     }
 }

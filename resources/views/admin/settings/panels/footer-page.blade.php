@@ -32,23 +32,23 @@
                                         </div>
                                         <div class="grid gap-4 md:grid-cols-2">
                                             <input name="footer[tagline]" type="text"
-                                                value="{{ old('footer.tagline', $footerSection?->title ?? __('home.footer.tagline')) }}"
+                                                value="{{ old('footer.tagline', $footerSection?->title ?? \App\Support\HomePageContent::text('footer.tagline')) }}"
                                                 placeholder="Tagline"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                             <input name="footer[explore]" type="text"
-                                                value="{{ old('footer.explore', $footerSection?->subtitle ?? __('home.footer.explore')) }}"
+                                                value="{{ old('footer.explore', $footerSection?->subtitle ?? \App\Support\HomePageContent::text('footer.explore')) }}"
                                                 placeholder="Explore label"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                             <input name="footer[contact]" type="text"
-                                                value="{{ old('footer.contact', $footerSection?->value ?? __('home.footer.contact')) }}"
+                                                value="{{ old('footer.contact', $footerSection?->value ?? \App\Support\HomePageContent::text('footer.contact')) }}"
                                                 placeholder="Contact label"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                             <input name="footer[copyright]" type="text"
-                                                value="{{ old('footer.copyright', $footerSection?->meta['copyright'] ?? __('home.footer.copyright')) }}"
+                                                value="{{ old('footer.copyright', $footerSection?->meta['copyright'] ?? \App\Support\HomePageContent::text('footer.copyright')) }}"
                                                 placeholder="Copyright text"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                                             <textarea name="footer[description]" rows="3" placeholder="Description"
-                                                class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('footer.description', $footerSection?->description ?? __('home.footer.description')) }}</textarea>
+                                                class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('footer.description', $footerSection?->description ?? \App\Support\HomePageContent::text('footer.description')) }}</textarea>
                                         </div>
                                     </div>
                                 </div>
