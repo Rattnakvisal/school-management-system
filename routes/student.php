@@ -24,6 +24,8 @@ Route::middleware(['auth', 'role:student'])
         Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
         Route::redirect('/Assignment', '/student/assignments');
         Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignment.index');
+        Route::post('/assignments/{assignment}/submit', [AssignmentController::class, 'submit'])->name('assignment.submit');
+        Route::delete('/assignments/{assignment}/submission', [AssignmentController::class, 'destroySubmission'])->name('assignment.submission.destroy');
         Route::get('/notices', [NotificationController::class, 'index'])->name('notices.index');
         Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
         Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');

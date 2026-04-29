@@ -251,15 +251,15 @@
                 @if (($assignments ?? null) && $assignments->count() > 0)
                     <div class="overflow-hidden rounded-2xl border border-slate-200">
                         <div class="max-h-[44rem] overflow-auto">
-                            <table class="w-full min-w-[960px] text-left text-sm">
+                            <table class="student-table w-full min-w-[1180px] text-left text-sm">
                                 <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                     <tr>
-                                        <th class="px-3 py-3 font-semibold">Assignment</th>
-                                        <th class="px-3 py-3 font-semibold">Subject</th>
-                                        <th class="px-3 py-3 font-semibold">Recipients</th>
-                                        <th class="px-3 py-3 font-semibold">Due</th>
-                                        <th class="px-3 py-3 font-semibold">Posted</th>
-                                        <th class="px-3 py-3 font-semibold text-right">Action</th>
+                                        <th class="whitespace-nowrap px-3 py-3 font-semibold">Assignment</th>
+                                        <th class="whitespace-nowrap px-3 py-3 font-semibold">Subject</th>
+                                        <th class="whitespace-nowrap px-3 py-3 font-semibold">Recipients</th>
+                                        <th class="whitespace-nowrap px-3 py-3 font-semibold">Due</th>
+                                        <th class="whitespace-nowrap px-3 py-3 font-semibold">Posted</th>
+                                        <th class="whitespace-nowrap px-3 py-3 font-semibold text-right">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 bg-white">
@@ -267,6 +267,12 @@
                                         @php
                                             $subjectLabel = trim((string) ($assignment->subject?->name ?? 'General assignment'));
                                             $classLabel = trim((string) ($assignment->subject?->schoolClass?->display_name ?? ''));
+                                            $submittedStudents = $assignment->students->filter(
+                                                fn($student) => filled($student->pivot?->submission_file_path),
+                                            );
+                                            $latestSubmission = $submittedStudents
+                                                ->sortByDesc(fn($student) => $student->pivot?->submitted_at)
+                                                ->first();
                                             $dueAt = $assignment->due_at;
                                             $dueClass = 'border-slate-200 bg-slate-50 text-slate-700';
                                             if ($dueAt && $dueAt->isPast()) {
@@ -275,7 +281,8 @@
                                                 $dueClass = 'border-amber-200 bg-amber-50 text-amber-700';
                                             }
                                         @endphp
-                                        <tr class="align-top hover:bg-slate-50/80 {{ $isEditing && (int) $editingAssignment->id === (int) $assignment->id ? 'bg-indigo-50/40' : '' }}">
+                                        <tr id="assignment-{{ $assignment->id }}" x-data="{ detailOpen: false }"
+                                            class="align-top hover:bg-slate-50/80 {{ $isEditing && (int) $editingAssignment->id === (int) $assignment->id ? 'bg-indigo-50/40' : '' }}">
                                             <td class="px-3 py-3">
                                                 <div class="font-semibold text-slate-900">{{ $assignment->title }}</div>
                                                 <div class="mt-1 line-clamp-2 text-xs text-slate-500">
@@ -288,11 +295,145 @@
                                                     {{ $classLabel !== '' ? $classLabel : 'No class label' }}
                                                 </div>
                                             </td>
-                                            <td class="px-3 py-3">
-                                                <span
-                                                    class="inline-flex rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
-                                                    {{ number_format((int) ($assignment->students_count ?? 0)) }} student{{ (int) ($assignment->students_count ?? 0) === 1 ? '' : 's' }}
-                                                </span>
+                                            <td class="whitespace-nowrap px-3 py-3">
+                                                <button type="button" @click="detailOpen = true"
+                                                    class="inline-flex items-center gap-2 rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
+                                                    <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+                                                    View Recipients
+                                                </button>
+                                                <div class="mt-2 flex flex-wrap gap-1.5">
+                                                    <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                        {{ number_format((int) ($assignment->students_count ?? 0)) }} student{{ (int) ($assignment->students_count ?? 0) === 1 ? '' : 's' }}
+                                                    </span>
+                                                    @if ($submittedStudents->isNotEmpty())
+                                                        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                                            {{ number_format($submittedStudents->count()) }} submitted
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+                                                            No files
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                @if ($latestSubmission?->pivot?->submitted_at)
+                                                    <div class="mt-1 text-xs text-slate-400">
+                                                        Latest {{ \Illuminate\Support\Carbon::parse($latestSubmission->pivot->submitted_at)->diffForHumans() }}
+                                                    </div>
+                                                @endif
+
+                                                <div x-show="detailOpen" x-cloak x-transition.opacity
+                                                    class="fixed inset-0 z-[80] bg-slate-900/40" @click="detailOpen = false"></div>
+                                                <div x-show="detailOpen" x-cloak x-transition
+                                                    class="fixed inset-x-3 top-6 z-[81] mx-auto max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:top-10">
+                                                    <div class="flex max-h-[calc(100vh-3rem)] flex-col">
+                                                        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+                                                            <div class="min-w-0">
+                                                                <h3 class="truncate text-lg font-black text-slate-900">
+                                                                    Recipient Details
+                                                                </h3>
+                                                                <p class="mt-1 text-xs text-slate-500">
+                                                                    {{ $assignment->title }} - {{ number_format((int) ($assignment->students_count ?? $assignment->students->count())) }} recipient{{ (int) ($assignment->students_count ?? $assignment->students->count()) === 1 ? '' : 's' }}, {{ number_format($submittedStudents->count()) }} file{{ $submittedStudents->count() === 1 ? '' : 's' }} received.
+                                                                </p>
+                                                            </div>
+                                                            <button type="button" @click="detailOpen = false"
+                                                                class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50"
+                                                                aria-label="Close recipient details">
+                                                                &times;
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+                                                            @if ($assignment->students->isNotEmpty())
+                                                                <div class="space-y-3">
+                                                                    @foreach ($assignment->students as $student)
+                                                                        @php
+                                                                            $hasSubmission = filled($student->pivot?->submission_file_path);
+                                                                            $fileSize = (int) ($student->pivot?->submission_file_size ?? 0);
+                                                                            $fileSizeLabel = 'Unknown size';
+
+                                                                            if ($fileSize > 0) {
+                                                                                $units = ['B', 'KB', 'MB', 'GB'];
+                                                                                $unitIndex = 0;
+                                                                                $displaySize = (float) $fileSize;
+
+                                                                                while ($displaySize >= 1024 && $unitIndex < count($units) - 1) {
+                                                                                    $displaySize /= 1024;
+                                                                                    $unitIndex++;
+                                                                                }
+
+                                                                                $fileSizeLabel = rtrim(rtrim(number_format($displaySize, 1), '0'), '.') . ' ' . $units[$unitIndex];
+                                                                            }
+                                                                        @endphp
+                                                                        <article class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                                                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                                                <div class="min-w-0">
+                                                                                    <div class="flex flex-wrap items-center gap-2">
+                                                                                        <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-100">
+                                                                                            Student
+                                                                                        </span>
+                                                                                        <span class="text-sm font-black text-slate-900">
+                                                                                            {{ $student->name }}
+                                                                                        </span>
+                                                                                        @if ($hasSubmission)
+                                                                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
+                                                                                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                                                                                Submitted
+                                                                                            </span>
+                                                                                        @else
+                                                                                            <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+                                                                                                Pending
+                                                                                            </span>
+                                                                                        @endif
+                                                                                    </div>
+                                                                                    <div class="mt-1 text-xs text-slate-400">
+                                                                                        {{ $student->email ?? 'No email' }}
+                                                                                    </div>
+                                                                                    <div class="mt-3">
+                                                                                        @if ($hasSubmission)
+                                                                                            <a href="{{ \Illuminate\Support\Facades\Storage::url($student->pivot->submission_file_path) }}"
+                                                                                                target="_blank"
+                                                                                                class="inline-flex max-w-full items-center gap-2 rounded-xl border border-emerald-100 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">
+                                                                                                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                                                                                    <path d="M14 2v6h6" />
+                                                                                                </svg>
+                                                                                                <span class="truncate">
+                                                                                                    {{ $student->pivot->submission_file_name ?: 'Submitted file' }}
+                                                                                                </span>
+                                                                                            </a>
+                                                                                        @else
+                                                                                            <span class="inline-flex rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
+                                                                                                No file submitted yet
+                                                                                            </span>
+                                                                                        @endif
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="shrink-0 rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">
+                                                                                    @if ($hasSubmission)
+                                                                                        <div>{{ $fileSizeLabel }}</div>
+                                                                                        <div class="mt-1">
+                                                                                            {{ $student->pivot?->submitted_at ? \Illuminate\Support\Carbon::parse($student->pivot->submitted_at)->format('M d, Y h:i A') : 'No date' }}
+                                                                                        </div>
+                                                                                    @else
+                                                                                        <div>Awaiting file</div>
+                                                                                        <div class="mt-1">Not submitted</div>
+                                                                                    @endif
+                                                                                </div>
+                                                                            </div>
+                                                                        </article>
+                                                                    @endforeach
+                                                                </div>
+                                                            @else
+                                                                <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+                                                                    <h4 class="text-base font-black text-slate-900">No recipients yet</h4>
+                                                                    <p class="mt-2 text-sm text-slate-500">Assigned students will appear here after this assignment is saved.</p>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td class="px-3 py-3">
                                                 @if ($dueAt)

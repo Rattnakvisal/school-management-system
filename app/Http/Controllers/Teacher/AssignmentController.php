@@ -41,8 +41,14 @@ class AssignmentController extends Controller
             ->with([
                 'subject:id,name,code,school_class_id',
                 'subject.schoolClass:id,name,section',
+                'students:id,name,email',
             ])
             ->withCount('students')
+            ->withCount([
+                'students as submissions_count' => function ($query) {
+                    $query->whereNotNull('assignment_student.submitted_at');
+                },
+            ])
             ->where('teacher_id', $teacherId);
 
         $assignments = (clone $assignmentQuery)

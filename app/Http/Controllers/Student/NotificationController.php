@@ -93,8 +93,10 @@ class NotificationController extends Controller
     {
         $query = Notification::query();
         $role = strtolower(trim($role));
-        $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request'];
+        $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request', 'student_assignment_submitted'];
         $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted'];
+        $staffOnlyTypes = ['mission_event_staff', 'teacher_mission_submitted', 'staff_mission_submitted'];
+        $teacherMissionTypes = ['mission_event_teacher'];
 
         if ($role === 'teacher') {
             $teacherTag = '[teacher_id:' . $userId . ']';
@@ -107,7 +109,7 @@ class NotificationController extends Controller
             $query->whereNotIn('type', array_merge($teacherOnlyTypes, $studentOnlyTypes));
         } else {
             $studentTag = '[student_id:' . $userId . ']';
-            $query->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes))
+            $query->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes, $staffOnlyTypes, $teacherMissionTypes))
                 ->where(function ($inner) use ($studentOnlyTypes, $studentTag) {
                     $inner->whereNotIn('type', $studentOnlyTypes)
                         ->orWhere('message', 'like', '%' . $studentTag . '%');

@@ -13,7 +13,6 @@ class MissionEvent extends Model
         'description',
         'starts_at',
         'ends_at',
-        'location',
         'audience',
         'priority',
         'is_active',

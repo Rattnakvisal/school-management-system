@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8" />
@@ -20,48 +20,81 @@
     </div>
 
     <div x-data="{
-        mobile: false,
+        mobileOpen: false,
+        collapsed: false,
+        isDesktop: window.innerWidth >= 1024,
         notifOpen: false,
         profileOpen: false,
+        init() {
+            const saved = localStorage.getItem('student_sidebar_collapsed');
+            this.collapsed = saved === '1';
+            this.syncViewport();
+            window.addEventListener('resize', () => this.syncViewport());
+        },
+        syncViewport() {
+            this.isDesktop = window.innerWidth >= 1024;
+            if (this.isDesktop) {
+                this.mobileOpen = false;
+            }
+        },
+        toggleSidebar() {
+            this.collapsed = !this.collapsed;
+            localStorage.setItem('student_sidebar_collapsed', this.collapsed ? '1' : '0');
+        },
         closeAll() {
             this.notifOpen = false;
             this.profileOpen = false;
+            this.mobileOpen = false;
         }
-    }" @keydown.escape.window="closeAll()" class="min-h-screen" data-student-notification-root
+    }" x-init="init()" @keydown.escape.window="closeAll()" class="min-h-screen overflow-x-hidden" data-student-notification-root
         data-notification-poll-url="{{ route('student.notifications.poll') }}"
         data-notification-readall-url="{{ route('student.notifications.readAll') }}"
         data-notification-latest-id="{{ (int) ($navNotifs->first()->id ?? 0) }}"
         data-notification-unread-count="{{ (int) ($navUnread ?? 0) }}">
 
         {{-- MOBILE OVERLAY --}}
-        <div x-show="mobile" class="fixed inset-0 z-40 bg-black/40 lg:hidden" @click="mobile = false"></div>
+        <div x-show="mobileOpen" x-transition.opacity class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            @click="mobileOpen = false" aria-hidden="true"></div>
 
         {{-- SIDEBAR --}}
         <aside
-            class="layout-rail fixed inset-y-0 left-0 z-50 flex h-screen w-72 flex-col overflow-hidden border-r border-slate-200 bg-white shadow-sm transition-all duration-300 lg:translate-x-0"
-            :class="mobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+            class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-slate-200 bg-white shadow-sm transition-all duration-300 lg:translate-x-0"
+            :class="[
+                mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+                collapsed ? 'w-24' : 'w-72'
+            ]"
+            aria-label="Sidebar">
 
             {{-- Header --}}
             <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4 shrink-0">
-                <a href="{{ route('student.dashboard') }}" class="flex items-center gap-3">
+                <a href="{{ route('student.dashboard') }}" class="flex min-w-0 items-center gap-3">
                     <img src="{{ $schoolBrandLogo ?? asset('images/techbridge-logo-mark.svg') }}"
                         alt="{{ $schoolBrandName ?? 'TechBridge Academy' }} logo"
                         class="h-12 w-12 shrink-0 object-contain" />
-                    <div class="min-w-0">
+                    <div x-show="!collapsed" x-transition class="min-w-0">
                         <div class="truncate text-base font-extrabold tracking-tight text-slate-900">{{ $schoolBrandName ?? 'TechBridge Academy' }}</div>
                         <div class="truncate text-xs text-slate-500">{{ $schoolBrandTagline ?? 'Student Panel' }}</div>
                     </div>
                 </a>
 
-                <button
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
-                    @click="mobile = false" aria-label="Close sidebar">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M18 6 6 18"></path>
-                        <path d="M6 6l12 12"></path>
-                    </svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button"
+                        class="hidden h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100 lg:inline-flex"
+                        @click="toggleSidebar()" :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+                        <svg x-show="!collapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M4 6h16v2H4V6Zm0 5h10v2H4v-2Zm0 5h16v2H4v-2Z" />
+                        </svg>
+                        <svg x-show="collapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M4 6h10v2H4V6Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z" />
+                        </svg>
+                    </button>
+
+                    <button
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100 lg:hidden"
+                        @click="mobileOpen = false" aria-label="Close sidebar" type="button">
+                        &times;
+                    </button>
+                </div>
             </div>
 
             {{-- NAVIGATION --}}
@@ -103,7 +136,8 @@
 
                 @foreach ($sections as $section)
                     <div class="space-y-1.5">
-                        <div class="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                        <div x-show="!collapsed" x-transition
+                            class="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
                             {{ $section['title'] }}
                         </div>
 
@@ -111,7 +145,7 @@
                             @foreach ($section['items'] as $l)
                                 <a href="{{ route($l['route']) }}"
                                     class="group relative flex items-center rounded-2xl transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_14px_30px_-18px_rgba(79,70,229,0.8)]' : 'text-slate-700 hover:-translate-y-px hover:bg-white hover:text-slate-900 hover:shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]' }}"
-                                    :class="'gap-3 px-3 py-3'">
+                                    :class="collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3'">
 
                                     @if ($l['active'])
                                         <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white"></span>
@@ -193,13 +227,20 @@
                                         @endswitch
                                     </span>
 
-                                    <div class="min-w-0 flex-1">
+                                    <div x-show="!collapsed" x-transition class="min-w-0 flex-1">
                                         <div class="truncate text-sm font-semibold">{{ $l['label'] }}</div>
                                     </div>
 
-                                    @if ($l['active'])
-                                        <span class="h-2.5 w-2.5 rounded-full bg-white"></span>
-                                    @endif
+                                    <div x-show="!collapsed">
+                                        @if ($l['active'])
+                                            <span class="h-2.5 w-2.5 rounded-full bg-white"></span>
+                                        @endif
+                                    </div>
+
+                                    <div x-show="collapsed"
+                                        class="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg group-hover:block lg:group-hover:block">
+                                        {{ $l['label'] }}
+                                    </div>
                                 </a>
                             @endforeach
                         </div>
@@ -208,7 +249,7 @@
             </nav>
 
             {{-- FOOTER --}}
-            <div class="border-t border-slate-100 p-4">
+            <div class="shrink-0 border-t border-slate-100 p-4" x-show="!collapsed" x-transition>
                 <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 text-white shadow-lg">
                     <div class="text-sm font-bold uppercase tracking-[0.18em] text-white/70">Student Focus</div>
                     <div class="mt-2 text-sm font-semibold leading-6 text-white/95">
@@ -222,15 +263,16 @@
         </aside>
 
         {{-- MAIN --}}
-        <div class="lg:pl-72">
+        <div class="flex min-h-screen flex-col overflow-x-hidden transition-[padding] duration-300"
+            :class="isDesktop ? (collapsed ? 'pl-20' : 'pl-72') : 'pl-0'">
 
             {{-- TOPBAR --}}
-            <header class="layout-topbar sticky top-0 z-30 border-b border-slate-200 bg-slate-100/80 backdrop-blur">
-                <div class="flex h-16 items-center gap-3 px-4">
+            <header class="sticky top-0 z-30 border-b border-slate-200 bg-slate-100/80 backdrop-blur">
+                <div class="flex min-h-16 flex-wrap items-center gap-2 px-4 sm:gap-3 md:flex-nowrap">
 
                     <button
                         class="rounded-xl p-2 text-slate-600 transition hover:bg-white hover:text-slate-900 lg:hidden"
-                        @click="mobile = true" aria-label="Open sidebar">
+                        @click="mobileOpen = true" aria-label="Open sidebar" type="button">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M4 6h16"></path>
@@ -239,10 +281,20 @@
                         </svg>
                     </button>
 
-                    <div class="flex-1 text-sm font-semibold text-slate-700">
-                        Welcome back, {{ auth()->user()->name }}
+                    <div class="min-w-0 flex-1">
+                        <div class="relative max-w-xl">
+                            <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path
+                                        d="M10 2a8 8 0 1 0 5.29 14.06l4.33 4.33 1.41-1.41-4.33-4.33A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" />
+                                </svg>
+                            </span>
+                            <input type="text" placeholder="Search"
+                                class="w-full rounded-full border border-slate-200 bg-white py-2.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-200 focus:ring-4 focus:ring-indigo-100" />
+                        </div>
                     </div>
 
+                    <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 md:ml-0">
                     <div class="relative" @click.outside="notifOpen=false">
                         <button
                             class="relative inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
@@ -375,10 +427,11 @@
                             </div>
                         </div>
                     </div>
+                    </div>
                 </div>
             </header>
 
-            <main class="p-6" data-page-animate>
+            <main class="p-4 sm:p-6" data-page-animate>
                 @yield('page')
             </main>
         </div>

@@ -33,6 +33,8 @@ Route::middleware(['auth', 'role:teacher'])
         Route::post('/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
         Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
         Route::get('/missions', [MissionEventController::class, 'index'])->name('missions.index');
+        Route::post('/missions/{mission}/submit', [MissionEventController::class, 'submit'])->name('missions.submit');
+        Route::delete('/missions/{mission}/submission', [MissionEventController::class, 'destroySubmission'])->name('missions.submission.destroy');
         Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
         Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
         Route::put('/grades/{grade}', [GradeController::class, 'update'])->name('grades.update');

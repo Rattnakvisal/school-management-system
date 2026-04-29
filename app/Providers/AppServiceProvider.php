@@ -40,9 +40,9 @@ class AppServiceProvider extends ServiceProvider
             $userId = (int) (auth()->id() ?? 0);
             $notifQuery = Notification::query()->latest();
             $unreadQuery = Notification::query()->where('is_read', false);
-            $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request'];
+            $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request', 'student_assignment_submitted'];
             $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted'];
-            $staffOnlyTypes = ['mission_event_staff'];
+            $staffOnlyTypes = ['mission_event_staff', 'teacher_mission_submitted', 'staff_mission_submitted'];
             $teacherMissionTypes = ['mission_event_teacher'];
 
             // Teacher law-request notifications are admin workflow alerts.
@@ -72,12 +72,12 @@ class AppServiceProvider extends ServiceProvider
             } else {
                 // Student notifications can include targeted student alerts.
                 $studentTag = '[student_id:' . $userId . ']';
-                $notifQuery->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes))
+                $notifQuery->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes, $staffOnlyTypes, $teacherMissionTypes))
                     ->where(function ($query) use ($studentOnlyTypes, $studentTag) {
                         $query->whereNotIn('type', $studentOnlyTypes)
                             ->orWhere('message', 'like', '%' . $studentTag . '%');
                     });
-                $unreadQuery->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes))
+                $unreadQuery->whereNotIn('type', array_merge(['teacher_law_request'], $teacherOnlyTypes, $staffOnlyTypes, $teacherMissionTypes))
                     ->where(function ($query) use ($studentOnlyTypes, $studentTag) {
                         $query->whereNotIn('type', $studentOnlyTypes)
                             ->orWhere('message', 'like', '%' . $studentTag . '%');

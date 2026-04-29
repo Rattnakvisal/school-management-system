@@ -43,6 +43,14 @@
                 'icon' => 'staff',
                 'tone' => 'from-sky-100 to-white text-sky-600',
             ],
+            [
+                'label' => 'Submitted',
+                'activeLabel' => 'Files',
+                'active' => (int) ($stats['submissions'] ?? 0),
+                'total' => max(1, (int) ($stats['submissions'] ?? 0)),
+                'icon' => 'active',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
+            ],
         ];
     @endphp
 
@@ -51,7 +59,7 @@
             subtitle="Create mission events and send them to staff, teachers, or both." />
 
         <x-admin.stat-cards :cards="$missionStatCards" reveal-class="student-reveal" float-class="student-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
+            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5" />
 
         @if (session('success'))
             <div class="student-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
@@ -120,17 +128,6 @@
                                 <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
-
-                    <div>
-                        <label for="mission_location"
-                            class="mb-1 block text-xs font-semibold text-slate-600">Location</label>
-                        <input id="mission_location" name="location" value="{{ old('location') }}"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                            placeholder="Optional">
-                        @error('location')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
@@ -220,7 +217,7 @@
                                 <section class="space-y-2">
                                     <h4 class="text-xl font-bold text-slate-900">Search</h4>
                                     <input id="mission_q" name="q" type="text" value="{{ $search ?? '' }}"
-                                        placeholder="Search by title, description, or location"
+                                        placeholder="Search by title or description"
                                         class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                 </section>
 
@@ -270,7 +267,7 @@
 
                 <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                     <div class="student-table-scroller max-h-[720px] overflow-auto">
-                        <table class="student-table w-full min-w-[1180px] text-left text-sm">
+                        <table class="student-table w-full min-w-[1320px] text-left text-sm">
                             <thead
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
@@ -280,13 +277,18 @@
                                     <th class="whitespace-nowrap px-3 py-3 font-semibold">Start</th>
                                     <th class="whitespace-nowrap px-3 py-3 font-semibold">End</th>
                                     <th class="whitespace-nowrap px-3 py-3 font-semibold">Status</th>
+                                    <th class="whitespace-nowrap px-3 py-3 font-semibold">Submissions</th>
                                     <th class="whitespace-nowrap px-3 py-3 font-semibold">Created By</th>
                                     <th class="whitespace-nowrap px-3 py-3 text-right font-semibold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 bg-white">
                                 @forelse ($missions as $mission)
-                                    <tr x-data="{ editOpen: false }" class="align-top hover:bg-slate-50/80">
+                                    @php
+                                        $submissionDetails = collect($mission->submission_details ?? []);
+                                        $latestSubmission = $mission->latest_submission ?? $submissionDetails->first();
+                                    @endphp
+                                    <tr id="mission-{{ $mission->id }}" x-data="{ editOpen: false, detailOpen: false }" class="align-top hover:bg-slate-50/80">
                                         <td class="whitespace-nowrap px-3 py-3">
                                             <div class="flex max-w-[320px] items-start gap-3">
                                                 <span
@@ -303,11 +305,6 @@
                                                     <div class="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
                                                         {{ \Illuminate\Support\Str::limit($mission->description, 110) }}
                                                     </div>
-                                                    @if ($mission->location)
-                                                        <div class="mt-1 text-xs font-semibold text-slate-400">
-                                                            {{ $mission->location }}
-                                                        </div>
-                                                    @endif
                                                 </div>
                                             </div>
                                         </td>
@@ -340,6 +337,25 @@
                                                     class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
                                                     <span class="h-2 w-2 rounded-full bg-slate-400"></span>Inactive
                                                 </span>
+                                            @endif
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-3">
+                                            @if ($submissionDetails->isNotEmpty())
+                                                <button type="button" @click="detailOpen = true"
+                                                    class="inline-flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100">
+                                                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                                    {{ number_format($submissionDetails->count()) }} submitted
+                                                </button>
+                                                @if ($latestSubmission?->submitted_at)
+                                                    <div class="mt-1 text-xs text-slate-400">
+                                                        Latest {{ \Illuminate\Support\Carbon::parse($latestSubmission->submitted_at)->diffForHumans() }}
+                                                    </div>
+                                                @endif
+                                            @else
+                                                <button type="button" @click="detailOpen = true"
+                                                    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100">
+                                                    No files
+                                                </button>
                                             @endif
                                         </td>
                                         <td class="whitespace-nowrap px-3 py-3 text-slate-500">
@@ -377,6 +393,107 @@
                                                         Remove
                                                     </button>
                                                 </form>
+                                            </div>
+
+                                            <div x-show="detailOpen" x-cloak x-transition.opacity
+                                                class="fixed inset-0 z-[80] bg-slate-900/40" @click="detailOpen = false">
+                                            </div>
+                                            <div x-show="detailOpen" x-cloak x-transition
+                                                class="fixed inset-x-3 top-6 z-[81] mx-auto max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:top-10">
+                                                <div class="flex max-h-[calc(100vh-3rem)] flex-col">
+                                                    <div
+                                                        class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+                                                        <div class="min-w-0">
+                                                            <h3 class="truncate text-lg font-black text-slate-900">
+                                                                Submission Details
+                                                            </h3>
+                                                            <p class="mt-1 text-xs text-slate-500">
+                                                                {{ $mission->title }} - {{ number_format($submissionDetails->count()) }} file{{ $submissionDetails->count() === 1 ? '' : 's' }} received.
+                                                            </p>
+                                                        </div>
+                                                        <button type="button" @click="detailOpen = false"
+                                                            class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50"
+                                                            aria-label="Close submission details">
+                                                            &times;
+                                                        </button>
+                                                    </div>
+
+                                                    <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+                                                        @if ($submissionDetails->isNotEmpty())
+                                                            <div class="space-y-3">
+                                                                @foreach ($submissionDetails as $submission)
+                                                                    @php
+                                                                        $fileSize = (int) ($submission->submission_file_size ?? 0);
+                                                                        $fileSizeLabel = 'Unknown size';
+
+                                                                        if ($fileSize > 0) {
+                                                                            $units = ['B', 'KB', 'MB', 'GB'];
+                                                                            $unitIndex = 0;
+                                                                            $displaySize = (float) $fileSize;
+
+                                                                            while ($displaySize >= 1024 && $unitIndex < count($units) - 1) {
+                                                                                $displaySize /= 1024;
+                                                                                $unitIndex++;
+                                                                            }
+
+                                                                            $fileSizeLabel = rtrim(rtrim(number_format($displaySize, 1), '0'), '.') . ' ' . $units[$unitIndex];
+                                                                        }
+                                                                    @endphp
+                                                                    <article
+                                                                        class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                                                        <div
+                                                                            class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                                            <div class="min-w-0">
+                                                                                <div class="flex flex-wrap items-center gap-2">
+                                                                                    <span
+                                                                                        class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-100">
+                                                                                        {{ $submission->submitter_role }}
+                                                                                    </span>
+                                                                                    <span
+                                                                                        class="text-sm font-black text-slate-900">
+                                                                                        {{ $submission->submitter_name ?? 'Unknown user' }}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div class="mt-1 text-xs text-slate-400">
+                                                                                    {{ $submission->submitter_email ?? 'No email' }}
+                                                                                </div>
+                                                                                <div class="mt-3">
+                                                                                    <a href="{{ \Illuminate\Support\Facades\Storage::url($submission->submission_file_path) }}"
+                                                                                        target="_blank"
+                                                                                        class="inline-flex max-w-full items-center gap-2 rounded-xl border border-emerald-100 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">
+                                                                                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24"
+                                                                                            fill="none" stroke="currentColor"
+                                                                                            stroke-width="2" stroke-linecap="round"
+                                                                                            stroke-linejoin="round" aria-hidden="true">
+                                                                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                                                                            <path d="M14 2v6h6" />
+                                                                                        </svg>
+                                                                                        <span class="truncate">
+                                                                                            {{ $submission->submission_file_name ?: 'Submitted file' }}
+                                                                                        </span>
+                                                                                    </a>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div
+                                                                                class="shrink-0 rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">
+                                                                                <div>{{ $fileSizeLabel }}</div>
+                                                                                <div class="mt-1">
+                                                                                    {{ $submission->submitted_at ? \Illuminate\Support\Carbon::parse($submission->submitted_at)->format('M d, Y h:i A') : 'No date' }}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </article>
+                                                                @endforeach
+                                                            </div>
+                                                        @else
+                                                            <div
+                                                                class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+                                                                <h4 class="text-base font-black text-slate-900">No submitted files yet</h4>
+                                                                <p class="mt-2 text-sm text-slate-500">Teacher and staff files will appear here after they send the mission.</p>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div x-show="editOpen" x-cloak x-transition.opacity
@@ -443,15 +560,6 @@
                                                             </div>
                                                         </div>
 
-                                                        <div>
-                                                            <label for="edit_mission_location_{{ $mission->id }}"
-                                                                class="mb-1 block text-xs font-semibold text-slate-600">Location</label>
-                                                            <input id="edit_mission_location_{{ $mission->id }}"
-                                                                name="location"
-                                                                value="{{ old('location', $mission->location) }}"
-                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                        </div>
-
                                                         <div class="grid gap-4 sm:grid-cols-2">
                                                             <div>
                                                                 <label for="edit_mission_audience_{{ $mission->id }}"
@@ -502,7 +610,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="px-3 py-10 text-center text-sm text-slate-500">
+                                        <td colspan="9" class="px-3 py-10 text-center text-sm text-slate-500">
                                             No mission events yet.
                                         </td>
                                     </tr>
