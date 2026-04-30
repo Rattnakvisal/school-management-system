@@ -17,6 +17,26 @@ const scrollToSection = (selector) => {
         ?.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
+const getCookie = (name) => {
+    const match = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${encodeURIComponent(name)}=`));
+
+    return match ? decodeURIComponent(match.split("=").slice(1).join("=")) : "";
+};
+
+const setCookie = (name, value, maxAgeSeconds) => {
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+
+    document.cookie = [
+        `${encodeURIComponent(name)}=${encodeURIComponent(value)}`,
+        `Max-Age=${maxAgeSeconds}`,
+        "Path=/",
+        "SameSite=Lax",
+        secure,
+    ].join("; ");
+};
+
 export const registerHomeComponents = () => {
     window.websiteHomePage = () => ({
         open: false,
@@ -24,10 +44,15 @@ export const registerHomeComponents = () => {
         active: "#home",
         showBanner: false,
         bannerStorageKey,
+        tokenPromptVisible: false,
+        tokenAlertVisible: false,
+        tokenAlertTimer: null,
+        tokenCookieName: "website_home_cookie_preference",
 
         init() {
             this.setActive();
             this.initBanner();
+            this.initTokenPrompt();
 
             window.addEventListener("scroll", () => {
                 this.top = window.scrollY > 560;
@@ -93,6 +118,48 @@ export const registerHomeComponents = () => {
         openProgramsFromBanner() {
             this.closeBanner();
             scrollToSection("#programs");
+        },
+
+        initTokenPrompt() {
+            if (getCookie(this.tokenCookieName)) {
+                return;
+            }
+
+            window.setTimeout(() => {
+                this.tokenPromptVisible = true;
+            }, 760);
+        },
+
+        storePageToken() {
+            this.tokenPromptVisible = false;
+            this.tokenAlertVisible = true;
+
+            window.clearTimeout(this.tokenAlertTimer);
+
+            try {
+                setCookie(this.tokenCookieName, "remembered", 60 * 60 * 24 * 7);
+            } catch (_) {
+                // The alert still confirms the preference for this page load.
+            }
+
+            this.tokenAlertTimer = window.setTimeout(() => {
+                this.closeTokenAlert();
+            }, 5200);
+        },
+
+        skipTokenPrompt() {
+            this.tokenPromptVisible = false;
+
+            try {
+                setCookie(this.tokenCookieName, "dismissed", 60 * 60 * 24 * 7);
+            } catch (_) {
+                // Dismissal still works for this page load.
+            }
+        },
+
+        closeTokenAlert() {
+            this.tokenAlertVisible = false;
+            window.clearTimeout(this.tokenAlertTimer);
         },
     });
 

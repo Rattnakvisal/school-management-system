@@ -19,7 +19,8 @@ test('guest homepage renders default content and public actions', function () {
         ->assertViewHas('teachersTotal', 1)
         ->assertSee('TechBridge', false)
         ->assertSee(\App\Support\HomePageContent::text('actions.contact_admissions'), false)
-        ->assertSee(\App\Support\HomePageContent::text('actions.explore_programs'), false);
+        ->assertSee(\App\Support\HomePageContent::text('actions.explore_programs'), false)
+        ->assertSee(\App\Support\HomePageContent::text('token.prompt_title'), false);
 });
 
 test('authenticated users get dashboard calls to action on the homepage', function () {

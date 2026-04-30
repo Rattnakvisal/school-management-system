@@ -6,7 +6,7 @@
     |--------------------------------------------------------------------------
     | Get only first 4 feature items for the dark strip section.
     */
-    $heroFeatureStrip = array_slice($heroStripFeatures ?? $features, 0, 4);
+    $heroFeatureStrip = array_slice($heroStripFeatures ?? ($features ?? []), 0, 4);
 
     /*
     |--------------------------------------------------------------------------
@@ -170,6 +170,7 @@
                             {{ \App\Support\HomePageContent::text('actions.explore_programs') }}
                         </a>
                     @endauth
+
                 </div>
 
                 {{-- Hero Points --}}

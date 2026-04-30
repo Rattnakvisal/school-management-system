@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use App\Models\HomePageItem;
 use App\Models\User;
+use App\Support\HomePageViewData;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Website\TelegramBotController as WebsiteTelegramBotController;
@@ -40,12 +41,17 @@ Route::get('/', function () {
             ->groupBy('section');
     }
 
-    return view('website.home', [
+    $viewData = [
         'studentsTotal' => $studentsTotal,
         'teachersTotal' => $teachersTotal,
         'dashboardRoute' => $dashboardRoute,
         'homePageItems' => $homePageItems,
-    ]);
+    ];
+
+    return view('website.home', array_merge(
+        $viewData,
+        HomePageViewData::make($homePageItems, $studentsTotal, $teachersTotal, $dashboardRoute),
+    ));
 })->name('home');
 
 Route::get('/storage/{path}', function (string $path) {
