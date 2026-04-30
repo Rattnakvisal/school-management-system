@@ -1023,14 +1023,14 @@ class SettingsController extends Controller
     private function ensureDefaultHomePageItems(): void
     {
         $hasExistingItems = HomePageItem::query()->exists();
-        $featureItems = \App\Support\HomePageContent::get('features.items');
-        $programItems = \App\Support\HomePageContent::get('programs.items');
-        $facilityItems = \App\Support\HomePageContent::get('facilities.items');
-        $admissionSteps = \App\Support\HomePageContent::get('admission.steps');
-        $faqItems = \App\Support\HomePageContent::get('faq.items');
-        $contactCards = \App\Support\HomePageContent::get('contact.cards');
-        $footerLinks = \App\Support\HomePageContent::get('footer_links');
-        $navbarLinks = \App\Support\HomePageContent::get('links');
+        $featureItems = $this->homeContentArray('features.items');
+        $programItems = $this->homeContentArray('programs.items');
+        $facilityItems = $this->homeContentArray('facilities.items');
+        $admissionSteps = $this->homeContentArray('admission.steps');
+        $faqItems = $this->homeContentArray('faq.items');
+        $contactCards = $this->homeContentArray('contact.cards');
+        $footerLinks = $this->homeContentArray('footer_links');
+        $navbarLinks = $this->homeContentArray('links');
         $defaults = [
             ['brand', 'main', 'content', 'TechBridge', null, \App\Support\HomePageContent::text('brand.tagline'), null, 1],
             ['hero', 'main', 'content', \App\Support\HomePageContent::text('hero.title'), \App\Support\HomePageContent::text('hero.badge'), \App\Support\HomePageContent::text('hero.description', ['schoolName' => 'TechBridge']), null, 1],
@@ -1208,6 +1208,13 @@ class SettingsController extends Controller
                 $attributes
             );
         }
+    }
+
+    private function homeContentArray(string $key): array
+    {
+        $value = \App\Support\HomePageContent::get($key, []);
+
+        return is_array($value) ? $value : [];
     }
 
     private function deleteHomePageItem(string $section, mixed $id, string $fallbackKey): void
