@@ -5,16 +5,30 @@
         $subjectOptions = collect($subjectOptions ?? []);
         $studentOptions = collect($studentOptions ?? []);
         $classOptions = collect($classOptions ?? []);
-        $assessmentTitleOptions = collect($assessmentTitleOptions ?? ['Homework Assignment', 'Quiz', 'Midterm', 'Final']);
+        $assessmentTitleOptions = collect(
+            $assessmentTitleOptions ?? ['Homework Assignment', 'Quiz', 'Midterm', 'Final'],
+        );
+        $remarkOptions = collect(
+            $remarkOptions ?? ['Perfect', 'Excellent', 'Very Good', 'Good', 'Average', 'Needs Improvement', 'Not Good'],
+        );
         $gradeDetails = collect($gradeDetails ?? []);
         $editingGrade = $editingGrade ?? null;
         $isEditing = $editingGrade !== null;
-        $selectedClassId = (string) old('class_id', $isEditing ? (string) ($editingGrade?->student?->school_class_id ?? '') : '');
+        $selectedClassId = (string) old(
+            'class_id',
+            $isEditing ? (string) ($editingGrade?->student?->school_class_id ?? '') : '',
+        );
         $selectedSubjectId = (string) old('subject_id', $isEditing ? (string) ($editingGrade->subject_id ?? '') : '');
         $selectedStudentId = (string) old('student_id', $isEditing ? (string) ($editingGrade->student_id ?? '') : '');
         $titleValue = (string) old('title', $isEditing ? (string) ($editingGrade->title ?? '') : '');
-        $scoreValue = (string) old('score', $isEditing ? number_format((float) ($editingGrade->score ?? 0), 2, '.', '') : '');
-        $maxScoreValue = (string) old('max_score', $isEditing ? number_format((float) ($editingGrade->max_score ?? 0), 2, '.', '') : '');
+        $scoreValue = (string) old(
+            'score',
+            $isEditing ? number_format((float) ($editingGrade->score ?? 0), 2, '.', '') : '',
+        );
+        $maxScoreValue = (string) old(
+            'max_score',
+            $isEditing ? number_format((float) ($editingGrade->max_score ?? 0), 2, '.', '') : '100.00',
+        );
         $gradedAtValue = (string) old(
             'graded_at',
             $isEditing && $editingGrade?->graded_at ? $editingGrade->graded_at->format('Y-m-d') : now()->toDateString(),
@@ -22,6 +36,19 @@
         $remarksValue = (string) old('remarks', $isEditing ? (string) ($editingGrade->remarks ?? '') : '');
         $gradeTotal = max(0, (int) ($stats['total'] ?? 0));
         $gradeAverage = isset($stats['average']) ? (float) $stats['average'] : null;
+        $filters = $filters ?? [];
+        $filterSearch = (string) ($filters['q'] ?? '');
+        $filterClassId = (int) ($filters['class_id'] ?? 0);
+        $filterSubjectId = (int) ($filters['subject_id'] ?? 0);
+        $filterTitle = (string) ($filters['title'] ?? 'all');
+        $filterMonth = (string) ($filters['month'] ?? '');
+        $monthOptions = collect($monthOptions ?? []);
+        $hasActiveFilters =
+            $filterSearch !== '' ||
+            $filterClassId > 0 ||
+            $filterSubjectId > 0 ||
+            ($filterTitle !== '' && $filterTitle !== 'all') ||
+            $filterMonth !== '';
         $teacherGradeStatCards = [
             [
                 'label' => 'Grades',
@@ -76,7 +103,8 @@
             grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success') && session('grade_action') !== 'updated')
-            <div class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+            <div
+                class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                 {{ session('success') }}
             </div>
         @endif
@@ -88,7 +116,9 @@
         @endif
 
         <div class="grid gap-6 xl:grid-cols-12">
-            <section class="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5">
+            <section
+                class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
+                style="--sd: 3;">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-black text-slate-900">{{ $isEditing ? 'Edit Grade' : 'Assign Grade' }}</h2>
@@ -96,7 +126,8 @@
                             {{ $isEditing ? 'Update the grade details and save the changes.' : 'Choose a student, enter the score, and send the result.' }}
                         </p>
                     </div>
-                    <span class="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+                    <span
+                        class="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
                         {{ $isEditing ? 'Edit mode' : 'Alert enabled' }}
                     </span>
                 </div>
@@ -104,8 +135,7 @@
                 @if ($studentOptions->isNotEmpty())
                     <form method="POST"
                         action="{{ $isEditing ? route('teacher.grades.update', $editingGrade) : route('teacher.grades.store') }}"
-                        class="mt-5 space-y-4"
-                        id="teacher-grade-form">
+                        class="mt-5 space-y-4" id="teacher-grade-form">
                         @csrf
                         @if ($isEditing)
                             @method('PUT')
@@ -117,7 +147,8 @@
                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                 <option value="">Select assessment</option>
                                 @foreach ($assessmentTitleOptions as $assessmentTitle)
-                                    <option value="{{ $assessmentTitle }}" {{ $titleValue === (string) $assessmentTitle ? 'selected' : '' }}>
+                                    <option value="{{ $assessmentTitle }}"
+                                        {{ $titleValue === (string) $assessmentTitle ? 'selected' : '' }}>
                                         {{ $assessmentTitle }}
                                     </option>
                                 @endforeach
@@ -156,14 +187,16 @@
                             </div>
 
                             <div class="space-y-2">
-                                <label for="grade_graded_at" class="text-sm font-semibold text-slate-700">Graded Date</label>
+                                <label for="grade_graded_at" class="text-sm font-semibold text-slate-700">Graded
+                                    Date</label>
                                 <input id="grade_graded_at" type="date" name="graded_at" value="{{ $gradedAtValue }}"
                                     class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             </div>
                         </div>
 
                         <div class="space-y-2">
-                            <label for="grade-student-search" class="text-sm font-semibold text-slate-700">Student Search</label>
+                            <label for="grade-student-search" class="text-sm font-semibold text-slate-700">Student
+                                Search</label>
                             <input id="grade-student-search" type="text" placeholder="Search by student or class"
                                 class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                         </div>
@@ -191,15 +224,18 @@
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div class="min-w-0">
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-100">
+                                        <span
+                                            class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-100">
                                             Selected Student
                                         </span>
-                                        <span id="grade-detail-student-name" class="text-sm font-black text-slate-900"></span>
+                                        <span id="grade-detail-student-name"
+                                            class="text-sm font-black text-slate-900"></span>
                                     </div>
                                     <div id="grade-detail-class" class="mt-1 text-xs font-semibold text-slate-500"></div>
                                     <div id="grade-detail-subjects" class="mt-3 flex flex-wrap gap-1.5"></div>
                                 </div>
-                                <div class="shrink-0 rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">
+                                <div
+                                    class="shrink-0 rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">
                                     <div id="grade-detail-month">No month selected</div>
                                     <div id="grade-detail-total" class="mt-1">0 records</div>
                                 </div>
@@ -218,26 +254,52 @@
                                 <label for="grade_score" class="text-sm font-semibold text-slate-700">Score</label>
                                 <input id="grade_score" type="number" name="score" step="0.01" min="0"
                                     value="{{ $scoreValue }}"
-                                    class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    class="js-grade-score w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             </div>
                             <div class="space-y-2">
-                                <label for="grade_max_score" class="text-sm font-semibold text-slate-700">Maximum Score</label>
-                                <input id="grade_max_score" type="number" name="max_score" step="0.01" min="0.01"
-                                    value="{{ $maxScoreValue }}"
-                                    class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                <label for="grade_max_score" class="text-sm font-semibold text-slate-700">Maximum
+                                    Score</label>
+                                <input id="grade_max_score" type="number" name="max_score" step="0.01"
+                                    min="0.01" value="{{ $maxScoreValue }}"
+                                    class="js-grade-max-score w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4 sm:grid-cols-3">
+                            <div>
+                                <div class="text-[11px] font-black uppercase tracking-wide text-indigo-500">Percentage
+                                </div>
+                                <div class="js-grade-percentage mt-1 text-lg font-black text-slate-900">N/A</div>
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-black uppercase tracking-wide text-indigo-500">Alpha Grade
+                                </div>
+                                <div class="js-grade-letter mt-1 text-lg font-black text-slate-900">N/A</div>
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-black uppercase tracking-wide text-indigo-500">GPA</div>
+                                <div class="js-grade-gpa mt-1 text-lg font-black text-slate-900">N/A</div>
                             </div>
                         </div>
 
                         <div class="space-y-2">
                             <label for="grade_remarks" class="text-sm font-semibold text-slate-700">Remarks</label>
-                            <textarea id="grade_remarks" name="remarks" rows="5" maxlength="5000"
-                                placeholder="Optional feedback for the student."
-                                class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $remarksValue }}</textarea>
+                            <select id="grade_remarks" name="remarks" disabled
+                                class="js-grade-remarks w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none disabled:bg-slate-50 disabled:text-slate-700">
+                                <option value="">Select remark</option>
+                                @foreach ($remarkOptions as $remarkOption)
+                                    <option value="{{ $remarkOption }}" @selected($remarksValue === (string) $remarkOption)>
+                                        {{ $remarkOption }}
+                                    </option>
+                                @endforeach
+                                @if ($remarksValue !== '' && !$remarkOptions->contains($remarksValue))
+                                    <option value="{{ $remarksValue }}" selected>{{ $remarksValue }}</option>
+                                @endif
+                            </select>
                         </div>
 
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                            <button type="submit"
-                                id="grade-submit-button"
+                            <button type="submit" id="grade-submit-button"
                                 class="inline-flex w-full flex-1 items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-500">
                                 {{ $isEditing ? 'Save Grade Changes' : 'Assign Grade And Notify Student' }}
                             </button>
@@ -259,17 +321,156 @@
                 @endif
             </section>
 
-            <section class="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7">
+            <section x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true"
+                class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
+                style="--sd: 4;">
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <div>
                         <h2 class="text-lg font-black text-slate-900">Grade History</h2>
                         <p class="mt-1 text-xs font-semibold text-slate-500">Latest grade records you have assigned.</p>
                     </div>
-                    <span class="text-xs font-semibold text-slate-500">Latest first</span>
+                    <button type="button" @click="filterOpen = true"
+                        class="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
+                        </svg>
+                        Filters
+                    </button>
                 </div>
 
+                <div x-show="filterOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[80] bg-slate-900/40"
+                    @click="filterOpen = false"></div>
+
+                <aside x-show="filterOpen" x-cloak x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0"
+                    x-transition:leave-end="translate-x-full"
+                    class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
+                    <div class="flex h-full flex-col">
+                        <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                            <h3 class="text-3xl font-black text-slate-900">Filters</h3>
+                            <div class="flex items-center gap-4">
+                                <a href="{{ route('teacher.grades.index') }}"
+                                    class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800">
+                                    Clear All
+                                </a>
+                                <button type="button" @click="filterOpen = false"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl font-bold leading-none text-slate-600 shadow-sm transition hover:bg-slate-100 hover:text-slate-900"
+                                    aria-label="Close filters">
+                                    &times;
+                                </button>
+                            </div>
+                        </div>
+
+                        <form method="GET" action="{{ route('teacher.grades.index') }}"
+                            class="flex min-h-0 flex-1 flex-col" @submit="filterOpen = false">
+                            <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+                                <section class="space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">Search</h4>
+                                    <input name="q" type="text" value="{{ $filterSearch }}"
+                                        placeholder="Search by assessment, student, or subject"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                </section>
+
+                                <section class="space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">Class</h4>
+                                    <select name="class_id"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="0">All classes</option>
+                                        @foreach ($classOptions as $classOption)
+                                            <option value="{{ $classOption['id'] }}" @selected($filterClassId === (int) $classOption['id'])>
+                                                {{ $classOption['label'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </section>
+
+                                <section class="space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">Subject</h4>
+                                    <select name="subject_id"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="0">All subjects</option>
+                                        @foreach ($subjectOptions as $subject)
+                                            <option value="{{ $subject['id'] }}" @selected($filterSubjectId === (int) $subject['id'])>
+                                                {{ $subject['name'] }}
+                                                {{ $subject['code'] !== '' ? ' (' . $subject['code'] . ')' : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </section>
+
+                                <section class="space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">Assessment</h4>
+                                    <select name="title"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="all">All assessments</option>
+                                        @foreach ($assessmentTitleOptions as $assessmentTitle)
+                                            <option value="{{ $assessmentTitle }}" @selected($filterTitle === (string) $assessmentTitle)>
+                                                {{ $assessmentTitle }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </section>
+
+                                <section class="space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">Month</h4>
+                                    <select name="month"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="">All months</option>
+                                        @foreach ($monthOptions as $monthOption)
+                                            <option value="{{ $monthOption['value'] }}" @selected($filterMonth === (string) $monthOption['value'])>
+                                                {{ $monthOption['label'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </section>
+                            </div>
+
+                            <div class="border-t border-slate-200 px-5 py-4">
+                                <button type="submit"
+                                    class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-base font-bold text-white shadow-sm transition hover:bg-slate-800">
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </aside>
+
+                @if ($hasActiveFilters)
+                    <div
+                        class="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-2 text-xs font-semibold text-slate-600">
+                        <span class="text-indigo-700">Active filters:</span>
+                        @if ($filterSearch !== '')
+                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Search:
+                                {{ $filterSearch }}</span>
+                        @endif
+                        @if ($filterClassId > 0)
+                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Class:
+                                {{ data_get(collect($classOptions)->firstWhere('id', $filterClassId), 'label', 'Selected') }}</span>
+                        @endif
+                        @if ($filterSubjectId > 0)
+                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Subject:
+                                {{ data_get(collect($subjectOptions)->firstWhere('id', $filterSubjectId), 'name', 'Selected') }}</span>
+                        @endif
+                        @if ($filterTitle !== '' && $filterTitle !== 'all')
+                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Assessment:
+                                {{ $filterTitle }}</span>
+                        @endif
+                        @if ($filterMonth !== '')
+                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Month:
+                                {{ data_get($monthOptions->firstWhere('value', $filterMonth), 'label', $filterMonth) }}</span>
+                        @endif
+                        <a href="{{ route('teacher.grades.index') }}"
+                            class="ml-auto rounded-full bg-white px-2.5 py-1 text-indigo-700 ring-1 ring-indigo-100 hover:bg-indigo-100">
+                            Clear
+                        </a>
+                    </div>
+                @endif
+
                 @if (session('success') && session('grade_action') === 'updated')
-                    <div class="js-inline-flash mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                    <div
+                        class="js-inline-flash mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                         {{ session('success') }}
                     </div>
                 @endif
@@ -278,7 +479,8 @@
                     <div class="overflow-hidden rounded-2xl border border-slate-200">
                         <div class="max-h-[44rem] overflow-auto">
                             <table class="w-full min-w-[1040px] text-left text-sm">
-                                <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                <thead
+                                    class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                     <tr>
                                         <th class="px-3 py-3 font-semibold">Assessment</th>
                                         <th class="px-3 py-3 font-semibold">Student</th>
@@ -305,13 +507,15 @@
                                                 </div>
                                             </td>
                                             <td class="px-3 py-3">
-                                                <div class="font-semibold text-slate-900">{{ $grade->student?->name ?? 'Student' }}</div>
+                                                <div class="font-semibold text-slate-900">
+                                                    {{ $grade->student?->name ?? 'Student' }}</div>
                                                 <div class="mt-1 text-xs text-slate-500">
                                                     {{ $grade->student?->schoolClass?->display_name ?? 'Unassigned class' }}
                                                 </div>
                                             </td>
                                             <td class="px-3 py-3">
-                                                <div class="font-semibold text-slate-800">{{ $grade->subject?->name ?? 'General result' }}</div>
+                                                <div class="font-semibold text-slate-800">
+                                                    {{ $grade->subject?->name ?? 'General result' }}</div>
                                                 <div class="mt-1 text-xs text-slate-500">
                                                     {{ trim((string) ($grade->subject?->code ?? '')) !== '' ? $grade->subject?->code : 'No subject code' }}
                                                 </div>
@@ -320,16 +524,20 @@
                                                 <div class="font-semibold text-slate-900">
                                                     {{ number_format($score, 2) }}/{{ number_format($maxScore, 2) }}
                                                 </div>
-                                                <div class="mt-1 text-xs text-slate-500">{{ number_format($percentage, 1) }}%</div>
+                                                <div class="mt-1 text-xs text-slate-500">
+                                                    {{ number_format($percentage, 1) }}%</div>
                                             </td>
                                             <td class="px-3 py-3">
-                                                <span class="inline-flex rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                                                <span
+                                                    class="inline-flex rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
                                                     {{ $grade->grade_letter }}
                                                 </span>
                                             </td>
                                             <td class="px-3 py-3 text-slate-700">
-                                                <div class="font-semibold text-slate-900">{{ $grade->graded_at?->format('M d, Y') }}</div>
-                                                <div class="mt-1 text-xs text-slate-500">{{ $grade->created_at?->format('h:i A') }}</div>
+                                                <div class="font-semibold text-slate-900">
+                                                    {{ $grade->graded_at?->format('M d, Y') }}</div>
+                                                <div class="mt-1 text-xs text-slate-500">
+                                                    {{ $grade->created_at?->format('h:i A') }}</div>
                                             </td>
                                             <td class="px-3 py-3">
                                                 <div class="flex justify-end">
@@ -340,7 +548,8 @@
                                                 </div>
 
                                                 <div x-show="editOpen" x-cloak x-transition.opacity
-                                                    class="fixed inset-0 z-[80] bg-slate-900/40" @click="editOpen = false"></div>
+                                                    class="fixed inset-0 z-[80] bg-slate-900/40"
+                                                    @click="editOpen = false"></div>
                                                 <div x-show="editOpen" x-cloak x-transition
                                                     class="fixed inset-x-3 top-6 z-[81] mx-auto max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:top-10">
                                                     <form method="POST"
@@ -350,7 +559,8 @@
                                                         @csrf
                                                         @method('PUT')
 
-                                                        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+                                                        <div
+                                                            class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
                                                             <div class="min-w-0">
                                                                 <h3 class="truncate text-2xl font-black text-slate-900">
                                                                     Edit Grade
@@ -369,11 +579,14 @@
                                                         <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
                                                             <div class="space-y-2">
                                                                 <label for="edit_grade_title_{{ $grade->id }}"
-                                                                    class="text-sm font-semibold text-slate-700">Assessment Title</label>
-                                                                <select id="edit_grade_title_{{ $grade->id }}" name="title"
+                                                                    class="text-sm font-semibold text-slate-700">Assessment
+                                                                    Title</label>
+                                                                <select id="edit_grade_title_{{ $grade->id }}"
+                                                                    name="title"
                                                                     class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     @foreach ($assessmentTitleOptions as $assessmentTitle)
-                                                                        <option value="{{ $assessmentTitle }}" @selected((string) $grade->title === (string) $assessmentTitle)>
+                                                                        <option value="{{ $assessmentTitle }}"
+                                                                            @selected((string) $grade->title === (string) $assessmentTitle)>
                                                                             {{ $assessmentTitle }}
                                                                         </option>
                                                                     @endforeach
@@ -383,14 +596,17 @@
                                                             <div class="grid gap-5 sm:grid-cols-2">
                                                                 <div class="space-y-2">
                                                                     <div class="flex items-center justify-between gap-3">
-                                                                        <label for="edit_grade_student_id_{{ $grade->id }}"
+                                                                        <label
+                                                                            for="edit_grade_student_id_{{ $grade->id }}"
                                                                             class="text-sm font-semibold text-slate-700">Student</label>
-                                                                        <button type="button" @click="studentPickerOpen = true"
+                                                                        <button type="button"
+                                                                            @click="studentPickerOpen = true"
                                                                             class="inline-flex items-center gap-2 rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">
                                                                             Student List
                                                                         </button>
                                                                     </div>
-                                                                    <select id="edit_grade_student_id_{{ $grade->id }}" name="student_id"
+                                                                    <select id="edit_grade_student_id_{{ $grade->id }}"
+                                                                        name="student_id"
                                                                         class="js-edit-grade-student-select hidden"
                                                                         data-grade-id="{{ $grade->id }}">
                                                                         @foreach ($studentOptions as $student)
@@ -400,39 +616,51 @@
                                                                                 data-name="{{ strtolower($student['name']) }}"
                                                                                 data-class="{{ strtolower($student['class_label']) }}"
                                                                                 @selected((int) $grade->student_id === (int) $student['id'])>
-                                                                                {{ $student['name'] }} | {{ $student['class_label'] }}
+                                                                                {{ $student['name'] }} |
+                                                                                {{ $student['class_label'] }}
                                                                             </option>
                                                                         @endforeach
                                                                     </select>
-                                                                    <button type="button" @click="studentPickerOpen = true"
+                                                                    <button type="button"
+                                                                        @click="studentPickerOpen = true"
                                                                         class="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-left transition hover:border-indigo-200 hover:bg-indigo-50/50">
                                                                         <span class="min-w-0">
-                                                                            <span class="js-edit-grade-student-name block truncate text-sm font-black text-slate-900"
+                                                                            <span
+                                                                                class="js-edit-grade-student-name block truncate text-sm font-black text-slate-900"
                                                                                 data-grade-id="{{ $grade->id }}">
                                                                                 {{ $grade->student?->name ?? 'Select student' }}
                                                                             </span>
-                                                                            <span class="js-edit-grade-student-meta mt-1 block truncate text-xs font-semibold text-slate-500"
+                                                                            <span
+                                                                                class="js-edit-grade-student-meta mt-1 block truncate text-xs font-semibold text-slate-500"
                                                                                 data-grade-id="{{ $grade->id }}">
                                                                                 {{ $grade->student?->schoolClass?->display_name ?? 'Open the student list to choose a student.' }}
                                                                             </span>
                                                                         </span>
-                                                                        <span class="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-100">
+                                                                        <span
+                                                                            class="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-100">
                                                                             Browse
                                                                         </span>
                                                                     </button>
 
-                                                                    <div x-show="studentPickerOpen" x-cloak x-transition.opacity
-                                                                        class="fixed inset-0 z-[90] bg-slate-900/40" @click="studentPickerOpen = false"></div>
+                                                                    <div x-show="studentPickerOpen" x-cloak
+                                                                        x-transition.opacity
+                                                                        class="fixed inset-0 z-[90] bg-slate-900/40"
+                                                                        @click="studentPickerOpen = false"></div>
                                                                     <div x-show="studentPickerOpen" x-cloak x-transition
                                                                         class="fixed inset-x-3 top-6 z-[91] mx-auto flex max-h-[calc(100vh-3rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:top-10">
-                                                                        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+                                                                        <div
+                                                                            class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
                                                                             <div class="min-w-0">
-                                                                                <h4 class="truncate text-lg font-black text-slate-900">Student List</h4>
+                                                                                <h4
+                                                                                    class="truncate text-lg font-black text-slate-900">
+                                                                                    Student List</h4>
                                                                                 <p class="mt-1 text-xs text-slate-500">
-                                                                                    Choose the student for this grade record.
+                                                                                    Choose the student for this grade
+                                                                                    record.
                                                                                 </p>
                                                                             </div>
-                                                                            <button type="button" @click="studentPickerOpen = false"
+                                                                            <button type="button"
+                                                                                @click="studentPickerOpen = false"
                                                                                 class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50"
                                                                                 aria-label="Close student list">
                                                                                 &times;
@@ -440,25 +668,45 @@
                                                                         </div>
 
                                                                         <div class="space-y-4 overflow-y-auto px-5 py-4">
-                                                                            <input type="text" placeholder="Search by student or class"
+                                                                            <input type="text"
+                                                                                placeholder="Search by student or class"
                                                                                 class="js-edit-grade-student-search w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
                                                                                 data-grade-id="{{ $grade->id }}">
 
-                                                                            <div class="overflow-hidden rounded-2xl border border-slate-200">
-                                                                                <div class="student-table-scroller max-h-[28rem] overflow-auto">
-                                                                                    <table class="student-table w-full min-w-[720px] whitespace-nowrap text-left text-sm">
-                                                                                        <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                                                            <div
+                                                                                class="overflow-hidden rounded-2xl border border-slate-200">
+                                                                                <div
+                                                                                    class="student-table-scroller max-h-[28rem] overflow-auto">
+                                                                                    <table
+                                                                                        class="student-table w-full min-w-[720px] whitespace-nowrap text-left text-sm">
+                                                                                        <thead
+                                                                                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                                                             <tr>
-                                                                                                <th class="px-3 py-3 font-semibold">Student</th>
-                                                                                                <th class="px-3 py-3 font-semibold">Class</th>
-                                                                                                <th class="px-3 py-3 font-semibold">Subjects</th>
-                                                                                                <th class="px-3 py-3 text-right font-semibold">Action</th>
+                                                                                                <th
+                                                                                                    class="px-3 py-3 font-semibold">
+                                                                                                    Student</th>
+                                                                                                <th
+                                                                                                    class="px-3 py-3 font-semibold">
+                                                                                                    Class</th>
+                                                                                                <th
+                                                                                                    class="px-3 py-3 font-semibold">
+                                                                                                    Subjects</th>
+                                                                                                <th
+                                                                                                    class="px-3 py-3 text-right font-semibold">
+                                                                                                    Action</th>
                                                                                             </tr>
                                                                                         </thead>
-                                                                                        <tbody class="divide-y divide-slate-100 bg-white">
+                                                                                        <tbody
+                                                                                            class="divide-y divide-slate-100 bg-white">
                                                                                             @foreach ($studentOptions as $student)
                                                                                                 @php
-                                                                                                    $studentSubjectNames = collect($student['subject_names'] ?? [])->take(3)->all();
+                                                                                                    $studentSubjectNames = collect(
+                                                                                                        $student[
+                                                                                                            'subject_names'
+                                                                                                        ] ?? [],
+                                                                                                    )
+                                                                                                        ->take(3)
+                                                                                                        ->all();
                                                                                                 @endphp
                                                                                                 <tr class="js-edit-grade-student-row align-top hover:bg-slate-50/80"
                                                                                                     data-grade-id="{{ $grade->id }}"
@@ -468,43 +716,58 @@
                                                                                                     data-name="{{ strtolower($student['name']) }}"
                                                                                                     data-class="{{ strtolower($student['class_label']) }}">
                                                                                                     <td class="px-3 py-3">
-                                                                                                        <div class="flex items-center gap-3">
-                                                                                                            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-indigo-50 text-xs font-black text-indigo-600 ring-1 ring-indigo-100">
+                                                                                                        <div
+                                                                                                            class="flex items-center gap-3">
+                                                                                                            <span
+                                                                                                                class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-indigo-50 text-xs font-black text-indigo-600 ring-1 ring-indigo-100">
                                                                                                                 {{ strtoupper(substr($student['name'], 0, 2)) }}
                                                                                                             </span>
-                                                                                                            <div class="min-w-0">
-                                                                                                                <div class="truncate font-semibold text-slate-800">
+                                                                                                            <div
+                                                                                                                class="min-w-0">
+                                                                                                                <div
+                                                                                                                    class="truncate font-semibold text-slate-800">
                                                                                                                     {{ $student['name'] }}
                                                                                                                 </div>
-                                                                                                                <div class="text-xs text-slate-400">
-                                                                                                                    ID #{{ str_pad((string) $student['id'], 7, '0', STR_PAD_LEFT) }}
+                                                                                                                <div
+                                                                                                                    class="text-xs text-slate-400">
+                                                                                                                    ID
+                                                                                                                    #{{ str_pad((string) $student['id'], 7, '0', STR_PAD_LEFT) }}
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </td>
                                                                                                     <td class="px-3 py-3">
-                                                                                                        <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                                                                        <span
+                                                                                                            class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
                                                                                                             {{ $student['class_label'] }}
                                                                                                         </span>
                                                                                                     </td>
                                                                                                     <td class="px-3 py-3">
-                                                                                                        <div class="flex max-w-[20rem] flex-wrap gap-1.5">
+                                                                                                        <div
+                                                                                                            class="flex max-w-[20rem] flex-wrap gap-1.5">
                                                                                                             @forelse ($studentSubjectNames as $subjectName)
-                                                                                                                <span class="rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px] font-semibold text-indigo-700">
+                                                                                                                <span
+                                                                                                                    class="rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px] font-semibold text-indigo-700">
                                                                                                                     {{ $subjectName }}
                                                                                                                 </span>
                                                                                                             @empty
-                                                                                                                <span class="text-xs font-semibold text-slate-400">No subjects</span>
+                                                                                                                <span
+                                                                                                                    class="text-xs font-semibold text-slate-400">No
+                                                                                                                    subjects</span>
                                                                                                             @endforelse
                                                                                                             @if (count($student['subject_names'] ?? []) > count($studentSubjectNames))
-                                                                                                                <span class="text-[11px] font-semibold text-slate-500">
-                                                                                                                    +{{ count($student['subject_names'] ?? []) - count($studentSubjectNames) }} more
+                                                                                                                <span
+                                                                                                                    class="text-[11px] font-semibold text-slate-500">
+                                                                                                                    +{{ count($student['subject_names'] ?? []) - count($studentSubjectNames) }}
+                                                                                                                    more
                                                                                                                 </span>
                                                                                                             @endif
                                                                                                         </div>
                                                                                                     </td>
-                                                                                                    <td class="px-3 py-3 text-right">
-                                                                                                        <button type="button"
+                                                                                                    <td
+                                                                                                        class="px-3 py-3 text-right">
+                                                                                                        <button
+                                                                                                            type="button"
                                                                                                             class="js-edit-grade-select-student rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
                                                                                                             data-grade-id="{{ $grade->id }}"
                                                                                                             data-student-id="{{ $student['id'] }}"
@@ -514,9 +777,12 @@
                                                                                                     </td>
                                                                                                 </tr>
                                                                                             @endforeach
-                                                                                            <tr class="js-edit-grade-empty-row hidden" data-grade-id="{{ $grade->id }}">
-                                                                                                <td colspan="4" class="px-3 py-10 text-center text-sm text-slate-500">
-                                                                                                    No students match the current filters.
+                                                                                            <tr class="js-edit-grade-empty-row hidden"
+                                                                                                data-grade-id="{{ $grade->id }}">
+                                                                                                <td colspan="4"
+                                                                                                    class="px-3 py-10 text-center text-sm text-slate-500">
+                                                                                                    No students match the
+                                                                                                    current filters.
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </tbody>
@@ -530,12 +796,14 @@
                                                                 <div class="space-y-2">
                                                                     <label for="edit_grade_subject_id_{{ $grade->id }}"
                                                                         class="text-sm font-semibold text-slate-700">Subject</label>
-                                                                    <select id="edit_grade_subject_id_{{ $grade->id }}" name="subject_id"
+                                                                    <select id="edit_grade_subject_id_{{ $grade->id }}"
+                                                                        name="subject_id"
                                                                         class="js-edit-grade-subject-select w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
                                                                         data-grade-id="{{ $grade->id }}">
                                                                         <option value="">General result</option>
                                                                         @foreach ($subjectOptions as $subject)
-                                                                            <option value="{{ $subject['id'] }}" @selected((int) ($grade->subject_id ?? 0) === (int) $subject['id'])>
+                                                                            <option value="{{ $subject['id'] }}"
+                                                                                @selected((int) ($grade->subject_id ?? 0) === (int) $subject['id'])>
                                                                                 {{ $subject['name'] }}
                                                                                 {{ $subject['code'] !== '' ? ' (' . $subject['code'] . ')' : '' }}
                                                                                 {{ $subject['class_label'] !== '' ? ' | ' . $subject['class_label'] : '' }}
@@ -548,8 +816,10 @@
                                                             <div class="grid gap-5 sm:grid-cols-2">
                                                                 <div class="space-y-2">
                                                                     <label for="edit_grade_graded_at_{{ $grade->id }}"
-                                                                        class="text-sm font-semibold text-slate-700">Graded Date</label>
-                                                                    <input id="edit_grade_graded_at_{{ $grade->id }}" type="date" name="graded_at"
+                                                                        class="text-sm font-semibold text-slate-700">Graded
+                                                                        Date</label>
+                                                                    <input id="edit_grade_graded_at_{{ $grade->id }}"
+                                                                        type="date" name="graded_at"
                                                                         value="{{ $grade->graded_at?->format('Y-m-d') }}"
                                                                         class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                 </div>
@@ -558,31 +828,84 @@
                                                                     <div class="space-y-2">
                                                                         <label for="edit_grade_score_{{ $grade->id }}"
                                                                             class="text-sm font-semibold text-slate-700">Score</label>
-                                                                        <input id="edit_grade_score_{{ $grade->id }}" type="number" name="score"
-                                                                            step="0.01" min="0" value="{{ number_format((float) ($grade->score ?? 0), 2, '.', '') }}"
-                                                                            class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                        <input id="edit_grade_score_{{ $grade->id }}"
+                                                                            type="number" name="score" step="0.01"
+                                                                            min="0"
+                                                                            value="{{ number_format((float) ($grade->score ?? 0), 2, '.', '') }}"
+                                                                            class="js-grade-score w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
                                                                     <div class="space-y-2">
-                                                                        <label for="edit_grade_max_score_{{ $grade->id }}"
-                                                                            class="text-sm font-semibold text-slate-700">Maximum Score</label>
-                                                                        <input id="edit_grade_max_score_{{ $grade->id }}" type="number" name="max_score"
-                                                                            step="0.01" min="0.01" value="{{ number_format((float) ($grade->max_score ?? 0), 2, '.', '') }}"
-                                                                            class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                        <label
+                                                                            for="edit_grade_max_score_{{ $grade->id }}"
+                                                                            class="text-sm font-semibold text-slate-700">Maximum
+                                                                            Score</label>
+                                                                        <input
+                                                                            id="edit_grade_max_score_{{ $grade->id }}"
+                                                                            type="number" name="max_score"
+                                                                            step="0.01" min="0.01"
+                                                                            value="{{ number_format((float) ($grade->max_score ?? 0), 2, '.', '') }}"
+                                                                            class="js-grade-max-score w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
                                                                 </div>
                                                             </div>
 
+                                                            <div
+                                                                class="grid gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4 sm:grid-cols-3">
+                                                                <div>
+                                                                    <div
+                                                                        class="text-[11px] font-black uppercase tracking-wide text-indigo-500">
+                                                                        Percentage</div>
+                                                                    <div
+                                                                        class="js-grade-percentage mt-1 text-lg font-black text-slate-900">
+                                                                        N/A</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div
+                                                                        class="text-[11px] font-black uppercase tracking-wide text-indigo-500">
+                                                                        Alpha Grade</div>
+                                                                    <div
+                                                                        class="js-grade-letter mt-1 text-lg font-black text-slate-900">
+                                                                        N/A</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div
+                                                                        class="text-[11px] font-black uppercase tracking-wide text-indigo-500">
+                                                                        GPA</div>
+                                                                    <div
+                                                                        class="js-grade-gpa mt-1 text-lg font-black text-slate-900">
+                                                                        N/A</div>
+                                                                </div>
+                                                            </div>
+
                                                             <div class="space-y-2">
+                                                                @php
+                                                                    $editRemarksValue = trim(
+                                                                        (string) ($grade->remarks ?? ''),
+                                                                    );
+                                                                @endphp
                                                                 <label for="edit_grade_remarks_{{ $grade->id }}"
                                                                     class="text-sm font-semibold text-slate-700">Remarks</label>
-                                                                <textarea id="edit_grade_remarks_{{ $grade->id }}" name="remarks" rows="5" maxlength="5000"
-                                                                    class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                                                    placeholder="Optional feedback for the student.">{{ $grade->remarks }}</textarea>
+                                                                <select id="edit_grade_remarks_{{ $grade->id }}"
+                                                                    name="remarks" disabled
+                                                                    class="js-grade-remarks w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none disabled:bg-slate-50 disabled:text-slate-700">
+                                                                    <option value="">Select remark</option>
+                                                                    @foreach ($remarkOptions as $remarkOption)
+                                                                        <option value="{{ $remarkOption }}"
+                                                                            @selected($editRemarksValue === (string) $remarkOption)>
+                                                                            {{ $remarkOption }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                    @if ($editRemarksValue !== '' && !$remarkOptions->contains($editRemarksValue))
+                                                                        <option value="{{ $editRemarksValue }}" selected>
+                                                                            {{ $editRemarksValue }}</option>
+                                                                    @endif
+                                                                </select>
                                                             </div>
                                                         </div>
 
-                                                        <div class="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
+                                                        <div
+                                                            class="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
                                                             <button type="button" @click="editOpen = false"
                                                                 class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
                                                                 Cancel
@@ -656,7 +979,11 @@
             const isEditing = @json($isEditing);
             let pageData = {
                 validationErrors: [],
-                flash: { success: '', error: '', action: '' },
+                flash: {
+                    success: '',
+                    error: '',
+                    action: ''
+                },
                 currentGradeId: 0,
                 students: [],
                 subjects: [],
@@ -685,7 +1012,9 @@
                 }
 
                 window.alert(`${config.title}\n\n${config.text}`);
-                return Promise.resolve({ isConfirmed: true });
+                return Promise.resolve({
+                    isConfirmed: true
+                });
             };
 
             const showConfirm = (options) => {
@@ -724,22 +1053,144 @@
             const validationErrors = Array.isArray(pageData.validationErrors) ? pageData.validationErrors : [];
             const alertQueue = [];
             const currentGradeId = Number(pageData.currentGradeId || 0) || 0;
-            const studentsById = new Map((Array.isArray(pageData.students) ? pageData.students : []).map((student) => [
-                String(student.id),
-                student,
-            ]));
-            const subjectsById = new Map((Array.isArray(pageData.subjects) ? pageData.subjects : []).map((subject) => [
-                String(subject.id),
-                subject,
-            ]));
+            const studentsById = new Map((Array.isArray(pageData.students) ? pageData.students : []).map((
+                student) => [
+                    String(student.id),
+                    student,
+                ]));
+            const subjectsById = new Map((Array.isArray(pageData.subjects) ? pageData.subjects : []).map((
+                subject) => [
+                    String(subject.id),
+                    subject,
+                ]));
             const gradeDetails = Array.isArray(pageData.gradeDetails) ? pageData.gradeDetails : [];
 
-            const escapeHtml = (value) => String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+            const gradePointForPercentage = (percentage) => {
+                if (percentage >= 90) {
+                    return 4.0;
+                }
+
+                if (percentage >= 80) {
+                    return 3.0 + ((percentage - 80) / 10);
+                }
+
+                if (percentage >= 70) {
+                    return 2.0 + ((percentage - 70) / 10);
+                }
+
+                if (percentage >= 60) {
+                    return 1.0 + ((percentage - 60) / 10);
+                }
+
+                return 0.0;
+            };
+
+            const remarkForGradePoint = (point) => {
+                if (point >= 3.5) {
+                    return 'Perfect';
+                }
+
+                if (point >= 3) {
+                    return 'Very Good';
+                }
+
+                if (point >= 2) {
+                    return 'Good';
+                }
+
+                if (point >= 1) {
+                    return 'Needs Improvement';
+                }
+
+                return 'Not Good';
+            };
+
+            const gradeLetterForPercentage = (percentage) => {
+                if (percentage >= 90) {
+                    return 'A';
+                }
+
+                if (percentage >= 80) {
+                    return 'B';
+                }
+
+                if (percentage >= 70) {
+                    return 'C';
+                }
+
+                if (percentage >= 60) {
+                    return 'D';
+                }
+
+                return 'F';
+            };
+
+            const updateGradePreview = (container) => {
+                const scoreInput = container.querySelector('.js-grade-score');
+                const maxScoreInput = container.querySelector('.js-grade-max-score');
+                const percentageNode = container.querySelector('.js-grade-percentage');
+                const letterNode = container.querySelector('.js-grade-letter');
+                const gpaNode = container.querySelector('.js-grade-gpa');
+                const remarksSelect = container.querySelector('.js-grade-remarks');
+
+                if (!scoreInput || !maxScoreInput || !percentageNode || !letterNode || !gpaNode) {
+                    return;
+                }
+
+                const score = Number.parseFloat(scoreInput.value);
+                const maxScore = Number.parseFloat(maxScoreInput.value);
+                const canCalculate = Number.isFinite(score) && Number.isFinite(maxScore) && maxScore > 0;
+
+                if (!canCalculate) {
+                    percentageNode.textContent = 'N/A';
+                    letterNode.textContent = 'N/A';
+                    gpaNode.textContent = 'N/A';
+                    if (remarksSelect) {
+                        remarksSelect.value = '';
+                    }
+                    return;
+                }
+
+                if (score > maxScore) {
+                    percentageNode.textContent = 'Invalid';
+                    letterNode.textContent = 'N/A';
+                    gpaNode.textContent = 'N/A';
+                    if (remarksSelect) {
+                        remarksSelect.value = '';
+                    }
+                    return;
+                }
+
+                const percentage = (Math.max(0, score) / maxScore) * 100;
+                const letter = gradeLetterForPercentage(percentage);
+                const gradePoint = Math.min(4, Math.max(0, gradePointForPercentage(percentage)));
+                const remark = remarkForGradePoint(gradePoint);
+
+                percentageNode.textContent = `${percentage.toFixed(1)}%`;
+                letterNode.textContent = letter;
+                gpaNode.textContent = `${gradePoint.toFixed(2)} / 4.00`;
+                if (remarksSelect) {
+                    remarksSelect.value = remark;
+                }
+            };
+
+            const initializeGradePreviews = () => {
+                const previewForms = new Set(
+                    Array.from(document.querySelectorAll('.js-grade-score, .js-grade-max-score'))
+                    .map((input) => input.closest('form'))
+                    .filter(Boolean)
+                );
+
+                previewForms.forEach((previewForm) => {
+                    const update = () => updateGradePreview(previewForm);
+                    previewForm.querySelectorAll('.js-grade-score, .js-grade-max-score').forEach((
+                        input) => {
+                            input.addEventListener('input', update);
+                            input.addEventListener('change', update);
+                        });
+                    update();
+                });
+            };
 
             const selectedMonthKey = () => {
                 const rawDate = String(gradedAtInput?.value || '').trim();
@@ -804,41 +1255,43 @@
 
                 if (detailSubjects) {
                     const subjectNames = Array.isArray(student.subject_names) ? student.subject_names : [];
-                    detailSubjects.innerHTML = subjectNames.length > 0
-                        ? subjectNames.map((subjectName) => `
+                    detailSubjects.innerHTML = subjectNames.length > 0 ?
+                        subjectNames.map((subjectName) => `
                             <span class="rounded-full border border-indigo-100 bg-white px-2.5 py-1 text-xs font-semibold text-indigo-700">
                                 ${escapeHtml(subjectName)}
                             </span>
-                        `).join('')
-                        : '<span class="text-xs font-semibold text-slate-400">No linked subjects</span>';
+                        `).join('') :
+                        '<span class="text-xs font-semibold text-slate-400">No linked subjects</span>';
                 }
 
                 const monthlyRecords = gradeDetails.filter((grade) => {
                     const gradeSubjectId = Number(grade.subject_id || 0) || 0;
-                    return String(grade.student_id || '') === studentId
-                        && gradeSubjectId === subjectId
-                        && String(grade.graded_month || '') === monthKey;
+                    return String(grade.student_id || '') === studentId &&
+                        gradeSubjectId === subjectId &&
+                        String(grade.graded_month || '') === monthKey;
                 });
                 const duplicate = monthlyRecords.find((grade) => {
-                    return Number(grade.id || 0) !== currentGradeId
-                        && String(grade.title || '') === title;
+                    return Number(grade.id || 0) !== currentGradeId &&
+                        String(grade.title || '') === title;
                 });
                 const selectedSubject = subjectId > 0 ? subjectsById.get(String(subjectId)) : null;
-                const subjectLabel = selectedSubject
-                    ? String(selectedSubject.name || 'Selected subject')
-                    : 'General result';
+                const subjectLabel = selectedSubject ?
+                    String(selectedSubject.name || 'Selected subject') :
+                    'General result';
 
                 if (detailMonth) {
                     detailMonth.textContent = `${monthLabel(monthKey)}`;
                 }
 
                 if (detailTotal) {
-                    detailTotal.textContent = `${monthlyRecords.length} record${monthlyRecords.length === 1 ? '' : 's'}`;
+                    detailTotal.textContent =
+                        `${monthlyRecords.length} record${monthlyRecords.length === 1 ? '' : 's'}`;
                 }
 
                 if (duplicateWarning) {
                     if (duplicate) {
-                        duplicateWarning.textContent = `${student.name} already has ${title} for ${subjectLabel} in ${monthLabel(monthKey)}. Edit the existing grade instead.`;
+                        duplicateWarning.textContent =
+                            `${student.name} already has ${title} for ${subjectLabel} in ${monthLabel(monthKey)}. Edit the existing grade instead.`;
                         duplicateWarning.classList.remove('hidden');
                     } else {
                         duplicateWarning.textContent = '';
@@ -936,7 +1389,8 @@
                     const classLabel = String(option.dataset.class || '');
                     const matchesClass = classId === 0 || optionClassId === classId;
                     const matchesSubject = subjectId === 0 || subjectIds.includes(subjectId);
-                    const matchesSearch = searchValue === '' || name.includes(searchValue) || classLabel.includes(searchValue);
+                    const matchesSearch = searchValue === '' || name.includes(searchValue) || classLabel
+                        .includes(searchValue);
                     const visible = matchesClass && matchesSubject && matchesSearch;
 
                     option.hidden = !visible;
@@ -963,6 +1417,7 @@
             titleSelect?.addEventListener('change', updateStudentDetail);
             studentSelect?.addEventListener('change', updateStudentDetail);
             gradedAtInput?.addEventListener('change', updateStudentDetail);
+            initializeGradePreviews();
             applyStudentFilters();
             updateStudentDetail();
 
@@ -977,7 +1432,8 @@
                 const search = document.querySelector(`.js-edit-grade-student-search[data-grade-id="${key}"]`);
                 const nameNode = document.querySelector(`.js-edit-grade-student-name[data-grade-id="${key}"]`);
                 const metaNode = document.querySelector(`.js-edit-grade-student-meta[data-grade-id="${key}"]`);
-                const rows = Array.from(document.querySelectorAll(`.js-edit-grade-student-row[data-grade-id="${key}"]`));
+                const rows = Array.from(document.querySelectorAll(
+                    `.js-edit-grade-student-row[data-grade-id="${key}"]`));
                 const emptyRow = document.querySelector(`.js-edit-grade-empty-row[data-grade-id="${key}"]`);
                 const selectedStudent = studentsById.get(String(select?.value || ''));
                 const subjectId = Number(subject?.value || 0) || 0;
@@ -990,10 +1446,11 @@
                     }
 
                     if (metaNode) {
-                        const subjectCount = Array.isArray(selectedStudent.subject_names)
-                            ? selectedStudent.subject_names.length
-                            : 0;
-                        metaNode.textContent = `${selectedStudent.class_label || 'Unassigned class'} | ${subjectCount} subject${subjectCount === 1 ? '' : 's'}`;
+                        const subjectCount = Array.isArray(selectedStudent.subject_names) ?
+                            selectedStudent.subject_names.length :
+                            0;
+                        metaNode.textContent =
+                            `${selectedStudent.class_label || 'Unassigned class'} | ${subjectCount} subject${subjectCount === 1 ? '' : 's'}`;
                     }
                 } else {
                     if (nameNode) {
@@ -1013,9 +1470,11 @@
                     const name = String(row.dataset.name || '');
                     const classLabel = String(row.dataset.class || '');
                     const matchesSubject = subjectId === 0 || subjectIds.includes(subjectId);
-                    const matchesSearch = searchValue === '' || name.includes(searchValue) || classLabel.includes(searchValue);
+                    const matchesSearch = searchValue === '' || name.includes(searchValue) || classLabel
+                        .includes(searchValue);
                     const visible = matchesSubject && matchesSearch;
-                    const selected = String(row.dataset.studentId || '') === String(select?.value || '');
+                    const selected = String(row.dataset.studentId || '') === String(select?.value ||
+                    '');
 
                     row.classList.toggle('hidden', !visible);
                     row.classList.toggle('bg-indigo-50/50', selected);
@@ -1035,7 +1494,8 @@
             });
 
             document.querySelectorAll('.js-edit-grade-subject-select').forEach((select) => {
-                select.addEventListener('change', () => updateEditStudentPicker(select.dataset.gradeId || ''));
+                select.addEventListener('change', () => updateEditStudentPicker(select.dataset.gradeId ||
+                    ''));
             });
 
             document.querySelectorAll('.js-edit-grade-student-search').forEach((input) => {
@@ -1045,14 +1505,17 @@
             document.querySelectorAll('.js-edit-grade-select-student').forEach((button) => {
                 button.addEventListener('click', () => {
                     const gradeId = button.dataset.gradeId || '';
-                    const select = document.querySelector(`.js-edit-grade-student-select[data-grade-id="${gradeId}"]`);
+                    const select = document.querySelector(
+                        `.js-edit-grade-student-select[data-grade-id="${gradeId}"]`);
 
                     if (!select) {
                         return;
                     }
 
                     select.value = String(button.dataset.studentId || '');
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    select.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
                     updateEditStudentPicker(gradeId);
                 });
             });
@@ -1079,15 +1542,16 @@
                     return;
                 }
 
-                const studentLabel = studentSelect?.selectedOptions?.[0]?.textContent?.trim() || 'this student';
+                const studentLabel = studentSelect?.selectedOptions?.[0]?.textContent?.trim() ||
+                    'this student';
                 showConfirm({
-                    title: isEditing ? 'Save grade changes?' : 'Assign grade?',
-                    text: isEditing
-                        ? `Update the grade record for ${studentLabel}?`
-                        : `Send this grade and notify ${studentLabel}?`,
-                    confirmButtonText: isEditing ? 'Yes, save it' : 'Yes, assign it',
+                    title: 'Are you sure?',
+                    text: isEditing ?
+                        `Do you want to save the grade changes for ${studentLabel}?` :
+                        `Do you want to submit this grade for ${studentLabel}?`,
+                    confirmButtonText: isEditing ? 'Yes, save' : 'Yes, submit',
                     cancelButtonText: 'Cancel',
-                    icon: 'question',
+                    icon: 'warning',
                 }).then((confirmed) => {
                     if (!confirmed) {
                         return;

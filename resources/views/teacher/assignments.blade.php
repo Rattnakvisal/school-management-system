@@ -20,6 +20,11 @@
             $isEditing && $editingAssignment?->due_at ? $editingAssignment->due_at->format('Y-m-d') : '',
         );
         $assignmentTotal = max(0, (int) ($stats['total'] ?? 0));
+        $filters = $filters ?? [];
+        $filterSearch = (string) ($filters['q'] ?? '');
+        $filterSubjectId = (int) ($filters['subject_id'] ?? 0);
+        $filterDue = (string) ($filters['due'] ?? 'all');
+        $hasActiveFilters = $filterSearch !== '' || $filterSubjectId > 0 || ($filterDue !== '' && $filterDue !== 'all');
         $teacherAssignmentStatCards = [
             [
                 'label' => 'Assignments',
@@ -84,7 +89,9 @@
         @endif
 
         <div class="grid gap-6 xl:grid-cols-12">
-            <section class="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5">
+            <section
+                class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
+                style="--sd: 3;">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-black text-slate-900">{{ $isEditing ? 'Edit Assignment' : 'Create Assignment' }}</h2>
@@ -239,14 +246,117 @@
                 @endif
             </section>
 
-            <section class="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7">
+            <section x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true"
+                class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
+                style="--sd: 4;">
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <div>
                         <h2 class="text-lg font-black text-slate-900">Assignment History</h2>
                         <p class="mt-1 text-xs font-semibold text-slate-500">Latest assignments you have posted.</p>
                     </div>
-                    <span class="text-xs font-semibold text-slate-500">Latest first</span>
+                    <button type="button" @click="filterOpen = true"
+                        class="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
+                        </svg>
+                        Filters
+                    </button>
                 </div>
+
+                <div x-show="filterOpen" x-cloak x-transition.opacity class="fixed inset-0 z-[80] bg-slate-900/40"
+                    @click="filterOpen = false"></div>
+
+                <aside x-show="filterOpen" x-cloak x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+                    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0"
+                    x-transition:leave-end="translate-x-full"
+                    class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
+                    <div class="flex h-full flex-col">
+                        <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                            <h3 class="text-3xl font-black text-slate-900">Filters</h3>
+                            <div class="flex items-center gap-4">
+                                <a href="{{ route('teacher.assignments.index') }}"
+                                    class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-800">
+                                    Clear All
+                                </a>
+                                <button type="button" @click="filterOpen = false"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl font-bold leading-none text-slate-600 shadow-sm transition hover:bg-slate-100 hover:text-slate-900"
+                                    aria-label="Close filters">
+                                    &times;
+                                </button>
+                            </div>
+                        </div>
+
+                        <form method="GET" action="{{ route('teacher.assignments.index') }}"
+                            class="flex min-h-0 flex-1 flex-col" @submit="filterOpen = false">
+                            <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+                                <section class="space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">Search</h4>
+                                    <input name="q" type="text" value="{{ $filterSearch }}"
+                                        placeholder="Search assignment, student, or subject"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                </section>
+
+                                <section class="space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">Subject</h4>
+                                    <select name="subject_id"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="0">All subjects</option>
+                                        @foreach ($subjectOptions as $subject)
+                                            <option value="{{ $subject['id'] }}" @selected($filterSubjectId === (int) $subject['id'])>
+                                                {{ $subject['name'] }}
+                                                {{ $subject['code'] !== '' ? ' (' . $subject['code'] . ')' : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </section>
+
+                                <section class="space-y-2">
+                                    <h4 class="text-xl font-bold text-slate-900">Due Status</h4>
+                                    <select name="due"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                        <option value="all" @selected($filterDue === 'all')>All due dates</option>
+                                        <option value="due_soon" @selected($filterDue === 'due_soon')>Due soon</option>
+                                        <option value="overdue" @selected($filterDue === 'overdue')>Overdue</option>
+                                        <option value="submitted" @selected($filterDue === 'submitted')>Has submissions</option>
+                                        <option value="no_due" @selected($filterDue === 'no_due')>No due date</option>
+                                    </select>
+                                </section>
+                            </div>
+
+                            <div class="border-t border-slate-200 px-5 py-4">
+                                <button type="submit"
+                                    class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-base font-bold text-white shadow-sm transition hover:bg-slate-800">
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </aside>
+
+                @if ($hasActiveFilters)
+                    <div
+                        class="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-2 text-xs font-semibold text-slate-600">
+                        <span class="text-indigo-700">Active filters:</span>
+                        @if ($filterSearch !== '')
+                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Search:
+                                {{ $filterSearch }}</span>
+                        @endif
+                        @if ($filterSubjectId > 0)
+                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Subject:
+                                {{ data_get(collect($subjectOptions)->firstWhere('id', $filterSubjectId), 'name', 'Selected') }}</span>
+                        @endif
+                        @if ($filterDue !== '' && $filterDue !== 'all')
+                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Due:
+                                {{ ['due_soon' => 'Due soon', 'overdue' => 'Overdue', 'submitted' => 'Has submissions', 'no_due' => 'No due date'][$filterDue] ?? ucfirst($filterDue) }}</span>
+                        @endif
+                        <a href="{{ route('teacher.assignments.index') }}"
+                            class="ml-auto rounded-full bg-white px-2.5 py-1 text-indigo-700 ring-1 ring-indigo-100 hover:bg-indigo-100">
+                            Clear
+                        </a>
+                    </div>
+                @endif
 
                 @if (($assignments ?? null) && $assignments->count() > 0)
                     <div class="overflow-hidden rounded-2xl border border-slate-200">

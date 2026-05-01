@@ -28,6 +28,7 @@ class GradeController extends Controller
         $subjectOptions = $this->resolveTeacherSubjects($teacher);
         $studentOptions = $this->resolveTeacherStudents($teacher, $subjectOptions);
         $assessmentTitleOptions = $this->assessmentTitleOptions();
+        $remarkOptions = $this->remarkOptions();
         $classOptions = $studentOptions
             ->map(function (array $student): array {
                 return [
@@ -54,7 +55,7 @@ class GradeController extends Controller
                 ->find($editId);
         }
 
-        $gradeQuery = Grade::query()
+        $gradeBaseQuery = Grade::query()
             ->with([
                 'student:id,name,school_class_id',
                 'student.schoolClass:id,name,section',
@@ -62,6 +63,42 @@ class GradeController extends Controller
                 'subject.schoolClass:id,name,section',
             ])
             ->where('teacher_id', $teacherId);
+
+        $search = trim((string) $request->query('q', ''));
+        $filterClassId = (int) $request->query('class_id', 0);
+        $filterSubjectId = (int) $request->query('subject_id', 0);
+        $filterTitle = trim((string) $request->query('title', 'all'));
+        $filterMonth = trim((string) $request->query('month', ''));
+
+        $gradeQuery = (clone $gradeBaseQuery)
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('title', 'like', '%' . $search . '%')
+                        ->orWhere('remarks', 'like', '%' . $search . '%')
+                        ->orWhereHas('student', function ($studentQuery) use ($search): void {
+                            $studentQuery->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('subject', function ($subjectQuery) use ($search): void {
+                            $subjectQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('code', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->when($filterClassId > 0, function ($query) use ($filterClassId): void {
+                $query->whereHas('student', function ($studentQuery) use ($filterClassId): void {
+                    $studentQuery->where('school_class_id', $filterClassId);
+                });
+            })
+            ->when($filterSubjectId > 0, function ($query) use ($filterSubjectId): void {
+                $query->where('subject_id', $filterSubjectId);
+            })
+            ->when($filterTitle !== '' && $filterTitle !== 'all', function ($query) use ($filterTitle): void {
+                $query->where('title', $filterTitle);
+            })
+            ->when(preg_match('/^\d{4}-\d{2}$/', $filterMonth) === 1, function ($query) use ($filterMonth): void {
+                $query->whereYear('graded_at', (int) substr($filterMonth, 0, 4))
+                    ->whereMonth('graded_at', (int) substr($filterMonth, 5, 2));
+            });
 
         $grades = (clone $gradeQuery)
             ->latest('graded_at')
@@ -105,15 +142,36 @@ class GradeController extends Controller
             })
             ->values();
 
+        $monthOptions = (clone $gradeBaseQuery)
+            ->whereNotNull('graded_at')
+            ->latest('graded_at')
+            ->get(['graded_at'])
+            ->map(fn (Grade $grade): array => [
+                'value' => $grade->graded_at?->format('Y-m') ?? '',
+                'label' => $grade->graded_at?->format('F Y') ?? '',
+            ])
+            ->filter(fn (array $option): bool => $option['value'] !== '' && $option['label'] !== '')
+            ->unique('value')
+            ->values();
+
         return view('teacher.grades', [
             'subjectOptions' => $subjectOptions,
             'studentOptions' => $studentOptions,
             'classOptions' => $classOptions,
             'assessmentTitleOptions' => $assessmentTitleOptions,
+            'remarkOptions' => $remarkOptions,
             'gradeDetails' => $gradeDetails,
             'grades' => $grades,
             'stats' => $stats,
             'editingGrade' => $editingGrade,
+            'filters' => [
+                'q' => $search,
+                'class_id' => $filterClassId,
+                'subject_id' => $filterSubjectId,
+                'title' => $filterTitle,
+                'month' => $filterMonth,
+            ],
+            'monthOptions' => $monthOptions,
         ]);
     }
 
@@ -196,6 +254,8 @@ class GradeController extends Controller
                 'score' => 'The score cannot be greater than the maximum score.',
             ]);
         }
+        $gradeLetter = $this->gradeLetter($score, $maxScore);
+        $gradePoint = $this->gradePoint($score, $maxScore);
 
         $gradedAt = Carbon::parse((string) $validated['graded_at']);
         $duplicateQuery = Grade::query()
@@ -230,8 +290,8 @@ class GradeController extends Controller
             'title' => trim((string) $validated['title']),
             'score' => $score,
             'max_score' => $maxScore,
-            'grade_letter' => $this->gradeLetter($score, $maxScore),
-            'remarks' => trim((string) ($validated['remarks'] ?? '')) ?: null,
+            'grade_letter' => $gradeLetter,
+            'remarks' => $this->remarkForGradePoint($gradePoint),
             'graded_at' => $gradedAt->toDateString(),
         ], $studentOptions];
     }
@@ -243,6 +303,19 @@ class GradeController extends Controller
             'Quiz',
             'Midterm',
             'Final',
+        ];
+    }
+
+    private function remarkOptions(): array
+    {
+        return [
+            'Perfect',
+            'Excellent',
+            'Very Good',
+            'Good',
+            'Average',
+            'Needs Improvement',
+            'Not Good',
         ];
     }
 
@@ -287,6 +360,30 @@ class GradeController extends Controller
             $percentage >= 70 => 'C',
             $percentage >= 60 => 'D',
             default => 'F',
+        };
+    }
+
+    private function gradePoint(float $score, float $maxScore): float
+    {
+        $percentage = $maxScore > 0 ? ($score / $maxScore) * 100 : 0;
+
+        return round(match (true) {
+            $percentage >= 90 => 4.0,
+            $percentage >= 80 => 3.0 + (($percentage - 80) / 10),
+            $percentage >= 70 => 2.0 + (($percentage - 70) / 10),
+            $percentage >= 60 => 1.0 + (($percentage - 60) / 10),
+            default => 0.0,
+        }, 2);
+    }
+
+    private function remarkForGradePoint(float $point): string
+    {
+        return match (true) {
+            $point >= 3.5 => 'Perfect',
+            $point >= 3 => 'Very Good',
+            $point >= 2 => 'Good',
+            $point >= 1 => 'Needs Improvement',
+            default => 'Not Good',
         };
     }
 

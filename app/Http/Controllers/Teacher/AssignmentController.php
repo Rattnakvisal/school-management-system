@@ -37,7 +37,7 @@ class AssignmentController extends Controller
                 ->find($editId);
         }
 
-        $assignmentQuery = Assignment::query()
+        $assignmentBaseQuery = Assignment::query()
             ->with([
                 'subject:id,name,code,school_class_id',
                 'subject.schoolClass:id,name,section',
@@ -50,6 +50,44 @@ class AssignmentController extends Controller
                 },
             ])
             ->where('teacher_id', $teacherId);
+
+        $search = trim((string) $request->query('q', ''));
+        $filterSubjectId = (int) $request->query('subject_id', 0);
+        $filterDue = trim((string) $request->query('due', 'all'));
+
+        $assignmentQuery = (clone $assignmentBaseQuery)
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('title', 'like', '%' . $search . '%')
+                        ->orWhere('description', 'like', '%' . $search . '%')
+                        ->orWhereHas('subject', function ($subjectQuery) use ($search): void {
+                            $subjectQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('code', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('students', function ($studentQuery) use ($search): void {
+                            $studentQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->when($filterSubjectId > 0, function ($query) use ($filterSubjectId): void {
+                $query->where('subject_id', $filterSubjectId);
+            })
+            ->when($filterDue === 'overdue', function ($query): void {
+                $query->whereNotNull('due_at')->where('due_at', '<', now());
+            })
+            ->when($filterDue === 'due_soon', function ($query): void {
+                $query->whereNotNull('due_at')
+                    ->whereBetween('due_at', [now(), now()->copy()->addDays(7)->endOfDay()]);
+            })
+            ->when($filterDue === 'no_due', function ($query): void {
+                $query->whereNull('due_at');
+            })
+            ->when($filterDue === 'submitted', function ($query): void {
+                $query->whereHas('students', function ($studentQuery): void {
+                    $studentQuery->whereNotNull('assignment_student.submitted_at');
+                });
+            });
 
         $assignments = (clone $assignmentQuery)
             ->latest()
@@ -72,6 +110,11 @@ class AssignmentController extends Controller
             'assignments' => $assignments,
             'stats' => $stats,
             'editingAssignment' => $editingAssignment,
+            'filters' => [
+                'q' => $search,
+                'subject_id' => $filterSubjectId,
+                'due' => $filterDue,
+            ],
         ]);
     }
 

@@ -22,21 +22,53 @@ class LawRequestController extends Controller
         $subjectOptions = $this->teacherSubjects($teacherId);
         $subjectTimeOptionsBySubject = $this->teacherSubjectTimes($teacherId, $subjectOptions);
 
-        $lawRequests = TeacherLawRequest::query()
-            ->where('teacher_id', $teacherId)
-            ->latest()
-            ->get();
+        $lawRequestBaseQuery = TeacherLawRequest::query()
+            ->where('teacher_id', $teacherId);
 
         $editingRequest = null;
         $editIdRaw = trim((string) $request->query('edit', ''));
         if (ctype_digit($editIdRaw)) {
-            $editingRequest = $lawRequests->firstWhere('id', (int) $editIdRaw);
+            $editingRequest = (clone $lawRequestBaseQuery)->find((int) $editIdRaw);
             if ($editingRequest && strtolower((string) ($editingRequest->status ?? 'pending')) !== 'pending') {
                 return redirect()
                     ->route('teacher.law-requests.index')
                     ->with('warning', 'Approved or rejected requests can no longer be edited.');
             }
         }
+
+        $search = trim((string) $request->query('q', ''));
+        $filterStatus = trim((string) $request->query('status', 'all'));
+        $filterType = trim((string) $request->query('law_type', 'all'));
+        $filterSubjectId = trim((string) $request->query('subject_id', 'all'));
+        $filterSubjectName = '';
+
+        if ($filterSubjectId !== '' && $filterSubjectId !== 'all') {
+            $matchedSubject = collect($subjectOptions)->first(function ($subjectOption) use ($filterSubjectId) {
+                return (string) ($subjectOption->id ?? '') === $filterSubjectId;
+            });
+            $filterSubjectName = trim((string) ($matchedSubject->name ?? ''));
+        }
+
+        $lawRequests = (clone $lawRequestBaseQuery)
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('subject', 'like', '%' . $search . '%')
+                        ->orWhere('subject_time', 'like', '%' . $search . '%')
+                        ->orWhere('reason', 'like', '%' . $search . '%')
+                        ->orWhere('admin_note', 'like', '%' . $search . '%');
+                });
+            })
+            ->when(in_array($filterStatus, ['pending', 'approved', 'rejected'], true), function ($query) use ($filterStatus): void {
+                $query->where('status', $filterStatus);
+            })
+            ->when($filterType !== '' && $filterType !== 'all' && array_key_exists($filterType, $lawTypes), function ($query) use ($filterType): void {
+                $query->where('law_type', $filterType);
+            })
+            ->when($filterSubjectName !== '', function ($query) use ($filterSubjectName): void {
+                $query->where('subject', 'like', '%' . $filterSubjectName . '%');
+            })
+            ->latest()
+            ->get();
 
         $selectionDefaults = $this->resolveSelectionFromRequest($editingRequest, $subjectOptions, $subjectTimeOptionsBySubject);
 
@@ -96,6 +128,12 @@ class LawRequestController extends Controller
             'subjectTimeOptionsBySubject' => $subjectTimeMap,
             'editingRequest' => $editingRequest,
             'approvalAlerts' => $approvalAlerts,
+            'filters' => [
+                'q' => $search,
+                'status' => $filterStatus,
+                'law_type' => $filterType,
+                'subject_id' => $filterSubjectId,
+            ],
             'formDefaults' => [
                 'law_type' => $defaultLawType,
                 'subject_id' => $defaultSubjectId,

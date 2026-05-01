@@ -30,47 +30,41 @@
             }
         }
 
-        $gradePointFor = function (string $letter): float {
-            return [
-                'A+' => 4.0,
-                'A' => 4.0,
-                'A-' => 3.7,
-                'B+' => 3.5,
-                'B' => 3.0,
-                'B-' => 2.7,
-                'C+' => 2.3,
-                'C' => 2.0,
-                'C-' => 1.7,
-                'D' => 1.0,
-                'F' => 0.0,
-            ][strtoupper(trim($letter))] ?? 0.0;
+        $gradePointFor = function (float $score, float $maxScore): float {
+            $percentage = $maxScore > 0 ? ($score / $maxScore) * 100 : 0;
+
+            return round(match (true) {
+                $percentage >= 90 => 4.0,
+                $percentage >= 80 => 3.0 + (($percentage - 80) / 10),
+                $percentage >= 70 => 2.0 + (($percentage - 70) / 10),
+                $percentage >= 60 => 1.0 + (($percentage - 60) / 10),
+                default => 0.0,
+            }, 2);
         };
 
-        $remarkFor = function (string $letter, ?string $remarks) use ($gradePointFor): string {
+        $remarkFor = function (float $point, ?string $remarks): string {
             $cleanRemarks = trim((string) $remarks);
             if ($cleanRemarks !== '') {
                 return $cleanRemarks;
             }
 
-            $point = $gradePointFor($letter);
-
-            if ($point >= 4) {
-                return 'Excellent';
-            }
-
             if ($point >= 3.5) {
-                return 'Very Good';
+                return 'Perfect';
             }
 
             if ($point >= 3) {
-                return 'Good';
+                return 'Very Good';
             }
 
             if ($point >= 2) {
-                return 'Satisfactory';
+                return 'Good';
             }
 
-            return $point > 0 ? 'Pass' : 'Needs Improvement';
+            if ($point >= 1) {
+                return 'Needs Improvement';
+            }
+
+            return 'Not Good';
         };
 
         $creditFor = fn($grade): int => 3;
@@ -394,7 +388,7 @@
                                         $maxScore = (float) ($grade->max_score ?? 0);
                                         $percentage = $maxScore > 0 ? round(($score / $maxScore) * 100, 1) : 0;
                                         $letter = trim((string) ($grade->grade_letter ?? ''));
-                                        $point = $gradePointFor($letter);
+                                        $point = $gradePointFor($score, $maxScore);
                                         $credit = $creditFor($grade);
                                         $earnedCredit = $point > 0 ? $credit : 0;
                                         $totalPoint = $credit * $point;
@@ -440,7 +434,7 @@
                                         </td>
                                         <td class="px-3 py-3 align-top">
                                             <div class="max-w-xs whitespace-normal text-xs leading-relaxed text-slate-600">
-                                                {{ $remarkFor($letter, $grade->remarks) }}
+                                                {{ $remarkFor($point, $grade->remarks) }}
                                             </div>
                                             <div class="mt-1 text-[11px] text-slate-400">
                                                 {{ number_format($score, 2) }}/{{ number_format($maxScore, 2) }}

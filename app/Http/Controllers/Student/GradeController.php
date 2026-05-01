@@ -58,7 +58,7 @@ class GradeController extends Controller
         ];
 
         $transcriptStats = $this->transcriptStats(
-            (clone $gradeQuery)->get(['id', 'grade_letter'])
+            (clone $gradeQuery)->get(['id', 'score', 'max_score'])
         );
 
         $allStudentGrades = Grade::query()
@@ -118,27 +118,13 @@ class GradeController extends Controller
 
     private function transcriptStats(Collection $grades): array
     {
-        $gradePoints = [
-            'A+' => 4.0,
-            'A' => 4.0,
-            'A-' => 3.7,
-            'B+' => 3.5,
-            'B' => 3.0,
-            'B-' => 2.7,
-            'C+' => 2.3,
-            'C' => 2.0,
-            'C-' => 1.7,
-            'D' => 1.0,
-            'F' => 0.0,
-        ];
-
         $creditPerGrade = 3;
         $creditsAttempted = 0;
         $creditsEarned = 0;
         $totalPoints = 0.0;
 
         foreach ($grades as $grade) {
-            $point = $gradePoints[strtoupper(trim((string) ($grade->grade_letter ?? '')))] ?? 0.0;
+            $point = $this->gradePoint((float) ($grade->score ?? 0), (float) ($grade->max_score ?? 0));
             $creditsAttempted += $creditPerGrade;
             $creditsEarned += $point > 0 ? $creditPerGrade : 0;
             $totalPoints += $creditPerGrade * $point;
@@ -151,5 +137,18 @@ class GradeController extends Controller
             'total_points' => $totalPoints,
             'cumulative_gpa' => $creditsAttempted > 0 ? $totalPoints / $creditsAttempted : null,
         ];
+    }
+
+    private function gradePoint(float $score, float $maxScore): float
+    {
+        $percentage = $maxScore > 0 ? ($score / $maxScore) * 100 : 0;
+
+        return round(match (true) {
+            $percentage >= 90 => 4.0,
+            $percentage >= 80 => 3.0 + (($percentage - 80) / 10),
+            $percentage >= 70 => 2.0 + (($percentage - 70) / 10),
+            $percentage >= 60 => 1.0 + (($percentage - 60) / 10),
+            default => 0.0,
+        }, 2);
     }
 }

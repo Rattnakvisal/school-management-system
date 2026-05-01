@@ -378,10 +378,7 @@
                                         $subjectTimeText = trim((string) ($lawRequest->subject_time ?? ''));
                                         $subjectTimeParts = array_values(
                                             array_filter(
-                                                array_map(
-                                                    'trim',
-                                                    explode(',', $subjectTimeText),
-                                                ),
+                                                array_map('trim', explode(',', $subjectTimeText)),
                                                 fn($value) => $value !== '',
                                             ),
                                         );
@@ -394,13 +391,21 @@
                                         $requestedUntilDisplay =
                                             $requestedUntilText !== '' ? $requestedUntilText : $requestedForText;
                                         $editSubjectId = (string) ((int) ($lawRequest->subject_id ?? 0) ?: '');
-                                        $hasEditSubject = $editSubjectId !== '' && collect($subjectOptions ?? [])->contains(
-                                            fn($subjectOption) => (string) ($subjectOption->id ?? '') === $editSubjectId,
-                                        );
+                                        $hasEditSubject =
+                                            $editSubjectId !== '' &&
+                                            collect($subjectOptions ?? [])->contains(
+                                                fn($subjectOption) => (string) ($subjectOption->id ?? '') ===
+                                                    $editSubjectId,
+                                            );
 
                                         if (!$hasEditSubject && $subjectText !== '') {
-                                            $matchedSubject = collect($subjectOptions ?? [])->first(function ($subjectOption) use ($subjectText) {
-                                                return strcasecmp(trim((string) ($subjectOption->name ?? '')), $subjectText) === 0;
+                                            $matchedSubject = collect($subjectOptions ?? [])->first(function (
+                                                $subjectOption,
+                                            ) use ($subjectText) {
+                                                return strcasecmp(
+                                                    trim((string) ($subjectOption->name ?? '')),
+                                                    $subjectText,
+                                                ) === 0;
                                             });
                                             $editSubjectId = $matchedSubject ? (string) $matchedSubject->id : '';
                                         }
@@ -410,7 +415,8 @@
                                             $editSubjectId = $firstSubject ? (string) $firstSubject->id : '';
                                         }
 
-                                        $editTimeOptions = $editSubjectId !== '' ? $subjectTimeMap[$editSubjectId] ?? [] : [];
+                                        $editTimeOptions =
+                                            $editSubjectId !== '' ? $subjectTimeMap[$editSubjectId] ?? [] : [];
                                         $editTimeKeys = [];
                                         foreach ($subjectTimeParts as $subjectTimePart) {
                                             foreach ($editTimeOptions as $timeOption) {
@@ -424,13 +430,16 @@
                                                 }
                                             }
                                         }
-                                        $editTimeKeys = array_values(array_unique(array_filter($editTimeKeys, fn($key) => $key !== '')));
+                                        $editTimeKeys = array_values(
+                                            array_unique(array_filter($editTimeKeys, fn($key) => $key !== '')),
+                                        );
                                     @endphp
                                     <tr x-data="{ editOpen: false }"
                                         class="align-top {{ $isEditing && (int) ($editingRequest->id ?? 0) === (int) $lawRequest->id ? 'bg-indigo-50/40' : 'hover:bg-slate-50/80' }}">
                                         <td class="px-3 py-3 font-semibold text-slate-900">{{ $typeLabel }}</td>
                                         <td class="px-3 py-3">
-                                            <div class="font-semibold text-slate-900">{{ $subjectText !== '' ? $subjectText : 'N/A' }}
+                                            <div class="font-semibold text-slate-900">
+                                                {{ $subjectText !== '' ? $subjectText : 'N/A' }}
                                             </div>
                                             <div class="mt-1 text-xs font-semibold text-sky-600">
                                                 Teacher: {{ $lawRequest->teacher?->name ?: 'Not assigned' }}
@@ -492,7 +501,7 @@
                                                     <form method="POST"
                                                         action="{{ route('student.law-requests.update', $lawRequest) }}"
                                                         class="js-student-law-request-edit-form flex max-h-[calc(100vh-3rem)] flex-col"
-                                                        data-request-label="{{ $subjectText !== '' ? $subjectText : ('Request #' . $lawRequest->id) }}">
+                                                        data-request-label="{{ $subjectText !== '' ? $subjectText : 'Request #' . $lawRequest->id }}">
                                                         @csrf
                                                         @method('PUT')
 
@@ -538,11 +547,20 @@
                                                                     data-selected-time-keys='@json($editTimeKeys)'>
                                                                     @forelse ($subjectOptions ?? [] as $subjectOption)
                                                                         @php
-                                                                            $className = trim((string) ($subjectOption->class_name ?? ''));
-                                                                            $classSection = trim((string) ($subjectOption->class_section ?? ''));
+                                                                            $className = trim(
+                                                                                (string) ($subjectOption->class_name ??
+                                                                                    ''),
+                                                                            );
+                                                                            $classSection = trim(
+                                                                                (string) ($subjectOption->class_section ??
+                                                                                    ''),
+                                                                            );
                                                                             $classDisplay =
                                                                                 $className !== ''
-                                                                                    ? $className . ($classSection !== '' ? ' - ' . $classSection : '')
+                                                                                    ? $className .
+                                                                                        ($classSection !== ''
+                                                                                            ? ' - ' . $classSection
+                                                                                            : '')
                                                                                     : '';
                                                                         @endphp
                                                                         <option value="{{ $subjectOption->id }}"
@@ -552,7 +570,8 @@
                                                                             {{ $classDisplay !== '' ? ' | ' . $classDisplay : '' }}
                                                                         </option>
                                                                     @empty
-                                                                        <option value="">No subject available</option>
+                                                                        <option value="">No subject available
+                                                                        </option>
                                                                     @endforelse
                                                                 </select>
                                                             </div>
@@ -602,7 +621,8 @@
                                                                     placeholder="Explain why you need an attendance law request...">{{ $lawRequest->reason }}</textarea>
                                                             </div>
 
-                                                            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                                                            <div
+                                                                class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                                                                 <div
                                                                     class="text-xs font-bold uppercase tracking-wide text-slate-500">
                                                                     Teachers Who Will Be Notified
@@ -618,7 +638,8 @@
                                                             </div>
                                                         </div>
 
-                                                        <div class="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
+                                                        <div
+                                                            class="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
                                                             <button type="button" @click="editOpen = false"
                                                                 class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
                                                                 Cancel
