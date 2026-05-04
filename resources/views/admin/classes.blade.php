@@ -95,9 +95,9 @@
                             this.createOpen = false;
                         }
                     };
-            
+
                     update();
-            
+
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -216,7 +216,7 @@
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-lg font-black text-slate-900">Class List</h2>
                         <button type="button" @click="filterOpen = true"
-                            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
@@ -316,7 +316,7 @@
                                 <div class="max-h-[700px] overflow-auto">
                                     <table class="w-full min-w-[1400px] text-left text-sm">
                                         <thead
-                                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                            class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
                                                 <th class="px-3 py-3 font-semibold">Class</th>
                                                 <th class="px-3 py-3 font-semibold">Section</th>

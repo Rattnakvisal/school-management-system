@@ -22,9 +22,10 @@
                 'barTone' => 'from-amber-500 to-orange-400',
                 'badgeTone' => 'bg-amber-50 text-amber-700 ring-amber-100',
                 'showPercent' => true,
-                'progressText' => $contactTotal > 0
-                    ? ((int) ($stats['unread'] ?? 0)) . ' of ' . $contactTotal . ' messages unread'
-                    : 'Inbox is empty',
+                'progressText' =>
+                    $contactTotal > 0
+                        ? ((int) ($stats['unread'] ?? 0)) . ' of ' . $contactTotal . ' messages unread'
+                        : 'Inbox is empty',
             ],
             [
                 'label' => 'Read',
@@ -36,9 +37,10 @@
                 'barTone' => 'from-emerald-500 to-cyan-400',
                 'badgeTone' => 'bg-emerald-50 text-emerald-700 ring-emerald-100',
                 'showPercent' => true,
-                'progressText' => $contactTotal > 0
-                    ? ((int) ($stats['read'] ?? 0)) . ' of ' . $contactTotal . ' messages read'
-                    : 'Inbox is empty',
+                'progressText' =>
+                    $contactTotal > 0
+                        ? ((int) ($stats['read'] ?? 0)) . ' of ' . $contactTotal . ' messages read'
+                        : 'Inbox is empty',
             ],
         ];
     @endphp
@@ -149,7 +151,7 @@
                             <div class="max-h-[700px] overflow-auto">
                                 <table class="w-full min-w-[1100px] text-left text-sm">
                                     <thead
-                                        class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                        class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                         <tr>
                                             <th class="px-3 py-3 font-semibold">Sender</th>
                                             <th class="px-3 py-3 font-semibold">Subject</th>

@@ -40,9 +40,10 @@
                 'barTone' => 'from-pink-500 to-rose-400',
                 'badgeTone' => 'bg-pink-50 text-pink-700 ring-pink-100',
                 'showPercent' => true,
-                'progressText' => $teacherTotal > 0
-                    ? ((int) ($stats['female'] ?? 0)) . ' of ' . $teacherTotal . ' teachers'
-                    : 'No teachers yet',
+                'progressText' =>
+                    $teacherTotal > 0
+                        ? ((int) ($stats['female'] ?? 0)) . ' of ' . $teacherTotal . ' teachers'
+                        : 'No teachers yet',
             ];
             $teacherStatCards[] = [
                 'label' => 'Men',
@@ -54,12 +55,13 @@
                 'barTone' => 'from-blue-500 to-cyan-400',
                 'badgeTone' => 'bg-blue-50 text-blue-700 ring-blue-100',
                 'showPercent' => true,
-                'progressText' => $teacherTotal > 0
-                    ? ((int) ($stats['male'] ?? 0)) . ' of ' . $teacherTotal . ' teachers'
-                    : 'No teachers yet',
+                'progressText' =>
+                    $teacherTotal > 0
+                        ? ((int) ($stats['male'] ?? 0)) . ' of ' . $teacherTotal . ' teachers'
+                        : 'No teachers yet',
             ];
         }
-        $teacherTableColspan = 5 + (($hasPhoneColumn ?? false) ? 1 : 0) + (($hasGenderColumn ?? false) ? 1 : 0);
+        $teacherTableColspan = 5 + ($hasPhoneColumn ?? false ? 1 : 0) + ($hasGenderColumn ?? false ? 1 : 0);
     @endphp
 
     <div class="teacher-stage space-y-6">
@@ -188,7 +190,8 @@
                             <label for="gender" class="mb-1 block text-xs font-semibold text-slate-600">Gender</label>
                             <select id="gender" name="gender"
                                 class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                <option value="" {{ old('gender') === null || old('gender') === '' ? 'selected' : '' }}>
+                                <option value=""
+                                    {{ old('gender') === null || old('gender') === '' ? 'selected' : '' }}>
                                     Not set</option>
                                 <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Women</option>
                                 <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Men</option>
@@ -260,13 +263,8 @@
                     );
                 @endphp
                 <div x-data="{ filterOpen: false, exportOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
-                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                        <div>
-                            <h2 class="text-lg font-black text-slate-900">Teacher List</h2>
-                            <p class="mt-1 text-xs font-medium text-slate-500">
-                                Manage all teacher accounts, view details, and perform actions like edit
-                            </p>
-                        </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-black text-slate-900">Teacher List</h2>
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="relative" @keydown.escape.window="exportOpen = false">
                                 <button type="button" @click="exportOpen = !exportOpen"
@@ -410,9 +408,9 @@
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                                 <div class="max-h-[700px] overflow-auto">
-                                    <table class="w-full min-w-[1140px] text-left text-sm">
+                                    <table class="admin-table w-full min-w-[1280px] text-left text-sm">
                                         <thead
-                                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                            class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
                                                 <th class="px-3 py-3 font-semibold">teacher</th>
                                                 <th class="px-3 py-3 font-semibold">Email</th>
@@ -485,7 +483,8 @@
                                                     <td class="whitespace-nowrap px-3 py-3 text-slate-500">
                                                         {{ $teacher->created_at->format('M d, Y') }}</td>
                                                     <td class="whitespace-nowrap px-3 py-3">
-                                                        <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
+                                                        <div
+                                                            class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
                                                             <button @click="open = true" type="button"
                                                                 class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                                 Edit

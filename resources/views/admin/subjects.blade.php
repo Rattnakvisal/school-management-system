@@ -31,9 +31,10 @@
                 'barTone' => 'from-sky-500 to-cyan-400',
                 'badgeTone' => 'bg-sky-50 text-sky-700 ring-sky-100',
                 'showPercent' => true,
-                'progressText' => $subjectTotal > 0
-                    ? ((int) ($stats['assigned'] ?? 0)) . ' of ' . $subjectTotal . ' subjects connected'
-                    : 'No subjects yet',
+                'progressText' =>
+                    $subjectTotal > 0
+                        ? ((int) ($stats['assigned'] ?? 0)) . ' of ' . $subjectTotal . ' subjects connected'
+                        : 'No subjects yet',
             ],
             [
                 'label' => 'Teacher Links',
@@ -45,9 +46,10 @@
                 'barTone' => 'from-amber-500 to-orange-400',
                 'badgeTone' => 'bg-amber-50 text-amber-700 ring-amber-100',
                 'showPercent' => true,
-                'progressText' => $subjectTotal > 0
-                    ? ((int) ($stats['withTeacher'] ?? 0)) . ' of ' . $subjectTotal . ' subjects with teachers'
-                    : 'No subjects yet',
+                'progressText' =>
+                    $subjectTotal > 0
+                        ? ((int) ($stats['withTeacher'] ?? 0)) . ' of ' . $subjectTotal . ' subjects with teachers'
+                        : 'No subjects yet',
             ],
             [
                 'label' => 'Students Learning',
@@ -59,9 +61,10 @@
                 'barTone' => 'from-violet-500 to-cyan-400',
                 'badgeTone' => 'bg-violet-50 text-violet-700 ring-violet-100',
                 'showPercent' => true,
-                'progressText' => $studentTotal > 0
-                    ? ((int) ($stats['studentsLearning'] ?? 0)) . ' of ' . $studentTotal . ' students connected'
-                    : 'No students yet',
+                'progressText' =>
+                    $studentTotal > 0
+                        ? ((int) ($stats['studentsLearning'] ?? 0)) . ' of ' . $studentTotal . ' students connected'
+                        : 'No students yet',
             ],
         ];
     @endphp
@@ -337,7 +340,7 @@
                                 <div class="max-h-[700px] overflow-auto">
                                     <table class="w-full min-w-[1150px] text-left text-sm">
                                         <thead
-                                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                            class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
                                                 <th class="px-3 py-3 font-semibold">Subject</th>
                                                 <th class="px-3 py-3 font-semibold">Study Time</th>
@@ -476,7 +479,8 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-3 py-3 text-slate-600">
-                                                        {{ $subject->students_learning_count ?? ($subject->students_count ?? 0) }}</td>
+                                                        {{ $subject->students_learning_count ?? ($subject->students_count ?? 0) }}
+                                                    </td>
                                                     <td class="px-3 py-3">
                                                         @if ($subject->is_active)
                                                             <span

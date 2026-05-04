@@ -2,7 +2,9 @@
 
 @section('page')
     @php
-        $gradeRows = collect(($grades ?? null)?->items() ?? []);
+        $gradeRows = collect(
+            ($grades ?? null) && is_object($grades) && method_exists($grades, 'items') ? $grades->items() : [],
+        );
         $subjectOptions = collect($subjectOptions ?? []);
         $termOptions = collect($termOptions ?? []);
         $selectedSubjectId = (int) ($selectedSubjectId ?? 0);
@@ -33,13 +35,16 @@
         $gradePointFor = function (float $score, float $maxScore): float {
             $percentage = $maxScore > 0 ? ($score / $maxScore) * 100 : 0;
 
-            return round(match (true) {
-                $percentage >= 90 => 4.0,
-                $percentage >= 80 => 3.0 + (($percentage - 80) / 10),
-                $percentage >= 70 => 2.0 + (($percentage - 70) / 10),
-                $percentage >= 60 => 1.0 + (($percentage - 60) / 10),
-                default => 0.0,
-            }, 2);
+            return round(
+                match (true) {
+                    $percentage >= 90 => 4.0,
+                    $percentage >= 80 => 3.0 + ($percentage - 80) / 10,
+                    $percentage >= 70 => 2.0 + ($percentage - 70) / 10,
+                    $percentage >= 60 => 1.0 + ($percentage - 60) / 10,
+                    default => 0.0,
+                },
+                2,
+            );
         };
 
         $remarkFor = function (float $point, ?string $remarks): string {
@@ -290,8 +295,8 @@
                     </div>
                 </div>
 
-                <form method="GET" action="{{ route('student.grades.index') }}"
-                    class="flex min-h-0 flex-1 flex-col" @submit="gradeFilterOpen = false">
+                <form method="GET" action="{{ route('student.grades.index') }}" class="flex min-h-0 flex-1 flex-col"
+                    @submit="gradeFilterOpen = false">
                     <div class="nav-scrollbar flex-1 space-y-7 overflow-y-auto px-6 py-6">
                         <section class="space-y-3">
                             <h4 class="text-2xl font-black text-slate-900">Program / Subject</h4>
@@ -411,7 +416,8 @@
                                                 {{ $subjectName !== '' ? $subjectName : $grade->title }}
                                             </div>
                                             <div class="text-xs text-slate-500">
-                                                {{ $grade->title }} | {{ $grade->graded_at?->format('M d, Y') ?? 'No date' }}
+                                                {{ $grade->title }} |
+                                                {{ $grade->graded_at?->format('M d, Y') ?? 'No date' }}
                                             </div>
                                         </td>
                                         <td class="px-3 py-3 align-top">
@@ -483,7 +489,7 @@
                     </div>
                 </div>
 
-                @if (($grades ?? null)?->hasPages())
+                @if (!empty($grades) && $grades->hasPages())
                     <div class="mt-4">
                         {{ $grades->links() }}
                     </div>

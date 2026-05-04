@@ -102,9 +102,9 @@
                             this.createOpen = false;
                         }
                     };
-
+            
                     update();
-
+            
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -379,12 +379,8 @@
                     );
                 @endphp
                 <div x-data="{ filterOpen: false, exportOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
-                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                        <div>
-                            <h2 class="text-lg font-black text-slate-900">Student List</h2>
-                            <p class="mt-1 text-xs font-medium text-slate-500">Export the current roster as a polished PDF
-                                or a styled Excel workbook.</p>
-                        </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-black text-slate-900">Student List</h2>
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="relative" @keydown.escape.window="exportOpen = false">
                                 <button type="button" @click="exportOpen = !exportOpen"
@@ -548,9 +544,9 @@
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                                 <div class="student-table-scroller max-h-[720px] overflow-auto">
-                                    <table class="student-table w-full whitespace-nowrap text-left text-sm">
+                                    <table class="admin-table w-full min-w-[1280px] whitespace-nowrap text-left text-sm">
                                         <thead
-                                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                            class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
                                                 <th class="student-col-student px-3 py-3 font-semibold">Student</th>
                                                 <th class="student-col-email px-3 py-3 font-semibold">Email</th>

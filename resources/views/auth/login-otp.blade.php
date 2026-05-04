@@ -8,13 +8,33 @@
         <div
             class="mx-auto flex max-w-5xl overflow-hidden rounded-[34px] border border-white/60 bg-white shadow-[0_30px_80px_rgba(99,102,241,0.16)] lg:h-[calc(100vh-2rem)] lg:max-h-[920px]">
             <section class="flex w-full items-center bg-white lg:w-[46%] lg:min-h-0">
-                <div class="mx-auto flex w-full max-w-md flex-col justify-center px-6 py-8 sm:px-10 sm:py-10 lg:px-10 lg:py-6 xl:px-12">
+                <div
+                    class="mx-auto flex w-full max-w-md flex-col justify-center px-6 py-8 sm:px-10 sm:py-10 lg:px-10 lg:py-6 xl:px-12">
+                    @php
+                        $brand = \Illuminate\Support\Facades\Schema::hasTable('home_page_items')
+                            ? \App\Models\HomePageItem::query()
+                                ->where('section', 'brand')
+                                ->where('key', 'main')
+                                ->first()
+                            : null;
+                        $schoolBrandName = trim((string) ($brand?->title ?: config('app.name', 'TechBridge Academy')));
+                        $schoolBrandTagline = trim((string) ($brand?->description ?: 'Academy'));
+                        $schoolBrandLogo =
+                            $brand && $brand->image_path
+                                ? route('public.storage', ['path' => $brand->image_path])
+                                : asset('images/techbridge-logo-mark.svg');
+                        $expiresMinutes = max(1, (int) env('LOGIN_OTP_EXPIRES_MINUTES', 5));
+                    @endphp
+
                     <div class="flex items-center gap-3">
-                        <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                        <img src="{{ $schoolBrandLogo }}" alt="{{ $schoolBrandName }} logo"
                             class="h-14 w-14 object-contain drop-shadow-[0_16px_34px_rgba(24,80,200,0.22)]" />
                         <div>
-                            <p class="text-xl font-extrabold tracking-[-0.03em] text-slate-900">TechBridge</p>
-                            <p class="text-xs font-semibold uppercase tracking-[0.26em] text-amber-500">Academy</p>
+                            <p class="text-xl font-extrabold tracking-[-0.03em] text-slate-900">{{ $schoolBrandName }}</p>
+                            @if ($schoolBrandTagline)
+                                <p class="text-xs font-semibold uppercase tracking-[0.26em] text-amber-500">
+                                    {{ $schoolBrandTagline }}</p>
+                            @endif
                         </div>
                     </div>
 
@@ -26,6 +46,9 @@
                             We sent a 6-digit Telegram login code to the phone number linked with
                             <span class="font-semibold text-slate-700">{{ $maskedPhone }}</span>.
                         </p>
+                        <p class="mt-2 text-xs text-slate-400">This code will expire in {{ $expiresMinutes }}
+                            minute{{ $expiresMinutes === 1 ? '' : 's' }}. Time left: <span id="otp-countdown"
+                                class="font-semibold text-slate-700"></span></p>
                     </div>
 
                     @if (session('success'))
@@ -53,11 +76,13 @@
 
                     <div class="my-6 flex items-center gap-4 lg:my-5">
                         <div class="h-px flex-1 bg-slate-200"></div>
-                        <span class="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-400">Secure verification</span>
+                        <span class="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-400">Secure
+                            verification</span>
                         <div class="h-px flex-1 bg-slate-200"></div>
                     </div>
 
-                    <form method="POST" action="{{ route('login.otp.verify') }}" class="space-y-4 lg:space-y-3">
+                    <form id="verify-form" method="POST" action="{{ route('login.otp.verify') }}"
+                        class="space-y-4 lg:space-y-3">
                         @csrf
 
                         <div>
@@ -80,8 +105,9 @@
                                         </svg>
                                     </span>
                                 </div>
-                                <input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"
-                                    autocomplete="one-time-code" value="{{ old('otp') }}" required autofocus
+                                <input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*"
+                                    maxlength="6" autocomplete="one-time-code" value="{{ old('otp') }}" required
+                                    autofocus
                                     class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-20 pr-6 text-center text-2xl font-bold tracking-[0.48em] text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 lg:py-2.5"
                                     placeholder="000000">
                             </div>
@@ -90,15 +116,15 @@
                             </p>
                         </div>
 
-                        <button type="submit"
+                        <button id="verify-button" type="submit"
                             class="w-full rounded-xl bg-[linear-gradient(135deg,#4f46e5_0%,#6366f1_100%)] px-6 py-3 text-sm font-bold text-white shadow-[0_20px_40px_rgba(79,70,229,0.30)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(79,70,229,0.34)] focus:outline-none focus:ring-4 focus:ring-indigo-200">
                             Verify OTP
                         </button>
                     </form>
 
-                    <form method="POST" action="{{ route('login.otp.resend') }}" class="mt-3">
+                    <form id="resend-form" method="POST" action="{{ route('login.otp.resend') }}" class="mt-3">
                         @csrf
-                        <button type="submit"
+                        <button id="resend-button" type="submit"
                             class="w-full rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-[0_14px_30px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_20px_36px_rgba(15,23,42,0.10)] focus:outline-none focus:ring-4 focus:ring-slate-100">
                             Resend OTP
                         </button>
@@ -128,9 +154,9 @@
                     <div class="flex items-start justify-end">
                         <div class="max-w-xs text-right">
                             <div class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
-                                <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                                <img src="{{ $schoolBrandLogo }}" alt="{{ $schoolBrandName }} logo"
                                     class="h-5 w-5 object-contain" />
-                                TechBridge Academy
+                                {{ $schoolBrandName }}
                             </div>
                             <p class="mt-5 text-sm leading-6 text-slate-500">
                                 Secure sign-in keeps your student, teacher, staff, and admin access protected every day.
@@ -155,4 +181,63 @@
             </aside>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const verifyForm = document.getElementById('verify-form');
+            const resendForm = document.getElementById('resend-form');
+            const verifyBtn = document.getElementById('verify-button');
+            const resendBtn = document.getElementById('resend-button');
+
+            function setLoading(btn, label) {
+                if (!btn) return;
+                btn.disabled = true;
+                const svg =
+                    '<svg class="h-4 w-4 animate-spin inline-block mr-2 align-middle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                    '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.2" stroke-width="4"></circle>' +
+                    '<path d="M22 12a10 10 0 00-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>' +
+                    '</svg>';
+                btn.innerHTML = svg + label;
+            }
+
+            verifyForm?.addEventListener('submit', function() {
+                setLoading(verifyBtn, 'Verifying...');
+            });
+
+            resendForm?.addEventListener('submit', function() {
+                setLoading(resendBtn, 'Sending...');
+            });
+
+            // OTP countdown and auto-reload when expired
+            try {
+                const countdownEl = document.getElementById('otp-countdown');
+                const initialMinutes = parseInt('{{ $expiresMinutes ?? 5 }}', 10) || 5;
+                if (countdownEl) {
+                    let remaining = initialMinutes * 60;
+
+                    function formatTime(s) {
+                        const m = Math.floor(s / 60);
+                        const sec = s % 60;
+                        return `${m}:${sec.toString().padStart(2, '0')}`;
+                    }
+
+                    countdownEl.textContent = formatTime(remaining);
+                    const intervalId = setInterval(() => {
+                        remaining -= 1;
+                        if (remaining <= 0) {
+                            countdownEl.textContent = '00:00';
+                            clearInterval(intervalId);
+                            // let user see expired state briefly, then reload to show updated state
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1200);
+                            return;
+                        }
+                        countdownEl.textContent = formatTime(remaining);
+                    }, 1000);
+                }
+            } catch (e) {
+                // ignore countdown errors
+            }
+        });
+    </script>
 @endsection

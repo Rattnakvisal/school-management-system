@@ -84,12 +84,11 @@
                 <div class="attendance-stat-card attendence-reveal attendence-float min-h-[132px] rounded-[26px] border border-white/80 bg-white/90 p-5 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur"
                     style="--sd: {{ $index + 2 }};">
                     <div class="flex items-start justify-between gap-4">
-                        <span
-                            class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br {{ $card['tone'] }}">
+                        <span class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br {{ $card['tone'] }}">
                             @switch($card['icon'])
                                 @case('records')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
                                         <path d="M14 2v6h6" />
                                         <path d="M8 13h8" />
@@ -98,8 +97,8 @@
                                 @break
 
                                 @case('students')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="M16 21v-2a4 4 0 0 0-8 0v2" />
                                         <circle cx="12" cy="7" r="4" />
                                         <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -108,8 +107,8 @@
                                 @break
 
                                 @case('teachers')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <circle cx="12" cy="7" r="4" />
                                         <path d="M6 21v-2a6 6 0 0 1 12 0v2" />
                                         <path d="M9 11h6" />
@@ -117,8 +116,8 @@
                                 @break
 
                                 @case('classes')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="m12 3 8 4-8 4-8-4 8-4Z" />
                                         <path d="m4 12 8 4 8-4" />
                                         <path d="m4 17 8 4 8-4" />
@@ -126,23 +125,23 @@
                                 @break
 
                                 @case('present')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="M20 6 9 17l-5-5" />
                                     </svg>
                                 @break
 
                                 @case('absent')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="M18 6 6 18" />
                                         <path d="m6 6 12 12" />
                                     </svg>
                                 @break
 
                                 @default
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <circle cx="12" cy="12" r="9" />
                                         <path d="M12 7v5l3 2" />
                                     </svg>
@@ -181,7 +180,8 @@
             </div>
         @endif
 
-        <section class="dashboard-card dash-hover attendence-reveal attendence-float rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+        <section
+            class="dashboard-card dash-hover attendence-reveal attendence-float rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
             style="--sd: 2;">
             <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                 <div class="dashboard-card-header flex flex-wrap items-start justify-between gap-3">
@@ -221,8 +221,8 @@
                             </div>
                         </div>
 
-                        <form method="GET" action="{{ route('admin.attendance.index') }}" class="flex min-h-0 flex-1 flex-col"
-                            @submit="filterOpen = false">
+                        <form method="GET" action="{{ route('admin.attendance.index') }}"
+                            class="flex min-h-0 flex-1 flex-col" @submit="filterOpen = false">
                             <div class="flex-1 space-y-5 overflow-y-auto px-5 py-4">
                                 <section class="space-y-2">
                                     <h4 class="text-xl font-bold text-slate-900">Date</h4>
@@ -303,26 +303,31 @@
                     }
                 @endphp
                 <div class="mb-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <span class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-indigo-700">
+                    <span
+                        class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-indigo-700">
                         Date: {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}
                     </span>
                     @if ($selectedClassLabel)
-                        <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-700">
+                        <span
+                            class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-700">
                             Class: {{ $selectedClassLabel }}
                         </span>
                     @endif
                     @if ($selectedTeacherLabel)
-                        <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">
+                        <span
+                            class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">
                             Teacher: {{ $selectedTeacherLabel }}
                         </span>
                     @endif
                     @if (($status ?? 'all') !== 'all')
-                        <span class="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-violet-700">
+                        <span
+                            class="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-violet-700">
                             Status: {{ $statusLabels[$status] ?? ucfirst((string) $status) }}
                         </span>
                     @endif
                     @if (($search ?? '') !== '')
-                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
+                        <span
+                            class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
                             Search: {{ $search }}
                         </span>
                     @endif
@@ -332,7 +337,7 @@
                     <div class="max-h-[620px] overflow-auto">
                         <table class="w-full min-w-[1180px] text-left text-sm">
                             <thead
-                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
                                     <th class="w-[120px] px-3 py-3 font-semibold">Date</th>
                                     <th class="w-[230px] px-3 py-3 font-semibold">Student</th>
@@ -362,27 +367,35 @@
                                             {{ \Carbon\Carbon::parse($row->attendance_date)->format('M d, Y') }}
                                         </td>
                                         <td class="px-3 py-3">
-                                            <div class="font-semibold text-slate-800">{{ $row->student_name ?? '-' }}</div>
+                                            <div class="font-semibold text-slate-800">{{ $row->student_name ?? '-' }}
+                                            </div>
                                             <div class="text-xs text-slate-500">{{ $row->student_email ?? '-' }}</div>
-                                            <div class="text-xs text-slate-400">ID #{{ str_pad((string) ($row->student_id ?? 0), 7, '0', STR_PAD_LEFT) }}</div>
+                                            <div class="text-xs text-slate-400">ID
+                                                #{{ str_pad((string) ($row->student_id ?? 0), 7, '0', STR_PAD_LEFT) }}
+                                            </div>
                                         </td>
                                         <td class="px-3 py-3 text-slate-600">
-                                            <div class="font-medium text-slate-700">{{ $row->class_label ?? 'Unassigned' }}</div>
+                                            <div class="font-medium text-slate-700">
+                                                {{ $row->class_label ?? 'Unassigned' }}</div>
                                             <div class="text-xs text-slate-400">Room: {{ $row->class_room ?: '-' }}</div>
                                         </td>
                                         <td class="px-3 py-3">
-                                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">
+                                            <span
+                                                class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">
                                                 {{ $statusText }}
                                             </span>
                                         </td>
                                         <td class="px-3 py-3 text-slate-600">
-                                            <div class="font-medium text-slate-700">{{ $row->teacher_name ?? 'Unknown' }}</div>
+                                            <div class="font-medium text-slate-700">{{ $row->teacher_name ?? 'Unknown' }}
+                                            </div>
                                             <div class="text-xs text-slate-400">{{ $row->teacher_email ?? '-' }}</div>
                                         </td>
                                         <td class="px-3 py-3 text-slate-600">
                                             @if ($checkedAt)
-                                                <div class="font-medium text-slate-700">{{ \Carbon\Carbon::parse($checkedAt)->format('M d, Y h:i A') }}</div>
-                                                <div class="text-xs text-slate-400">{{ \Carbon\Carbon::parse($checkedAt)->diffForHumans() }}</div>
+                                                <div class="font-medium text-slate-700">
+                                                    {{ \Carbon\Carbon::parse($checkedAt)->format('M d, Y h:i A') }}</div>
+                                                <div class="text-xs text-slate-400">
+                                                    {{ \Carbon\Carbon::parse($checkedAt)->diffForHumans() }}</div>
                                             @else
                                                 <span class="text-slate-400">-</span>
                                             @endif

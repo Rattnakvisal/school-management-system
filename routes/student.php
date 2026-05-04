@@ -9,7 +9,7 @@ use App\Http\Controllers\Student\SettingsController;
 use App\Http\Controllers\Student\SubjectController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'role:student'])
+Route::middleware(['auth', 'role:student', 'session.timeout'])
     ->prefix('student')
     ->name('student.')
     ->group(function () {

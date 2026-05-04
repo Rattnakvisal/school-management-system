@@ -98,9 +98,9 @@
                             this.createOpen = false;
                         }
                     };
-
+            
                     update();
-
+            
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -235,13 +235,8 @@
                 class="reveal float-card min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--sd: 4;">
                 <div class="space-y-4">
-                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                        <div>
-                            <h2 class="text-lg font-black text-slate-900">Admin / Staff List</h2>
-                            <p class="mt-1 text-xs font-medium text-slate-500">
-                                Search, filter, edit, activate, deactivate, or remove privileged accounts.
-                            </p>
-                        </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-black text-slate-900">Admin / Staff List</h2>
                         <button type="button" @click="filterOpen = true"
                             class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -352,8 +347,9 @@
 
                     <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                         <div class="max-h-[1200px] overflow-auto">
-                            <table class="student-table admin-staff-table w-full min-w-[1180px] text-left text-sm">
-                                <thead class="sticky top-0 z-10 text-xs uppercase">
+                            <table class="admin-table w-full min-w-[1280px] text-left text-sm">
+                                <thead
+                                    class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                     <tr>
                                         <th class="student-col-student px-3 py-3 font-semibold ">Account
                                         </th>
@@ -376,7 +372,8 @@
                                             $isSelf = (int) auth()->id() === (int) $account->id;
                                             $currentUserIsStaff =
                                                 strtolower(trim((string) (auth()->user()?->role ?? ''))) === 'staff';
-                                            $deleteDisabled = $isSelf || ($currentUserIsStaff && $account->role === 'admin');
+                                            $deleteDisabled =
+                                                $isSelf || ($currentUserIsStaff && $account->role === 'admin');
                                             $roleBadgeClass =
                                                 $account->role === 'admin'
                                                     ? 'bg-indigo-50 text-indigo-700'

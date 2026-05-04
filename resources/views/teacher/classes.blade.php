@@ -33,10 +33,25 @@
 
     <div class="teacher-classes-stage space-y-6">
         <section class="teacher-classes-reveal admin-page-header teacher-page-header" style="--sd: 1;">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">My Classes</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">View classes you teach and open class details.</p>
+            <div class="admin-page-header__main flex flex-wrap items-start justify-between gap-4">
+                <div class="admin-page-header__intro min-w-0">
+                    <div class="admin-page-header__title-row flex items-start gap-3">
+                        <span class="admin-page-header__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3.5" y="4" width="17" height="14" rx="2.2" />
+                                <path d="M8 20h8" />
+                                <path d="M12 18v2" />
+                                <path d="M7.5 9.5h9" />
+                            </svg>
+                        </span>
+
+                        <div>
+                            <div class="admin-page-header__eyebrow">Teacher Panel</div>
+                            <h1 class="admin-page-title text-3xl font-black tracking-tight">My Classes</h1>
+                            <p class="admin-page-subtitle mt-1 text-sm">View classes you teach and open class details.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -158,9 +173,9 @@
                     </aside>
 
                     <div class="min-w-0">
-                        <div class="overflow-hidden rounded-2xl border border-slate-200">
-                            <div class="max-h-[560px] overflow-auto">
-                                <table class="w-full min-w-[980px] text-left text-sm">
+                        <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
+                            <div class="student-table-scroller max-h-[700px] overflow-auto">
+                                <table class="student-table w-full whitespace-nowrap text-left text-sm">
                                     <thead
                                         class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                         <tr>
@@ -203,7 +218,9 @@
                                                     <div class="flex max-w-sm flex-wrap gap-1.5">
                                                         @forelse ($schoolClass->studySchedules as $slot)
                                                             @php
-                                                                $dayKey = strtolower((string) ($slot->day_of_week ?? 'all'));
+                                                                $dayKey = strtolower(
+                                                                    (string) ($slot->day_of_week ?? 'all'),
+                                                                );
                                                                 $dayLabel = $dayLabels[$dayKey] ?? ucfirst($dayKey);
                                                                 $periodKey = strtolower((string) $slot->period);
                                                                 $periodLabel =
@@ -324,7 +341,7 @@
                                                                             class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
                                                                             <span class="font-semibold text-slate-800">
                                                                                 @if (!empty($hasSubjectDayColumn))
-                                                                                    {{ $dayLabel }} | 
+                                                                                    {{ $dayLabel }} |
                                                                                 @endif
                                                                                 {{ $periodLabel }}
                                                                             </span>

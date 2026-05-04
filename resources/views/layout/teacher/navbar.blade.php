@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Teacher Dashboard' }}</title>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -34,9 +35,9 @@
         <aside
             class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col overflow-hidden border-r border-slate-200/80 bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.10),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_24px_50px_-34px_rgba(15,23,42,0.35)] transition-all duration-300"
             :class="[
-                isDesktop
-                    ? (sidebarCollapsed ? 'translate-x-0 w-24' : 'translate-x-0 w-72')
-                    : (mobileOpen ? 'translate-x-0 w-[84vw] max-w-[19rem]' : '-translate-x-full w-[84vw] max-w-[19rem]')
+                isDesktop ?
+                (sidebarCollapsed ? 'translate-x-0 w-24' : 'translate-x-0 w-72') :
+                (mobileOpen ? 'translate-x-0 w-[84vw] max-w-[19rem]' : '-translate-x-full w-[84vw] max-w-[19rem]')
             ]"
             aria-label="Sidebar">
 
@@ -48,8 +49,10 @@
                         class="h-12 w-12 shrink-0 object-contain drop-shadow-[0_12px_24px_-14px_rgba(24,80,200,0.45)]" />
 
                     <div class="min-w-0" x-show="!sidebarCollapsed" x-transition>
-                        <div class="truncate text-lg font-black tracking-tight text-slate-900">{{ $schoolBrandName ?? 'TechBridge Academy' }}</div>
-                        <div class="truncate text-xs font-medium text-slate-500">{{ $schoolBrandTagline ?? 'Teacher Panel' }}</div>
+                        <div class="truncate text-lg font-black tracking-tight text-slate-900">
+                            {{ $schoolBrandName ?? 'TechBridge Academy' }}</div>
+                        <div class="truncate text-xs font-medium text-slate-500">
+                            {{ $schoolBrandTagline ?? 'Teacher Panel' }}</div>
                     </div>
                 </a>
 
@@ -141,7 +144,9 @@
                                         {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
                                         @switch($l['icon'])
                                             @case('home')
-                                                @include('layout.admin.navbar.partials.sidebar-icon', ['icon' => 'layout-dashboard'])
+                                                @include('layout.admin.navbar.partials.sidebar-icon', [
+                                                    'icon' => 'layout-dashboard',
+                                                ])
                                             @break
 
                                             @case('grid')
@@ -192,7 +197,8 @@
 
                                             @case('flag')
                                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M6 3a1 1 0 0 1 1 1v1h9.2l-.54.9a2 2 0 0 0 0 2.1l.68 1.13a2 2 0 0 1 0 2.07l-.68 1.13a2 2 0 0 0 0 2.1l.54.9H7v4a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1Z" />
+                                                    <path
+                                                        d="M6 3a1 1 0 0 1 1 1v1h9.2l-.54.9a2 2 0 0 0 0 2.1l.68 1.13a2 2 0 0 1 0 2.07l-.68 1.13a2 2 0 0 0 0 2.1l.54.9H7v4a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1Z" />
                                                 </svg>
                                             @break
 
@@ -236,7 +242,8 @@
             </nav>
 
             {{-- Footer card --}}
-            <div class="hidden shrink-0 border-t border-slate-200/80 p-4 sm:block" x-show="!sidebarCollapsed" x-transition>
+            <div class="hidden shrink-0 border-t border-slate-200/80 p-4 sm:block" x-show="!sidebarCollapsed"
+                x-transition>
                 <div
                     class="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-4 text-white shadow-[0_18px_40px_-24px_rgba(79,70,229,0.9)]">
                     <div class="text-[11px] font-black uppercase tracking-[0.22em] text-white/70">Teacher Focus</div>
@@ -311,7 +318,8 @@
                                                 <span
                                                     class="mt-2 h-2 w-2 rounded-full {{ $n->is_read ? 'bg-slate-300' : 'bg-indigo-600' }}"></span>
                                                 <div class="min-w-0">
-                                                    <div class="text-sm font-semibold text-slate-800">{{ $n->title }}
+                                                    <div class="text-sm font-semibold text-slate-800">
+                                                        {{ $n->title }}
                                                     </div>
                                                     <div class="truncate text-xs text-slate-500">{{ $n->message }}
                                                     </div>
@@ -458,6 +466,67 @@
                 }
             }
         }
+    </script>
+    <script>
+        // Logout when user closes the tab/window (but avoid on internal navigation)
+        (function() {
+            const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+            const logoutUrl = '{{ route('logout') }}';
+            const token = tokenMeta ? tokenMeta.getAttribute('content') : null;
+
+            if (!token) return;
+
+            let navigatingInternally = false;
+
+            // Mark internal navigation clicks/forms briefly so we don't logout when user navigates inside the app
+            // The flag is short-lived (1s) so it doesn't permanently block logout after many clicks.
+            document.addEventListener('click', (e) => {
+                const a = e.target.closest && e.target.closest('a');
+                if (!a || !a.href) return;
+                // ignore links that open in new tab/window or use modifiers
+                if (a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                try {
+                    const url = new URL(a.href, location.href);
+                    if (url.origin === location.origin) {
+                        navigatingInternally = true;
+                        setTimeout(() => {
+                            navigatingInternally = false;
+                        }, 1000);
+                    }
+                } catch (err) {
+                    // ignore
+                }
+            }, {
+                capture: true
+            });
+
+            document.addEventListener('submit', (e) => {
+                navigatingInternally = true;
+                setTimeout(() => {
+                    navigatingInternally = false;
+                }, 1000);
+            }, {
+                capture: true
+            });
+
+            const doLogout = () => {
+                if (navigatingInternally) return;
+                try {
+                    const body = new URLSearchParams();
+                    body.append('_token', token);
+                    const blob = new Blob([body.toString()], {
+                        type: 'application/x-www-form-urlencoded'
+                    });
+                    navigator.sendBeacon(logoutUrl, blob);
+                } catch (e) {
+                    // best-effort only
+                }
+            };
+
+            // pagehide is the most reliable across browsers; also listen for beforeunload as a fallback
+            window.addEventListener('pagehide', doLogout);
+            window.addEventListener('beforeunload', doLogout);
+        })();
     </script>
     <script src="//unpkg.com/alpinejs" defer></script>
 </body>

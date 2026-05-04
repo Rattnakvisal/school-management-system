@@ -209,7 +209,7 @@
                             <div class="max-h-[700px] overflow-auto">
                                 <table class="w-full min-w-[1240px] text-left text-sm">
                                     <thead
-                                        class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                        class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                         <tr>
                                             <th class="w-[260px] whitespace-nowrap px-3 py-3 font-semibold">Student</th>
                                             <th class="w-[180px] whitespace-nowrap px-3 py-3 font-semibold">Class</th>

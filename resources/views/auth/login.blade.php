@@ -5,6 +5,15 @@
 @section('content')
     @php
         $telegramUsername = trim((string) config('services.telegram.bot_username', ''));
+        $brand = \Illuminate\Support\Facades\Schema::hasTable('home_page_items')
+            ? \App\Models\HomePageItem::query()->where('section', 'brand')->where('key', 'main')->first()
+            : null;
+        $schoolBrandName = trim((string) ($brand?->title ?: config('app.name', 'TechBridge Academy')));
+        $schoolBrandTagline = trim((string) ($brand?->description ?: 'Academy'));
+        $schoolBrandLogo =
+            $brand && $brand->image_path
+                ? route('public.storage', ['path' => $brand->image_path])
+                : asset('images/techbridge-logo-mark.svg');
     @endphp
 
     <div
@@ -12,13 +21,17 @@
         <div
             class="mx-auto flex max-w-5xl overflow-hidden rounded-[34px] border border-white/60 bg-white shadow-[0_30px_80px_rgba(99,102,241,0.16)] lg:h-[calc(100vh-2rem)] lg:max-h-[920px]">
             <section class="flex w-full items-center bg-white lg:w-[46%] lg:min-h-0">
-                <div class="mx-auto flex w-full max-w-md flex-col justify-center px-6 py-8 sm:px-10 sm:py-10 lg:px-10 lg:py-6 xl:px-12">
+                <div
+                    class="mx-auto flex w-full max-w-md flex-col justify-center px-6 py-8 sm:px-10 sm:py-10 lg:px-10 lg:py-6 xl:px-12">
                     <div class="flex items-center gap-3">
-                        <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                        <img src="{{ $schoolBrandLogo }}" alt="{{ $schoolBrandName }} logo"
                             class="h-14 w-14 object-contain drop-shadow-[0_16px_34px_rgba(24,80,200,0.22)]" />
                         <div>
-                            <p class="text-xl font-extrabold tracking-[-0.03em] text-slate-900">TechBridge</p>
-                            <p class="text-xs font-semibold uppercase tracking-[0.26em] text-amber-500">Academy</p>
+                            <p class="text-xl font-extrabold tracking-[-0.03em] text-slate-900">{{ $schoolBrandName }}</p>
+                            @if ($schoolBrandTagline)
+                                <p class="text-xs font-semibold uppercase tracking-[0.26em] text-amber-500">
+                                    {{ $schoolBrandTagline }}</p>
+                            @endif
                         </div>
                     </div>
 
@@ -78,7 +91,8 @@
                         <div class="h-px flex-1 bg-slate-200"></div>
                     </div>
 
-                    <form method="POST" action="{{ route('login.submit') }}" class="space-y-4 lg:space-y-3">
+                    <form id="login-form" method="POST" action="{{ route('login.submit') }}"
+                        class="space-y-4 lg:space-y-3">
                         @csrf
 
                         <div>
@@ -173,7 +187,7 @@
                             </div>
                         @endif
 
-                        <button type="submit"
+                        <button id="login-button" type="submit"
                             class="w-full rounded-xl bg-[linear-gradient(135deg,#4f46e5_0%,#6366f1_100%)] px-6 py-3 text-sm font-bold text-white shadow-[0_20px_40px_rgba(79,70,229,0.30)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(79,70,229,0.34)] focus:outline-none focus:ring-4 focus:ring-indigo-200">
                             Log In
                         </button>
@@ -195,12 +209,13 @@
                     <div class="flex items-start justify-end">
                         <div class="max-w-xs text-right">
                             <div class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
-                                <img src="{{ asset('images/techbridge-logo-mark.svg') }}" alt="TechBridge Academy logo"
+                                <img src="{{ $schoolBrandLogo }}" alt="{{ $schoolBrandName }} logo"
                                     class="h-5 w-5 object-contain" />
-                                TechBridge Academy
+                                {{ $schoolBrandName }}
                             </div>
                             <p class="mt-5 text-sm leading-6 text-slate-500">
-                                We&apos;ve got tools to help your students, teachers, staff, and admins stay connected every day.
+                                We&apos;ve got tools to help your students, teachers, staff, and admins stay connected every
+                                day.
                             </p>
                             <div class="mt-5">
                                 <span
@@ -234,5 +249,29 @@
             eye.classList.toggle('hidden');
             eyeOff.classList.toggle('hidden');
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('login-form');
+            const loginBtn = document.getElementById('login-button');
+
+            function setLoading(btn, label) {
+                if (!btn) return;
+                btn.disabled = true;
+                const svg =
+                    '<svg class="h-4 w-4 animate-spin inline-block mr-2 align-middle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                    '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.2" stroke-width="4"></circle>' +
+                    '<path d="M22 12a10 10 0 00-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>' +
+                    '</svg>';
+                btn.innerHTML = svg + label;
+            }
+
+            loginForm?.addEventListener('submit', function(e) {
+                // show loading and delay submit by 1 second so spinner is visible
+                e.preventDefault();
+                setLoading(loginBtn, 'Signing in...');
+                setTimeout(function() {
+                    loginForm.submit();
+                }, 1000);
+            });
+        });
     </script>
 @endsection

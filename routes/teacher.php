@@ -12,7 +12,7 @@ use App\Http\Controllers\Teacher\MissionEventController;
 use App\Http\Controllers\Teacher\SettingsController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'role:teacher'])
+Route::middleware(['auth', 'role:teacher', 'session.timeout'])
     ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {

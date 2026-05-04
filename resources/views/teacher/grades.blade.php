@@ -89,12 +89,26 @@
 
     <div class="teacher-stage teacher-grade-stage space-y-6">
         <section class="admin-page-header teacher-page-header">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div class="min-w-0">
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Grades</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">
-                        Record student grades and automatically notify each student when a new grade is assigned.
-                    </p>
+            <div class="admin-page-header__main flex flex-wrap items-start justify-between gap-4">
+                <div class="admin-page-header__intro min-w-0">
+                    <div class="admin-page-header__title-row flex items-start gap-3">
+                        <span class="admin-page-header__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 4.5h9.2a2.8 2.8 0 0 1 2.8 2.8V19.5H7.8A2.8 2.8 0 0 0 5 22V4.5Z" />
+                                <path d="M19 19.5H9.8A2.8 2.8 0 0 0 7 22h9.2a2.8 2.8 0 0 0 2.8-2.5Z" />
+                                <path d="M9 9h5.5" />
+                                <path d="M9 12h5.5" />
+                            </svg>
+                        </span>
+
+                        <div>
+                            <div class="admin-page-header__eyebrow">Teacher Panel</div>
+                            <h1 class="admin-page-title text-3xl font-black tracking-tight">Grades</h1>
+                            <p class="admin-page-subtitle mt-1 text-sm">Record student grades and automatically notify each
+                                student when a new grade is assigned.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -331,8 +345,8 @@
                     </div>
                     <button type="button" @click="filterOpen = true"
                         class="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
                         </svg>
                         Filters
@@ -454,7 +468,8 @@
                                 {{ data_get(collect($subjectOptions)->firstWhere('id', $filterSubjectId), 'name', 'Selected') }}</span>
                         @endif
                         @if ($filterTitle !== '' && $filterTitle !== 'all')
-                            <span class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Assessment:
+                            <span
+                                class="rounded-full bg-white px-2.5 py-1 text-slate-700 ring-1 ring-indigo-100">Assessment:
                                 {{ $filterTitle }}</span>
                         @endif
                         @if ($filterMonth !== '')
@@ -794,9 +809,11 @@
                                                                 </div>
 
                                                                 <div class="space-y-2">
-                                                                    <label for="edit_grade_subject_id_{{ $grade->id }}"
+                                                                    <label
+                                                                        for="edit_grade_subject_id_{{ $grade->id }}"
                                                                         class="text-sm font-semibold text-slate-700">Subject</label>
-                                                                    <select id="edit_grade_subject_id_{{ $grade->id }}"
+                                                                    <select
+                                                                        id="edit_grade_subject_id_{{ $grade->id }}"
                                                                         name="subject_id"
                                                                         class="js-edit-grade-subject-select w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
                                                                         data-grade-id="{{ $grade->id }}">
@@ -1055,14 +1072,14 @@
             const currentGradeId = Number(pageData.currentGradeId || 0) || 0;
             const studentsById = new Map((Array.isArray(pageData.students) ? pageData.students : []).map((
                 student) => [
-                    String(student.id),
-                    student,
-                ]));
+                String(student.id),
+                student,
+            ]));
             const subjectsById = new Map((Array.isArray(pageData.subjects) ? pageData.subjects : []).map((
                 subject) => [
-                    String(subject.id),
-                    subject,
-                ]));
+                String(subject.id),
+                subject,
+            ]));
             const gradeDetails = Array.isArray(pageData.gradeDetails) ? pageData.gradeDetails : [];
 
             const gradePointForPercentage = (percentage) => {
@@ -1185,9 +1202,9 @@
                     const update = () => updateGradePreview(previewForm);
                     previewForm.querySelectorAll('.js-grade-score, .js-grade-max-score').forEach((
                         input) => {
-                            input.addEventListener('input', update);
-                            input.addEventListener('change', update);
-                        });
+                        input.addEventListener('input', update);
+                        input.addEventListener('change', update);
+                    });
                     update();
                 });
             };
@@ -1474,7 +1491,7 @@
                         .includes(searchValue);
                     const visible = matchesSubject && matchesSearch;
                     const selected = String(row.dataset.studentId || '') === String(select?.value ||
-                    '');
+                        '');
 
                     row.classList.toggle('hidden', !visible);
                     row.classList.toggle('bg-indigo-50/50', selected);

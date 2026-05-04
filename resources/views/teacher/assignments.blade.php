@@ -12,9 +12,15 @@
             ->filter(fn(int $id) => $id > 0)
             ->values()
             ->all();
-        $selectedSubjectId = (string) old('subject_id', $isEditing ? (string) ($editingAssignment->subject_id ?? '') : '');
+        $selectedSubjectId = (string) old(
+            'subject_id',
+            $isEditing ? (string) ($editingAssignment->subject_id ?? '') : '',
+        );
         $titleValue = (string) old('title', $isEditing ? (string) ($editingAssignment->title ?? '') : '');
-        $descriptionValue = (string) old('description', $isEditing ? (string) ($editingAssignment->description ?? '') : '');
+        $descriptionValue = (string) old(
+            'description',
+            $isEditing ? (string) ($editingAssignment->description ?? '') : '',
+        );
         $dueDateValue = (string) old(
             'due_at',
             $isEditing && $editingAssignment?->due_at ? $editingAssignment->due_at->format('Y-m-d') : '',
@@ -63,12 +69,26 @@
 
     <div class="teacher-stage teacher-assignment-stage space-y-6">
         <section class="admin-page-header teacher-page-header">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div class="min-w-0">
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">Assignments</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">
-                        Create assignments for your students and send an alert as soon as they are posted.
-                    </p>
+            <div class="admin-page-header__main flex flex-wrap items-start justify-between gap-4">
+                <div class="admin-page-header__intro min-w-0">
+                    <div class="admin-page-header__title-row flex items-start gap-3">
+                        <span class="admin-page-header__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 5 2.5 10 12 15l9.5-5L12 5Z" />
+                                <path d="M6 12.11V16c0 1.66 2.69 3 6 3s6-1.34 6-3v-3.89" />
+                                <path d="M21.5 10v4.5" />
+                                <circle cx="21.5" cy="16.5" r="1.3" />
+                            </svg>
+                        </span>
+
+                        <div>
+                            <div class="admin-page-header__eyebrow">Teacher Panel</div>
+                            <h1 class="admin-page-title text-3xl font-black tracking-tight">Assignments</h1>
+                            <p class="admin-page-subtitle mt-1 text-sm">Create assignments for your students and send an
+                                alert as soon as they are posted.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -77,7 +97,8 @@
             grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success'))
-            <div class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+            <div
+                class="js-inline-flash rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                 {{ session('success') }}
             </div>
         @endif
@@ -89,47 +110,85 @@
         @endif
 
         <div class="grid gap-6 xl:grid-cols-12">
-            <section
+            <section x-data="{
+                createOpen: @js(old('_form') === 'create_assignment' || ($errors->any() && old('_form') === 'create_assignment')),
+                isDesktop: false,
+                init() {
+                    const media = window.matchMedia('(min-width: 1280px)');
+
+                    const update = () => {
+                        this.isDesktop = media.matches;
+
+                        if (this.isDesktop) {
+                            this.createOpen = true;
+                        } else if (!@js(old('_form') === 'create_assignment' || ($errors->any() && old('_form') === 'create_assignment'))) {
+                            this.createOpen = false;
+                        }
+                    };
+
+                    update();
+
+                    if (typeof media.addEventListener === 'function') {
+                        media.addEventListener('change', update);
+                    } else if (typeof media.addListener === 'function') {
+                        media.addListener(update);
+                    }
+                }
+            }" x-init="init()"
                 class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
                 style="--sd: 3;">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <h2 class="text-lg font-black text-slate-900">{{ $isEditing ? 'Edit Assignment' : 'Create Assignment' }}</h2>
-                        <p class="mt-1 text-xs font-semibold text-slate-500">
+                        <h2 class="text-lg font-black text-slate-900">
+                            {{ $isEditing ? 'Edit Assignment' : 'Create Assignment' }}</h2>
+                        <p class="mt-1 text-xs text-slate-500">
                             {{ $isEditing ? 'Update the assignment details and save your changes.' : 'Choose the students, write the task, and send it with one post.' }}
                         </p>
                     </div>
-                    <span class="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
-                        {{ $isEditing ? 'Edit mode' : 'Alert enabled' }}
-                    </span>
+
+                    <button type="button" @click="createOpen = !createOpen"
+                        :aria-expanded="(createOpen || isDesktop).toString()" aria-controls="create-assignment-form-panel"
+                        class="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm hover:bg-indigo-100 xl:hidden">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14" x-show="!(createOpen || isDesktop)"></path>
+                            <path d="M5 12h14" x-show="createOpen || isDesktop"></path>
+                        </svg>
+
+                        <span x-show="!(createOpen || isDesktop)">Create Assignment</span>
+                        <span x-show="createOpen || isDesktop">Hide Form</span>
+                    </button>
                 </div>
 
                 @if ($studentOptions->isNotEmpty())
-                    <form method="POST"
+                    <form id="create-assignment-form-panel" method="POST"
                         action="{{ $isEditing ? route('teacher.assignments.update', $editingAssignment) : route('teacher.assignments.store') }}"
-                        class="mt-5 space-y-4"
-                        id="teacher-assignment-form">
+                        class="mt-5 space-y-4" x-show="createOpen || isDesktop" x-cloak x-transition.opacity.duration.150ms>
                         @csrf
                         @if ($isEditing)
                             @method('PUT')
                         @endif
+                        <input type="hidden" name="_form" value="create_assignment">
 
-                        <div class="space-y-2">
-                            <label for="assignment_title" class="text-sm font-semibold text-slate-700">Title</label>
+                        <div>
+                            <label for="assignment_title"
+                                class="mb-1 block text-xs font-semibold text-slate-600">Title</label>
+
                             <input id="assignment_title" name="title" type="text" value="{{ $titleValue }}"
                                 maxlength="255" placeholder="Example: Chapter 4 Homework"
-                                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                         </div>
 
                         <div class="grid gap-4 sm:grid-cols-2">
-                            <div class="space-y-2">
-                                <label for="assignment_subject_id" class="text-sm font-semibold text-slate-700">Subject</label>
+                            <div>
+                                <label for="assignment_subject_id"
+                                    class="mb-1 block text-xs font-semibold text-slate-600">Subject</label>
+
                                 <select id="assignment_subject_id" name="subject_id"
-                                    class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                     <option value="">General assignment</option>
                                     @foreach ($subjectOptions as $subject)
-                                        <option value="{{ $subject['id'] }}"
-                                            {{ $selectedSubjectId === (string) $subject['id'] ? 'selected' : '' }}>
+                                        <option value="{{ $subject['id'] }}" @selected($selectedSubjectId === (string) $subject['id'])>
                                             {{ $subject['name'] }}
                                             {{ $subject['code'] !== '' ? ' (' . $subject['code'] . ')' : '' }}
                                             {{ $subject['class_label'] !== '' ? ' | ' . $subject['class_label'] : '' }}
@@ -138,82 +197,87 @@
                                 </select>
                             </div>
 
-                            <div class="space-y-2">
-                                <label for="assignment_due_at" class="text-sm font-semibold text-slate-700">Due Date</label>
+                            <div>
+                                <label for="assignment_due_at" class="mb-1 block text-xs font-semibold text-slate-600">Due
+                                    Date</label>
+
                                 <input id="assignment_due_at" type="date" name="due_at" value="{{ $dueDateValue }}"
-                                    class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                             </div>
                         </div>
 
-                        <div class="space-y-2">
-                            <label for="assignment_description" class="text-sm font-semibold text-slate-700">Description</label>
-                            <textarea id="assignment_description" name="description" rows="6" maxlength="5000"
+                        <div>
+                            <label for="assignment_description"
+                                class="mb-1 block text-xs font-semibold text-slate-600">Description</label>
+
+                            <textarea id="assignment_description" name="description" rows="6" maxlength="5000" required
                                 placeholder="Write the task details, what students should submit, and any important instructions."
-                                class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $descriptionValue }}</textarea>
+                                class="w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $descriptionValue }}</textarea>
                         </div>
 
-                        <div class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h3 class="text-sm font-black text-slate-900">Assign To Students</h3>
-                                    <p class="mt-1 text-xs font-medium text-slate-500">
-                                        Filter the list, then select one or more students.
-                                    </p>
-                                </div>
-                                <div id="assignment-selected-count"
-                                    class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <div class="text-xs font-bold uppercase tracking-wide text-slate-500">Assign To Students</div>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <div id="assignment_selected_count"
+                                    class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
                                     0 selected
                                 </div>
                             </div>
 
-                            <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+                            <div class="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
                                 <input id="assignment-student-search" type="text"
                                     placeholder="Search by student or class"
-                                    class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+
                                 <button type="button" id="assignment-select-visible"
                                     class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100">
                                     Select visible
                                 </button>
+
                                 <button type="button" id="assignment-clear-visible"
                                     class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100">
                                     Clear visible
                                 </button>
                             </div>
 
-                            <div class="max-h-[26rem] space-y-3 overflow-auto pr-1" id="assignment-student-list">
+                            <div class="mt-3 max-h-[26rem] space-y-3 overflow-auto pr-1" id="assignment-student-list">
                                 @foreach ($studentOptions as $student)
                                     @php
                                         $subjectIds = implode(',', $student['subject_ids'] ?? []);
-                                        $subjectNames = collect($student['subject_names'] ?? [])->take(3)->all();
+                                        $subjectNames = collect($student['subject_names'] ?? [])
+                                            ->take(3)
+                                            ->all();
                                         $isChecked = in_array((int) $student['id'], $oldStudentIds, true);
                                     @endphp
+
                                     <label data-student-card data-student-name="{{ strtolower($student['name']) }}"
                                         data-student-class="{{ strtolower($student['class_label']) }}"
                                         data-subject-ids="{{ $subjectIds }}"
-                                        class="flex cursor-pointer items-start gap-3 rounded-2xl border {{ $isChecked ? 'border-indigo-300 bg-indigo-50/70' : 'border-slate-200 bg-white' }} px-4 py-3 transition hover:border-indigo-300 hover:bg-indigo-50/50">
+                                        class="flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 text-sm transition hover:border-indigo-300 hover:bg-indigo-50 {{ $isChecked ? 'border-indigo-300 bg-indigo-50/70' : 'border-slate-200 bg-white' }}">
                                         <input type="checkbox" name="student_ids[]" value="{{ $student['id'] }}"
                                             {{ $isChecked ? 'checked' : '' }}
                                             class="assignment-student-checkbox mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
+
                                         <div class="min-w-0 flex-1">
                                             <div class="flex flex-wrap items-center justify-between gap-2">
-                                                <div class="text-sm font-semibold text-slate-900">{{ $student['name'] }}</div>
+                                                <div class="font-semibold text-slate-900 text-sm">{{ $student['name'] }}
+                                                </div>
                                                 <span
-                                                    class="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
-                                                    {{ $student['class_label'] }}
-                                                </span>
+                                                    class="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">{{ $student['class_label'] }}</span>
                                             </div>
+
                                             @if ($subjectNames !== [])
                                                 <div class="mt-2 flex flex-wrap gap-1.5">
                                                     @foreach ($subjectNames as $subjectName)
                                                         <span
-                                                            class="rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
-                                                            {{ $subjectName }}
-                                                        </span>
+                                                            class="rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">{{ $subjectName }}</span>
                                                     @endforeach
+
                                                     @if (count($student['subject_names'] ?? []) > count($subjectNames))
-                                                        <span class="text-[11px] font-semibold text-slate-400">
-                                                            +{{ count($student['subject_names'] ?? []) - count($subjectNames) }} more
-                                                        </span>
+                                                        <span
+                                                            class="text-[11px] font-semibold text-slate-400">+{{ count($student['subject_names'] ?? []) - count($subjectNames) }}
+                                                            more</span>
                                                     @endif
                                                 </div>
                                             @endif
@@ -223,25 +287,21 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <div class="flex justify-end gap-2">
                             <button type="submit"
-                                class="inline-flex w-full flex-1 items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-500">
-                                {{ $isEditing ? 'Save Assignment Changes' : 'Post Assignment And Send Alert' }}
-                            </button>
+                                class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500">{{ $isEditing ? 'Save Assignment Changes' : 'Post Assignment And Send Alert' }}</button>
+
                             @if ($isEditing)
                                 <a href="{{ route('teacher.assignments.index') }}"
-                                    class="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 sm:w-auto">
-                                    Cancel
-                                </a>
+                                    class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</a>
                             @endif
                         </div>
                     </form>
                 @else
                     <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
                         <div class="text-lg font-bold text-slate-900">No students available yet</div>
-                        <p class="mt-2 text-sm text-slate-500">
-                            Once you are linked to a class or subject, your student roster will appear here.
-                        </p>
+                        <p class="mt-2 text-sm text-slate-500">Once you are linked to a class or subject, your student
+                            roster will appear here.</p>
                     </div>
                 @endif
             </section>
@@ -256,8 +316,8 @@
                     </div>
                     <button type="button" @click="filterOpen = true"
                         class="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
                         </svg>
                         Filters
@@ -362,7 +422,8 @@
                     <div class="overflow-hidden rounded-2xl border border-slate-200">
                         <div class="max-h-[44rem] overflow-auto">
                             <table class="student-table w-full min-w-[1180px] text-left text-sm">
-                                <thead class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                <thead
+                                    class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                     <tr>
                                         <th class="whitespace-nowrap px-3 py-3 font-semibold">Assignment</th>
                                         <th class="whitespace-nowrap px-3 py-3 font-semibold">Subject</th>
@@ -375,8 +436,12 @@
                                 <tbody class="divide-y divide-slate-100 bg-white">
                                     @foreach ($assignments as $assignment)
                                         @php
-                                            $subjectLabel = trim((string) ($assignment->subject?->name ?? 'General assignment'));
-                                            $classLabel = trim((string) ($assignment->subject?->schoolClass?->display_name ?? ''));
+                                            $subjectLabel = trim(
+                                                (string) ($assignment->subject?->name ?? 'General assignment'),
+                                            );
+                                            $classLabel = trim(
+                                                (string) ($assignment->subject?->schoolClass?->display_name ?? ''),
+                                            );
                                             $submittedStudents = $assignment->students->filter(
                                                 fn($student) => filled($student->pivot?->submission_file_path),
                                             );
@@ -412,38 +477,50 @@
                                                     View Recipients
                                                 </button>
                                                 <div class="mt-2 flex flex-wrap gap-1.5">
-                                                    <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                                                        {{ number_format((int) ($assignment->students_count ?? 0)) }} student{{ (int) ($assignment->students_count ?? 0) === 1 ? '' : 's' }}
+                                                    <span
+                                                        class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                        {{ number_format((int) ($assignment->students_count ?? 0)) }}
+                                                        student{{ (int) ($assignment->students_count ?? 0) === 1 ? '' : 's' }}
                                                     </span>
                                                     @if ($submittedStudents->isNotEmpty())
-                                                        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                                        <span
+                                                            class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                                                             <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
                                                             {{ number_format($submittedStudents->count()) }} submitted
                                                         </span>
                                                     @else
-                                                        <span class="inline-flex rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+                                                        <span
+                                                            class="inline-flex rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
                                                             No files
                                                         </span>
                                                     @endif
                                                 </div>
                                                 @if ($latestSubmission?->pivot?->submitted_at)
                                                     <div class="mt-1 text-xs text-slate-400">
-                                                        Latest {{ \Illuminate\Support\Carbon::parse($latestSubmission->pivot->submitted_at)->diffForHumans() }}
+                                                        Latest
+                                                        {{ \Illuminate\Support\Carbon::parse($latestSubmission->pivot->submitted_at)->diffForHumans() }}
                                                     </div>
                                                 @endif
 
                                                 <div x-show="detailOpen" x-cloak x-transition.opacity
-                                                    class="fixed inset-0 z-[80] bg-slate-900/40" @click="detailOpen = false"></div>
+                                                    class="fixed inset-0 z-[80] bg-slate-900/40"
+                                                    @click="detailOpen = false"></div>
                                                 <div x-show="detailOpen" x-cloak x-transition
                                                     class="fixed inset-x-3 top-6 z-[81] mx-auto max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:top-10">
                                                     <div class="flex max-h-[calc(100vh-3rem)] flex-col">
-                                                        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
+                                                        <div
+                                                            class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4">
                                                             <div class="min-w-0">
                                                                 <h3 class="truncate text-lg font-black text-slate-900">
                                                                     Recipient Details
                                                                 </h3>
                                                                 <p class="mt-1 text-xs text-slate-500">
-                                                                    {{ $assignment->title }} - {{ number_format((int) ($assignment->students_count ?? $assignment->students->count())) }} recipient{{ (int) ($assignment->students_count ?? $assignment->students->count()) === 1 ? '' : 's' }}, {{ number_format($submittedStudents->count()) }} file{{ $submittedStudents->count() === 1 ? '' : 's' }} received.
+                                                                    {{ $assignment->title }} -
+                                                                    {{ number_format((int) ($assignment->students_count ?? $assignment->students->count())) }}
+                                                                    recipient{{ (int) ($assignment->students_count ?? $assignment->students->count()) === 1 ? '' : 's' }},
+                                                                    {{ number_format($submittedStudents->count()) }}
+                                                                    file{{ $submittedStudents->count() === 1 ? '' : 's' }}
+                                                                    received.
                                                                 </p>
                                                             </div>
                                                             <button type="button" @click="detailOpen = false"
@@ -458,8 +535,12 @@
                                                                 <div class="space-y-3">
                                                                     @foreach ($assignment->students as $student)
                                                                         @php
-                                                                            $hasSubmission = filled($student->pivot?->submission_file_path);
-                                                                            $fileSize = (int) ($student->pivot?->submission_file_size ?? 0);
+                                                                            $hasSubmission = filled(
+                                                                                $student->pivot?->submission_file_path,
+                                                                            );
+                                                                            $fileSize =
+                                                                                (int) ($student->pivot
+                                                                                    ?->submission_file_size ?? 0);
                                                                             $fileSizeLabel = 'Unknown size';
 
                                                                             if ($fileSize > 0) {
@@ -467,36 +548,60 @@
                                                                                 $unitIndex = 0;
                                                                                 $displaySize = (float) $fileSize;
 
-                                                                                while ($displaySize >= 1024 && $unitIndex < count($units) - 1) {
+                                                                                while (
+                                                                                    $displaySize >= 1024 &&
+                                                                                    $unitIndex < count($units) - 1
+                                                                                ) {
                                                                                     $displaySize /= 1024;
                                                                                     $unitIndex++;
                                                                                 }
 
-                                                                                $fileSizeLabel = rtrim(rtrim(number_format($displaySize, 1), '0'), '.') . ' ' . $units[$unitIndex];
+                                                                                $fileSizeLabel =
+                                                                                    rtrim(
+                                                                                        rtrim(
+                                                                                            number_format(
+                                                                                                $displaySize,
+                                                                                                1,
+                                                                                            ),
+                                                                                            '0',
+                                                                                        ),
+                                                                                        '.',
+                                                                                    ) .
+                                                                                    ' ' .
+                                                                                    $units[$unitIndex];
                                                                             }
                                                                         @endphp
-                                                                        <article class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                                                                            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                                                        <article
+                                                                            class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                                                            <div
+                                                                                class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                                                                 <div class="min-w-0">
-                                                                                    <div class="flex flex-wrap items-center gap-2">
-                                                                                        <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-100">
+                                                                                    <div
+                                                                                        class="flex flex-wrap items-center gap-2">
+                                                                                        <span
+                                                                                            class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 ring-1 ring-indigo-100">
                                                                                             Student
                                                                                         </span>
-                                                                                        <span class="text-sm font-black text-slate-900">
+                                                                                        <span
+                                                                                            class="text-sm font-black text-slate-900">
                                                                                             {{ $student->name }}
                                                                                         </span>
                                                                                         @if ($hasSubmission)
-                                                                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
-                                                                                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                                                                            <span
+                                                                                                class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
+                                                                                                <span
+                                                                                                    class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                                                                                 Submitted
                                                                                             </span>
                                                                                         @else
-                                                                                            <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+                                                                                            <span
+                                                                                                class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
                                                                                                 Pending
                                                                                             </span>
                                                                                         @endif
                                                                                     </div>
-                                                                                    <div class="mt-1 text-xs text-slate-400">
+                                                                                    <div
+                                                                                        class="mt-1 text-xs text-slate-400">
                                                                                         {{ $student->email ?? 'No email' }}
                                                                                     </div>
                                                                                     <div class="mt-3">
@@ -504,9 +609,16 @@
                                                                                             <a href="{{ \Illuminate\Support\Facades\Storage::url($student->pivot->submission_file_path) }}"
                                                                                                 target="_blank"
                                                                                                 class="inline-flex max-w-full items-center gap-2 rounded-xl border border-emerald-100 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">
-                                                                                                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                                                                                                <svg class="h-4 w-4 shrink-0"
+                                                                                                    viewBox="0 0 24 24"
+                                                                                                    fill="none"
+                                                                                                    stroke="currentColor"
+                                                                                                    stroke-width="2"
+                                                                                                    stroke-linecap="round"
+                                                                                                    stroke-linejoin="round"
+                                                                                                    aria-hidden="true">
+                                                                                                    <path
+                                                                                                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
                                                                                                     <path d="M14 2v6h6" />
                                                                                                 </svg>
                                                                                                 <span class="truncate">
@@ -514,13 +626,15 @@
                                                                                                 </span>
                                                                                             </a>
                                                                                         @else
-                                                                                            <span class="inline-flex rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
+                                                                                            <span
+                                                                                                class="inline-flex rounded-xl border border-dashed border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
                                                                                                 No file submitted yet
                                                                                             </span>
                                                                                         @endif
                                                                                     </div>
                                                                                 </div>
-                                                                                <div class="shrink-0 rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">
+                                                                                <div
+                                                                                    class="shrink-0 rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-slate-500 ring-1 ring-slate-100">
                                                                                     @if ($hasSubmission)
                                                                                         <div>{{ $fileSizeLabel }}</div>
                                                                                         <div class="mt-1">
@@ -528,7 +642,8 @@
                                                                                         </div>
                                                                                     @else
                                                                                         <div>Awaiting file</div>
-                                                                                        <div class="mt-1">Not submitted</div>
+                                                                                        <div class="mt-1">Not submitted
+                                                                                        </div>
                                                                                     @endif
                                                                                 </div>
                                                                             </div>
@@ -536,9 +651,13 @@
                                                                     @endforeach
                                                                 </div>
                                                             @else
-                                                                <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-                                                                    <h4 class="text-base font-black text-slate-900">No recipients yet</h4>
-                                                                    <p class="mt-2 text-sm text-slate-500">Assigned students will appear here after this assignment is saved.</p>
+                                                                <div
+                                                                    class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+                                                                    <h4 class="text-base font-black text-slate-900">No
+                                                                        recipients yet</h4>
+                                                                    <p class="mt-2 text-sm text-slate-500">Assigned
+                                                                        students will appear here after this assignment is
+                                                                        saved.</p>
                                                                 </div>
                                                             @endif
                                                         </div>
@@ -547,7 +666,8 @@
                                             </td>
                                             <td class="px-3 py-3">
                                                 @if ($dueAt)
-                                                    <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ $dueClass }}">
+                                                    <span
+                                                        class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ $dueClass }}">
                                                         {{ $dueAt->format('M d, Y') }}
                                                     </span>
                                                 @else
@@ -574,7 +694,8 @@
                                                 </div>
 
                                                 <div x-show="editOpen" x-cloak x-transition.opacity
-                                                    class="fixed inset-0 z-[80] bg-slate-900/40" @click="editOpen = false"></div>
+                                                    class="fixed inset-0 z-[80] bg-slate-900/40"
+                                                    @click="editOpen = false"></div>
                                                 <div x-show="editOpen" x-cloak x-transition
                                                     class="fixed inset-x-3 top-6 z-[81] mx-auto max-h-[calc(100vh-3rem)] w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:top-10">
                                                     <form method="POST"
@@ -584,10 +705,13 @@
                                                         @csrf
                                                         @method('PUT')
 
-                                                        <div class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+                                                        <div
+                                                            class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
                                                             <div class="min-w-0">
-                                                                <h3 class="truncate text-2xl font-black text-slate-900">Edit Assignment</h3>
-                                                                <p class="mt-2 text-sm text-slate-500">Update the assignment details and recipients.</p>
+                                                                <h3 class="truncate text-2xl font-black text-slate-900">
+                                                                    Edit Assignment</h3>
+                                                                <p class="mt-2 text-sm text-slate-500">Update the
+                                                                    assignment details and recipients.</p>
                                                             </div>
                                                             <button type="button" @click="editOpen = false"
                                                                 class="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-slate-200 text-xl font-bold text-slate-600 hover:bg-slate-50"
@@ -598,20 +722,27 @@
 
                                                         <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
                                                             <div class="space-y-2">
-                                                                <label for="edit_assignment_title_{{ $assignment->id }}" class="text-sm font-semibold text-slate-700">Title</label>
-                                                                <input id="edit_assignment_title_{{ $assignment->id }}" name="title" type="text"
+                                                                <label for="edit_assignment_title_{{ $assignment->id }}"
+                                                                    class="text-sm font-semibold text-slate-700">Title</label>
+                                                                <input id="edit_assignment_title_{{ $assignment->id }}"
+                                                                    name="title" type="text"
                                                                     value="{{ $assignment->title }}" maxlength="255"
                                                                     class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                             </div>
 
                                                             <div class="grid gap-5 sm:grid-cols-2">
                                                                 <div class="space-y-2">
-                                                                    <label for="edit_assignment_subject_id_{{ $assignment->id }}" class="text-sm font-semibold text-slate-700">Subject</label>
-                                                                    <select id="edit_assignment_subject_id_{{ $assignment->id }}" name="subject_id"
+                                                                    <label
+                                                                        for="edit_assignment_subject_id_{{ $assignment->id }}"
+                                                                        class="text-sm font-semibold text-slate-700">Subject</label>
+                                                                    <select
+                                                                        id="edit_assignment_subject_id_{{ $assignment->id }}"
+                                                                        name="subject_id"
                                                                         class="js-assignment-edit-subject w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                         <option value="">General assignment</option>
                                                                         @foreach ($subjectOptions as $subject)
-                                                                            <option value="{{ $subject['id'] }}" @selected((int) ($assignment->subject_id ?? 0) === (int) $subject['id'])>
+                                                                            <option value="{{ $subject['id'] }}"
+                                                                                @selected((int) ($assignment->subject_id ?? 0) === (int) $subject['id'])>
                                                                                 {{ $subject['name'] }}
                                                                                 {{ $subject['code'] !== '' ? ' (' . $subject['code'] . ')' : '' }}
                                                                                 {{ $subject['class_label'] !== '' ? ' | ' . $subject['class_label'] : '' }}
@@ -621,32 +752,46 @@
                                                                 </div>
 
                                                                 <div class="space-y-2">
-                                                                    <label for="edit_assignment_due_at_{{ $assignment->id }}" class="text-sm font-semibold text-slate-700">Due Date</label>
-                                                                    <input id="edit_assignment_due_at_{{ $assignment->id }}" type="date" name="due_at"
+                                                                    <label
+                                                                        for="edit_assignment_due_at_{{ $assignment->id }}"
+                                                                        class="text-sm font-semibold text-slate-700">Due
+                                                                        Date</label>
+                                                                    <input
+                                                                        id="edit_assignment_due_at_{{ $assignment->id }}"
+                                                                        type="date" name="due_at"
                                                                         value="{{ $assignment->due_at?->format('Y-m-d') }}"
                                                                         class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                 </div>
                                                             </div>
 
                                                             <div class="space-y-2">
-                                                                <label for="edit_assignment_description_{{ $assignment->id }}" class="text-sm font-semibold text-slate-700">Description</label>
+                                                                <label
+                                                                    for="edit_assignment_description_{{ $assignment->id }}"
+                                                                    class="text-sm font-semibold text-slate-700">Description</label>
                                                                 <textarea id="edit_assignment_description_{{ $assignment->id }}" name="description" rows="5" maxlength="5000"
                                                                     class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $assignment->description }}</textarea>
                                                             </div>
 
-                                                            <div class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                                            <div
+                                                                class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                                                <div
+                                                                    class="flex flex-wrap items-center justify-between gap-3">
                                                                     <div>
-                                                                        <h4 class="text-sm font-black text-slate-900">Student List</h4>
-                                                                        <p class="mt-1 text-xs font-medium text-slate-500">Choose the recipients for this assignment.</p>
+                                                                        <h4 class="text-sm font-black text-slate-900">
+                                                                            Student List</h4>
+                                                                        <p class="mt-1 text-xs font-medium text-slate-500">
+                                                                            Choose the recipients for this assignment.</p>
                                                                     </div>
-                                                                    <div class="js-assignment-edit-count rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                                                                    <div
+                                                                        class="js-assignment-edit-count rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
                                                                         0 selected
                                                                     </div>
                                                                 </div>
 
-                                                                <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
-                                                                    <input type="text" placeholder="Search by student or class"
+                                                                <div
+                                                                    class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+                                                                    <input type="text"
+                                                                        placeholder="Search by student or class"
                                                                         class="js-assignment-edit-search w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     <button type="button"
                                                                         class="js-assignment-edit-select-visible inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100">
@@ -660,39 +805,62 @@
 
                                                                 <div class="max-h-[22rem] space-y-3 overflow-auto pr-1">
                                                                     @php
-                                                                        $assignmentStudentIds = $assignment->students->pluck('id')->map(fn($id) => (int) $id)->all();
+                                                                        $assignmentStudentIds = $assignment->students
+                                                                            ->pluck('id')
+                                                                            ->map(fn($id) => (int) $id)
+                                                                            ->all();
                                                                     @endphp
                                                                     @foreach ($studentOptions as $student)
                                                                         @php
-                                                                            $editSubjectIds = implode(',', $student['subject_ids'] ?? []);
-                                                                            $editSubjectNames = collect($student['subject_names'] ?? [])->take(3)->all();
-                                                                            $editChecked = in_array((int) $student['id'], $assignmentStudentIds, true);
+                                                                            $editSubjectIds = implode(
+                                                                                ',',
+                                                                                $student['subject_ids'] ?? [],
+                                                                            );
+                                                                            $editSubjectNames = collect(
+                                                                                $student['subject_names'] ?? [],
+                                                                            )
+                                                                                ->take(3)
+                                                                                ->all();
+                                                                            $editChecked = in_array(
+                                                                                (int) $student['id'],
+                                                                                $assignmentStudentIds,
+                                                                                true,
+                                                                            );
                                                                         @endphp
                                                                         <label data-edit-student-card
                                                                             data-student-name="{{ strtolower($student['name']) }}"
                                                                             data-student-class="{{ strtolower($student['class_label']) }}"
                                                                             data-subject-ids="{{ $editSubjectIds }}"
                                                                             class="flex cursor-pointer items-start gap-3 rounded-2xl border {{ $editChecked ? 'border-indigo-300 bg-indigo-50/70' : 'border-slate-200 bg-white' }} px-4 py-3 transition hover:border-indigo-300 hover:bg-indigo-50/50">
-                                                                            <input type="checkbox" name="student_ids[]" value="{{ $student['id'] }}"
+                                                                            <input type="checkbox" name="student_ids[]"
+                                                                                value="{{ $student['id'] }}"
                                                                                 {{ $editChecked ? 'checked' : '' }}
                                                                                 class="js-assignment-edit-checkbox mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
                                                                             <div class="min-w-0 flex-1">
-                                                                                <div class="flex flex-wrap items-center justify-between gap-2">
-                                                                                    <div class="text-sm font-semibold text-slate-900">{{ $student['name'] }}</div>
-                                                                                    <span class="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
+                                                                                <div
+                                                                                    class="flex flex-wrap items-center justify-between gap-2">
+                                                                                    <div
+                                                                                        class="text-sm font-semibold text-slate-900">
+                                                                                        {{ $student['name'] }}</div>
+                                                                                    <span
+                                                                                        class="rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
                                                                                         {{ $student['class_label'] }}
                                                                                     </span>
                                                                                 </div>
                                                                                 @if ($editSubjectNames !== [])
-                                                                                    <div class="mt-2 flex flex-wrap gap-1.5">
+                                                                                    <div
+                                                                                        class="mt-2 flex flex-wrap gap-1.5">
                                                                                         @foreach ($editSubjectNames as $subjectName)
-                                                                                            <span class="rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+                                                                                            <span
+                                                                                                class="rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
                                                                                                 {{ $subjectName }}
                                                                                             </span>
                                                                                         @endforeach
                                                                                         @if (count($student['subject_names'] ?? []) > count($editSubjectNames))
-                                                                                            <span class="text-[11px] font-semibold text-slate-400">
-                                                                                                +{{ count($student['subject_names'] ?? []) - count($editSubjectNames) }} more
+                                                                                            <span
+                                                                                                class="text-[11px] font-semibold text-slate-400">
+                                                                                                +{{ count($student['subject_names'] ?? []) - count($editSubjectNames) }}
+                                                                                                more
                                                                                             </span>
                                                                                         @endif
                                                                                     </div>
@@ -704,7 +872,8 @@
                                                             </div>
                                                         </div>
 
-                                                        <div class="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
+                                                        <div
+                                                            class="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
                                                             <button type="button" @click="editOpen = false"
                                                                 class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
                                                                 Cancel
@@ -787,7 +956,9 @@
                 }
 
                 window.alert(`${config.title}\n\n${config.text}`);
-                return Promise.resolve({ isConfirmed: true });
+                return Promise.resolve({
+                    isConfirmed: true
+                });
             };
 
             const showConfirm = (options) => {
@@ -831,7 +1002,8 @@
             if (String(flash.success || '').trim() !== '') {
                 alertQueue.push({
                     icon: 'success',
-                    title: String(flash.action || '') === 'updated' ? 'Assignment updated' : 'Assignment posted',
+                    title: String(flash.action || '') === 'updated' ? 'Assignment updated' :
+                        'Assignment posted',
                     text: String(flash.success),
                     confirmButtonText: 'Great',
                 });
@@ -906,7 +1078,8 @@
                         const classLabel = String(card.dataset.studentClass || '');
                         const subjectIds = readTargetSubjectIds(card);
                         const matchesSubject = subjectId === 0 || subjectIds.includes(subjectId);
-                        const matchesSearch = searchValue === '' || name.includes(searchValue) || classLabel.includes(searchValue);
+                        const matchesSearch = searchValue === '' || name.includes(searchValue) ||
+                            classLabel.includes(searchValue);
                         const visible = matchesSubject && matchesSearch;
 
                         card.classList.toggle('hidden', !visible);
@@ -914,7 +1087,8 @@
                 };
 
                 targetCards.forEach((card) => {
-                    card.querySelector('.js-assignment-edit-checkbox')?.addEventListener('change', updateTargetSelection);
+                    card.querySelector('.js-assignment-edit-checkbox')?.addEventListener('change',
+                        updateTargetSelection);
                 });
 
                 targetSubject?.addEventListener('change', applyTargetFilters);
@@ -1007,7 +1181,8 @@
                     const classLabel = String(card.dataset.studentClass || '');
                     const subjectIds = readSubjectIds(card);
                     const matchesSubject = subjectId === 0 || subjectIds.includes(subjectId);
-                    const matchesSearch = searchValue === '' || name.includes(searchValue) || classLabel.includes(searchValue);
+                    const matchesSearch = searchValue === '' || name.includes(searchValue) || classLabel
+                        .includes(searchValue);
                     const visible = matchesSubject && matchesSearch;
 
                     card.classList.toggle('hidden', !visible);
@@ -1068,11 +1243,11 @@
 
                 showConfirm({
                     title: isEditing ? 'Save assignment changes?' : 'Post assignment?',
-                    text: checkedCount > 0
-                        ? (isEditing
-                            ? `Update this assignment for ${targetLabel}?`
-                            : `Send this assignment and alert ${targetLabel}?`)
-                        : (isEditing ? 'Save this assignment now?' : 'Send this assignment now?'),
+                    text: checkedCount > 0 ?
+                        (isEditing ?
+                            `Update this assignment for ${targetLabel}?` :
+                            `Send this assignment and alert ${targetLabel}?`) : (isEditing ?
+                            'Save this assignment now?' : 'Send this assignment now?'),
                     confirmButtonText: isEditing ? 'Yes, save it' : 'Yes, post it',
                     cancelButtonText: 'Cancel',
                     icon: 'question',

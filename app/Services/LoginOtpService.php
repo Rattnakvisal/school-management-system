@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\LoginOtp;
 use App\Models\User;
+use App\Models\HomePageItem;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class LoginOtpService
 {
@@ -74,13 +76,18 @@ class LoginOtpService
         ]);
 
         $displayName = trim((string) $user->name);
+        $schoolName = $this->schoolName();
+
         $message = implode("\n", [
-            'Hi ' . ($displayName !== '' ? $displayName : 'there') . '!',
-            'Use the following one-time password (OTP) to sign in to your TechBridge Academy account.',
-            'This OTP will be valid for ' . $expiresMinutes . ' minute' . ($expiresMinutes === 1 ? '' : 's') . ': ' . $otp,
-            'If this was not you, contact administrator.',
+            'Hi ' . ($displayName !== '' ? $displayName : 'there') . ',',
+            '',
+            'Your ' . $schoolName . ' sign-in code (OTP) is: ' . $otp,
+            'It will expire in ' . $expiresMinutes . ' minute' . ($expiresMinutes === 1 ? '' : 's') . '.',
+            '',
+            'If you did not request this code, please contact the administrator immediately.',
+            '',
             'Best regards,',
-            'TechBridge Academy',
+            $schoolName,
         ]);
 
         $sent = $this->telegramBotService->sendMessage($chatId, $message);
@@ -97,6 +104,26 @@ class LoginOtpService
             'ok' => true,
             'message' => null,
         ];
+    }
+
+    private function schoolName(): string
+    {
+        $default = config('app.name', 'TechBridge Academy');
+
+        if (!Schema::hasTable('home_page_items')) {
+            return $default;
+        }
+
+        try {
+            $brand = HomePageItem::query()
+                ->where('section', 'brand')
+                ->where('key', 'main')
+                ->first();
+
+            return trim((string) ($brand?->title ?: $default));
+        } catch (\Throwable $e) {
+            return $default;
+        }
     }
 
     public function verify(User $user, string $otp): bool

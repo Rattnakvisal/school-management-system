@@ -332,7 +332,8 @@
 
                     <!-- Subject Study Time -->
                     <form method="POST" action="{{ route('admin.time-studies.subjects.store') }}"
-                        id="subject_time_create_form" class="js-create-form mt-6 space-y-4 border-t border-slate-200 pt-6">
+                        id="subject_time_create_form"
+                        class="js-create-form mt-6 space-y-4 border-t border-slate-200 pt-6">
                         @csrf
                         <input type="hidden" name="_form" value="create_subject_time">
 
@@ -496,7 +497,7 @@
                             window.location.href = teacherUrl.toString();
                             return;
                         }
-
+                
                         this.activeTab = tab;
                         const url = new URL(window.location.href);
                         url.searchParams.set('tab', tab);
@@ -697,7 +698,7 @@
                                     <div x-show="activeTab === 'class'" x-cloak>
                                         <table class="w-full min-w-[1280px] text-left text-sm">
                                             <thead
-                                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                                class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                 <tr>
                                                     <th class="px-3 py-3 font-semibold">Class</th>
                                                     <th class="px-3 py-3 font-semibold">Day</th>
@@ -900,7 +901,7 @@
                                         {{-- SUBJECT TABLE --}}
                                         <table class="w-full min-w-[1280px] text-left text-sm">
                                             <thead
-                                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                                class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                 <tr>
                                                     <th class="px-3 py-3 font-semibold">Subject</th>
                                                     <th class="px-3 py-3 font-semibold">Day</th>
@@ -1090,7 +1091,8 @@
                                                                             <select name="teacher_id"
                                                                                 data-selected="{{ (string) ($slot->teacher_id ?? null ?: $slot->subject?->teacher_id ?? '') }}"
                                                                                 class="js-subject-edit-teacher w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                                <option value="">Select teacher</option>
+                                                                                <option value="">Select teacher
+                                                                                </option>
                                                                                 @foreach ($teachers as $teacherOption)
                                                                                     <option
                                                                                         value="{{ $teacherOption->id }}"
@@ -1133,7 +1135,7 @@
                                         {{-- TEACHER TABLE --}}
                                         <table class="w-full min-w-[1280px] text-left text-sm">
                                             <thead
-                                                class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                                class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                                 <tr>
                                                     <th class="px-3 py-3 font-semibold">Teacher</th>
                                                     <th class="px-3 py-3 font-semibold">Subject</th>

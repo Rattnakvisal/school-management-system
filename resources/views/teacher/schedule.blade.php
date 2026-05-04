@@ -39,13 +39,25 @@
 
     <div class="teacher-time-stage space-y-6">
         <section class="teacher-time-reveal admin-page-header teacher-page-header" style="--sd: 1;">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <h1 class="admin-page-title text-3xl font-black tracking-tight">My Schedule</h1>
-                    <p class="admin-page-subtitle mt-1 text-sm">
-                        View your teaching list by day, time, subject, and class.
-                    </p>
+            <div class="admin-page-header__main flex flex-wrap items-start justify-between gap-4">
+                <div class="admin-page-header__intro min-w-0">
+                    <div class="admin-page-header__title-row flex items-start gap-3">
+                        <span class="admin-page-header__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="8.5" />
+                                <path d="M12 7.5v5l3.4 1.9" />
+                                <path d="M12 2.5v2" />
+                            </svg>
+                        </span>
+
+                        <div>
+                            <div class="admin-page-header__eyebrow">Teacher Panel</div>
+                            <h1 class="admin-page-title text-3xl font-black tracking-tight">My Schedule</h1>
+                        </div>
+                    </div>
                 </div>
+                <p class="admin-page-subtitle mt-1 text-sm">View your teaching list by day, time, subject, and class.</p>
             </div>
 
             <div class="mt-4 grid gap-3 sm:grid-cols-3">
@@ -61,16 +73,19 @@
 
                 <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3">
                     <div id="schedule-live-current-title" class="text-sm font-black text-emerald-800">No live slot now</div>
-                    <div id="schedule-live-current-meta" class="mt-0.5 text-xs font-semibold text-emerald-700/80">Waiting for next slot...</div>
+                    <div id="schedule-live-current-meta" class="mt-0.5 text-xs font-semibold text-emerald-700/80">Waiting
+                        for next slot...</div>
                     <div class="mt-2 h-1.5 rounded-full bg-emerald-100">
-                        <div id="schedule-live-progress" class="h-1.5 w-0 rounded-full bg-emerald-500 transition-all duration-500">
+                        <div id="schedule-live-progress"
+                            class="h-1.5 w-0 rounded-full bg-emerald-500 transition-all duration-500">
                         </div>
                     </div>
                 </div>
 
                 <div class="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3">
                     <div id="schedule-live-next-title" class="text-sm font-black text-amber-800">No upcoming slot</div>
-                    <div id="schedule-live-next-meta" class="mt-0.5 text-xs font-semibold text-amber-700/80">All slots finished for selected day</div>
+                    <div id="schedule-live-next-meta" class="mt-0.5 text-xs font-semibold text-amber-700/80">All slots
+                        finished for selected day</div>
                 </div>
             </div>
 
@@ -86,14 +101,16 @@
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-1">
                         <button type="button" @click="tab = 'class'"
-                            :class="tab === 'class' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-800'"
+                            :class="tab === 'class' ? 'bg-white text-slate-900 shadow-sm' :
+                                'text-slate-600 hover:text-slate-800'"
                             class="rounded-lg px-4 py-2 text-sm font-semibold transition">
-                            Class Times ({{ number_format(($stats['classSlots'] ?? 0)) }})
+                            Class Times ({{ number_format($stats['classSlots'] ?? 0) }})
                         </button>
                         <button type="button" @click="tab = 'teach'"
-                            :class="tab === 'teach' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-800'"
+                            :class="tab === 'teach' ? 'bg-white text-slate-900 shadow-sm' :
+                                'text-slate-600 hover:text-slate-800'"
                             class="rounded-lg px-4 py-2 text-sm font-semibold transition">
-                            Teach List ({{ number_format(($stats['subjectSlots'] ?? 0)) }})
+                            Teach List ({{ number_format($stats['subjectSlots'] ?? 0) }})
                         </button>
                     </div>
 
@@ -161,7 +178,8 @@
                                 <h4 class="text-xl font-bold text-slate-900">Class</h4>
                                 <select id="class_id" name="class_id"
                                     class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                    <option value="all" {{ ($classId ?? 'all') === 'all' ? 'selected' : '' }}>All Classes
+                                    <option value="all" {{ ($classId ?? 'all') === 'all' ? 'selected' : '' }}>All
+                                        Classes
                                     </option>
                                     @foreach ($classes as $classOption)
                                         <option value="{{ $classOption->id }}"
@@ -197,9 +215,10 @@
             </aside>
 
             <div class="mt-5 min-w-0">
-                <div class="overflow-hidden rounded-2xl border border-slate-200">
-                    <div class="max-h-[560px] overflow-auto">
-                        <table x-show="tab === 'class'" x-cloak class="w-full min-w-[980px] text-left text-sm">
+                <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
+                    <div class="student-table-scroller max-h-[700px] overflow-auto">
+                        <table x-show="tab === 'class'" x-cloak
+                            class="student-table w-full whitespace-nowrap text-left text-sm">
                             <thead
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
@@ -222,8 +241,7 @@
                                         $slotDayKey = strtolower((string) ($slot->day_of_week ?? 'all'));
                                         $slotDayLabel = $dayOptions[$slotDayKey] ?? ucfirst($slotDayKey);
                                     @endphp
-                                    <tr class="js-schedule-row align-top hover:bg-slate-50/80"
-                                        data-type="class"
+                                    <tr class="js-schedule-row align-top hover:bg-slate-50/80" data-type="class"
                                         data-label="{{ $slot->schoolClass?->display_name ?? 'Class Schedule' }}"
                                         data-day="{{ $slotDayKey }}"
                                         data-start="{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i:s') }}"
@@ -272,7 +290,8 @@
                             </tbody>
                         </table>
 
-                        <table x-show="tab === 'teach'" x-cloak class="w-full min-w-[1080px] text-left text-sm">
+                        <table x-show="tab === 'teach'" x-cloak
+                            class="student-table w-full whitespace-nowrap text-left text-sm">
                             <thead
                                 class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                 <tr>
@@ -295,9 +314,8 @@
                                         $slotDayKey = strtolower((string) ($slot->day_of_week ?? 'all'));
                                         $slotDayLabel = $dayOptions[$slotDayKey] ?? ucfirst($slotDayKey);
                                     @endphp
-                                    <tr class="js-schedule-row align-top hover:bg-slate-50/80"
-                                        data-type="subject"
-                                        data-label="{{ ($slot->subject?->name ?? 'Subject Schedule') . ' | ' . ($slot->schoolClass?->display_name ?? $slot->subject?->schoolClass?->display_name ?? 'Class') }}"
+                                    <tr class="js-schedule-row align-top hover:bg-slate-50/80" data-type="subject"
+                                        data-label="{{ ($slot->subject?->name ?? 'Subject Schedule') . ' | ' . ($slot->schoolClass?->display_name ?? ($slot->subject?->schoolClass?->display_name ?? 'Class')) }}"
                                         data-day="{{ $slotDayKey }}"
                                         data-start="{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i:s') }}"
                                         data-end="{{ \Carbon\Carbon::parse($slot->end_time)->format('H:i:s') }}">
@@ -316,9 +334,11 @@
                                             {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
                                         </td>
                                         <td class="px-3 py-3">
-                                            <div class="font-semibold text-slate-900">{{ $slot->subject?->name ?? 'Unknown Subject' }}</div>
+                                            <div class="font-semibold text-slate-900">
+                                                {{ $slot->subject?->name ?? 'Unknown Subject' }}</div>
                                         </td>
-                                        <td class="px-3 py-3 text-slate-700">{{ $slot->schoolClass?->display_name ?: ($slot->subject?->schoolClass?->display_name ?: 'N/A') }}
+                                        <td class="px-3 py-3 text-slate-700">
+                                            {{ $slot->schoolClass?->display_name ?: ($slot->subject?->schoolClass?->display_name ?: 'N/A') }}
                                         </td>
                                         <td class="px-3 py-3">
                                             <span

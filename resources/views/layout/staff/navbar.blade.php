@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Staff Dashboard' }}</title>
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -28,9 +28,9 @@
         <aside
             class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col overflow-hidden border-r border-slate-200/80 bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.10),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_24px_50px_-34px_rgba(15,23,42,0.35)] transition-all duration-300"
             :class="[
-                isDesktop
-                    ? (sidebarCollapsed ? 'translate-x-0 w-24' : 'translate-x-0 w-72')
-                    : (mobileOpen ? 'translate-x-0 w-[84vw] max-w-[19rem]' : '-translate-x-full w-[84vw] max-w-[19rem]')
+                isDesktop ?
+                (sidebarCollapsed ? 'translate-x-0 w-24' : 'translate-x-0 w-72') :
+                (mobileOpen ? 'translate-x-0 w-[84vw] max-w-[19rem]' : '-translate-x-full w-[84vw] max-w-[19rem]')
             ]"
             aria-label="Sidebar">
 
@@ -41,8 +41,10 @@
                         class="h-12 w-12 shrink-0 object-contain drop-shadow-[0_12px_24px_-14px_rgba(24,80,200,0.45)]" />
 
                     <div class="min-w-0" x-show="!sidebarCollapsed" x-transition>
-                        <div class="truncate text-lg font-black tracking-tight text-slate-900">{{ $schoolBrandName ?? 'TechBridge Academy' }}</div>
-                        <div class="truncate text-xs font-medium text-slate-500">{{ $schoolBrandTagline ?? 'Staff Panel' }}</div>
+                        <div class="truncate text-lg font-black tracking-tight text-slate-900">
+                            {{ $schoolBrandName ?? 'TechBridge Academy' }}</div>
+                        <div class="truncate text-xs font-medium text-slate-500">
+                            {{ $schoolBrandTagline ?? 'Staff Panel' }}</div>
                     </div>
                 </a>
 
@@ -134,7 +136,9 @@
 
                                     <span
                                         class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
-                                        @include('layout.admin.navbar.partials.sidebar-icon', ['icon' => $l['icon']])
+                                        @include('layout.admin.navbar.partials.sidebar-icon', [
+                                            'icon' => $l['icon'],
+                                        ])
 
                                         @if ($l['icon'] === 'mail' && ($l['badge'] ?? 0) > 0)
                                             <span
@@ -201,7 +205,8 @@
                         <div class="relative max-w-xl">
                             <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M10 2a8 8 0 1 0 5.29 14.06l4.33 4.33 1.41-1.41-4.33-4.33A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" />
+                                    <path
+                                        d="M10 2a8 8 0 1 0 5.29 14.06l4.33 4.33 1.41-1.41-4.33-4.33A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" />
                                 </svg>
                             </span>
                             <input type="text" placeholder="Search records, people, classes..."
@@ -213,10 +218,11 @@
                         <div class="relative" @click.outside="notifOpen = false">
                             <button
                                 class="relative rounded-xl border border-slate-200 bg-white p-2 hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
-                                @click="messageOpen = false; profileOpen = false; notifOpen = !notifOpen" aria-label="Notifications"
-                                type="button">
+                                @click="messageOpen = false; profileOpen = false; notifOpen = !notifOpen"
+                                aria-label="Notifications" type="button">
                                 <svg class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2Z" />
+                                    <path
+                                        d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2Zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2Z" />
                                 </svg>
 
                                 @if (($navUnread ?? 0) > 0)
@@ -242,8 +248,10 @@
                                                 <span
                                                     class="mt-2 h-2 w-2 rounded-full {{ $n->is_read ? 'bg-slate-300' : 'bg-indigo-600' }}"></span>
                                                 <div class="min-w-0">
-                                                    <div class="text-sm font-semibold text-slate-800">{{ $n->title }}</div>
-                                                    <div class="truncate text-xs text-slate-500">{{ $n->message }}</div>
+                                                    <div class="text-sm font-semibold text-slate-800">
+                                                        {{ $n->title }}</div>
+                                                    <div class="truncate text-xs text-slate-500">{{ $n->message }}
+                                                    </div>
                                                     <div class="mt-1 text-[11px] text-slate-400">
                                                         {{ $n->created_at->diffForHumans() }}
                                                     </div>
@@ -343,8 +351,8 @@
                         <div class="relative" @click.outside="profileOpen = false">
                             <button
                                 class="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-3 py-2 hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
-                                @click="notifOpen = false; messageOpen = false; profileOpen = !profileOpen" aria-label="Open profile menu"
-                                type="button">
+                                @click="notifOpen = false; messageOpen = false; profileOpen = !profileOpen"
+                                aria-label="Open profile menu" type="button">
                                 <img class="h-8 w-8 rounded-full object-cover" src="{{ auth()->user()->avatar_url }}"
                                     onerror="this.onerror=null;this.src='{{ auth()->user()->fallback_avatar_url }}';"
                                     alt="avatar">
@@ -371,7 +379,8 @@
                                     class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
                                     <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50">
                                         <svg class="h-5 w-5 text-indigo-600" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+                                            <path
+                                                d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
                                         </svg>
                                     </span>
                                     Settings
@@ -383,7 +392,8 @@
                                     <a href="{{ route('logout') }}"
                                         class="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100">
                                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M16 13v-2H7V8l-5 4 5 4v-3zM20 3h-8v2h8v14h-8v2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
+                                            <path
+                                                d="M16 13v-2H7V8l-5 4 5 4v-3zM20 3h-8v2h8v14h-8v2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
                                         </svg>
                                         Logout
                                     </a>
@@ -440,6 +450,66 @@
                 }
             }
         }
+    </script>
+    <script>
+        // Logout when user closes the tab/window (but avoid on internal navigation)
+        (function() {
+            const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+            const logoutUrl = '{{ route('logout') }}';
+            const token = tokenMeta ? tokenMeta.getAttribute('content') : null;
+
+            if (!token) return;
+
+            let navigatingInternally = false;
+
+            // Mark internal navigation clicks/forms briefly so we don't logout when user navigates inside the app
+            // The flag is short-lived (1s) so it doesn't permanently block logout after many clicks.
+            document.addEventListener('click', (e) => {
+                const a = e.target.closest && e.target.closest('a');
+                if (!a || !a.href) return;
+                // ignore links that open in new tab/window or use modifiers
+                if (a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                try {
+                    const url = new URL(a.href, location.href);
+                    if (url.origin === location.origin) {
+                        navigatingInternally = true;
+                        setTimeout(() => {
+                            navigatingInternally = false;
+                        }, 1000);
+                    }
+                } catch (err) {
+                    // ignore
+                }
+            }, {
+                capture: true
+            });
+
+            document.addEventListener('submit', (e) => {
+                navigatingInternally = true;
+                setTimeout(() => {
+                    navigatingInternally = false;
+                }, 1000);
+            }, {
+                capture: true
+            });
+
+            const doLogout = () => {
+                if (navigatingInternally) return;
+                try {
+                    const body = new URLSearchParams();
+                    body.append('_token', token);
+                    const blob = new Blob([body.toString()], {
+                        type: 'application/x-www-form-urlencoded'
+                    });
+                    navigator.sendBeacon(logoutUrl, blob);
+                } catch (e) {
+                    // best-effort only
+                }
+            };
+
+            window.addEventListener('pagehide', doLogout);
+            window.addEventListener('beforeunload', doLogout);
+        })();
     </script>
     <script src="//unpkg.com/alpinejs" defer></script>
 </body>

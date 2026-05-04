@@ -62,6 +62,8 @@ class GoogleController extends Controller
             // Ensure user is logged in on the web guard before redirecting.
             Auth::guard('web')->login($user, true);
             $request->session()->regenerate();
+            // Set session last activity timestamp for session timeout tracking
+            $request->session()->put('last_activity', time());
 
             if (isset($user->is_active) && !$user->is_active) {
                 Auth::guard('web')->logout();
