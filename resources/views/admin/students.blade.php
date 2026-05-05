@@ -548,7 +548,7 @@
                                         <thead
                                             class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
-                                                <th class="student-col-student px-3 py-3 font-semibold">Student</th>
+                                                <th class="student-col-student px-3 py-3 font-semibold ">Student</th>
                                                 <th class="student-col-email px-3 py-3 font-semibold">Email</th>
                                                 @if ($hasPhoneColumn ?? false)
                                                     <th
@@ -581,16 +581,18 @@
                                                                 alt="{{ $student->name }}"
                                                                 class="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200">
                                                             <div class="min-w-0">
-                                                                <div class="student-name font-semibold text-slate-800">
+                                                                <div
+                                                                    class="student-name truncate font-semibold text-slate-800">
                                                                     {{ $student->name }}
                                                                 </div>
-                                                                <div class="text-xs text-slate-400">ID
+                                                                <div class="text-xs truncate text-slate-400">ID
                                                                     #{{ $student->formatted_id }}</div>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td class="student-col-email px-3 py-3 align-top text-slate-600">
-                                                        <div class="student-email text-slate-600">{{ $student->email }}
+                                                        <div class="student-email max-w-[360px] truncate text-slate-600">
+                                                            {{ $student->email }}
                                                         </div>
                                                     </td>
                                                     @if ($hasPhoneColumn ?? false)

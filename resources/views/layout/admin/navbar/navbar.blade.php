@@ -126,17 +126,21 @@
                     if (!$isStaffUser) {
                         array_unshift($managementItems, $item('admin.admin-staff.index', 'Admin / Staff', 'shield'));
                         $managementItems[] = $item('admin.mission.index', 'Mission', 'flag', $missionUnread ?? 0);
+                        $reportRoute[] = $item('admin.reports.index', 'Reports', 'chart-line');
                     } else {
                         $managementItems[] = $item('staff.missions.index', 'Mission Events', 'flag');
+                    }
+
+                    $mainItems = [$item('admin.dashboard', 'Dashboard', 'layout-dashboard')];
+
+                    if (!$isStaffUser) {
+                        $mainItems[] = $item('admin.reports', 'Reports', 'chart-line');
                     }
 
                     $sections = [
                         [
                             'title' => 'Main',
-                            'items' => [
-                                $item('admin.dashboard', 'Dashboard', 'layout-dashboard'),
-                                $item('admin.reports', 'Reports', 'chart-line'),
-                            ],
+                            'items' => $mainItems,
                         ],
                         [
                             'title' => 'Management',

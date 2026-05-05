@@ -168,7 +168,7 @@
             'rounded-[26px] border border-white/80 bg-white/90 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur';
         $softPanelClass =
             'rounded-[26px] border border-[#ececff] bg-[#f7f6ff]/95 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.45)]';
-        $titleClass = 'text-[15px] font-extrabold tracking-[-0.02em] text-slate-800';
+        $titleClass = 'text-[15px] tracking-[-0.02em] text-slate-800';
     @endphp
 
     <div class="dashboard-stage staff-soft-dashboard -mx-2 rounded-[30px] bg-[#f5f6ff] p-3 sm:p-5 xl:p-7">
@@ -261,7 +261,7 @@
                             <div class="mt-5 flex items-end gap-1 text-2xl tracking-[-0.04em] text-slate-950">
                                 <span class="staff-animate-number"
                                     data-value="{{ $card['active'] }}">{{ number_format($card['active']) }}</span>
-                                <span class="pb-0.5 text-base font-extrabold text-slate-300">/
+                                <span class="pb-0.5 text-base text-slate-300">/
                                     {{ number_format($card['total']) }}</span>
                             </div>
                             <div class="mt-1 text-sm font-bold text-slate-600">{{ $card['label'] }}</div>
@@ -302,8 +302,7 @@
                                         {{ strtoupper(substr($item['name'], 0, 1)) }}
                                     </span>
                                     <span class="min-w-0 flex-1">
-                                        <span
-                                            class="block truncate text-sm font-extrabold text-slate-800">{{ $item['name'] }}</span>
+                                        <span class="block truncate text-sm text-slate-800">{{ $item['name'] }}</span>
                                         <span
                                             class="block truncate text-[11px] font-semibold text-slate-400">{{ $item['meta'] }}</span>
                                     </span>

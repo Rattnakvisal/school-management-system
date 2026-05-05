@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Staff Dashboard' }}</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        referrerpolicy="no-referrer" />
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -81,6 +85,25 @@
                         'active' => request()->routeIs($route),
                     ];
 
+                    // Use same icon class mapping as admin sidebar (Font Awesome)
+                    $adminNavIconClasses = [
+                        'layout-dashboard' => 'fa-solid fa-table-columns',
+                        'users' => 'fa-solid fa-users',
+                        'user-cog' => 'fa-solid fa-user-gear',
+                        'shield' => 'fa-solid fa-shield-halved',
+                        'layers' => 'fa-solid fa-layer-group',
+                        'book-open' => 'fa-solid fa-book-open',
+                        'clock-3' => 'fa-solid fa-clock',
+                        'graduation-cap' => 'fa-solid fa-graduation-cap',
+                        'clipboard-check' => 'fa-solid fa-clipboard-check',
+                        'calendar-check' => 'fa-solid fa-calendar-check',
+                        'mail' => 'fa-solid fa-envelope',
+                        'flag' => 'fa-solid fa-flag',
+                        'chart-line' => 'fa-solid fa-chart-line',
+                        'palette' => 'fa-solid fa-palette',
+                        'settings' => 'fa-solid fa-gear',
+                    ];
+
                     $sections = [
                         [
                             'title' => 'Main',
@@ -95,7 +118,7 @@
                                 $item('admin.subjects.index', 'Subjects', 'book-open'),
                                 $item('admin.time-studies.index', 'Schedule', 'clock-3'),
                                 $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
-                                $item('staff.missions.index', 'Mission Events', 'flag'),
+                                $item('admin.contacts.index', 'Messages', 'mail', $contactUnread ?? 0),
                             ],
                         ],
                         [
@@ -135,9 +158,8 @@
 
                                     <span
                                         class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
-                                        @include('layout.admin.navbar.partials.sidebar-icon', [
-                                            'icon' => $l['icon'],
-                                        ])
+                                        <i class="{{ $adminNavIconClasses[$l['icon']] ?? 'fa-solid fa-gear' }} text-base"
+                                            aria-hidden="true"></i>
 
                                         @if ($l['icon'] === 'mail' && ($l['badge'] ?? 0) > 0)
                                             <span
