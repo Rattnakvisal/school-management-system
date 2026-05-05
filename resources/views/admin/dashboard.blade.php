@@ -111,7 +111,7 @@
                             class="grid min-h-[380px] gap-6 bg-[linear-gradient(135deg,#ffffff_0%,#fbfdff_48%,#f4f7ff_100%)] p-7 sm:p-8 lg:grid-cols-[minmax(0,0.88fr)_minmax(300px,0.78fr)]">
                             <div class="flex min-w-0 flex-col justify-center">
                                 <div
-                                    class="inline-flex w-fit items-center gap-2 rounded-full border border-indigo-50 bg-white px-4 py-2 text-sm text-indigo-700 shadow-sm">
+                                    class="inline-flex w-fit items-center gap-2 rounded-full font-bold border border-indigo-50 bg-white px-4 py-2 text-sm text-indigo-700 shadow-sm">
                                     <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
                                     Live admin overview
                                 </div>
@@ -130,10 +130,11 @@
                                 </a>
                             </div>
 
-                            <div class="relative flex items-end justify-center overflow-hidden">
-                                <div class="absolute inset-x-6 bottom-6 h-24 rounded-full bg-indigo-100/70 blur-2xl"></div>
+                            <div class="relative flex items-center justify-center">
+                                <div class="absolute inset-x-8 inset-y-8 rounded-full bg-indigo-100/60 blur-3xl"></div>
                                 <img src="{{ asset('images/3D.png') }}" alt="Student learning illustration"
-                                    class="relative z-10 max-h-[330px] w-full object-contain">
+                                    class="teacher-hero-art relative block h-auto w-full max-w-[30rem] max-h-[40rem] rounded-[30px] object-cover drop-shadow-[0_18px_40px_rgba(59,130,246,0.20)]
+                                    transition group-hover:rotate-1 group-hover:scale-105" />
                             </div>
                         </div>
                     </article>

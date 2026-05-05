@@ -129,12 +129,11 @@
                             ],
                         ],
                         [
-                            'title' => 'Communication',
-                            'items' => [$item('admin.contacts.index', 'Messages', 'mail', $contactUnread ?? 0)],
-                        ],
-                        [
                             'title' => 'System',
-                            'items' => [$item('admin.settings', 'Settings', 'settings')],
+                            'items' => [
+                                $item('admin.homepage.index', 'Homepage UI', 'palette'),
+                                $item('admin.settings', 'Settings', 'settings'),
+                            ],
                         ],
                     ];
                 @endphp

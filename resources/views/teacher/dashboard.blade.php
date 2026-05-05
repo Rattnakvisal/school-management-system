@@ -45,7 +45,7 @@
         $panelClass =
             'rounded-[28px] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.22)] backdrop-blur-sm';
         $panelPadding = 'p-5 sm:p-6';
-        $titleClass = 'text-lg tracking-[-0.03em] text-slate-900';
+        $titleClass = 'text-lg font-bold tracking-[-0.03em] text-slate-900';
         $mutedLinkClass = 'text-sm text-slate-400 transition hover:text-slate-600';
     @endphp
 
@@ -64,11 +64,12 @@
                         <div class="space-y-5">
                             <div class="space-y-3">
                                 <span
-                                    class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs uppercase tracking-[0.14em] text-indigo-700">
+                                    class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-indigo-700">
                                     Teacher dashboard
                                 </span>
 
-                                <h1 class="text-[clamp(2rem,4vw,3.25rem)] leading-[0.95] tracking-[-0.06em] text-slate-900">
+                                <h1
+                                    class="text-[clamp(2rem,4vw,3.25rem)] font-bold leading-[0.95] tracking-[-0.06em] text-slate-900">
                                     Welcome back,
                                     <span
                                         class="bg-gradient-to-r from-indigo-700 to-blue-500 bg-clip-text text-transparent">
@@ -90,25 +91,25 @@
 
                             <div class="flex flex-wrap gap-3">
                                 <span
-                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm text-blue-700 ring-1 ring-blue-100">
-                                    Classes <span class="teacher-animate-number ml-1"
+                                    class="teacher-stat-pill font-bold inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm text-blue-700 ring-1 ring-blue-100">
+                                    Classes <span class="teacher-animate-number font-bold ml-1"
                                         data-value="{{ (int) $stats['classes'] }}">0</span>
                                 </span>
                                 <span
-                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-amber-50 px-4 py-2 text-sm text-amber-700 ring-1 ring-amber-100">
-                                    Students <span class="teacher-animate-number ml-1"
+                                    class="teacher-stat-pill font-bold inline-flex items-center rounded-full bg-amber-50 px-4 py-2 text-sm text-amber-700 ring-1 ring-amber-100">
+                                    Students <span class="teacher-animate-number font-bold ml-1"
                                         data-value="{{ (int) $stats['students'] }}">0</span>
                                 </span>
                                 <span
-                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-rose-50 px-4 py-2 text-sm text-rose-700 ring-1 ring-rose-100">
-                                    Subjects <span class="teacher-animate-number ml-1"
+                                    class="teacher-stat-pill font-bold inline-flex items-center rounded-full bg-rose-50 px-4 py-2 text-sm text-rose-700 ring-1 ring-rose-100">
+                                    Subjects <span class="teacher-animate-number font-bold ml-1"
                                         data-value="{{ (int) $stats['subjects'] }}">0</span>
                                 </span>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-3">
                                 <a href="{{ route('teacher.schedule.index', ['day' => $todayKey]) }}"
-                                    class="dash-hover inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-3 text-sm text-white shadow-[0_18px_30px_-16px_rgba(59,130,246,0.5)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_34px_-16px_rgba(59,130,246,0.55)]">
+                                    class="dash-hover inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-3 text-sm text-white shadow-[0_18px_30px_-16px_rgba(59,130,246,0.5)] font-bold transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_34px_-16px_rgba(59,130,246,0.55)]">
                                     Open today schedule
                                 </a>
 
@@ -120,8 +121,9 @@
 
                         <div class="relative flex items-center justify-center">
                             <div class="absolute inset-x-8 inset-y-8 rounded-full bg-indigo-100/60 blur-3xl"></div>
-                            <img src="{{ asset('images/9865735.png') }}" alt="Teacher dashboard study illustration"
-                                class="teacher-hero-art relative block h-auto w-full max-w-[28rem] rounded-[30px] object-cover drop-shadow-[0_18px_40px_rgba(59,130,246,0.20)]">
+                            <img src="{{ asset('images/Admin.png') }}" alt="Teacher dashboard study illustration"
+                                class="teacher-hero-art relative block h-auto w-full max-w-[15rem] max-h-[35.5rem] rounded-[30px] object-cover drop-shadow-[0_18px_40px_rgba(59,130,246,0.20)]
+                                    transition group-hover:rotate-1 group-hover:scale-105">
                         </div>
                     </div>
                 </section>
@@ -305,7 +307,7 @@
                 <section class="dash-reveal {{ $panelClass }} {{ $panelPadding }}" style="--d: 2;">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <div class="text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                            <div class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
                                 Teacher panel
                             </div>
                             <div class="mt-1 text-base text-slate-900">
