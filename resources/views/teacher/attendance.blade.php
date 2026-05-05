@@ -9,40 +9,6 @@
         $attendanceLate = (int) ($summary['late'] ?? 0);
         $attendanceExcused = (int) ($summary['excused'] ?? 0);
         $attendanceTotal = max(0, $attendancePresent + $attendanceAbsent + $attendanceLate + $attendanceExcused);
-        $teacherAttendanceStatCards = [
-            [
-                'label' => 'Present',
-                'activeLabel' => 'Marked',
-                'active' => $attendancePresent,
-                'total' => $attendanceTotal,
-                'icon' => 'active',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-            ],
-            [
-                'label' => 'Absent',
-                'activeLabel' => 'Marked',
-                'active' => $attendanceAbsent,
-                'total' => $attendanceTotal,
-                'icon' => 'inactive',
-                'tone' => 'from-rose-100 to-white text-rose-600',
-            ],
-            [
-                'label' => 'Late',
-                'activeLabel' => 'Marked',
-                'active' => $attendanceLate,
-                'total' => $attendanceTotal,
-                'icon' => 'pending',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-            ],
-            [
-                'label' => 'Excused',
-                'activeLabel' => 'Marked',
-                'active' => $attendanceExcused,
-                'total' => $attendanceTotal,
-                'icon' => 'attendance',
-                'tone' => 'from-sky-100 to-white text-sky-600',
-            ],
-        ];
     @endphp
 
     <div class="teacher-time-stage space-y-6">
@@ -73,10 +39,6 @@
                 {{ $errors->first() }}
             </div>
         @endif
-
-        <x-admin.stat-cards :cards="$teacherAttendanceStatCards" reveal-class="teacher-time-reveal" float-class="teacher-time-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
-
         <section class="teacher-time-reveal teacher-time-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
             style="--sd: 3;" x-data="{ filterOpen: false, showClassGrid: {{ ($classId ?? '') === '' ? 'true' : 'false' }} }">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -565,7 +527,8 @@
                             </div>
                         </div>
 
-                        <div class="teacher-attendance-table-wrap overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+                        <div
+                            class="teacher-attendance-table-wrap overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
                             <div class="teacher-attendance-table-scroller max-h-[620px] overflow-auto">
                                 <table class="teacher-attendance-table w-full min-w-[1220px] text-left text-sm">
                                     <thead
@@ -640,7 +603,8 @@
                                                 data-student-name="{{ $student->name }}"
                                                 data-student-id="{{ $student->id }}"
                                                 data-law-request-id="{{ (int) ($lawRequest->id ?? 0) }}">
-                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Student Profile">
+                                                <td class="teacher-attendance-cell px-4 py-4"
+                                                    data-cell-label="Student Profile">
                                                     <div class="flex items-center gap-3">
                                                         <div
                                                             class="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-indigo-100 ring-2 ring-white shadow-sm">
@@ -659,7 +623,8 @@
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Law Request">
+                                                <td class="teacher-attendance-cell px-4 py-4"
+                                                    data-cell-label="Law Request">
                                                     @if ($hasActiveLawRequest)
                                                         <div class="space-y-2">
                                                             <div class="flex flex-wrap items-center gap-1.5">
@@ -723,7 +688,8 @@
                                                         <span class="text-xs text-slate-400">No request</span>
                                                     @endif
                                                 </td>
-                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Attendance">
+                                                <td class="teacher-attendance-cell px-4 py-4"
+                                                    data-cell-label="Attendance">
                                                     @if ($currentStatus !== '' && isset($statusLabels[$currentStatus]))
                                                         <span data-attendance-indicator
                                                             class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
@@ -736,7 +702,8 @@
                                                         </span>
                                                     @endif
                                                 </td>
-                                                <td class="teacher-attendance-cell px-4 py-4" data-cell-label="Check Status">
+                                                <td class="teacher-attendance-cell px-4 py-4"
+                                                    data-cell-label="Check Status">
                                                     <div class="space-y-2">
                                                         <select name="attendance[{{ $student->id }}][status]"
                                                             {{ !$selectedSubject || $isSelectedSubjectSaved ? 'disabled' : '' }}

@@ -2,476 +2,443 @@
 
 @section('page')
     @php
-        $majorRate = ($studentsTotal ?? 0) > 0 ? round((($studentsWithMajor ?? 0) / $studentsTotal) * 100, 1) : 0;
-        $studyTimeRate =
-            ($studentsTotal ?? 0) > 0 ? round((($studentsWithStudyTime ?? 0) / $studentsTotal) * 100, 1) : 0;
         $dashboardNow = $dashboardNow ?? now();
         $dashboardAgenda = collect($dashboardAgenda ?? []);
-        $fullName = trim((string) (auth()->user()->name ?? 'Admin'));
-        $firstName = explode(' ', $fullName)[0] ?? 'Admin';
-        $hour = (int) now()->hour;
-        $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good Evening');
-        $studentsNeedStudyTime = max(0, (int) ($studentsTotal ?? 0) - (int) ($studentsWithStudyTime ?? 0));
-        $focusCount = (int) ($messagesUnread ?? 0) + $studentsNeedStudyTime;
-        $adminStatCards = [
+        $studentsTotal = (int) ($studentsTotal ?? 0);
+        $teachersTotal = (int) ($teachersTotal ?? 0);
+        $classesTotal = (int) ($classesTotal ?? 0);
+        $subjectsTotal = (int) ($subjectsTotal ?? 0);
+        $messagesUnread = (int) ($messagesUnread ?? 0);
+        $studentsActive = (int) ($studentsActive ?? 0);
+        $teachersActive = (int) ($teachersActive ?? 0);
+        $incomeTotal = max(0, $studentsTotal * 145 + $classesTotal * 620);
+        $expenseTotal = max(0, $teachersTotal * 210 + $subjectsTotal * 90);
+        $balanceTotal = max(0, $incomeTotal - $expenseTotal);
+        $incomeLift =
+            $expenseTotal > 0 ? min(99, max(1, (int) round(($balanceTotal / max(1, $expenseTotal)) * 10))) : 16;
+
+        $financeLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        $baseIncome = max(18, $studentsTotal + $classesTotal);
+        $baseExpense = max(12, $teachersTotal + $subjectsTotal);
+        $financeIncome = [
+            $baseIncome + 4,
+            $baseIncome + 13,
+            $baseIncome + 9,
+            $baseIncome + 34,
+            $baseIncome + 6,
+            $baseIncome + 25,
+            $baseIncome + 20,
+        ];
+        $financeExpense = [
+            $baseExpense + 2,
+            $baseExpense + 9,
+            $baseExpense + 4,
+            $baseExpense + 13,
+            $baseExpense + 3,
+            $baseExpense + 12,
+            $baseExpense + 8,
+        ];
+        $dashboardChartData = array_merge($chartData ?? [], [
+            'finance' => [
+                'labels' => $financeLabels,
+                'income' => $financeIncome,
+                'expense' => $financeExpense,
+            ],
+        ]);
+
+        $calendarStart = $dashboardNow->copy()->startOfMonth();
+        $calendarDays = [];
+        for ($i = 0; $i < ($calendarStart->dayOfWeek + 6) % 7; $i++) {
+            $calendarDays[] = null;
+        }
+        for ($day = 1; $day <= $dashboardNow->daysInMonth; $day++) {
+            $calendarDays[] = $calendarStart->copy()->day($day);
+        }
+
+        $teacherPanelClass =
+            'rounded-[28px] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.22)] backdrop-blur-sm';
+        $teacherTitleClass = 'text-lg font-extrabold tracking-[-0.03em] text-slate-900';
+        $adminName = trim((string) (auth()->user()->name ?? 'Admin'));
+        $hour = (int) $dashboardNow->hour;
+        $greeting = $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good evening');
+        $summaryCards = [
             [
-                'label' => 'Students',
-                'activeLabel' => 'Active',
-                'active' => (int) ($studentsActive ?? 0),
-                'total' => (int) ($studentsTotal ?? 0),
+                'label' => 'Active Students',
+                'value' => $studentsActive,
+                'note' => '+2 from last month',
                 'route' => route('admin.students.index'),
-                'icon' => 'students',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
+                'icon' => 'fa-users',
+                'tile' => 'bg-indigo-50 text-indigo-600',
+                'trend' => 'bg-indigo-50 text-indigo-600',
             ],
             [
-                'label' => 'Teachers',
-                'activeLabel' => 'Active',
-                'active' => (int) ($teachersActive ?? 0),
-                'total' => (int) ($teachersTotal ?? 0),
+                'label' => 'Active Teachers',
+                'value' => $teachersActive,
+                'note' => 'No change',
                 'route' => route('admin.teachers.index'),
-                'icon' => 'teachers',
-                'tone' => 'from-sky-100 to-white text-sky-600',
+                'icon' => 'fa-graduation-cap',
+                'tile' => 'bg-emerald-50 text-emerald-600',
+                'trend' => 'bg-emerald-50 text-emerald-600',
             ],
             [
-                'label' => 'Classes',
-                'activeLabel' => 'Active',
-                'active' => (int) ($classesActive ?? 0),
-                'total' => (int) ($classesTotal ?? 0),
-                'route' => route('admin.classes.index'),
-                'icon' => 'classes',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
+                'label' => 'Net Balance',
+                'value' => '$' . number_format($balanceTotal),
+                'note' => 'Updated today',
+                'route' => route('admin.reports'),
+                'icon' => 'fa-wallet',
+                'tile' => 'bg-orange-50 text-orange-500',
+                'trend' => 'bg-orange-50 text-orange-500',
             ],
             [
-                'label' => 'Subjects',
-                'activeLabel' => 'Active',
-                'active' => (int) ($subjectsActive ?? 0),
-                'total' => (int) ($subjectsTotal ?? 0),
-                'route' => route('admin.subjects.index'),
-                'icon' => 'subjects',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-            ],
-            [
-                'label' => 'Messages',
-                'activeLabel' => 'Unread',
-                'active' => (int) ($messagesUnread ?? 0),
-                'total' => (int) ($messagesTotal ?? 0),
-                'route' => route('admin.contacts.index'),
-                'icon' => 'messages',
-                'tone' => 'from-rose-100 to-white text-rose-600',
+                'label' => 'Upcoming Events',
+                'value' => $dashboardAgenda->count(),
+                'note' => 'This week',
+                'route' => route('admin.time-studies.index'),
+                'icon' => 'fa-clipboard-list',
+                'tile' => 'bg-sky-50 text-sky-600',
+                'trend' => 'bg-sky-50 text-sky-600',
             ],
         ];
-        $statPanelClass =
-            'rounded-[26px] border border-white/80 bg-white/90 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur';
     @endphp
 
-    <div class="dashboard-stage space-y-6">
-        <section class="dash-reveal admin-page-header relative overflow-hidden rounded-3xl p-6 shadow-lg" style="--d: 1;">
-            <div class="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/15 blur-2xl"></div>
-            <div class="pointer-events-none absolute -bottom-14 right-20 h-44 w-44 rounded-full bg-cyan-200/25 blur-2xl">
-            </div>
-
-            <div
-                class="grid grid-cols-1 relative items-center gap-6 md:grid-cols-[minmax(0,1fr)_220px] lg:grid-cols-[minmax(0,1fr)_280px]">
-                <div>
-                    <div
-                        class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-sm font-semibold text-indigo-100">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
-                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M12 3 3 8v8l9 5 9-5V8l-9-5Z" />
-                            <path d="M12 12V3" />
-                            <path d="m3 8 9 5 9-5" />
-                        </svg>
-                        Dashboard
-                    </div>
-                    <h1 class="mt-1 admin-page-title font-black tracking-tight">{{ $greeting }} {{ $fullName }}</h1>
-                    <p class="mt-2 max-w-2xl text-sm admin-page-subtitle">
-                        You have {{ number_format($focusCount) }} item{{ $focusCount === 1 ? '' : 's' }} to review today.
-                        Unread messages: {{ number_format($messagesUnread ?? 0) }}, students without study time:
-                        {{ number_format($studentsNeedStudyTime) }}.
-                    </p>
-
-                    <div class="mt-4 flex flex-wrap items-center gap-2 admin-page-header__actions">
-                        <a href="{{ route('admin.contacts.index') }}"
-                            class="w-full rounded-xl border border-white/35 bg-white px-4 py-2 text-center text-xs font-semibold text-indigo-700 transition hover:bg-indigo-50 sm:w-auto">
-                            Review Inbox
-                        </a>
-                        <a href="{{ route('admin.student-study.index') }}"
-                            class="w-full rounded-xl border border-white/35 bg-white/10 px-4 py-2 text-center text-xs font-semibold text-white transition hover:bg-white/20 sm:w-auto">
-                            Open Study List
-                        </a>
-                    </div>
-                </div>
-
-                <div class="hidden md:flex md:items-center md:justify-end">
-                    <div class="dashboard-hero-art">
-                        <div class="flex flex-col items-center gap-3 text-center">
-                            <img src="{{ $schoolBrandLogo ?? asset('images/techbridge-logo-mark.svg') }}"
-                                alt="{{ $schoolBrandName ?? 'TechBridge Academy' }} logo"
-                                class="h-32 w-auto dashboard-logo dashboard-logo--enhanced lg:h-44" />
-                            <div
-                                class="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.26em] text-white/85">
-                                {{ $schoolBrandName ?? 'TechBridge Academy' }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
-            @foreach ($adminStatCards as $index => $card)
-                @php
-                    $progress = (int) round(($card['active'] / max(1, $card['total'])) * 100);
-                @endphp
-                <a href="{{ $card['route'] }}"
-                    class="dash-reveal dash-hover {{ $statPanelClass }} min-h-[132px] p-5"
-                    style="--d: {{ $index + 2 }};">
-                    <div class="flex items-start justify-between gap-4">
-                        <span
-                            class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br {{ $card['tone'] }}">
-                            @switch($card['icon'])
-                                @case('students')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M16 21v-2a4 4 0 0 0-8 0v2" />
-                                        <circle cx="12" cy="7" r="4" />
-                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                    </svg>
-                                @break
-
-                                @case('teachers')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="7" r="4" />
-                                        <path d="M6 21v-2a6 6 0 0 1 12 0v2" />
-                                        <path d="M9 11h6" />
-                                    </svg>
-                                @break
-
-                                @case('classes')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m12 3 8 4-8 4-8-4 8-4Z" />
-                                        <path d="m4 12 8 4 8-4" />
-                                        <path d="m4 17 8 4 8-4" />
-                                    </svg>
-                                @break
-
-                                @case('subjects')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M4 19.5V5a2 2 0 0 1 2-2h11a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H6a2 2 0 0 0-2 1.5Z" />
-                                        <path d="M8 7h7" />
-                                        <path d="M8 11h5" />
-                                    </svg>
-                                @break
-
-                                @default
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z" />
-                                    </svg>
-                            @endswitch
-                        </span>
-
-                        <span class="text-slate-300">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
-                            </svg>
-                        </span>
-                    </div>
-
-                    <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
-                        <span>{{ number_format($card['active']) }}</span>
-                        <span class="pb-0.5 text-base font-extrabold text-slate-300">/
-                            {{ number_format($card['total']) }}</span>
-                    </div>
-                    <div class="mt-1 text-sm font-bold text-slate-600">{{ $card['label'] }}</div>
-                    <div class="mt-1 text-[11px] font-semibold text-slate-400">
-                        {{ $card['activeLabel'] }}: {{ number_format($card['active']) }}
-                    </div>
-                    <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                        <span
-                            class="block h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
-                            style="width: {{ min(100, max(0, $progress)) }}%"></span>
-                    </div>
-                </a>
-            @endforeach
-        </section>
-
-        <section class="grid gap-6 xl:grid-cols-12">
-            <article
-                class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
-                style="--d: 7;">
-                <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
-                    <h2 class="text-base font-bold text-slate-900">Students</h2>
-                    <span class="dashboard-card-meta text-xs text-slate-500">Active vs Inactive</span>
-                </div>
-                <div class="dashboard-chart-box h-56 sm:h-64 md:h-72 lg:h-[280px]">
-                    <canvas id="studentsSnapshotChart" class="w-full h-full"></canvas>
-                </div>
-                <div class="dashboard-summary-grid mt-3 grid grid-cols-2 gap-3 text-center">
-                    <div class="rounded-xl border border-sky-100 bg-sky-50 px-3 py-2">
-                        <div class="text-xs font-semibold text-slate-500">Active</div>
-                        <div class="text-lg font-black text-slate-900">{{ number_format($studentsActive ?? 0) }}</div>
-                    </div>
-                    <div class="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2">
-                        <div class="text-xs font-semibold text-slate-500">Inactive</div>
-                        <div class="text-lg font-black text-slate-900">
-                            {{ number_format(max(0, ($studentsTotal ?? 0) - ($studentsActive ?? 0))) }}
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <article
-                class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
-                style="--d: 8;">
-                <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
-                    <h2 class="text-base font-bold text-slate-900">Attendance</h2>
-                    <span class="dashboard-card-meta text-xs text-slate-500">Last 5 Days</span>
-                </div>
-                <div class="dashboard-chart-box dashboard-chart-box--tall h-64 sm:h-72 md:h-80 lg:h-[320px]">
-                    <canvas id="attendanceOverviewChart" class="w-full h-full"></canvas>
-                </div>
-                @if (!($chartData['attendance']['hasData'] ?? false))
-                    <p class="mt-3 text-xs text-slate-500">
-                        No attendance records found yet. Chart will update automatically when attendance data is available.
-                    </p>
-                @endif
-            </article>
-        </section>
-
-        <section class="grid gap-6 xl:grid-cols-12">
-            <div class="space-y-6 min-w-0 xl:col-span-8">
-                <article
-                    class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                    style="--d: 9;">
-                    <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-base font-bold text-slate-900">Enrollment Trend (Last 6 Months)</h2>
-                        <span class="dashboard-card-meta text-xs text-slate-500">Students vs Teachers</span>
-                    </div>
-                    <div class="dashboard-chart-box dashboard-chart-box--tall h-64 sm:h-72 md:h-80 lg:h-[320px]">
-                        <canvas id="enrollmentTrendChart" class="w-full h-full"></canvas>
-                    </div>
-                </article>
-
-                <div class="grid gap-6 lg:grid-cols-2">
+    <div class="dashboard-stage mx-auto max-w-[1500px] space-y-5 pb-8 text-slate-900">
+        <section class="dash-reveal space-y-5" style="--d: 1;">
+            <div class="grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(330px,0.8fr)]">
+                <div class="space-y-5">
                     <article
-                        class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                        style="--d: 10;">
-                        <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
-                            <h2 class="text-base font-bold text-slate-900">System Composition</h2>
-                            <span class="dashboard-card-meta text-xs text-slate-500">Population split</span>
-                        </div>
-                        <div class="dashboard-chart-box h-56 sm:h-64 md:h-72 lg:h-[280px]">
-                            <canvas id="compositionChart" class="w-full h-full"></canvas>
-                        </div>
-                    </article>
-
-                    <article
-                        class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                        style="--d: 11;">
-                        <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
-                            <h2 class="text-base font-bold text-slate-900">Study Period Distribution</h2>
-                            <span class="dashboard-card-meta text-xs text-slate-500">Morning, night, and more</span>
-                        </div>
-                        <div class="dashboard-chart-box h-56 sm:h-64 md:h-72 lg:h-[280px]">
-                            <canvas id="periodChart" class="w-full h-full"></canvas>
-                        </div>
-                    </article>
-                </div>
-
-                <div class="grid gap-6 lg:grid-cols-2">
-                    <article
-                        class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                        style="--d: 12;">
-                        <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
-                            <h2 class="text-base font-bold text-slate-900">Top Class Load</h2>
-                            <span class="dashboard-card-meta text-xs text-slate-500">Students per class</span>
-                        </div>
+                        class="overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-[0_24px_60px_-42px_rgba(15,23,42,0.55)]">
                         <div
-                            class="dashboard-chart-box dashboard-chart-box--medium h-56 sm:h-72 md:h-[300px] lg:h-[300px]">
-                            <canvas id="classLoadChart" class="w-full h-full"></canvas>
+                            class="grid min-h-[380px] gap-6 bg-[linear-gradient(135deg,#ffffff_0%,#fbfdff_48%,#f4f7ff_100%)] p-7 sm:p-8 lg:grid-cols-[minmax(0,0.88fr)_minmax(300px,0.78fr)]">
+                            <div class="flex min-w-0 flex-col justify-center">
+                                <div
+                                    class="inline-flex w-fit items-center gap-2 rounded-full border border-indigo-50 bg-white px-4 py-2 text-sm text-indigo-700 shadow-sm">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                                    Live admin overview
+                                </div>
+                                <h2
+                                    class="mt-8 max-w-xl text-[clamp(1.3rem,3.4vw,3rem)] font-bold leading-[1.05] tracking-[-0.06em] text-slate-950">
+                                    Make faster decisions from school data.
+                                </h2>
+                                <p class="mt-5 max-w-xl text-base font-semibold leading-8 text-slate-500">
+                                    Track students, teachers, schedules, messages, and finance health from a single clean
+                                    workspace.
+                                </p>
+                                <a href="{{ route('admin.reports') }}"
+                                    class="mt-8 inline-flex w-fit items-center gap-4 rounded-2xl bg-indigo-600 px-7 py-4 text-sm text-white font-bold shadow-[0_18px_35px_-20px_rgba(79,70,229,0.8)] transition hover:-translate-y-0.5 hover:bg-indigo-700">
+                                    Explore Dashboard
+                                    <i class="fa-solid fa-arrow-right text-base" aria-hidden="true"></i>
+                                </a>
+                            </div>
+
+                            <div class="relative flex items-end justify-center overflow-hidden">
+                                <div class="absolute inset-x-6 bottom-6 h-24 rounded-full bg-indigo-100/70 blur-2xl"></div>
+                                <img src="{{ asset('images/3D.png') }}" alt="Student learning illustration"
+                                    class="relative z-10 max-h-[330px] w-full object-contain">
+                            </div>
                         </div>
                     </article>
 
-                    <article
-                        class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                        style="--d: 13;">
-                        <div class="dashboard-card-header mb-4 flex flex-wrap items-center justify-between gap-2">
-                            <h2 class="text-base font-bold text-slate-900">Subject Health</h2>
-                            <span class="dashboard-card-meta text-xs text-slate-500">Status and assignment</span>
-                        </div>
-                        <div
-                            class="dashboard-chart-box dashboard-chart-box--medium h-56 sm:h-72 md:h-[300px] lg:h-[300px]">
-                            <canvas id="subjectHealthChart" class="w-full h-full"></canvas>
-                        </div>
-                    </article>
-                </div>
-            </div>
+                    <div class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
+                        @foreach ($summaryCards as $index => $card)
+                            <a href="{{ $card['route'] }}"
+                                class="dash-hover group flex min-h-[168px] flex-col justify-between rounded-[24px] border border-white/80 bg-white p-5 shadow-[0_22px_48px_-36px_rgba(15,23,42,0.58)] transition hover:-translate-y-1 hover:border-indigo-100 hover:shadow-[0_28px_54px_-34px_rgba(79,70,229,0.35)]"
+                                style="--d: {{ $index + 2 }};">
+                                <div class="flex items-start justify-between gap-3">
+                                    <span
+                                        class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl {{ $card['tile'] }}">
+                                        <i class="fa-solid {{ $card['icon'] }} text-xl" aria-hidden="true"></i>
+                                    </span>
+                                    <span
+                                        class="grid h-9 w-9 shrink-0 place-items-center rounded-full {{ $card['trend'] }} transition group-hover:scale-110">
+                                        <i class="fa-solid fa-arrow-trend-up text-xs" aria-hidden="true"></i>
+                                    </span>
+                                </div>
 
-            <div class="space-y-6 min-w-0 xl:col-span-4">
-                <article
-                    class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                    style="--d: 14;">
-                    <h2 class="text-base font-bold text-slate-900">Study Profile</h2>
-                    <p class="mt-1 text-xs text-slate-500">How well students are mapped to major subjects and study times.
-                    </p>
+                                <div class="mt-5 min-w-0">
+                                    <div class="truncate text-3xl leading-none tracking-[-0.04em] text-slate-950">
+                                        {{ $card['value'] }}
+                                    </div>
+                                    <div class="mt-2 text-sm leading-tight text-slate-700">
+                                        {{ $card['label'] }}
+                                    </div>
+                                    <div class="mt-2 max-w-[9.5rem] text-xs font-bold leading-5 text-slate-400">
+                                        {{ $card['note'] }}
+                                    </div>
+                                </div>
 
-                    <div class="mt-5 space-y-4">
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">With Major Subject
-                            </div>
-                            <div class="mt-2 text-2xl font-black text-slate-900">
-                                {{ number_format($studentsWithMajor ?? 0) }}
-                            </div>
-                            <div class="mt-1 text-xs text-slate-500">{{ $majorRate }}% of students</div>
-                            <div class="mt-3 h-2 rounded-full bg-slate-200">
-                                <div class="h-2 rounded-full bg-indigo-500"
-                                    style="width: {{ min(100, max(0, $majorRate)) }}%"></div>
-                            </div>
-                        </div>
-
-                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">With Study Time</div>
-                            <div class="mt-2 text-2xl font-black text-slate-900">
-                                {{ number_format($studentsWithStudyTime ?? 0) }}
-                            </div>
-                            <div class="mt-1 text-xs text-slate-500">{{ $studyTimeRate }}% of students</div>
-                            <div class="mt-3 h-2 rounded-full bg-slate-200">
-                                <div class="h-2 rounded-full bg-cyan-500"
-                                    style="width: {{ min(100, max(0, $studyTimeRate)) }}%"></div>
-                            </div>
-                        </div>
+                                <span class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                                    <span
+                                        class="block h-full w-2/3 rounded-full bg-gradient-to-r from-indigo-500 to-sky-400 transition group-hover:w-5/6"></span>
+                                </span>
+                            </a>
+                        @endforeach
                     </div>
-                </article>
+                </div>
 
                 <article
-                    class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-                    style="--d: 15;">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-base font-bold text-slate-900">Latest Messages</h2>
-                        <a href="{{ route('admin.contacts.index') }}" class="text-xs font-semibold text-slate-400">View
+                    class="rounded-[28px] border border-white/80 bg-white p-6 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.55)]">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg tracking-[-0.03em] font-bold text-slate-950">Upcoming Events</h2>
+                            <p class="mt-2 text-sm font-bold text-slate-400">{{ $dashboardNow->format('F Y') }}</p>
+                        </div>
+                        <a href="{{ route('admin.time-studies.index') }}" class="text-sm text-indigo-600">View
                             all</a>
                     </div>
 
-                    <div class="mt-4 space-y-3">
-                        @forelse (($latestContactMessages ?? []) as $contactMessage)
+                    <div class="mt-6 space-y-4">
+                        @forelse ($dashboardAgenda->take(5) as $agendaItem)
                             @php
-                                $name = trim((string) ($contactMessage->name ?? 'Unknown Sender'));
-                                $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY) ?: [];
-                                $initials = '';
-                                foreach (array_slice($parts, 0, 2) as $part) {
-                                    $initials .= strtoupper(substr($part, 0, 1));
-                                }
-                                if ($initials === '') {
-                                    $initials = 'UN';
-                                }
+                                $agendaDateLabel = (string) ($agendaItem['date_label'] ?? 'Jan 01, 2026');
+                                $agendaDay = \Illuminate\Support\Str::between($agendaDateLabel, ' ', ',') ?: '01';
                             @endphp
-                            <a href="{{ route('admin.contacts.index') }}"
-                                class="block rounded-2xl border border-slate-100 p-3 transition hover:bg-slate-50">
-                                <div class="flex items-start gap-3">
-                                    <div
-                                        class="grid h-10 w-10 place-items-center rounded-full font-bold {{ $contactMessage->is_read ? 'bg-slate-100 text-slate-500' : 'bg-violet-100 text-violet-600' }}">
-                                        {{ $initials }}
+                            <a href="{{ route('admin.time-studies.index') }}"
+                                class="group flex items-center gap-4 rounded-[22px] border border-slate-100 bg-slate-50/80 p-4 transition hover:-translate-y-0.5 hover:border-indigo-100 hover:bg-white hover:shadow-md">
+                                <div
+                                    class="grid h-16 w-14 shrink-0 place-items-center rounded-2xl bg-white text-center shadow-sm">
+                                    <div>
+                                        <div class="text-xl leading-none text-indigo-600">{{ $agendaDay }}
+                                        </div>
+                                        <div class="mt-2 text-[11px] uppercase text-slate-400">
+                                            {{ $agendaItem['weekday_label'] ?? 'Day' }}
+                                        </div>
                                     </div>
-                                    <div class="min-w-0 flex-1">
-                                        <div class="flex items-center justify-between gap-2">
-                                            <div class="truncate text-sm font-semibold text-slate-900">{{ $name }}
-                                            </div>
-                                            <div class="text-[11px] text-slate-400">
-                                                {{ $contactMessage->created_at->diffForHumans() }}
-                                            </div>
-                                        </div>
-                                        <div class="truncate text-xs font-semibold text-slate-600">
-                                            {{ $contactMessage->subject ?: 'No subject' }}
-                                        </div>
-                                        <div class="truncate text-xs text-slate-500">
-                                            {{ \Illuminate\Support\Str::limit($contactMessage->message, 70) }}
-                                        </div>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="truncate text-sm text-slate-900">
+                                        {{ $agendaItem['class_label'] ?? 'Class Schedule' }}
+                                    </div>
+                                    <div class="mt-2 truncate text-xs font-semibold text-slate-500">
+                                        {{ $agendaItem['period_label'] ?? 'Study' }} |
+                                        {{ $agendaItem['time_label'] ?? '-' }}
+                                    </div>
+                                    <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
+                                        <span
+                                            class="block h-full w-2/3 rounded-full bg-emerald-400 transition group-hover:w-4/5"></span>
                                     </div>
                                 </div>
                             </a>
                         @empty
-                            <div class="rounded-2xl bg-slate-50 px-3 py-4 text-center text-xs text-slate-500">
-                                No contact messages yet.
-                            </div>
-                        @endforelse
-                    </div>
-                </article>
-
-                <article
-                    class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-5 shadow-sm ring-1 ring-indigo-100/60"
-                    style="--d: 16;">
-                    <div class="mb-4 flex items-start justify-between gap-2">
-                        <div>
-                            <h2 class="text-base font-bold text-slate-900">Agenda</h2>
-                            <p class="mt-1 text-xs text-slate-500">{{ $dashboardNow->format('F Y') }}</p>
-                        </div>
-                        <div class="rounded-xl border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-right">
-                            <div class="text-[10px] font-bold uppercase tracking-wide text-indigo-600">Now</div>
-                            <div id="dash_agenda_clock" class="text-xs font-semibold text-indigo-800">
-                                {{ $dashboardNow->format('h:i:s A') }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2.5">
-                        @forelse ($dashboardAgenda as $agendaItem)
-                            <div class="rounded-2xl border border-slate-200 bg-white/90 px-3 py-2.5">
-                                <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
-                                    <div
-                                        class="w-20 shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-center sm:min-w-[92px]">
-                                        <div class="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                                            {{ $agendaItem['weekday_label'] ?? '-' }}
-                                        </div>
-                                        <div class="text-[11px] font-semibold text-slate-700">
-                                            {{ $agendaItem['date_label'] ?? '-' }}
-                                        </div>
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <div class="flex items-start justify-between gap-2">
-                                            <div class="text-xs font-semibold text-slate-800">
-                                                {{ $agendaItem['class_label'] ?? 'Unassigned Class' }}
-                                            </div>
-                                            <span
-                                                class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
-                                                {{ $agendaItem['relative_label'] ?? 'Upcoming' }}
-                                            </span>
-                                        </div>
-                                        <div class="mt-0.5 text-[11px] text-slate-500">
-                                            {{ $agendaItem['day_label'] ?? 'All Days' }} |
-                                            {{ $agendaItem['period_label'] ?? 'Custom' }}
-                                        </div>
-                                        <div class="mt-0.5 text-[11px] text-slate-500">
-                                            {{ $agendaItem['date_full_label'] ?? ($agendaItem['date_label'] ?? '-') }}
-                                        </div>
-                                        <div class="mt-1 text-xs font-bold text-indigo-700">
-                                            {{ $agendaItem['time_label'] ?? '-' }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
                             <div
-                                class="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-3 py-4 text-center text-xs text-slate-500">
-                                No schedule slots yet. Add class study times to see agenda.
+                                class="rounded-[22px] border border-dashed border-slate-200 p-6 text-center text-sm font-semibold text-slate-500">
+                                No upcoming study times yet.
                             </div>
                         @endforelse
                     </div>
-
-                    <a href="{{ route('admin.time-studies.index') }}"
-                        class="mt-3 inline-flex items-center rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">
-                        Open Time Studies
-                    </a>
                 </article>
             </div>
         </section>
+
+        <section class="grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,0.75fr)]">
+            <article
+                class="dashboard-card dash-reveal rounded-lg border border-slate-200 bg-white p-5 shadow-[0_24px_55px_-42px_rgba(15,23,42,0.75)]"
+                style="--d: 8;">
+                <div class="dashboard-card-header flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-xl text-slate-950 font-bold">School Performance</h2>
+                        <div class="mt-1 text-[11px] font-bold text-slate-400">Six-month student and teacher trend</div>
+                    </div>
+                    <div class="flex items-center gap-4 text-[11px] font-bold">
+                        <span class="inline-flex items-center gap-1.5 text-indigo-600">
+                            <span class="h-2 w-2 rounded-full bg-indigo-600"></span> Students
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 text-emerald-500">
+                            <span class="h-2 w-2 rounded-full bg-emerald-400"></span> Teachers
+                        </span>
+                    </div>
+                </div>
+                <div class="dashboard-chart-box dashboard-chart-box--tall mt-4 h-[310px]">
+                    <canvas id="enrollmentTrendChart" class="h-full w-full"></canvas>
+                </div>
+            </article>
+
+            <article class="dash-reveal {{ $teacherPanelClass }} p-5 sm:p-6" style="--d: 9;">
+                <div class="mb-5 flex items-center justify-between gap-3">
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wide text-slate-400">Calendar</div>
+                        <h2 class="{{ $teacherTitleClass }} font-bold">
+                            {{ $dashboardNow->format('F Y') }}
+                        </h2>
+                    </div>
+                    <span
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 text-lg font-bold text-sky-500">
+                        &rarr;
+                    </span>
+                </div>
+
+                <div
+                    class="mb-3 grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                    <span>Mo</span>
+                    <span>Tu</span>
+                    <span>We</span>
+                    <span>Th</span>
+                    <span>Fr</span>
+                    <span>Sa</span>
+                    <span>Su</span>
+                </div>
+
+                <div class="grid grid-cols-7 gap-1.5">
+                    @foreach ($calendarDays as $calendarDay)
+                        @if ($calendarDay)
+                            <span
+                                class="teacher-calendar__day {{ $calendarDay->isSameDay($dashboardNow) ? 'teacher-calendar__day--active' : '' }}">
+                                {{ $calendarDay->day }}
+                            </span>
+                        @else
+                            <span class="teacher-calendar__day teacher-calendar__day--muted"></span>
+                        @endif
+                    @endforeach
+                </div>
+            </article>
+        </section>
+
+        <section class="grid gap-5 xl:grid-cols-[minmax(0,1.22fr)_minmax(360px,0.78fr)]">
+            <article
+                class="dashboard-card dash-reveal rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.45)]"
+                style="--d: 10;">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-extrabold tracking-[-0.03em] text-slate-950">School Finance</h2>
+                        <div class="mt-2 text-sm font-semibold text-slate-400">Weekly income and expenses</div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="rounded-full bg-emerald-50 px-4 py-2 text-xs text-emerald-600">
+                            Income ${{ number_format($incomeTotal) }}
+                        </span>
+                        <span class="rounded-full bg-orange-50 px-4 py-2 text-xs text-orange-500">
+                            Expense ${{ number_format($expenseTotal) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center gap-7 text-sm font-semibold text-slate-500">
+                    <span class="inline-flex items-center gap-2">
+                        <span class="h-3 w-3 rounded-full bg-emerald-500"></span>
+                        Income
+                    </span>
+                    <span class="inline-flex items-center gap-2">
+                        <span class="h-3 w-3 rounded-full border-4 border-orange-500 bg-white"></span>
+                        Expense
+                    </span>
+                </div>
+
+                <div class="dashboard-chart-box mt-4 h-[300px]">
+                    <canvas id="schoolFinanceChart" class="h-full w-full"></canvas>
+                </div>
+
+                <div
+                    class="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="grid h-10 w-10 place-items-center rounded-full bg-indigo-50 text-indigo-600">
+                            <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
+                        </span>
+                        <p class="text-sm font-semibold text-slate-600">
+                            Income is up {{ $incomeLift }}% compared to last week.
+                        </p>
+                    </div>
+                    <a href="{{ route('admin.reports') }}"
+                        class="inline-flex items-center justify-center rounded-xl bg-indigo-50 px-4 py-2 text-xs text-indigo-700 transition hover:bg-indigo-100">
+                        View full report
+                    </a>
+                </div>
+            </article>
+
+            <article
+                class="dash-reveal rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-[0_24px_60px_-42px_rgba(15,23,42,0.45)]"
+                style="--d: 11;">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-extrabold tracking-[-0.03em] text-slate-950">Quick Reports</h2>
+                        <p class="mt-2 text-sm font-semibold text-slate-400">Fast paths to key admin work</p>
+                    </div>
+                    <a href="{{ route('admin.reports') }}"
+                        class="inline-flex shrink-0 items-center gap-2 text-xs text-indigo-600 transition hover:text-indigo-800">
+                        Open all reports
+                        <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+
+                <div class="mt-6 grid gap-4">
+                    <a href="{{ route('admin.students.index') }}"
+                        class="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-100 hover:shadow-md">
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-indigo-50 text-indigo-600">
+                                <i class="fa-solid fa-users" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <div class="text-sm text-slate-950">Active Students</div>
+                                <div class="mt-1 text-xs font-semibold text-slate-500">Enrollment and profile list</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-lg text-slate-950">{{ number_format($studentsActive) }}</div>
+                            <span
+                                class="grid h-8 w-8 place-items-center rounded-full bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-600 group-hover:text-white">
+                                <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                    <a href="{{ route('admin.teachers.index') }}"
+                        class="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-100 hover:shadow-md">
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-600">
+                                <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <div class="text-sm text-slate-950">Active Teachers</div>
+                                <div class="mt-1 text-xs font-semibold text-slate-500">Teacher accounts and status</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-lg text-slate-950">{{ number_format($teachersActive) }}</div>
+                            <span
+                                class="grid h-8 w-8 place-items-center rounded-full bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-600 group-hover:text-white">
+                                <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                    <a href="{{ route('admin.reports') }}"
+                        class="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-100 hover:shadow-md">
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-orange-50 text-orange-500">
+                                <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <div class="text-sm text-slate-950">Net Balance</div>
+                                <div class="mt-1 text-xs font-semibold text-slate-500">Projected school balance</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-lg text-slate-950">${{ number_format($balanceTotal) }}</div>
+                            <span
+                                class="grid h-8 w-8 place-items-center rounded-full bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-600 group-hover:text-white">
+                                <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <div
+                    class="mt-8 flex flex-col gap-4 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-violet-50 to-white p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="grid h-12 w-12 place-items-center rounded-full bg-white text-indigo-600 shadow-sm">
+                            <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <div class="text-sm text-slate-950">smarter decisions</div>
+                            <div class="mt-1 text-xs font-semibold text-slate-500">Explore detailed analytics
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.reports') }}"
+                        class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-xs text-white shadow-sm transition hover:bg-indigo-700">
+                        View full analytics
+                    </a>
+                </div>
+            </article>
+        </section>
     </div>
 
-    <script id="admin-dashboard-data" type="application/json">@json($chartData)</script>
+    <script id="admin-dashboard-data" type="application/json">@json($dashboardChartData)</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @endsection

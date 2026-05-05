@@ -2,6 +2,7 @@
 
 @section('page')
     @php
+        $isHomepageUiPage = request()->routeIs('admin.homepage.index');
         $nameParts = preg_split('/\s+/', trim((string) $admin->name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
         $defaultFirstName = $nameParts[0] ?? '';
         $defaultLastName = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '';
@@ -17,21 +18,24 @@
         $faqPageErrors = $errors->faqPageUpdate;
         $contactPageErrors = $errors->contactPageUpdate;
         $footerPageErrors = $errors->footerPageUpdate;
-        $fallbackSettingsTab = 'profile';
+        $fallbackSettingsTab = $isHomepageUiPage ? 'home-page' : 'profile';
         foreach (
-            [
-                'footer-page' => $footerPageErrors,
-                'contact-page' => $contactPageErrors,
-                'faq-page' => $faqPageErrors,
-                'admission-page' => $admissionPageErrors,
-                'facility-page' => $facilityPageErrors,
-                'program-page' => $programPageErrors,
-                'navbar-page' => $navbarPageErrors,
-                'feature-page' => $featurePageErrors,
-                'about-page' => $aboutPageErrors,
-                'home-page' => $homePageErrors,
-                'password' => $passwordErrors,
-            ]
+            $isHomepageUiPage
+                ? [
+                    'footer-page' => $footerPageErrors,
+                    'contact-page' => $contactPageErrors,
+                    'faq-page' => $faqPageErrors,
+                    'admission-page' => $admissionPageErrors,
+                    'facility-page' => $facilityPageErrors,
+                    'program-page' => $programPageErrors,
+                    'navbar-page' => $navbarPageErrors,
+                    'feature-page' => $featurePageErrors,
+                    'about-page' => $aboutPageErrors,
+                    'home-page' => $homePageErrors,
+                ]
+                : [
+                    'password' => $passwordErrors,
+                ]
             as $tab => $bag
         ) {
             if ($bag->any()) {
@@ -82,6 +86,43 @@
         $footerLinkLimit = 8;
         $footerContactLimit = 8;
         $navbarLinkLimit = 10;
+        $settingsTabs = [
+            'profile',
+            'password',
+            'notifications',
+            'navbar-page',
+            'home-page',
+            'about-page',
+            'feature-page',
+            'program-page',
+            'facility-page',
+            'admission-page',
+            'faq-page',
+            'contact-page',
+            'footer-page',
+            'verification',
+        ];
+        $requestedSettingsTab = $isHomepageUiPage ? 'home-page' : (string) request()->query('tab', '');
+        if (in_array($requestedSettingsTab, $settingsTabs, true)) {
+            $settingsDefaultTab = $requestedSettingsTab;
+        }
+        $homepageUiTabs = [
+            'navbar-page',
+            'home-page',
+            'about-page',
+            'feature-page',
+            'program-page',
+            'facility-page',
+            'admission-page',
+            'faq-page',
+            'contact-page',
+            'footer-page',
+        ];
+        $accountSettingsTabs = ['profile', 'password', 'notifications', 'verification'];
+        $availableSettingsTabs = $isHomepageUiPage ? $homepageUiTabs : $accountSettingsTabs;
+        if (!in_array($settingsDefaultTab, $availableSettingsTabs, true)) {
+            $settingsDefaultTab = $isHomepageUiPage ? 'home-page' : 'profile';
+        }
         $iconColorValue = function ($value, string $fallback): string {
             $value = trim((string) $value);
 
@@ -120,7 +161,9 @@
 
     @include('admin.settings._styles')
 
-    <div id="admin-settings-page" class="stage space-y-6" data-settings-default-tab="{{ $settingsDefaultTab }}">
+    <div id="admin-settings-page" class="stage space-y-6"
+        data-settings-default-tab="{{ $settingsDefaultTab }}"
+        data-homepage-ui="{{ $isHomepageUiPage ? '1' : '0' }}">
         @include('admin.settings._header')
         @include('admin.settings._alerts')
 
@@ -129,20 +172,23 @@
                 @include('admin.settings._sidebar')
 
                 <div class="min-w-0">
-                    @include('admin.settings.panels.profile')
-                    @include('admin.settings.panels.password')
-                    @include('admin.settings.panels.notifications')
-                    @include('admin.settings.panels.navbar-page')
-                    @include('admin.settings.panels.home-page')
-                    @include('admin.settings.panels.about-page')
-                    @include('admin.settings.panels.feature-page')
-                    @include('admin.settings.panels.program-page')
-                    @include('admin.settings.panels.facility-page')
-                    @include('admin.settings.panels.admission-page')
-                    @include('admin.settings.panels.faq-page')
-                    @include('admin.settings.panels.contact-page')
-                    @include('admin.settings.panels.footer-page')
-                    @include('admin.settings.panels.verification')
+                    @if ($isHomepageUiPage)
+                        @include('admin.settings.panels.navbar-page')
+                        @include('admin.settings.panels.home-page')
+                        @include('admin.settings.panels.about-page')
+                        @include('admin.settings.panels.feature-page')
+                        @include('admin.settings.panels.program-page')
+                        @include('admin.settings.panels.facility-page')
+                        @include('admin.settings.panels.admission-page')
+                        @include('admin.settings.panels.faq-page')
+                        @include('admin.settings.panels.contact-page')
+                        @include('admin.settings.panels.footer-page')
+                    @else
+                        @include('admin.settings.panels.profile')
+                        @include('admin.settings.panels.password')
+                        @include('admin.settings.panels.notifications')
+                        @include('admin.settings.panels.verification')
+                    @endif
                 </div>
             </div>
         </section>

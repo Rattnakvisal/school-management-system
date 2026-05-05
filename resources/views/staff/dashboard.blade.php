@@ -258,7 +258,7 @@
                                 </span>
                             </div>
 
-                            <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+                            <div class="mt-5 flex items-end gap-1 text-2xl tracking-[-0.04em] text-slate-950">
                                 <span class="staff-animate-number"
                                     data-value="{{ $card['active'] }}">{{ number_format($card['active']) }}</span>
                                 <span class="pb-0.5 text-base font-extrabold text-slate-300">/
@@ -307,7 +307,7 @@
                                         <span
                                             class="block truncate text-[11px] font-semibold text-slate-400">{{ $item['meta'] }}</span>
                                     </span>
-                                    <span class="text-xs font-black text-slate-700">{{ $item['percent'] }}%</span>
+                                    <span class="text-xs text-slate-700">{{ $item['percent'] }}%</span>
                                 </a>
                             @endforeach
                         </div>
@@ -327,9 +327,9 @@
 
                 <section class="dash-reveal {{ $panelClass }} p-5 sm:p-6" style="--d: 5;">
                     <div class="mb-5 flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-black tracking-[-0.03em] text-slate-800">Teaching Lessons</h2>
+                        <h2 class="text-lg tracking-[-0.03em] text-slate-800">Teaching Lessons</h2>
                         <a href="{{ route('admin.time-studies.index') }}"
-                            class="rounded-full bg-[#f3f0ff] px-4 py-2 text-xs font-black text-indigo-500">View all</a>
+                            class="rounded-full bg-[#f3f0ff] px-4 py-2 text-xs text-indigo-500">View all</a>
                     </div>
 
                     <div class="space-y-3">
@@ -351,14 +351,14 @@
                                 </span>
 
                                 <div class="min-w-0">
-                                    <div class="text-sm font-black text-slate-800">Start from</div>
+                                    <div class="text-sm text-slate-800">Start from</div>
                                     <div class="mt-0.5 text-[11px] font-semibold text-slate-400">
                                         {{ $slot['day_label'] }}, {{ $slot['start'] }}
                                     </div>
                                 </div>
 
                                 <div class="min-w-0">
-                                    <div class="truncate text-sm font-black text-slate-800">{{ $slot['class_name'] }}
+                                    <div class="truncate text-sm text-slate-800">{{ $slot['class_name'] }}
                                     </div>
                                     <div class="mt-1 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-400">
                                         <span>{{ $slot['period'] }}</span>
@@ -366,7 +366,7 @@
                                     </div>
                                 </div>
 
-                                <div class="text-sm font-black text-slate-700">School Schedule</div>
+                                <div class="text-sm text-slate-700">School Schedule</div>
 
                                 <span class="js-staff-slot-status teacher-lesson__status teacher-lesson__status--default">
                                     Scheduled
@@ -383,8 +383,8 @@
 
                 <section class="dash-reveal {{ $panelClass }} p-5" style="--d: 6;">
                     <div class="mb-4 flex items-center justify-between gap-3">
-                        <h2 class="text-base font-black text-slate-800">Team Pulse</h2>
-                        <span class="text-xs font-black text-slate-400">Recent team</span>
+                        <h2 class="text-base text-slate-800">Team Pulse</h2>
+                        <span class="text-xs text-slate-400">Recent team</span>
                     </div>
                     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                         @forelse ($recentAccounts as $account)
@@ -403,12 +403,12 @@
                                             class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white {{ $isOnline ? 'bg-emerald-400' : 'bg-slate-300' }}"></span>
                                     </span>
                                     <span
-                                        class="rounded-full bg-[#f3f0ff] px-2.5 py-1 text-[10px] font-black capitalize text-indigo-500">
+                                        class="rounded-full bg-[#f3f0ff] px-2.5 py-1 text-[10px] capitalize text-indigo-500">
                                         {{ $account->role }}
                                     </span>
                                 </div>
                                 <span
-                                    class="mt-3 block truncate text-xs font-black text-slate-800">{{ $account->name ?: 'Team member' }}</span>
+                                    class="mt-3 block truncate text-xs text-slate-800">{{ $account->name ?: 'Team member' }}</span>
                                 <span
                                     class="mt-1 block truncate text-[11px] font-semibold text-slate-400">{{ $account->email ?: 'No email added' }}</span>
                             </div>
@@ -451,7 +451,7 @@
 
                 <section class="dash-reveal space-y-4" style="--d: 3;">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-base font-black text-slate-800">Upcoming Events</h2>
+                        <h2 class="text-base text-slate-800">Upcoming Events</h2>
                         <span class="text-slate-300">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                 <path
@@ -468,8 +468,7 @@
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="text-[11px] font-bold text-slate-400">{{ $slot['start'] }}</div>
                                     <div class="min-w-0 flex-1">
-                                        <div
-                                            class="truncate text-sm font-black text-slate-800 group-hover:text-indigo-600">
+                                        <div class="truncate text-sm text-slate-800 group-hover:text-indigo-600">
                                             {{ $slot['class_name'] }}
                                         </div>
                                         <div class="mt-1 line-clamp-2 text-[11px] font-medium leading-4 text-slate-400">
@@ -490,9 +489,9 @@
 
                 <section class="dash-reveal {{ $panelClass }} p-5" style="--d: 4;">
                     <div class="mb-4 flex items-center justify-between gap-3">
-                        <h2 class="text-base font-black text-slate-800">My Notes</h2>
+                        <h2 class="text-base text-slate-800">My Notes</h2>
                         <span
-                            class="rounded-full border border-indigo-100 bg-[#f7f5ff] px-3 py-1.5 text-[10px] font-black text-indigo-500">
+                            class="rounded-full border border-indigo-100 bg-[#f7f5ff] px-3 py-1.5 text-[10px] text-indigo-500">
                             {{ number_format($focusCount) }} open
                         </span>
                     </div>
@@ -509,8 +508,7 @@
                                     </svg>
                                 </span>
                                 <span class="min-w-0 flex-1">
-                                    <span
-                                        class="block truncate text-xs font-black text-slate-800 group-hover:text-indigo-600">
+                                    <span class="block truncate text-xs text-slate-800 group-hover:text-indigo-600">
                                         {{ $note['title'] }}
                                     </span>
                                     <span class="mt-0.5 block truncate text-[11px] font-semibold text-slate-400">
@@ -531,8 +529,8 @@
 
                 <section class="dash-reveal {{ $panelClass }} p-5" style="--d: 5;">
                     <div class="mb-4 flex items-center justify-between">
-                        <h2 class="text-base font-black text-slate-800">Messages</h2>
-                        <a href="{{ route('admin.contacts.index') }}" class="text-xs font-black text-indigo-500">View
+                        <h2 class="text-base text-slate-800">Messages</h2>
+                        <a href="{{ route('admin.contacts.index') }}" class="text-xs text-indigo-500">View
                             all</a>
                     </div>
                     <div class="space-y-3">
@@ -545,7 +543,7 @@
                                 </span>
                                 <span class="min-w-0">
                                     <span
-                                        class="block truncate text-xs font-black text-slate-800">{{ $message->name ?: 'Unknown Sender' }}</span>
+                                        class="block truncate text-xs text-slate-800">{{ $message->name ?: 'Unknown Sender' }}</span>
                                     <span
                                         class="mt-0.5 block truncate text-[11px] font-semibold text-slate-400">{{ $message->subject ?: 'No subject' }}</span>
                                 </span>

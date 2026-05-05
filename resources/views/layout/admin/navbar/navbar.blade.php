@@ -51,9 +51,11 @@
                         class="h-12 w-12 shrink-0 object-contain" />
 
                     <div x-show="!collapsed" x-transition class="min-w-0">
-                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">{{ $schoolBrandName ?? 'TechBridge Academy' }}
+                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">
+                            {{ $schoolBrandName ?? 'TechBridge Academy' }}
                         </div>
-                        <div class="truncate text-xs text-slate-500">{{ $schoolBrandTagline ?? $adminShellLabel . ' Dashboard' }}</div>
+                        <div class="truncate text-xs text-slate-500">
+                            {{ $schoolBrandTagline ?? $adminShellLabel . ' Dashboard' }}</div>
                     </div>
                 </a>
 
@@ -81,9 +83,147 @@
 
             {{-- Navigation --}}
             <div class="nav-scrollbar flex-1 overflow-y-auto px-3 py-4">
-                @include('layout.admin.navbar.partials.sidebar-navigation', [
-                    'contactUnread' => $contactUnread ?? 0,
-                ])
+                @php
+                    $currentRole = strtolower(trim((string) (auth()->user()?->role ?? 'admin')));
+                    $isStaffUser = $currentRole === 'staff';
+
+                    $item = fn($route, $label, $icon, $badge = 0) => [
+                        'route' => $route,
+                        'label' => $label,
+                        'icon' => $icon,
+                        'badge' => max((int) $badge, 0),
+                        'active' => request()->routeIs($route),
+                    ];
+
+                    $adminNavIconClasses = [
+                        'layout-dashboard' => 'fa-solid fa-table-columns',
+                        'users' => 'fa-solid fa-users',
+                        'user-cog' => 'fa-solid fa-user-gear',
+                        'shield' => 'fa-solid fa-shield-halved',
+                        'layers' => 'fa-solid fa-layer-group',
+                        'book-open' => 'fa-solid fa-book-open',
+                        'clock-3' => 'fa-solid fa-clock',
+                        'graduation-cap' => 'fa-solid fa-graduation-cap',
+                        'clipboard-check' => 'fa-solid fa-clipboard-check',
+                        'calendar-check' => 'fa-solid fa-calendar-check',
+                        'mail' => 'fa-solid fa-envelope',
+                        'flag' => 'fa-solid fa-flag',
+                        'chart-line' => 'fa-solid fa-chart-line',
+                        'palette' => 'fa-solid fa-palette',
+                        'settings' => 'fa-solid fa-gear',
+                    ];
+
+                    $managementItems = [
+                        $item('admin.students.index', 'Students', 'users'),
+                        $item('admin.teachers.index', 'Teachers', 'user-cog'),
+                        $item('admin.classes.index', 'Classes', 'layers'),
+                        $item('admin.subjects.index', 'Subjects', 'book-open'),
+                        $item('admin.time-studies.index', 'Schedule', 'clock-3'),
+                        $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
+                        $item('admin.contacts.index', 'Messages', 'mail', $contactUnread ?? 0),
+                    ];
+
+                    if (!$isStaffUser) {
+                        array_unshift($managementItems, $item('admin.admin-staff.index', 'Admin / Staff', 'shield'));
+                        $managementItems[] = $item('admin.mission.index', 'Mission', 'flag', $missionUnread ?? 0);
+                    } else {
+                        $managementItems[] = $item('staff.missions.index', 'Mission Events', 'flag');
+                    }
+
+                    $sections = [
+                        [
+                            'title' => 'Main',
+                            'items' => [
+                                $item('admin.dashboard', 'Dashboard', 'layout-dashboard'),
+                                $item('admin.reports', 'Reports', 'chart-line'),
+                            ],
+                        ],
+                        [
+                            'title' => 'Management',
+                            'items' => $managementItems,
+                        ],
+                        [
+                            'title' => 'Attendance',
+                            'items' => [
+                                $item(
+                                    'admin.attendance.teachers.index',
+                                    'Teacher Attendance',
+                                    'clipboard-check',
+                                    $teacherAttendanceUnread ?? 0,
+                                ),
+                                $item(
+                                    'admin.attendance.index',
+                                    'Student Attendance',
+                                    'calendar-check',
+                                    $studentAttendanceUnread ?? 0,
+                                ),
+                            ],
+                        ],
+                        [
+                            'title' => 'System',
+                            'items' => [
+                                $item('admin.homepage.index', 'Homepage UI', 'palette'),
+                                $item('admin.settings', 'Settings', 'settings'),
+                            ],
+                        ],
+                    ];
+                @endphp
+
+                <nav class="space-y-4">
+                    @foreach ($sections as $section)
+                        <div class="space-y-1.5">
+                            <div x-show="!collapsed"
+                                class="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                                {{ $section['title'] }}
+                            </div>
+
+                            <div class="space-y-1.5">
+                                @foreach ($section['items'] as $l)
+                                    <a href="{{ route($l['route']) }}"
+                                        class="group relative flex items-center rounded-2xl transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_14px_30px_-18px_rgba(79,70,229,0.8)]' : 'text-slate-700 hover:-translate-y-px hover:bg-white hover:text-slate-900 hover:shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]' }}"
+                                        :class="collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3'">
+
+                                        @if ($l['active'])
+                                            <span
+                                                class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white"></span>
+                                        @endif
+
+                                        <span
+                                            class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
+                                            <i class="{{ $adminNavIconClasses[$l['icon']] ?? 'fa-solid fa-gear' }} text-base"
+                                                aria-hidden="true"></i>
+
+                                            @if ($l['icon'] === 'mail' && ($l['badge'] ?? 0) > 0)
+                                                <span
+                                                    class="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 {{ $l['active'] ? 'ring-indigo-600' : 'ring-white' }}"></span>
+                                            @endif
+                                        </span>
+
+                                        <div x-show="!collapsed" x-transition class="min-w-0 flex-1">
+                                            <div class="truncate text-sm font-semibold">{{ $l['label'] }}</div>
+                                        </div>
+
+                                        <div x-show="!collapsed">
+                                            @if (($l['badge'] ?? 0) > 0)
+                                                <span
+                                                    class="inline-flex min-w-[24px] items-center justify-center rounded-full px-2 py-1 text-[10px] font-bold {{ $l['active'] ? 'bg-white text-indigo-700' : 'bg-red-100 text-red-700' }}">
+                                                    {{ $l['badge'] > 99 ? '99+' : $l['badge'] }}
+                                                </span>
+                                            @elseif ($l['active'])
+                                                <span class="h-2.5 w-2.5 rounded-full bg-white"></span>
+                                            @endif
+                                        </div>
+
+                                        <div x-show="collapsed"
+                                            class="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg group-hover:block lg:group-hover:block">
+                                            {{ $l['label'] }}
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </nav>
             </div>
             {{-- Footer --}}
             <div class="border-t border-slate-100 p-4 shrink-0" x-show="!collapsed" x-transition>
@@ -305,17 +445,6 @@
                                     <div class="text-xs text-slate-500">{{ auth()->user()->email }}</div>
                                 </div>
 
-                                <a href="#"
-                                    class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
-                                    <span class="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center">
-                                        <svg class="h-5 w-5 text-indigo-600" viewBox="0 0 24 24" fill="currentColor">
-                                            <path
-                                                d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4Zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5Z" />
-                                        </svg>
-                                    </span>
-                                    Profile
-                                </a>
-
                                 <a href="{{ route('admin.settings') }}"
                                     class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
                                     <span class="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center">
@@ -351,9 +480,6 @@
                 @yield('page')
             </main>
 
-            <footer class="px-4 py-4 text-xs text-slate-500 sm:px-6">
-                &copy; {{ date('Y') }} {{ $schoolBrandName ?? 'TechBridge Academy' }} &bull; {{ $adminShellLabel }} Panel
-            </footer>
         </div>
     </div>
 

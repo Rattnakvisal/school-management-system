@@ -63,12 +63,13 @@
         $panelClass =
             'rounded-[28px] border border-white/70 bg-white/85 shadow-[0_20px_60px_-28px_rgba(15,23,42,0.18)] backdrop-blur-sm';
         $panelPadding = 'p-5 sm:p-6';
-        $eyebrowClass = 'text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-400';
-        $titleClass = 'text-lg font-black tracking-[-0.04em] text-slate-900';
+        $eyebrowClass = 'text-[11px] uppercase tracking-[0.18em] text-slate-400';
+        $titleClass = 'text-lg font-bold tracking-[-0.04em] text-slate-900';
         $softText = 'text-sm text-slate-500';
     @endphp
 
-    <div class="dashboard-stage space-y-6 bg-[linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)] font-[Plus Jakarta Sans] tracking-[-0.01em]">
+    <div
+        class="dashboard-stage space-y-6 bg-[linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)] font-[Plus Jakarta Sans] tracking-[-0.01em]">
         {{-- Hero / Profile --}}
         <section
             class="dash-reveal relative overflow-hidden rounded-[32px] border border-white/70 bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(167,139,250,0.10),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.98))] px-6 py-6 shadow-[0_24px_70px_-30px_rgba(15,23,42,0.22)] sm:px-8 sm:py-8"
@@ -82,11 +83,11 @@
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div class="space-y-2">
                         <span
-                            class="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.16em] text-blue-700">
+                            class="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-blue-700">
                             Student dashboard
                         </span>
                         <h1
-                            class="font-[Sora] text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-[0.95] tracking-[-0.06em] text-slate-900">
+                            class="font-[Sora] text-[clamp(1.8rem,4vw,2.8rem)] font-bold leading-[0.95] tracking-[-0.06em] text-slate-900">
                             Welcome back,
                             <span class="bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">
                                 {{ $firstName }}
@@ -112,7 +113,7 @@
 
                         <div class="min-w-0">
                             <h2
-                                class="truncate font-[Sora] text-[clamp(1.25rem,3vw,1.75rem)] font-extrabold tracking-[-0.04em] text-slate-900">
+                                class="truncate font-[Sora] text-[clamp(1.25rem,3vw,1.75rem)] tracking-[-0.04em] text-slate-900">
                                 {{ $fullName }}
                             </h2>
 
@@ -123,45 +124,45 @@
                                 @endif
                             </p>
 
-                            <p class="mt-1 text-sm font-semibold text-slate-500">
+                            <p class="mt-1 text-sm text-slate-500">
                                 {{ $studentSubtitle }}
                             </p>
                         </div>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
-                        <article class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
+                        <article
+                            class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
                             <span class="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Student
                                 ID</span>
-                            <strong
-                                class="mt-2 block break-words font-[Sora] text-[0.98rem] font-extrabold text-slate-800">
+                            <strong class="mt-2 block break-words font-[Sora] text-[0.98rem] text-slate-800">
                                 {{ $displayStudentId }}
                             </strong>
                         </article>
 
-                        <article class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
+                        <article
+                            class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
                             <span
                                 class="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Phone</span>
-                            <strong
-                                class="mt-2 block break-words font-[Sora] text-[0.98rem] font-extrabold text-slate-800">
+                            <strong class="mt-2 block break-words font-[Sora] text-[0.98rem] text-slate-800">
                                 {{ $studentPhone !== '' ? $studentPhone : 'Not set' }}
                             </strong>
                         </article>
 
-                        <article class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
+                        <article
+                            class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
                             <span
                                 class="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Email</span>
-                            <strong
-                                class="mt-2 block break-words font-[Sora] text-[0.98rem] font-extrabold text-slate-800">
+                            <strong class="mt-2 block break-words font-[Sora] text-[0.98rem] text-slate-800">
                                 {{ $studentEmail !== '' ? $studentEmail : 'Not set' }}
                             </strong>
                         </article>
 
-                        <article class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
+                        <article
+                            class="student-hover-card dash-hover rounded-[22px] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.16)]">
                             <span
                                 class="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Address</span>
-                            <strong
-                                class="mt-2 block break-words font-[Sora] text-[0.98rem] font-extrabold text-slate-800">
+                            <strong class="mt-2 block break-words font-[Sora] text-[0.98rem] text-slate-800">
                                 {{ $studentAddress }}
                             </strong>
                         </article>
@@ -233,7 +234,7 @@
 
                             <div>
                                 <strong
-                                    class="student-animate-number block font-[Sora] text-[1.15rem] font-extrabold tracking-[-0.04em] text-slate-800"
+                                    class="student-animate-number block font-[Sora] text-[1.15rem] tracking-[-0.04em] text-slate-800"
                                     data-value="{{ (int) $card['value'] }}" data-suffix=" Days">
                                     0 Days
                                 </strong>
@@ -256,8 +257,7 @@
                             <p class="mt-1 {{ $softText }}">Total class days recorded this month</p>
                         </div>
 
-                        <div
-                            class="student-animate-number font-[Sora] text-[clamp(2rem,4vw,2.6rem)] font-normal tracking-[-0.05em] text-slate-800 max-sm:text-left"
+                        <div class="student-animate-number font-[Sora] text-[clamp(2rem,4vw,2.6rem)] font-normal tracking-[-0.05em] text-slate-800 max-sm:text-left"
                             data-value="{{ (int) ($attendanceThisMonth ?? 0) }}" data-suffix=" Days">
                             0 Days
                         </div>
@@ -272,8 +272,7 @@
                             <p class="mt-1 {{ $softText }}">Yearly attendance overview</p>
                         </div>
 
-                        <div
-                            class="student-animate-number font-[Sora] text-[clamp(2.3rem,4vw,3.25rem)] font-normal leading-none tracking-[-0.06em] text-slate-900"
+                        <div class="student-animate-number font-[Sora] text-[clamp(2.3rem,4vw,3.25rem)] font-normal leading-none tracking-[-0.06em] text-slate-900"
                             data-value="{{ (float) ($attendanceRate ?? 0) }}" data-decimals="1" data-suffix="%">
                             0.0%
                         </div>
@@ -289,9 +288,8 @@
                                 </span>
 
                                 <strong
-                                    class="student-animate-number font-[Sora] text-[1.08rem] font-extrabold tracking-[-0.04em] text-slate-800"
-                                    data-value="{{ (float) ($trend['value'] ?? 0) }}" data-decimals="1"
-                                    data-suffix="%">
+                                    class="student-animate-number font-[Sora] text-[1.08rem] tracking-[-0.04em] text-slate-800"
+                                    data-value="{{ (float) ($trend['value'] ?? 0) }}" data-decimals="1" data-suffix="%">
                                     0.0%
                                 </strong>
 
@@ -347,9 +345,9 @@
                             };
                         @endphp
 
-                        <article class="student-hover-card dash-hover flex flex-col gap-3 rounded-[24px] bg-slate-50/70 p-4">
-                            <div
-                                class="student-animate-number text-center font-[Sora] text-[1.75rem] font-extrabold tracking-[-0.05em] text-slate-800"
+                        <article
+                            class="student-hover-card dash-hover flex flex-col gap-3 rounded-[24px] bg-slate-50/70 p-4">
+                            <div class="student-animate-number text-center font-[Sora] text-[1.75rem] tracking-[-0.05em] text-slate-800"
                                 data-value="{{ (int) $card['value'] }}">
                                 0
                             </div>
@@ -357,8 +355,7 @@
                             <div
                                 class="relative flex min-h-[8rem] flex-1 items-end overflow-hidden rounded-[1.5rem] {{ $trackClass }} md:min-h-[10rem] xl:min-h-[14rem]">
                                 <div class="student-summary-fill w-full rounded-[1.25rem] {{ $fillClass }}"
-                                    data-height="{{ $card['height'] }}"
-                                    style="height: {{ $card['height'] }}%"></div>
+                                    data-height="{{ $card['height'] }}" style="height: {{ $card['height'] }}%"></div>
                             </div>
 
                             <div class="text-center text-[0.82rem] font-bold text-slate-500">
@@ -394,7 +391,7 @@
                             <article
                                 class="student-hover-card dash-hover flex flex-col gap-3 rounded-[22px] border border-slate-100 bg-slate-50/70 p-4 transition hover:bg-white sm:flex-row sm:items-center sm:justify-between">
                                 <div>
-                                    <strong class="block text-[0.95rem] font-extrabold text-slate-800">
+                                    <strong class="block text-[0.95rem] text-slate-800">
                                         {{ optional($record->attendance_date)->format('d M Y') ?? '-' }}
                                     </strong>
                                     <span class="mt-1 block text-[0.8rem] text-slate-400">
@@ -403,7 +400,7 @@
                                 </div>
 
                                 <span
-                                    class="inline-flex items-center justify-center rounded-full px-3 py-2 text-[0.74rem] font-extrabold sm:min-w-[6.5rem] {{ $badgeClass }}">
+                                    class="inline-flex items-center justify-center rounded-full px-3 py-2 text-[0.74rem] sm:min-w-[6.5rem] {{ $badgeClass }}">
                                     {{ ucfirst((string) $record->status) }}
                                 </span>
                             </article>
@@ -428,7 +425,7 @@
                     @forelse ($majorSubjects->take(3) as $subject)
                         <article
                             class="student-hover-card dash-hover rounded-[22px] border border-emerald-100 bg-[linear-gradient(180deg,#ecfdf5,#ffffff)] p-4 shadow-[0_10px_24px_-20px_rgba(16,185,129,0.22)]">
-                            <strong class="block text-[0.95rem] font-extrabold text-slate-800">
+                            <strong class="block text-[0.95rem] text-slate-800">
                                 {{ $subject->name }}
                             </strong>
                             <span class="mt-1 block text-[0.8rem] text-slate-400">
@@ -439,7 +436,7 @@
                         @forelse ($classSubjects->take(3) as $subject)
                             <article
                                 class="student-hover-card dash-hover rounded-[22px] border border-sky-100 bg-[linear-gradient(180deg,#f0f9ff,#ffffff)] p-4 shadow-[0_10px_24px_-20px_rgba(14,165,233,0.22)]">
-                                <strong class="block text-[0.95rem] font-extrabold text-slate-800">
+                                <strong class="block text-[0.95rem] text-slate-800">
                                     {{ $subject->name }}
                                 </strong>
                                 <span class="mt-1 block text-[0.8rem] text-slate-400">

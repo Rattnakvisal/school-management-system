@@ -45,8 +45,8 @@
         $panelClass =
             'rounded-[28px] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.22)] backdrop-blur-sm';
         $panelPadding = 'p-5 sm:p-6';
-        $titleClass = 'text-lg font-extrabold tracking-[-0.03em] text-slate-900';
-        $mutedLinkClass = 'text-sm font-semibold text-slate-400 transition hover:text-slate-600';
+        $titleClass = 'text-lg tracking-[-0.03em] text-slate-900';
+        $mutedLinkClass = 'text-sm text-slate-400 transition hover:text-slate-600';
     @endphp
 
     <div class="dashboard-stage space-y-6">
@@ -64,12 +64,11 @@
                         <div class="space-y-5">
                             <div class="space-y-3">
                                 <span
-                                    class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-indigo-700">
+                                    class="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs uppercase tracking-[0.14em] text-indigo-700">
                                     Teacher dashboard
                                 </span>
 
-                                <h1
-                                    class="text-[clamp(2rem,4vw,3.25rem)] font-black leading-[0.95] tracking-[-0.06em] text-slate-900">
+                                <h1 class="text-[clamp(2rem,4vw,3.25rem)] leading-[0.95] tracking-[-0.06em] text-slate-900">
                                     Welcome back,
                                     <span
                                         class="bg-gradient-to-r from-indigo-700 to-blue-500 bg-clip-text text-transparent">
@@ -83,34 +82,37 @@
 
                                 <p class="max-w-2xl text-[1rem] leading-7 text-slate-500 sm:text-[1.05rem]">
                                     Today's subject coverage is
-                                    <strong class="teacher-animate-number font-extrabold text-rose-500"
-                                        data-value="{{ $coveragePercent }}" data-suffix="%">0%</strong>.
+                                    <strong class="teacher-animate-number text-rose-500" data-value="{{ $coveragePercent }}"
+                                        data-suffix="%">0%</strong>.
                                     {{ $progressLine }}
                                 </p>
                             </div>
 
                             <div class="flex flex-wrap gap-3">
                                 <span
-                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700 ring-1 ring-blue-100">
-                                    Classes <span class="teacher-animate-number ml-1" data-value="{{ (int) $stats['classes'] }}">0</span>
+                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm text-blue-700 ring-1 ring-blue-100">
+                                    Classes <span class="teacher-animate-number ml-1"
+                                        data-value="{{ (int) $stats['classes'] }}">0</span>
                                 </span>
                                 <span
-                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700 ring-1 ring-amber-100">
-                                    Students <span class="teacher-animate-number ml-1" data-value="{{ (int) $stats['students'] }}">0</span>
+                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-amber-50 px-4 py-2 text-sm text-amber-700 ring-1 ring-amber-100">
+                                    Students <span class="teacher-animate-number ml-1"
+                                        data-value="{{ (int) $stats['students'] }}">0</span>
                                 </span>
                                 <span
-                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 ring-1 ring-rose-100">
-                                    Subjects <span class="teacher-animate-number ml-1" data-value="{{ (int) $stats['subjects'] }}">0</span>
+                                    class="teacher-stat-pill inline-flex items-center rounded-full bg-rose-50 px-4 py-2 text-sm text-rose-700 ring-1 ring-rose-100">
+                                    Subjects <span class="teacher-animate-number ml-1"
+                                        data-value="{{ (int) $stats['subjects'] }}">0</span>
                                 </span>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-3">
                                 <a href="{{ route('teacher.schedule.index', ['day' => $todayKey]) }}"
-                                    class="dash-hover inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-3 text-sm font-bold text-white shadow-[0_18px_30px_-16px_rgba(59,130,246,0.5)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_34px_-16px_rgba(59,130,246,0.55)]">
+                                    class="dash-hover inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-3 text-sm text-white shadow-[0_18px_30px_-16px_rgba(59,130,246,0.5)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_34px_-16px_rgba(59,130,246,0.55)]">
                                     Open today schedule
                                 </a>
 
-                                <span class="text-sm font-semibold text-slate-400">
+                                <span class="text-sm text-slate-400">
                                     {{ $todayLabel }} • {{ $todayDate->format('M d, Y') }}
                                 </span>
                             </div>
@@ -161,7 +163,7 @@
                                             class="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm">
 
                                         <div class="min-w-0">
-                                            <div class="truncate text-[15px] font-bold text-slate-800">
+                                            <div class="truncate text-[15px] text-slate-800">
                                                 {{ $student['name'] }}
                                             </div>
                                             <div class="mt-0.5 truncate text-xs text-slate-400">
@@ -171,12 +173,13 @@
                                     </div>
 
                                     <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                                        <span class="teacher-progress-fill block h-full rounded-full bg-gradient-to-r {{ $barClass }}"
+                                        <span
+                                            class="teacher-progress-fill block h-full rounded-full bg-gradient-to-r {{ $barClass }}"
                                             data-width="{{ max(0, min(100, (float) $progressPercent)) }}"
                                             style="width: {{ $progressPercent }}%"></span>
                                     </div>
 
-                                    <div class="teacher-animate-number text-sm font-extrabold text-slate-800"
+                                    <div class="teacher-animate-number text-sm text-slate-800"
                                         @if ($student['attendance_percent'] !== null) data-value="{{ (float) $student['attendance_percent'] }}" data-suffix="%" @endif>
                                         {{ $student['attendance_percent'] !== null ? '0%' : $progressLabel }}
                                     </div>
@@ -198,8 +201,7 @@
                                 <p class="mt-1 text-sm text-slate-400">Your progress for today</p>
                             </div>
 
-                            <span
-                                class="rounded-full bg-amber-50 px-4 py-1.5 text-xs font-bold text-amber-700 ring-1 ring-amber-100">
+                            <span class="rounded-full bg-amber-50 px-4 py-1.5 text-xs text-amber-700 ring-1 ring-amber-100">
                                 Today
                             </span>
                         </div>
@@ -221,7 +223,7 @@
 
                         <div class="mt-5 grid grid-cols-2 gap-4 border-t border-slate-100 pt-5">
                             <div class="dash-hover rounded-2xl bg-slate-50 p-4">
-                                <strong class="teacher-animate-number block text-lg font-extrabold text-slate-900"
+                                <strong class="teacher-animate-number block text-lg text-slate-900"
                                     data-value="{{ (int) $stats['todaySchedules'] }}">
                                     0
                                 </strong>
@@ -229,7 +231,7 @@
                             </div>
 
                             <div class="dash-hover rounded-2xl bg-slate-50 p-4">
-                                <strong class="teacher-animate-number block text-lg font-extrabold text-slate-900"
+                                <strong class="teacher-animate-number block text-lg text-slate-900"
                                     data-value="{{ $coveragePercent }}" data-suffix="%">
                                     0%
                                 </strong>
@@ -262,12 +264,12 @@
                                 class="dash-hover grid items-center gap-4 rounded-3xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white lg:grid-cols-[minmax(0,1.6fr)_minmax(140px,1fr)_auto_auto]">
                                 <div class="flex min-w-0 items-center gap-4">
                                     <span
-                                        class="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-extrabold {{ $badgeClass }}">
+                                        class="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm {{ $badgeClass }}">
                                         {{ $classItem['badge'] }}
                                     </span>
 
                                     <div class="min-w-0">
-                                        <div class="truncate text-[15px] font-extrabold text-slate-800">
+                                        <div class="truncate text-[15px] text-slate-800">
                                             {{ $classItem['title'] }}
                                         </div>
                                         <div class="truncate text-sm text-slate-400">
@@ -276,7 +278,7 @@
                                     </div>
                                 </div>
 
-                                <div class="text-sm font-semibold text-slate-600">
+                                <div class="text-sm text-slate-600">
                                     {{ $classItem['action'] }}
                                 </div>
 
@@ -284,7 +286,7 @@
                                     {{ $classItem['members'] }} members
                                 </div>
 
-                                <div class="text-sm font-extrabold text-slate-700">
+                                <div class="text-sm text-slate-700">
                                     {{ $classItem['capacity_label'] }}
                                 </div>
                             </div>
@@ -303,10 +305,10 @@
                 <section class="dash-reveal {{ $panelClass }} {{ $panelPadding }}" style="--d: 2;">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <div class="text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-400">
+                            <div class="text-[11px] uppercase tracking-[0.16em] text-slate-400">
                                 Teacher panel
                             </div>
-                            <div class="mt-1 text-base font-extrabold text-slate-900">
+                            <div class="mt-1 text-base text-slate-900">
                                 {{ $teacherName }}
                             </div>
                             <div class="mt-1 text-sm text-slate-400">
@@ -324,19 +326,19 @@
                 <section class="dash-reveal {{ $panelClass }} {{ $panelPadding }}" style="--d: 3;">
                     <div class="mb-5 flex items-center justify-between gap-3">
                         <div>
-                            <div class="text-xs font-bold uppercase tracking-wide text-slate-400">Calendar</div>
+                            <div class="text-xs uppercase tracking-wide text-slate-400">Calendar</div>
                             <h2 id="teacher-dashboard-calendar-label" class="{{ $titleClass }}">
                                 {{ $todayDate->format('F Y') }}
                             </h2>
                         </div>
                         <span
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 text-lg font-bold text-sky-500">
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 text-lg text-sky-500">
                             →
                         </span>
                     </div>
 
                     <div
-                        class="mb-3 grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        class="mb-3 grid grid-cols-7 gap-1.5 text-center text-[11px] uppercase tracking-wide text-slate-400">
                         <span>Mo</span>
                         <span>Tu</span>
                         <span>We</span>
@@ -375,7 +377,7 @@
                                 <span class="w-1 shrink-0 rounded-full bg-gradient-to-b {{ $accentClass }}"></span>
 
                                 <div class="min-w-0 flex-1">
-                                    <div class="text-[15px] font-extrabold text-slate-900">
+                                    <div class="text-[15px] text-slate-900">
                                         {{ $lesson['subject_label'] }}
                                     </div>
                                     <div class="mt-1 text-xs text-slate-400">
@@ -387,7 +389,7 @@
                                 </div>
 
                                 <span
-                                    class="js-dash-slot-status self-center whitespace-nowrap rounded-full bg-slate-100 px-3 py-1.5 text-[11px] font-extrabold text-slate-500">
+                                    class="js-dash-slot-status self-center whitespace-nowrap rounded-full bg-slate-100 px-3 py-1.5 text-[11px] text-slate-500">
                                     Scheduled
                                 </span>
                             </article>
@@ -427,7 +429,7 @@
                                 </span>
 
                                 <div class="min-w-0">
-                                    <div class="truncate text-sm font-bold text-slate-900">
+                                    <div class="truncate text-sm text-slate-900">
                                         {{ $notice->title }}
                                     </div>
                                     <div class="mt-0.5 text-xs text-slate-400">

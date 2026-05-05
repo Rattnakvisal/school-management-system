@@ -490,14 +490,6 @@
                     filterOpen: false,
                     activeTab: @js(in_array($tab, ['class', 'subject', 'teacher'], true) ? $tab : 'class'),
                     switchTab(tab) {
-                        if (tab === 'teacher') {
-                            const teacherUrl = new URL(@js(route('admin.time-studies.index')), window.location.origin);
-                            teacherUrl.searchParams.set('tab', 'teacher');
-                            teacherUrl.searchParams.set('per_page', @js((string) $perPage));
-                            window.location.href = teacherUrl.toString();
-                            return;
-                        }
-                
                         this.activeTab = tab;
                         const url = new URL(window.location.href);
                         url.searchParams.set('tab', tab);

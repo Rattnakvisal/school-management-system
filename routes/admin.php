@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\TeacherAttendanceController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\MissionEventController;
+use App\Http\Controllers\Admin\ReportsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'admin'])
@@ -20,7 +21,10 @@ Route::middleware(['auth', 'admin'])
     ->name('admin.')
     ->group(function () {
 
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', DashboardController::class)->name('dashboard');
+        Route::get('/reports', ReportsController::class)->name('reports');
+        Route::get('/reports/export/pdf', [ReportsController::class, 'exportPdf'])->name('reports.export.pdf');
+        Route::get('/reports/export/excel', [ReportsController::class, 'exportExcel'])->name('reports.export.excel');
         Route::get('/admin-staff', [AdminStaffController::class, 'index'])->name('admin-staff.index');
         Route::post('/admin-staff', [AdminStaffController::class, 'store'])->name('admin-staff.store');
         Route::put('/admin-staff/{account}', [AdminStaffController::class, 'update'])->name('admin-staff.update');
@@ -75,6 +79,7 @@ Route::middleware(['auth', 'admin'])
         Route::put('/mission/{mission}', [MissionEventController::class, 'update'])->name('mission.update');
         Route::patch('/mission/{mission}/status', [MissionEventController::class, 'toggleStatus'])->name('mission.status');
         Route::delete('/mission/{mission}', [MissionEventController::class, 'destroy'])->name('mission.destroy');
+        Route::get('/homepage-ui', [SettingsController::class, 'index'])->name('homepage.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
         Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');

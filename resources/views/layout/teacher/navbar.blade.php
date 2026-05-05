@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Teacher Dashboard' }}</title>
-
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -466,67 +464,6 @@
                 }
             }
         }
-    </script>
-    <script>
-        // Logout when user closes the tab/window (but avoid on internal navigation)
-        (function() {
-            const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-            const logoutUrl = '{{ route('logout') }}';
-            const token = tokenMeta ? tokenMeta.getAttribute('content') : null;
-
-            if (!token) return;
-
-            let navigatingInternally = false;
-
-            // Mark internal navigation clicks/forms briefly so we don't logout when user navigates inside the app
-            // The flag is short-lived (1s) so it doesn't permanently block logout after many clicks.
-            document.addEventListener('click', (e) => {
-                const a = e.target.closest && e.target.closest('a');
-                if (!a || !a.href) return;
-                // ignore links that open in new tab/window or use modifiers
-                if (a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                try {
-                    const url = new URL(a.href, location.href);
-                    if (url.origin === location.origin) {
-                        navigatingInternally = true;
-                        setTimeout(() => {
-                            navigatingInternally = false;
-                        }, 1000);
-                    }
-                } catch (err) {
-                    // ignore
-                }
-            }, {
-                capture: true
-            });
-
-            document.addEventListener('submit', (e) => {
-                navigatingInternally = true;
-                setTimeout(() => {
-                    navigatingInternally = false;
-                }, 1000);
-            }, {
-                capture: true
-            });
-
-            const doLogout = () => {
-                if (navigatingInternally) return;
-                try {
-                    const body = new URLSearchParams();
-                    body.append('_token', token);
-                    const blob = new Blob([body.toString()], {
-                        type: 'application/x-www-form-urlencoded'
-                    });
-                    navigator.sendBeacon(logoutUrl, blob);
-                } catch (e) {
-                    // best-effort only
-                }
-            };
-
-            // pagehide is the most reliable across browsers; also listen for beforeunload as a fallback
-            window.addEventListener('pagehide', doLogout);
-            window.addEventListener('beforeunload', doLogout);
-        })();
     </script>
     <script src="//unpkg.com/alpinejs" defer></script>
 </body>

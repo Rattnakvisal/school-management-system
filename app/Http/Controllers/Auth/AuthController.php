@@ -124,8 +124,8 @@ class AuthController extends Controller
         $remember = (bool) $request->session()->get(self::OTP_SESSION_REMEMBER_KEY, false);
         Auth::guard('web')->login($user, $remember);
 
-        // Set session last activity timestamp for session timeout tracking
-        $request->session()->put('last_activity', time());
+
+
 
         $request->session()->forget([
             self::OTP_SESSION_USER_KEY,

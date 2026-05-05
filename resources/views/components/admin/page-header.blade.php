@@ -114,6 +114,18 @@
                             </svg>
                         @break
 
+                        @case('palette')
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12 3a9 9 0 0 0 0 18h1.3a1.9 1.9 0 0 0 1.3-3.3 1.9 1.9 0 0 1 1.3-3.3H18a3 3 0 0 0 3-3A8.4 8.4 0 0 0 12 3Z" />
+                                <circle cx="7.5" cy="11" r=".8" />
+                                <circle cx="9.5" cy="7.7" r=".8" />
+                                <circle cx="13.5" cy="7.4" r=".8" />
+                                <circle cx="16.5" cy="10.2" r=".8" />
+                            </svg>
+                        @break
+
                         @case('settings')
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
                                 stroke-linecap="round" stroke-linejoin="round">

@@ -27,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
             'layout.teacher.navbar',
             'layout.students.navbar',
             'admin.dashboard',
+            'admin.reports',
         ], function ($view) {
             $brand = Schema::hasTable('home_page_items')
                 ? HomePageItem::query()->where('section', 'brand')->where('key', 'main')->first()

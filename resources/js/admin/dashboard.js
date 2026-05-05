@@ -53,6 +53,11 @@ document.addEventListener("DOMContentLoaded", () => {
         present: [],
         absent: [],
     };
+    const financeData = charts.finance ?? {
+        labels: [],
+        income: [],
+        expense: [],
+    };
 
     Chart.defaults.responsive = true;
     Chart.defaults.maintainAspectRatio = false;
@@ -157,16 +162,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         label: "Teachers",
                         data: trendData.teachers,
                         borderWidth: 3,
-                        borderColor: "#0ea5e9",
+                        borderColor: "#22c55e",
                         backgroundColor: gradient(
                             ctx,
-                            "rgba(14,165,233,0.28)",
-                            "rgba(14,165,233,0.02)",
+                            "rgba(34,197,94,0.24)",
+                            "rgba(34,197,94,0.02)",
                         ),
                         fill: true,
                         tension: 0.35,
                         pointRadius: 3,
-                        pointBackgroundColor: "#0ea5e9",
+                        pointBackgroundColor: "#22c55e",
                     },
                 ],
             },
@@ -200,6 +205,81 @@ document.addEventListener("DOMContentLoaded", () => {
                 cutout: "68%",
                 layout: { padding },
                 plugins: { legend: legend("top", "bottom") },
+            },
+        });
+    }
+
+    const financeCanvas = document.getElementById("schoolFinanceChart");
+    if (financeCanvas) {
+        const ctx = financeCanvas.getContext("2d");
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: financeData.labels?.length
+                    ? financeData.labels
+                    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+                datasets: [
+                    {
+                        label: "Income",
+                        data: financeData.income?.length
+                            ? financeData.income
+                            : [24, 32, 28, 50, 26, 41, 38],
+                        borderWidth: 4,
+                        borderColor: "#22c55e",
+                        backgroundColor: gradient(
+                            ctx,
+                            "rgba(34,197,94,0.22)",
+                            "rgba(34,197,94,0.03)",
+                        ),
+                        fill: true,
+                        tension: 0.42,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: "#22c55e",
+                        pointBorderColor: "#ffffff",
+                        pointBorderWidth: 2,
+                    },
+                    {
+                        label: "Expense",
+                        data: financeData.expense?.length
+                            ? financeData.expense
+                            : [18, 25, 21, 31, 20, 29, 24],
+                        borderWidth: 4,
+                        borderColor: "#f97316",
+                        backgroundColor: gradient(
+                            ctx,
+                            "rgba(249,115,22,0.18)",
+                            "rgba(249,115,22,0.03)",
+                        ),
+                        fill: true,
+                        tension: 0.42,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: "#f97316",
+                        pointBorderColor: "#ffffff",
+                        pointBorderWidth: 2,
+                    },
+                ],
+            },
+            options: {
+                animation: animation(160, 70, 1050),
+                animations: axisAnimations(160),
+                interaction: { mode: "index", intersect: false },
+                layout: {
+                    padding: compact
+                        ? { left: 0, right: 0, top: 6, bottom: 0 }
+                        : { left: 8, right: 8, top: 8, bottom: 0 },
+                },
+                plugins: {
+                    legend: { display: false },
+                },
+                scales: {
+                    y: {
+                        ...yScale,
+                        grid: { color: "rgba(148,163,184,0.22)" },
+                    },
+                    x: xGridless,
+                },
             },
         });
     }

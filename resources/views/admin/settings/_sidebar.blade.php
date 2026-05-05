@@ -1,16 +1,8 @@
                 <aside
                     class="settings-sidebar-shell sticky top-16 z-20 self-start rounded-2xl border border-slate-200 bg-slate-50/95 p-3 shadow-sm backdrop-blur xl:top-20">
                     <div class="grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:block xl:space-y-2">
-                        <details data-settings-nav-group open class="group min-w-0 p-2">
-                            <summary
-                                class="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500 transition hover:bg-slate-50">
-                                Account
-                                <svg class="h-4 w-4 transition group-open:rotate-180" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <path d="m6 9 6 6 6-6" />
-                                </svg>
-                            </summary>
-                            <div class="mt-2 space-y-1">
+                        @unless ($isHomepageUiPage ?? false)
+                            <div data-settings-nav-group class="space-y-1 p-2">
                                 <button type="button" data-settings-nav="profile"
                                     class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
                                     <span class="inline-flex items-center gap-2">
@@ -41,19 +33,22 @@
                                         Notifications
                                     </span>
                                 </button>
+                                <button type="button" data-settings-nav="verification"
+                                    class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 lg:h-full xl:h-auto">
+                                    <span class="inline-flex items-center gap-2 lg:justify-center xl:justify-start">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path
+                                                d="m10.56 17.36 7.78-7.78-1.42-1.42-6.36 6.36-2.84-2.83-1.41 1.41 4.25 4.26Zm1.44-15.3 7 3v5c0 5.25-3.5 10.17-7 11.94-3.5-1.77-7-6.69-7-11.94v-5l7-3Z" />
+                                        </svg>
+                                        Verification
+                                    </span>
+                                </button>
                             </div>
-                        </details>
-                        <details data-settings-nav-group open class="group min-w-0 rounded-2xl p-2">
-                            <summary
-                                class="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500 transition hover:bg-slate-50">
-                                Home UI
-                                <svg class="h-4 w-4 transition group-open:rotate-180" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2">
-                                    <path d="m6 9 6 6 6-6" />
-                                </svg>
-                            </summary>
-                            <div
-                                class="settings-sidebar-scrollbar mt-2 max-h-[calc(100vh-19rem)] space-y-1 overflow-y-auto pr-1">
+                        @endunless
+
+                        @if ($isHomepageUiPage ?? false)
+                            <div data-settings-nav-group
+                                class="settings-sidebar-scrollbar max-h-[calc(100vh-13rem)] space-y-1 overflow-y-auto p-2 pr-1">
                                 <button type="button" data-settings-nav="navbar-page"
                                     class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
                                     <span class="inline-flex items-center gap-2">
@@ -150,16 +145,6 @@
                                     </span>
                                 </button>
                             </div>
-                        </details>
-                        <button type="button" data-settings-nav="verification"
-                            class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 lg:h-full xl:h-auto">
-                            <span class="inline-flex items-center gap-2 lg:justify-center xl:justify-start">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                                    <path
-                                        d="m10.56 17.36 7.78-7.78-1.42-1.42-6.36 6.36-2.84-2.83-1.41 1.41 4.25 4.26Zm1.44-15.3 7 3v5c0 5.25-3.5 10.17-7 11.94-3.5-1.77-7-6.69-7-11.94v-5l7-3Z" />
-                                </svg>
-                                Verification
-                            </span>
-                        </button>
+                        @endif
                     </div>
                 </aside>
