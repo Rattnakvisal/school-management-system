@@ -11,40 +11,14 @@
         $messagesUnread = (int) ($messagesUnread ?? 0);
         $studentsActive = (int) ($studentsActive ?? 0);
         $teachersActive = (int) ($teachersActive ?? 0);
-        $incomeTotal = max(0, $studentsTotal * 145 + $classesTotal * 620);
-        $expenseTotal = max(0, $teachersTotal * 210 + $subjectsTotal * 90);
-        $balanceTotal = max(0, $incomeTotal - $expenseTotal);
-        $incomeLift =
-            $expenseTotal > 0 ? min(99, max(1, (int) round(($balanceTotal / max(1, $expenseTotal)) * 10))) : 16;
+        $financeStats = $financeStats ?? [];
+        $incomeTotal = (float) ($financeStats['collected'] ?? 0);
+        $expenseTotal = (float) ($financeStats['outstanding'] ?? 0);
+        $balanceTotal = $incomeTotal - $expenseTotal;
+        $balanceDisplay = ($balanceTotal < 0 ? '-$' : '$') . number_format(abs($balanceTotal));
+        $financeRecords = (int) ($financeStats['payments'] ?? 0);
 
-        $financeLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        $baseIncome = max(18, $studentsTotal + $classesTotal);
-        $baseExpense = max(12, $teachersTotal + $subjectsTotal);
-        $financeIncome = [
-            $baseIncome + 4,
-            $baseIncome + 13,
-            $baseIncome + 9,
-            $baseIncome + 34,
-            $baseIncome + 6,
-            $baseIncome + 25,
-            $baseIncome + 20,
-        ];
-        $financeExpense = [
-            $baseExpense + 2,
-            $baseExpense + 9,
-            $baseExpense + 4,
-            $baseExpense + 13,
-            $baseExpense + 3,
-            $baseExpense + 12,
-            $baseExpense + 8,
-        ];
-        $dashboardChartData = array_merge($chartData ?? [], [
-            'finance' => [
-                'labels' => $financeLabels,
-                'income' => $financeIncome,
-                'expense' => $financeExpense,
-            ],
-        ]);
+        $dashboardChartData = $chartData ?? [];
 
         $calendarStart = $dashboardNow->copy()->startOfMonth();
         $calendarDays = [];
@@ -81,10 +55,10 @@
                 'trend' => 'bg-emerald-50 text-emerald-600',
             ],
             [
-                'label' => 'Net Balance',
-                'value' => '$' . number_format($balanceTotal),
-                'note' => 'Updated today',
-                'route' => route('admin.reports'),
+                'label' => 'Finance Balance',
+                'value' => $balanceDisplay,
+                'note' => number_format($financeRecords) . ' payment records',
+                'route' => route('admin.finance.index'),
                 'icon' => 'fa-wallet',
                 'tile' => 'bg-orange-50 text-orange-500',
                 'trend' => 'bg-orange-50 text-orange-500',
@@ -300,14 +274,14 @@
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-extrabold tracking-[-0.03em] text-slate-950">School Finance</h2>
-                        <div class="mt-2 text-sm font-semibold text-slate-400">Weekly income and expenses</div>
+                        <div class="mt-2 text-sm font-semibold text-slate-400">Weekly collected and outstanding payments</div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="rounded-full bg-emerald-50 px-4 py-2 text-xs text-emerald-600">
-                            Income ${{ number_format($incomeTotal) }}
+                            Collected ${{ number_format($incomeTotal) }}
                         </span>
                         <span class="rounded-full bg-orange-50 px-4 py-2 text-xs text-orange-500">
-                            Expense ${{ number_format($expenseTotal) }}
+                            Outstanding ${{ number_format($expenseTotal) }}
                         </span>
                     </div>
                 </div>
@@ -315,11 +289,11 @@
                 <div class="mt-8 flex items-center gap-7 text-sm font-semibold text-slate-500">
                     <span class="inline-flex items-center gap-2">
                         <span class="h-3 w-3 rounded-full bg-emerald-500"></span>
-                        Income
+                        Collected
                     </span>
                     <span class="inline-flex items-center gap-2">
                         <span class="h-3 w-3 rounded-full border-4 border-orange-500 bg-white"></span>
-                        Expense
+                        Outstanding
                     </span>
                 </div>
 
@@ -334,10 +308,10 @@
                             <i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i>
                         </span>
                         <p class="text-sm font-semibold text-slate-600">
-                            Income is up {{ $incomeLift }}% compared to last week.
+                            {{ number_format($financeRecords) }} student payment records are available for finance reports.
                         </p>
                     </div>
-                    <a href="{{ route('admin.reports') }}"
+                    <a href="{{ route('admin.finance.index') }}"
                         class="inline-flex items-center justify-center rounded-xl bg-indigo-50 px-4 py-2 text-xs text-indigo-700 transition hover:bg-indigo-100">
                         View full report
                     </a>
@@ -398,19 +372,19 @@
                             </span>
                         </div>
                     </a>
-                    <a href="{{ route('admin.reports') }}"
+                    <a href="{{ route('admin.finance.index') }}"
                         class="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-100 hover:shadow-md">
                         <div class="flex items-center gap-3">
                             <span class="grid h-12 w-12 place-items-center rounded-2xl bg-orange-50 text-orange-500">
                                 <i class="fa-solid fa-wallet" aria-hidden="true"></i>
                             </span>
                             <div>
-                                <div class="text-sm text-slate-950">Net Balance</div>
-                                <div class="mt-1 text-xs font-semibold text-slate-500">Projected school balance</div>
+                                <div class="text-sm text-slate-950">School Finance</div>
+                                <div class="mt-1 text-xs font-semibold text-slate-500">Student payment detail</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
-                            <div class="text-lg text-slate-950">${{ number_format($balanceTotal) }}</div>
+                            <div class="text-lg text-slate-950">{{ $balanceDisplay }}</div>
                             <span
                                 class="grid h-8 w-8 place-items-center rounded-full bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-600 group-hover:text-white">
                                 <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>

@@ -148,6 +148,11 @@ class User extends Authenticatable
         return $this->hasMany(Grade::class, 'student_id');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(StudentPayment::class, 'student_id');
+    }
+
     public function getAvatarUrlAttribute(): string
     {
         $avatar = trim((string) $this->avatar);

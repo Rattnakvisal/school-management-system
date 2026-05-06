@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\TeacherAttendanceController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\MissionEventController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\FinanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'admin'])
@@ -25,6 +26,12 @@ Route::middleware(['auth', 'admin'])
         Route::get('/reports', ReportsController::class)->name('reports');
         Route::get('/reports/export/pdf', [ReportsController::class, 'exportPdf'])->name('reports.export.pdf');
         Route::get('/reports/export/excel', [ReportsController::class, 'exportExcel'])->name('reports.export.excel');
+        Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
+        Route::get('/finance/export/pdf', [FinanceController::class, 'exportPdf'])->name('finance.export.pdf');
+        Route::get('/finance/export/excel', [FinanceController::class, 'exportExcel'])->name('finance.export.excel');
+        Route::post('/finance', [FinanceController::class, 'store'])->name('finance.store');
+        Route::put('/finance/{payment}', [FinanceController::class, 'update'])->name('finance.update');
+        Route::delete('/finance/{payment}', [FinanceController::class, 'destroy'])->name('finance.destroy');
         Route::get('/admin-staff', [AdminStaffController::class, 'index'])->name('admin-staff.index');
         Route::post('/admin-staff', [AdminStaffController::class, 'store'])->name('admin-staff.store');
         Route::put('/admin-staff/{account}', [AdminStaffController::class, 'update'])->name('admin-staff.update');

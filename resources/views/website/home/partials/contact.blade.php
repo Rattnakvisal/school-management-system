@@ -165,9 +165,6 @@
                                     {{ $card['value'] }}
                                 </p>
 
-                                <div
-                                    class="relative mt-3 h-1 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-300 group-hover/item:w-16">
-                                </div>
                             </article>
                         @endforeach
                     </div>
@@ -187,9 +184,6 @@
                         @endguest
                     </div>
 
-                    <div
-                        class="mt-6 h-1.5 w-12 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-300 group-hover:w-20">
-                    </div>
                 </div>
             </div>
         </div>

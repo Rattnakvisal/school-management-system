@@ -102,8 +102,8 @@
             'footer-page',
             'verification',
         ];
-        $requestedSettingsTab = $isHomepageUiPage ? 'home-page' : (string) request()->query('tab', '');
-        if (in_array($requestedSettingsTab, $settingsTabs, true)) {
+        $requestedSettingsTab = (string) request()->query('tab', '');
+        if ($requestedSettingsTab !== '' && in_array($requestedSettingsTab, $settingsTabs, true)) {
             $settingsDefaultTab = $requestedSettingsTab;
         }
         $homepageUiTabs = [

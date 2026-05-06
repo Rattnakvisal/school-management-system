@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\ClassStudyTime;
 use App\Models\ContactMessage;
 use App\Models\SchoolClass;
+use App\Models\StudentPayment;
 use App\Models\Subject;
 use App\Models\User;
 use Carbon\Carbon;
@@ -59,6 +60,15 @@ class AdminDashboardViewData
             ->latest()
             ->take(4)
             ->get();
+
+        $latestFinancePayments = Schema::hasTable('student_payments')
+            ? StudentPayment::query()
+                ->with('student.schoolClass')
+                ->latest('payment_date')
+                ->latest()
+                ->take(5)
+                ->get()
+            : collect();
 
         $monthlyLabels = [];
         $monthKeys = [];
@@ -156,6 +166,9 @@ class AdminDashboardViewData
                 ],
             ],
             'attendance' => $this->attendanceOverviewData(),
+            'finance' => $this->financeChartData(),
+            'financeStatus' => $this->financeStatusData(),
+            'latestPayments' => $this->latestPaymentChartData($latestFinancePayments),
         ];
 
         $dashboardNow = Carbon::now();
@@ -174,9 +187,130 @@ class AdminDashboardViewData
             'messagesTotal' => $messagesTotal,
             'messagesUnread' => $messagesUnread,
             'chartData' => $chartData,
+            'financeStats' => $this->financeStats(),
             'latestContactMessages' => $latestContactMessages,
+            'latestFinancePayments' => $latestFinancePayments,
             'dashboardNow' => $dashboardNow,
             'dashboardAgenda' => $this->dashboardAgendaData($dashboardNow),
+        ];
+    }
+
+    private function financeStats(): array
+    {
+        if (!Schema::hasTable('student_payments')) {
+            return [
+                'payments' => 0,
+                'collected' => 0,
+                'outstanding' => 0,
+                'discounts' => 0,
+                'students_paid' => 0,
+            ];
+        }
+
+        $payments = StudentPayment::query();
+
+        return [
+            'payments' => (clone $payments)->count(),
+            'collected' => (float) (clone $payments)->whereIn('status', ['paid', 'partial'])->sum('amount'),
+            'outstanding' => (float) (clone $payments)->whereIn('status', ['pending', 'overdue'])->sum('amount'),
+            'discounts' => (float) (clone $payments)->sum('discount_amount'),
+            'students_paid' => (clone $payments)->distinct('student_id')->count('student_id'),
+        ];
+    }
+
+    private function financeChartData(): array
+    {
+        $days = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->startOfDay();
+            $days[$date->toDateString()] = [
+                'label' => $date->format('D'),
+                'income' => 0,
+                'outstanding' => 0,
+            ];
+        }
+
+        if (!Schema::hasTable('student_payments')) {
+            return [
+                'labels' => array_values(array_map(static fn(array $day): string => $day['label'], $days)),
+                'income' => array_values(array_map(static fn(array $day): float => $day['income'], $days)),
+                'expense' => array_values(array_map(static fn(array $day): float => $day['outstanding'], $days)),
+                'expenseLabel' => 'Outstanding',
+            ];
+        }
+
+        $startDate = array_key_first($days);
+        $rows = StudentPayment::query()
+            ->selectRaw('DATE(payment_date) as day_key, status, SUM(amount) as total')
+            ->whereDate('payment_date', '>=', $startDate)
+            ->groupBy('day_key', 'status')
+            ->get();
+
+        foreach ($rows as $row) {
+            $dayKey = (string) ($row->day_key ?? '');
+            if (!array_key_exists($dayKey, $days)) {
+                continue;
+            }
+
+            $status = strtolower((string) ($row->status ?? ''));
+            $total = (float) ($row->total ?? 0);
+
+            if (in_array($status, ['paid', 'partial'], true)) {
+                $days[$dayKey]['income'] += $total;
+            } elseif (in_array($status, ['pending', 'overdue'], true)) {
+                $days[$dayKey]['outstanding'] += $total;
+            }
+        }
+
+        return [
+            'labels' => array_values(array_map(static fn(array $day): string => $day['label'], $days)),
+            'income' => array_values(array_map(static fn(array $day): float => $day['income'], $days)),
+            'expense' => array_values(array_map(static fn(array $day): float => $day['outstanding'], $days)),
+            'expenseLabel' => 'Outstanding',
+        ];
+    }
+
+    private function financeStatusData(): array
+    {
+        $labels = ['Paid', 'Partial', 'Pending', 'Overdue', 'Waived'];
+        $values = array_fill(0, count($labels), 0.0);
+
+        if (!Schema::hasTable('student_payments')) {
+            return compact('labels', 'values');
+        }
+
+        $statusTotals = StudentPayment::query()
+            ->selectRaw('LOWER(status) as status_key, SUM(amount) as total')
+            ->groupBy('status_key')
+            ->pluck('total', 'status_key')
+            ->all();
+
+        $keys = ['paid', 'partial', 'pending', 'overdue', 'waived'];
+        $values = array_map(
+            static fn(string $key): float => (float) ($statusTotals[$key] ?? 0),
+            $keys
+        );
+
+        return compact('labels', 'values');
+    }
+
+    private function latestPaymentChartData($latestFinancePayments): array
+    {
+        $payments = collect($latestFinancePayments)->reverse()->values();
+
+        return [
+            'labels' => $payments
+                ->map(fn(StudentPayment $payment): string => (string) ($payment->student?->name ?? 'Unknown Student'))
+                ->values()
+                ->all(),
+            'amounts' => $payments
+                ->map(fn(StudentPayment $payment): float => (float) $payment->amount)
+                ->values()
+                ->all(),
+            'statuses' => $payments
+                ->map(fn(StudentPayment $payment): string => $payment->status_label)
+                ->values()
+                ->all(),
         ];
     }
 

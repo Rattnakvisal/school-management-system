@@ -154,7 +154,7 @@ class SettingsController extends Controller
     {
         if (!Schema::hasTable('home_page_items')) {
             return redirect()
-                ->route('admin.settings')
+                ->route('admin.homepage.index')
                 ->with('error', 'Please run migrations before editing the navbar page.');
         }
 
@@ -223,7 +223,7 @@ class SettingsController extends Controller
         }
 
         return redirect()
-            ->route('admin.settings')
+            ->route('admin.homepage.index')
             ->with('success', 'Navbar page content updated successfully.')
             ->with('settings_tab', 'navbar-page');
     }
@@ -232,7 +232,7 @@ class SettingsController extends Controller
     {
         if (!Schema::hasTable('home_page_items')) {
             return redirect()
-                ->route('admin.settings')
+                ->route('admin.homepage.index')
                 ->with('error', 'Please run migrations before editing the home page.');
         }
 
@@ -375,7 +375,7 @@ class SettingsController extends Controller
         }
 
         return redirect()
-            ->route('admin.settings')
+            ->route('admin.homepage.index')
             ->with('success', 'Hero page content updated successfully.')
             ->with('settings_tab', 'home-page');
     }
@@ -384,7 +384,7 @@ class SettingsController extends Controller
     {
         if (!Schema::hasTable('home_page_items')) {
             return redirect()
-                ->route('admin.settings')
+                ->route('admin.homepage.index')
                 ->with('error', 'Please run migrations before editing the about page.');
         }
 
@@ -473,7 +473,7 @@ class SettingsController extends Controller
         }
 
         return redirect()
-            ->route('admin.settings')
+            ->route('admin.homepage.index')
             ->with('success', 'About page content updated successfully.')
             ->with('settings_tab', 'about-page');
     }
@@ -482,7 +482,7 @@ class SettingsController extends Controller
     {
         if (!Schema::hasTable('home_page_items')) {
             return redirect()
-                ->route('admin.settings')
+                ->route('admin.homepage.index')
                 ->with('error', 'Please run migrations before editing the feature page.');
         }
 
@@ -542,7 +542,7 @@ class SettingsController extends Controller
         }
 
         return redirect()
-            ->route('admin.settings')
+            ->route('admin.homepage.index')
             ->with('success', 'Feature page content updated successfully.')
             ->with('settings_tab', 'feature-page');
     }
@@ -551,7 +551,7 @@ class SettingsController extends Controller
     {
         if (!Schema::hasTable('home_page_items')) {
             return redirect()
-                ->route('admin.settings')
+                ->route('admin.homepage.index')
                 ->with('error', 'Please run migrations before editing the program page.');
         }
 
@@ -614,7 +614,7 @@ class SettingsController extends Controller
         }
 
         return redirect()
-            ->route('admin.settings')
+            ->route('admin.homepage.index')
             ->with('success', 'Program page content updated successfully.')
             ->with('settings_tab', 'program-page');
     }
@@ -623,7 +623,7 @@ class SettingsController extends Controller
     {
         if (!Schema::hasTable('home_page_items')) {
             return redirect()
-                ->route('admin.settings')
+                ->route('admin.homepage.index')
                 ->with('error', 'Please run migrations before editing the facility page.');
         }
 
@@ -701,7 +701,7 @@ class SettingsController extends Controller
         }
 
         return redirect()
-            ->route('admin.settings')
+            ->route('admin.homepage.index')
             ->with('success', 'Facility page content updated successfully.')
             ->with('settings_tab', 'facility-page');
     }
@@ -709,7 +709,7 @@ class SettingsController extends Controller
     public function updateAdmissionPage(Request $request)
     {
         if (!Schema::hasTable('home_page_items')) {
-            return redirect()->route('admin.settings')->with('error', 'Please run migrations before editing the admission page.');
+            return redirect()->route('admin.homepage.index')->with('error', 'Please run migrations before editing the admission page.');
         }
 
         $validated = $request->validateWithBag('admissionPageUpdate', [
@@ -775,13 +775,13 @@ class SettingsController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.settings')->with('success', 'Admission page content updated successfully.')->with('settings_tab', 'admission-page');
+        return redirect()->route('admin.homepage.index')->with('success', 'Admission page content updated successfully.')->with('settings_tab', 'admission-page');
     }
 
     public function updateFaqPage(Request $request)
     {
         if (!Schema::hasTable('home_page_items')) {
-            return redirect()->route('admin.settings')->with('error', 'Please run migrations before editing the FAQ page.');
+            return redirect()->route('admin.homepage.index')->with('error', 'Please run migrations before editing the FAQ page.');
         }
 
         $validated = $request->validateWithBag('faqPageUpdate', [
@@ -843,13 +843,13 @@ class SettingsController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.settings')->with('success', 'FAQ page content updated successfully.')->with('settings_tab', 'faq-page');
+        return redirect()->route('admin.homepage.index')->with('success', 'FAQ page content updated successfully.')->with('settings_tab', 'faq-page');
     }
 
     public function updateContactPage(Request $request)
     {
         if (!Schema::hasTable('home_page_items')) {
-            return redirect()->route('admin.settings')->with('error', 'Please run migrations before editing the contact page.');
+            return redirect()->route('admin.homepage.index')->with('error', 'Please run migrations before editing the contact page.');
         }
 
         $validated = $request->validateWithBag('contactPageUpdate', [
@@ -913,13 +913,13 @@ class SettingsController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.settings')->with('success', 'Contact page content updated successfully.')->with('settings_tab', 'contact-page');
+        return redirect()->route('admin.homepage.index')->with('success', 'Contact page content updated successfully.')->with('settings_tab', 'contact-page');
     }
 
     public function updateFooterPage(Request $request)
     {
         if (!Schema::hasTable('home_page_items')) {
-            return redirect()->route('admin.settings')->with('error', 'Please run migrations before editing the footer page.');
+            return redirect()->route('admin.homepage.index')->with('error', 'Please run migrations before editing the footer page.');
         }
 
         $validated = $request->validateWithBag('footerPageUpdate', [
@@ -1017,7 +1017,7 @@ class SettingsController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.settings')->with('success', 'Footer page content updated successfully.')->with('settings_tab', 'footer-page');
+        return redirect()->route('admin.homepage.index')->with('success', 'Footer page content updated successfully.')->with('settings_tab', 'footer-page');
     }
 
     private function ensureDefaultHomePageItems(): void

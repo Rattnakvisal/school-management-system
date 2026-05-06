@@ -13,6 +13,10 @@
         $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good Evening');
         $studentsNeedStudyTime = max(0, (int) ($studentsTotal ?? 0) - (int) ($studentsWithStudyTime ?? 0));
         $focusCount = (int) ($messagesUnread ?? 0) + $studentsNeedStudyTime;
+        $financeStats = $financeStats ?? [];
+        $financeCollected = (float) ($financeStats['collected'] ?? 0);
+        $financeOutstanding = (float) ($financeStats['outstanding'] ?? 0);
+        $financePayments = (int) ($financeStats['payments'] ?? 0);
         $adminStatCards = [
             [
                 'label' => 'Students',
@@ -51,6 +55,17 @@
                 'tone' => 'from-amber-100 to-white text-amber-600',
             ],
             [
+                'label' => 'Finance',
+                'activeLabel' => 'Collected',
+                'active' => (int) round($financeCollected),
+                'total' => max(1, (int) round($financeCollected + $financeOutstanding)),
+                'route' => route('admin.finance.index'),
+                'icon' => 'finance',
+                'tone' => 'from-teal-100 to-white text-teal-600',
+                'display' => '$' . number_format($financeCollected, 2),
+                'totalDisplay' => '$' . number_format($financeOutstanding, 2) . ' due',
+            ],
+            [
                 'label' => 'Messages',
                 'activeLabel' => 'Unread',
                 'active' => (int) ($messagesUnread ?? 0),
@@ -58,6 +73,24 @@
                 'route' => route('admin.contacts.index'),
                 'icon' => 'messages',
                 'tone' => 'from-rose-100 to-white text-rose-600',
+            ],
+            [
+                'label' => 'Study Time',
+                'activeLabel' => 'Assigned',
+                'active' => (int) ($studentsWithStudyTime ?? 0),
+                'total' => (int) ($studentsTotal ?? 0),
+                'route' => route('admin.student-study.index'),
+                'icon' => 'study-time',
+                'tone' => 'from-violet-100 to-white text-violet-600',
+            ],
+            [
+                'label' => 'Major Subjects',
+                'activeLabel' => 'Assigned',
+                'active' => (int) ($studentsWithMajor ?? 0),
+                'total' => (int) ($studentsTotal ?? 0),
+                'route' => route('admin.student-study.index'),
+                'icon' => 'major-subjects',
+                'tone' => 'from-cyan-100 to-white text-cyan-600',
             ],
         ];
         $statPanelClass =
@@ -143,6 +176,11 @@
                                     <i class="fa-solid fa-graduation-cap text-indigo-600" aria-hidden="true"></i>
                                     Open Study List
                                 </a>
+                                <a href="{{ route('admin.finance.index') }}"
+                                    class="flex items-center gap-3 px-4 py-3 text-xs font-bold hover:bg-slate-50">
+                                    <i class="fa-solid fa-wallet text-teal-600" aria-hidden="true"></i>
+                                    Open Finance Detail
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -164,7 +202,7 @@
             </div>
         </section>
 
-        <section class="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             @foreach ($adminStatCards as $index => $card)
                 @php
                     $progress = (int) round(($card['active'] / max(1, $card['total'])) * 100);
@@ -211,6 +249,34 @@
                                     </svg>
                                 @break
 
+                                @case('finance')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H20v14H6.5A2.5 2.5 0 0 1 4 16.5v-9Z" />
+                                        <path d="M20 9H6.5A2.5 2.5 0 0 1 4 6.5" />
+                                        <path d="M16.5 13.5h.01" />
+                                    </svg>
+                                @break
+
+                                @case('study-time')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path d="M12 7v5l3 2" />
+                                        <path d="M7 3 4 6" />
+                                        <path d="m20 6-3-3" />
+                                    </svg>
+                                @break
+
+                                @case('major-subjects')
+                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 3 3 8l9 5 9-5-9-5Z" />
+                                        <path d="M6 10v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
+                                        <path d="M21 8v5" />
+                                    </svg>
+                                @break
+
                                 @default
                                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -228,9 +294,9 @@
                     </div>
 
                     <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
-                        <span>{{ number_format($card['active']) }}</span>
+                        <span>{{ $card['display'] ?? number_format($card['active']) }}</span>
                         <span class="pb-0.5 text-base font-extrabold text-slate-300">/
-                            {{ number_format($card['total']) }}</span>
+                            {{ $card['totalDisplay'] ?? number_format($card['total']) }}</span>
                     </div>
                     <div class="mt-1 text-sm font-bold text-slate-600">{{ $card['label'] }}</div>
                     <div class="mt-1 text-[11px] font-semibold text-slate-400">
@@ -242,6 +308,63 @@
                     </div>
                 </a>
             @endforeach
+        </section>
+
+        <section class="grid gap-6 xl:grid-cols-12">
+            <article
+                class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
+                style="--d: 7;">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900">School Finance Detail</h2>
+                        <p class="mt-1 text-xs text-slate-500">Collected and outstanding student payments for the last 7 days.</p>
+                    </div>
+                    <a href="{{ route('admin.finance.index') }}"
+                        class="inline-flex items-center gap-2 rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700 transition hover:bg-teal-100">
+                        Open detail
+                        <i class="fa-solid fa-arrow-right text-[10px]" aria-hidden="true"></i>
+                    </a>
+                </div>
+
+                <div class="dashboard-chart-box dashboard-chart-box--medium mt-5 h-72 sm:h-80 lg:h-[360px]">
+                    <canvas id="schoolFinanceChart" class="h-full w-full"></canvas>
+                </div>
+            </article>
+
+            <article
+                class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
+                style="--d: 8;">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900">Payment Status</h2>
+                        <p class="mt-1 text-xs text-slate-500">Paid, pending, overdue, and waived amounts.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('admin.finance.export.excel') }}" class="text-xs font-bold text-emerald-700">Excel</a>
+                        <a href="{{ route('admin.finance.export.pdf') }}" class="text-xs font-bold text-rose-700">PDF</a>
+                    </div>
+                </div>
+                <div class="dashboard-chart-box mt-4 h-64 sm:h-72">
+                    <canvas id="financeStatusChart" class="h-full w-full"></canvas>
+                </div>
+            </article>
+        </section>
+
+        <section class="grid gap-6 xl:grid-cols-12">
+            <article
+                class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-12"
+                style="--d: 9;">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900">Latest Student Payments</h2>
+                        <p class="mt-1 text-xs text-slate-500">Newest payment amounts by student.</p>
+                    </div>
+                    <a href="{{ route('admin.finance.index') }}" class="text-xs font-bold text-indigo-700">Manage payments</a>
+                </div>
+                <div class="dashboard-chart-box dashboard-chart-box--medium mt-4 h-64 sm:h-72 lg:h-[300px]">
+                    <canvas id="latestStudentPaymentsChart" class="h-full w-full"></canvas>
+                </div>
+            </article>
         </section>
 
         <section class="grid gap-6 xl:grid-cols-12">

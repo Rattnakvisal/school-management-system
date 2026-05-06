@@ -109,6 +109,7 @@
                         'mail' => 'fa-solid fa-envelope',
                         'flag' => 'fa-solid fa-flag',
                         'chart-line' => 'fa-solid fa-chart-line',
+                        'wallet' => 'fa-solid fa-wallet',
                         'palette' => 'fa-solid fa-palette',
                         'settings' => 'fa-solid fa-gear',
                     ];
@@ -120,13 +121,13 @@
                         $item('admin.subjects.index', 'Subjects', 'book-open'),
                         $item('admin.time-studies.index', 'Schedule', 'clock-3'),
                         $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
+                        $item('admin.finance.index', 'School Finance', 'wallet'),
                         $item('admin.contacts.index', 'Messages', 'mail', $contactUnread ?? 0),
                     ];
 
                     if (!$isStaffUser) {
                         array_unshift($managementItems, $item('admin.admin-staff.index', 'Admin / Staff', 'shield'));
                         $managementItems[] = $item('admin.mission.index', 'Mission', 'flag', $missionUnread ?? 0);
-                        $reportRoute[] = $item('admin.reports.index', 'Reports', 'chart-line');
                     } else {
                         $managementItems[] = $item('staff.missions.index', 'Mission Events', 'flag');
                     }

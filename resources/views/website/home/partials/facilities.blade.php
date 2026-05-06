@@ -130,10 +130,6 @@
                                         {{ $facility['description'] }}
                                     </p>
 
-                                    {{-- Bottom Line --}}
-                                    <div
-                                        class="mt-3 h-1 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-300 group-hover:w-16">
-                                    </div>
                                 </div>
 
                             </div>

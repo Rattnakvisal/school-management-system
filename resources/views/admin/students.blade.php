@@ -544,7 +544,7 @@
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                                 <div class="student-table-scroller max-h-[720px] overflow-auto">
-                                    <table class="admin-table w-full min-w-[1280px] whitespace-nowrap text-left text-sm">
+                                    <table class="admin-table student-table w-full min-w-[1280px] text-left text-sm">
                                         <thead
                                             class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
@@ -582,7 +582,7 @@
                                                                 class="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200">
                                                             <div class="min-w-0">
                                                                 <div
-                                                                    class="student-name truncate font-semibold text-slate-800">
+                                                                    class="student-name font-semibold text-slate-800">
                                                                     {{ $student->name }}
                                                                 </div>
                                                                 <div class="text-xs truncate text-slate-400">ID

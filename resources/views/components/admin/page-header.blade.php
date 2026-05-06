@@ -114,6 +114,16 @@
                             </svg>
                         @break
 
+                        @case('finance')
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H20v14H6.5A2.5 2.5 0 0 1 4 16.5v-9Z" />
+                                <path d="M20 9H6.5A2.5 2.5 0 0 1 4 6.5" />
+                                <path d="M16.5 13.5h.01" />
+                                <path d="M8 14h4" />
+                            </svg>
+                        @break
+
                         @case('palette')
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
                                 stroke-linecap="round" stroke-linejoin="round">

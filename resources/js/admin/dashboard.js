@@ -58,6 +58,15 @@ document.addEventListener("DOMContentLoaded", () => {
         income: [],
         expense: [],
     };
+    const financeStatusData = charts.financeStatus ?? {
+        labels: [],
+        values: [],
+    };
+    const latestPaymentData = charts.latestPayments ?? {
+        labels: [],
+        amounts: [],
+        statuses: [],
+    };
 
     Chart.defaults.responsive = true;
     Chart.defaults.maintainAspectRatio = false;
@@ -240,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         pointBorderWidth: 2,
                     },
                     {
-                        label: "Expense",
+                        label: financeData.expenseLabel ?? "Expense",
                         data: financeData.expense?.length
                             ? financeData.expense
                             : [18, 25, 21, 31, 20, 29, 24],
@@ -279,6 +288,99 @@ document.addEventListener("DOMContentLoaded", () => {
                         grid: { color: "rgba(148,163,184,0.22)" },
                     },
                     x: xGridless,
+                },
+            },
+        });
+    }
+
+    const financeStatusCanvas = document.getElementById("financeStatusChart");
+    if (financeStatusCanvas) {
+        new Chart(financeStatusCanvas, {
+            type: "doughnut",
+            data: {
+                labels: financeStatusData.labels?.length
+                    ? financeStatusData.labels
+                    : ["Paid", "Partial", "Pending", "Overdue", "Waived"],
+                datasets: [
+                    {
+                        data: financeStatusData.values?.length
+                            ? financeStatusData.values
+                            : [0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            "#10b981",
+                            "#38bdf8",
+                            "#f59e0b",
+                            "#f43f5e",
+                            "#94a3b8",
+                        ],
+                        borderWidth: 0,
+                    },
+                ],
+            },
+            options: {
+                animation: animation(170, 70, 980),
+                cutout: "64%",
+                layout: { padding },
+                plugins: { legend: legend("bottom", "bottom") },
+            },
+        });
+    }
+
+    const latestPaymentsCanvas = document.getElementById(
+        "latestStudentPaymentsChart",
+    );
+    if (latestPaymentsCanvas) {
+        const labels = latestPaymentData.labels?.length
+            ? latestPaymentData.labels
+            : ["No payments"];
+        const amounts = latestPaymentData.amounts?.length
+            ? latestPaymentData.amounts
+            : [0];
+
+        new Chart(latestPaymentsCanvas, {
+            type: "bar",
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: "Payment amount",
+                        data: amounts,
+                        backgroundColor: [
+                            "#4f46e5",
+                            "#0ea5e9",
+                            "#10b981",
+                            "#f59e0b",
+                            "#f43f5e",
+                        ],
+                        borderRadius: 10,
+                        borderSkipped: false,
+                        maxBarThickness: 34,
+                    },
+                ],
+            },
+            options: {
+                animation: animation(185, 80, 980),
+                animations: axisAnimations(185),
+                indexAxis: compact ? "y" : "x",
+                layout: { padding },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: (context) => {
+                                const status =
+                                    latestPaymentData.statuses?.[
+                                        context.dataIndex
+                                    ] ?? "";
+
+                                return status ? `Status: ${status}` : "";
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    y: compact ? { grid: { display: false } } : yScale,
+                    x: compact ? yScale : xGridless,
                 },
             },
         });

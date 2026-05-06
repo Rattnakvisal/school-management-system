@@ -98,9 +98,9 @@
                             this.createOpen = false;
                         }
                     };
-            
+
                     update();
-            
+
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -254,7 +254,7 @@
                         x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
                         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0"
                         x-transition:leave-end="translate-x-full"
-                        class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform border-l border-slate-200 bg-white shadow-2xl">
+                        class="fixed inset-y-0 right-0 z-[81] w-full max-w-md transform bg-white shadow-2xl">
                         <div class="flex h-full flex-col">
                             <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                                 <h3 class="text-3xl font-black text-slate-900">Filters</h3>
@@ -322,7 +322,7 @@
 
                     @if ($search !== '' || $role !== 'all' || $status !== 'all')
                         <div
-                            class="flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-3 py-2 text-xs font-semibold text-slate-600">
+                            class="flex flex-wrap items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold text-slate-600">
                             <span class="text-indigo-700">Active filters:</span>
                             @if ($search !== '')
                                 <span
@@ -345,24 +345,23 @@
                         </div>
                     @endif
 
-                    <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
+                    <div class="mt-1 overflow-hidden rounded-2xl border border-slate-100">
                         <div class="max-h-[1200px] overflow-auto">
-                            <table class="admin-table w-full min-w-[1280px] text-left text-sm">
+                            <table class="admin-table admin-staff-table border border-slate-100 w-full min-w-full text-left text-sm">
                                 <thead
-                                    class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                                    class="admin-table-head sticky top-0 z-10 text-xs border border-slate-100 uppercase tracking-wide text-slate-500">
                                     <tr>
                                         <th class="student-col-student px-3 py-3 font-semibold ">Account
                                         </th>
-                                        <th class="student-col-email px-3 py-3 font-semibold whitespace-nowrap">Email</th>
+                                        <th class="student-col-email px-3 py-3 font-semibold">Email</th>
                                         @if ($hasPhoneColumn ?? false)
-                                            <th class="student-col-phone whitespace-nowrap px-3 py-3 font-semibold">Phone
-                                                Number</th>
+                                            <th class="student-col-phone px-3 py-3 font-semibold">Phone Number</th>
                                         @endif
                                         <th class="student-col-class px-3 py-3 font-semibold">Role</th>
                                         <th class="student-col-status px-3 py-3 font-semibold">Status</th>
-                                        <th class="student-col-created whitespace-nowrap px-3 py-3 font-semibold">Created
+                                        <th class="student-col-created  px-3 py-3 font-semibold">Created
                                         </th>
-                                        <th class="student-col-actions whitespace-nowrap px-3 py-3 font-semibold">Actions
+                                        <th class="student-col-actions  px-3 py-3 font-semibold">Actions
                                         </th>
                                     </tr>
                                 </thead>
@@ -402,7 +401,7 @@
                                             </td>
                                             @if ($hasPhoneColumn ?? false)
                                                 <td
-                                                    class="student-col-phone whitespace-nowrap px-3 py-3 align-top tabular-nums text-slate-600">
+                                                    class="student-col-phone  px-3 py-3 align-top tabular-nums text-slate-600">
                                                     {{ $account->phone_number ?: '-' }}
                                                 </td>
                                             @endif
@@ -435,9 +434,9 @@
                                             </td>
                                             <td class="student-col-actions whitespace-nowrap px-3 py-3 align-top">
                                                 <div
-                                                    class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
+                                                    class="flex flex-nowrap items-center justify-end gap-2 ">
                                                     <button @click="editing = {{ $account->id }}" type="button"
-                                                        class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                                                        class=" rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
                                                         Edit
                                                     </button>
 
@@ -449,7 +448,7 @@
                                                             @csrf
                                                             @method('PATCH')
                                                             <button type="submit" {{ $isSelf ? 'disabled' : '' }}
-                                                                class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50 {{ $account->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                                                                class=" rounded-lg border px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50 {{ $account->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
                                                                 {{ $account->is_active ? 'Set Inactive' : 'Set Active' }}
                                                             </button>
                                                         </form>
@@ -461,7 +460,7 @@
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" {{ $deleteDisabled ? 'disabled' : '' }}
-                                                            class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                                            class=" rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50">
                                                             Delete
                                                         </button>
                                                     </form>

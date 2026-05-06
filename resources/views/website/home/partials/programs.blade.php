@@ -110,10 +110,6 @@
                     {{ $item['description'] }}
                 </p>
 
-                {{-- Bottom Line --}}
-                <div
-                    class="relative mt-6 h-1.5 w-12 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-300 group-hover:w-20">
-                </div>
             </article>
         @endforeach
     </div>

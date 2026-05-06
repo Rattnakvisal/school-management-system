@@ -48,52 +48,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeAvatarField = page.querySelector('#remove_admin_avatar');
 
     if (
-        !avatarInput ||
-        !avatarPreview ||
-        !uploadAvatarBtn ||
-        !triggerUploadBtn ||
-        !deleteAvatarBtn ||
-        !removeAvatarField
+        avatarInput &&
+        avatarPreview &&
+        uploadAvatarBtn &&
+        triggerUploadBtn &&
+        deleteAvatarBtn &&
+        removeAvatarField
     ) {
-        return;
+        let currentObjectUrl = null;
+
+        const revokeCurrentObjectUrl = () => {
+            if (!currentObjectUrl) {
+                return;
+            }
+
+            URL.revokeObjectURL(currentObjectUrl);
+            currentObjectUrl = null;
+        };
+
+        const openFilePicker = () => avatarInput.click();
+
+        uploadAvatarBtn.addEventListener('click', openFilePicker);
+        triggerUploadBtn.addEventListener('click', openFilePicker);
+
+        avatarInput.addEventListener('change', () => {
+            const file = avatarInput.files && avatarInput.files[0] ? avatarInput.files[0] : null;
+            if (!file) {
+                return;
+            }
+
+            revokeCurrentObjectUrl();
+
+            currentObjectUrl = URL.createObjectURL(file);
+            avatarPreview.src = currentObjectUrl;
+            removeAvatarField.value = '0';
+        });
+
+        deleteAvatarBtn.addEventListener('click', () => {
+            revokeCurrentObjectUrl();
+
+            avatarInput.value = '';
+            avatarPreview.src = avatarPreview.dataset.fallback || avatarPreview.src;
+            removeAvatarField.value = '1';
+        });
     }
-
-    let currentObjectUrl = null;
-
-    const revokeCurrentObjectUrl = () => {
-        if (!currentObjectUrl) {
-            return;
-        }
-
-        URL.revokeObjectURL(currentObjectUrl);
-        currentObjectUrl = null;
-    };
-
-    const openFilePicker = () => avatarInput.click();
-
-    uploadAvatarBtn.addEventListener('click', openFilePicker);
-    triggerUploadBtn.addEventListener('click', openFilePicker);
-
-    avatarInput.addEventListener('change', () => {
-        const file = avatarInput.files && avatarInput.files[0] ? avatarInput.files[0] : null;
-        if (!file) {
-            return;
-        }
-
-        revokeCurrentObjectUrl();
-
-        currentObjectUrl = URL.createObjectURL(file);
-        avatarPreview.src = currentObjectUrl;
-        removeAvatarField.value = '0';
-    });
-
-    deleteAvatarBtn.addEventListener('click', () => {
-        revokeCurrentObjectUrl();
-
-        avatarInput.value = '';
-        avatarPreview.src = avatarPreview.dataset.fallback || avatarPreview.src;
-        removeAvatarField.value = '1';
-    });
 
     const homeImageInput = page.querySelector('#home_hero_image_input');
     const homeImagePreview = page.querySelector('#home_hero_image_preview');
@@ -102,47 +100,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeHomeImageField = page.querySelector('#remove_home_hero_image');
 
     if (
-        !homeImageInput ||
-        !homeImagePreview ||
-        !uploadHomeImageBtn ||
-        !deleteHomeImageBtn ||
-        !removeHomeImageField
+        homeImageInput &&
+        homeImagePreview &&
+        uploadHomeImageBtn &&
+        deleteHomeImageBtn &&
+        removeHomeImageField
     ) {
-        return;
+        let currentHomeObjectUrl = null;
+        const defaultHomeImage = '/images/school.jpg';
+
+        const revokeCurrentHomeObjectUrl = () => {
+            if (!currentHomeObjectUrl) {
+                return;
+            }
+
+            URL.revokeObjectURL(currentHomeObjectUrl);
+            currentHomeObjectUrl = null;
+        };
+
+        uploadHomeImageBtn.addEventListener('click', () => homeImageInput.click());
+
+        homeImageInput.addEventListener('change', () => {
+            const file = homeImageInput.files && homeImageInput.files[0] ? homeImageInput.files[0] : null;
+            if (!file) {
+                return;
+            }
+
+            revokeCurrentHomeObjectUrl();
+            currentHomeObjectUrl = URL.createObjectURL(file);
+            homeImagePreview.src = currentHomeObjectUrl;
+            removeHomeImageField.value = '0';
+        });
+
+        deleteHomeImageBtn.addEventListener('click', () => {
+            revokeCurrentHomeObjectUrl();
+            homeImageInput.value = '';
+            homeImagePreview.src = defaultHomeImage;
+            removeHomeImageField.value = '1';
+        });
     }
-
-    let currentHomeObjectUrl = null;
-    const defaultHomeImage = '/images/school.jpg';
-
-    const revokeCurrentHomeObjectUrl = () => {
-        if (!currentHomeObjectUrl) {
-            return;
-        }
-
-        URL.revokeObjectURL(currentHomeObjectUrl);
-        currentHomeObjectUrl = null;
-    };
-
-    uploadHomeImageBtn.addEventListener('click', () => homeImageInput.click());
-
-    homeImageInput.addEventListener('change', () => {
-        const file = homeImageInput.files && homeImageInput.files[0] ? homeImageInput.files[0] : null;
-        if (!file) {
-            return;
-        }
-
-        revokeCurrentHomeObjectUrl();
-        currentHomeObjectUrl = URL.createObjectURL(file);
-        homeImagePreview.src = currentHomeObjectUrl;
-        removeHomeImageField.value = '0';
-    });
-
-    deleteHomeImageBtn.addEventListener('click', () => {
-        revokeCurrentHomeObjectUrl();
-        homeImageInput.value = '';
-        homeImagePreview.src = defaultHomeImage;
-        removeHomeImageField.value = '1';
-    });
 
     const brandLogoInput = page.querySelector('#home_brand_logo_input');
     const brandLogoPreview = page.querySelector('#home_brand_logo_preview');

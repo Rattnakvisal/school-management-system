@@ -1223,10 +1223,10 @@
     }
 
     .admin-stage .admin-staff-table {
-        min-width: 1180px;
+        min-width: 100%;
         table-layout: auto;
-        border-collapse: separate;
-        border-spacing: 0 0.1rem;
+        border-collapse: collapse;
+        border-spacing: 0;
     }
 
     .admin-stage .admin-staff-table thead th {
@@ -1235,11 +1235,17 @@
     }
 
     .admin-stage .admin-staff-table tbody td {
-        border-top: 0;
-        border-bottom: 0;
+        border: 0;
+        border-radius: 0;
         padding-top: 0.7rem;
         padding-bottom: 0.7rem;
         vertical-align: middle;
+    }
+
+    .admin-stage .admin-staff-table tbody td:first-child,
+    .admin-stage .admin-staff-table tbody td:last-child {
+        border: 0;
+        border-radius: 0;
     }
 
     .admin-stage .admin-staff-table tbody tr:hover {
