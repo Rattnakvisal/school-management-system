@@ -15,26 +15,18 @@
                                             <img id="footer_logo_preview" src="{{ $footerLogo }}"
                                                 alt="Footer logo preview"
                                                 class="h-36 w-full rounded-2xl border border-slate-200 bg-slate-950 object-contain p-4 shadow-sm">
-                                            <input id="footer_logo_input" name="footer[logo]" type="file"
-                                                accept="image/*" class="hidden">
-                                            <input id="remove_footer_logo" name="footer[remove_logo]" type="hidden"
-                                                value="0">
-                                            <div class="mt-3 flex flex-wrap gap-2">
-                                                <button id="upload_footer_logo_btn" type="button"
-                                                    class="rounded-full bg-slate-900 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-slate-700">
-                                                    Upload Logo
-                                                </button>
-                                                <button id="delete_footer_logo_btn" type="button"
-                                                    class="rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-50">
-                                                    Remove
-                                                </button>
+                                            <div
+                                                class="mt-3 rounded-2xl border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700">
+                                                Logo, school name, and brand description are synced from Navbar Page.
                                             </div>
                                         </div>
                                         <div class="grid gap-4 md:grid-cols-2">
-                                            <input name="footer[tagline]" type="text"
-                                                value="{{ old('footer.tagline', $footerSection?->title ?? \App\Support\HomePageContent::text('footer.tagline')) }}"
-                                                placeholder="Tagline"
-                                                class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                            <input name="footer[tagline]" type="hidden"
+                                                value="{{ old('footer.tagline', $homeBrand?->description ?? \App\Support\HomePageContent::text('brand.tagline')) }}">
+                                            <input type="text"
+                                                value="{{ old('brand.name', $homeBrand?->title ?? 'TechBridge') }}"
+                                                aria-label="Synced school name" readonly
+                                                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
                                             <input name="footer[explore]" type="text"
                                                 value="{{ old('footer.explore', $footerSection?->subtitle ?? \App\Support\HomePageContent::text('footer.explore')) }}"
                                                 placeholder="Explore label"
@@ -47,6 +39,10 @@
                                                 value="{{ old('footer.copyright', $footerSection?->meta['copyright'] ?? \App\Support\HomePageContent::text('footer.copyright')) }}"
                                                 placeholder="Copyright text"
                                                 class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                            <input type="text"
+                                                value="{{ old('brand.description', $homeBrand?->description ?? \App\Support\HomePageContent::text('brand.tagline')) }}"
+                                                aria-label="Synced brand description" readonly
+                                                class="md:col-span-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                                             <textarea name="footer[description]" rows="3" placeholder="Description"
                                                 class="md:col-span-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('footer.description', $footerSection?->description ?? \App\Support\HomePageContent::text('footer.description')) }}</textarea>
                                         </div>

@@ -637,6 +637,11 @@
                                                                             <span class="font-semibold text-indigo-700">
                                                                                 {{ $majorSubject->name }}
                                                                             </span>
+                                                                            @if ((float) ($majorSubject->tuition_fee ?? 0) > 0)
+                                                                                <span class="font-bold text-indigo-500">
+                                                                                    ${{ number_format((float) $majorSubject->tuition_fee, 2) }}
+                                                                                </span>
+                                                                            @endif
                                                                         </div>
                                                                     @endforeach
 

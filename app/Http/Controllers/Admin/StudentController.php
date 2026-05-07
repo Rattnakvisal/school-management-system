@@ -689,8 +689,14 @@ class StudentController extends Controller
             return [];
         }
 
+        $subjectColumns = ['id', 'name', 'code', 'school_class_id'];
+        $hasTuitionFeeColumn = Schema::hasColumn('subjects', 'tuition_fee');
+        if ($hasTuitionFeeColumn) {
+            $subjectColumns[] = 'tuition_fee';
+        }
+
         $fallbackMap = Subject::query()
-            ->select(['id', 'name', 'code', 'school_class_id'])
+            ->select($subjectColumns)
             ->whereNotNull('school_class_id')
             ->orderBy('name')
             ->get()
@@ -701,6 +707,7 @@ class StudentController extends Controller
                         'id' => (int) $subject->id,
                         'name' => (string) $subject->name,
                         'code' => (string) $subject->code,
+                        'tuition_fee' => (float) ($subject->tuition_fee ?? 0),
                         'school_class_id' => (int) $subject->school_class_id,
                     ];
                 })->values()->all();
@@ -719,6 +726,9 @@ class StudentController extends Controller
                 'subjects.name',
                 'subjects.code',
             ]);
+        if ($hasTuitionFeeColumn) {
+            $query->addSelect('subjects.tuition_fee');
+        }
 
         if ($hasSubjectClassColumn) {
             $query
@@ -744,6 +754,7 @@ class StudentController extends Controller
                             'id' => (int) $subject->id,
                             'name' => (string) $subject->name,
                             'code' => (string) $subject->code,
+                            'tuition_fee' => (float) ($subject->tuition_fee ?? 0),
                             'school_class_id' => (int) $subject->class_id,
                         ];
                     })

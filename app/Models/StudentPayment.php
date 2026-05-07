@@ -12,7 +12,7 @@ class StudentPayment extends Model
 
     public const STATUSES = ['paid', 'partial', 'pending', 'overdue', 'waived'];
 
-    public const PAYMENT_METHODS = ['cash', 'qr_cash', 'bank_transfer', 'card', 'mobile_money', 'scholarship', 'other'];
+    public const PAYMENT_METHODS = ['cash', 'qr_code', 'other'];
 
     protected $fillable = [
         'student_id',
@@ -22,7 +22,6 @@ class StudentPayment extends Model
         'due_date',
         'status',
         'payment_method',
-        'reference',
         'note',
     ];
 
@@ -53,10 +52,15 @@ class StudentPayment extends Model
         return $method !== '' ? self::methodLabel($method) : 'Not specified';
     }
 
+    public function getNetAmountAttribute(): float
+    {
+        return max((float) $this->amount - (float) $this->discount_amount, 0);
+    }
+
     public static function methodLabel(string $method): string
     {
         return match ($method) {
-            'qr_cash' => 'QR Cash',
+            'qr_code' => 'QR Code',
             default => ucfirst(str_replace('_', ' ', $method)),
         };
     }

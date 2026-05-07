@@ -168,6 +168,20 @@
                         value="{{ old('code', 'SUB' . now()->format('His') . strtoupper(substr(md5((string) microtime(true)), 0, 4))) }}">
 
                     <div>
+                        <label for="tuition_fee" class="mb-1 block text-xs font-semibold text-slate-600">Tuition Fee</label>
+                        <div class="relative">
+                            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-bold text-slate-400">$</span>
+                            <input id="tuition_fee" name="tuition_fee" type="number" step="0.01" min="0"
+                                value="{{ old('tuition_fee') }}"
+                                class="w-full rounded-xl border border-slate-200 py-2.5 pl-7 pr-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                                placeholder="0.00">
+                        </div>
+                        @error('tuition_fee', 'subjectCreate')
+                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
                         <label class="mb-1 block text-xs font-semibold text-slate-600">Study Times</label>
                         <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-600">
                             Study times are now managed in Time Studies.
@@ -338,11 +352,12 @@
                         <div class="min-w-0">
                             <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200">
                                 <div class="max-h-[700px] overflow-auto">
-                                    <table class="w-full min-w-[1150px] text-left text-sm">
+                                    <table class="w-full min-w-[1250px] text-left text-sm">
                                         <thead
                                             class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
                                                 <th class="px-3 py-3 font-semibold">Subject</th>
+                                                <th class="whitespace-nowrap px-3 py-3 font-semibold">Tuition Fee</th>
                                                 <th class="px-3 py-3 font-semibold">Study Time</th>
                                                 <th class="px-3 py-3 font-semibold">Class</th>
                                                 <th class="px-3 py-3 font-semibold">Teacher</th>
@@ -362,6 +377,9 @@
                                                         <div class="text-xs text-slate-400">
                                                             {{ \Illuminate\Support\Str::limit($subject->description ?: 'No description', 60) }}
                                                         </div>
+                                                    </td>
+                                                    <td class="whitespace-nowrap px-3 py-3 font-semibold tabular-nums text-slate-800">
+                                                        ${{ number_format((float) ($subject->tuition_fee ?? 0), 2) }}
                                                     </td>
                                                     <td class="px-3 py-3 text-slate-600">
                                                         @if ($subject->studySchedules->isNotEmpty())
@@ -621,6 +639,13 @@
                                                                             </div>
                                                                             <div
                                                                                 class="flex items-center justify-between gap-3">
+                                                                                <span class="text-slate-500">Tuition Fee</span>
+                                                                                <span class="font-semibold text-slate-900">
+                                                                                    ${{ number_format((float) ($subject->tuition_fee ?? 0), 2) }}
+                                                                                </span>
+                                                                            </div>
+                                                                            <div
+                                                                                class="flex items-center justify-between gap-3">
                                                                                 <span class="text-slate-500">Total
                                                                                     Students</span>
                                                                                 <span class="font-semibold text-slate-900">
@@ -796,6 +821,21 @@
                                                                         value="{{ $subject->code }}">
 
                                                                     <div>
+                                                                        <label for="edit_tuition_fee_{{ $subject->id }}"
+                                                                            class="mb-1 block text-xs font-semibold text-slate-600">Tuition
+                                                                            Fee</label>
+                                                                        <div class="relative">
+                                                                            <span
+                                                                                class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-bold text-slate-400">$</span>
+                                                                            <input id="edit_tuition_fee_{{ $subject->id }}"
+                                                                                name="tuition_fee" type="number"
+                                                                                step="0.01" min="0"
+                                                                                value="{{ $subject->tuition_fee }}"
+                                                                                class="w-full rounded-xl border border-slate-200 py-2.5 pl-7 pr-3 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div>
                                                                         <label
                                                                             class="mb-1 block text-xs font-semibold text-slate-600">Study
                                                                             Times</label>
@@ -847,7 +887,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="8"
+                                                    <td colspan="9"
                                                         class="px-4 py-10 text-left text-sm text-slate-500 sm:text-center">
                                                         No subjects found.
                                                     </td>

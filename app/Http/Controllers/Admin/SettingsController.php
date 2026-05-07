@@ -203,6 +203,8 @@ class SettingsController extends Controller
             'is_active' => true,
         ])->save();
 
+        $this->syncFooterBrandFromBrand($brand);
+
         foreach (($validated['navbar_links'] ?? []) as $index => $link) {
             $key = 'link_' . ($index + 1);
             $label = trim((string) ($link['label'] ?? ''));
@@ -948,6 +950,7 @@ class SettingsController extends Controller
         $this->ensureDefaultHomePageItems();
 
         $footer = HomePageItem::query()->where('section', 'footer')->where('key', 'main')->firstOrFail();
+        $brand = HomePageItem::query()->where('section', 'brand')->where('key', 'main')->first();
         $currentLogo = $footer->image_path;
 
         if ($request->boolean('footer.remove_logo')) {
@@ -970,11 +973,12 @@ class SettingsController extends Controller
 
         $footer->fill([
             'type' => 'content',
-            'title' => $validated['footer']['tagline'],
+            'title' => $brand?->description ?: $validated['footer']['tagline'],
             'description' => $validated['footer']['description'],
             'subtitle' => $validated['footer']['explore'],
             'value' => $validated['footer']['contact'],
             'meta' => ['copyright' => $validated['footer']['copyright']],
+            'image_path' => $brand?->image_path,
             'sort_order' => 1,
             'is_active' => true,
         ])->save();
@@ -1018,6 +1022,23 @@ class SettingsController extends Controller
         }
 
         return redirect()->route('admin.homepage.index')->with('success', 'Footer page content updated successfully.')->with('settings_tab', 'footer-page');
+    }
+
+    private function syncFooterBrandFromBrand(HomePageItem $brand): void
+    {
+        $footer = HomePageItem::query()
+            ->where('section', 'footer')
+            ->where('key', 'main')
+            ->first();
+
+        if (!$footer) {
+            return;
+        }
+
+        $footer->fill([
+            'title' => $brand->description,
+            'image_path' => $brand->image_path,
+        ])->save();
     }
 
     private function ensureDefaultHomePageItems(): void

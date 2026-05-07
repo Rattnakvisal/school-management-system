@@ -100,6 +100,7 @@
                         'mail' => 'fa-solid fa-envelope',
                         'flag' => 'fa-solid fa-flag',
                         'chart-line' => 'fa-solid fa-chart-line',
+                        'wallet' => 'fa-solid fa-wallet',
                         'palette' => 'fa-solid fa-palette',
                         'settings' => 'fa-solid fa-gear',
                     ];
@@ -135,6 +136,35 @@
                                 $item('admin.settings', 'Settings', 'settings'),
                             ],
                         ],
+                    ];
+
+                    $staffSearchTarget = function ($route, $label, $icon, $description, $keywords = [], $searchable = true) use ($adminNavIconClasses) {
+                        return [
+                            'label' => $label,
+                            'description' => $description,
+                            'url' => route($route),
+                            'icon' => $adminNavIconClasses[$icon] ?? 'fa-solid fa-magnifying-glass',
+                            'keywords' => implode(' ', array_merge([$label, $description], $keywords)),
+                            'searchable' => $searchable,
+                            'active' => request()->routeIs($route),
+                        ];
+                    };
+
+                    $staffSearchTargets = [
+                        $staffSearchTarget('staff.dashboard', 'Dashboard', 'layout-dashboard', 'Overview, stats, events, and school summary.', ['home', 'overview'], false),
+                        $staffSearchTarget('admin.students.index', 'Students', 'users', 'Search students, email, phone, class, and subject.', ['learner', 'class']),
+                        $staffSearchTarget('admin.teachers.index', 'Teachers', 'user-cog', 'Search teachers, email, phone, and subjects.', ['staff', 'instructor']),
+                        $staffSearchTarget('admin.classes.index', 'Classes', 'layers', 'Search classes, sections, rooms, and study time.', ['room', 'section']),
+                        $staffSearchTarget('admin.subjects.index', 'Subjects', 'book-open', 'Search subjects, codes, schedules, and descriptions.', ['course', 'lesson']),
+                        $staffSearchTarget('admin.time-studies.index', 'Schedule', 'clock-3', 'Search class, subject, teacher, and study time records.', ['time study', 'period']),
+                        $staffSearchTarget('admin.student-study.index', 'Student Progress', 'graduation-cap', 'Search study records by student, class, subject, or teacher.', ['study', 'progress']),
+                        $staffSearchTarget('admin.finance.index', 'School Finance', 'wallet', 'Search payments, student balances, and finance notes.', ['payment', 'balance']),
+                        $staffSearchTarget('admin.attendance.teachers.index', 'Teacher Attendance', 'clipboard-check', 'Search teacher attendance and leave records.', ['present', 'absent', 'law request']),
+                        $staffSearchTarget('admin.attendance.index', 'Student Attendance', 'calendar-check', 'Search student attendance, classes, teachers, and remarks.', ['present', 'absent']),
+                        $staffSearchTarget('admin.contacts.index', 'Messages', 'mail', 'Search contact messages by name, email, subject, or text.', ['inbox', 'contact']),
+                        $staffSearchTarget('staff.missions.index', 'Mission Events', 'flag', 'Search assigned mission events.', ['event', 'trip']),
+                        $staffSearchTarget('admin.homepage.index', 'Homepage UI', 'palette', 'Open website content and homepage settings.', ['website', 'content'], false),
+                        $staffSearchTarget('admin.settings', 'Settings', 'settings', 'Open profile, password, and system settings.', ['profile', 'password'], false),
                     ];
                 @endphp
 
@@ -191,21 +221,6 @@
                     </div>
                 @endforeach
             </nav>
-
-            <div class="hidden shrink-0 border-t border-slate-200/80 p-4 sm:block" x-show="!sidebarCollapsed"
-                x-transition>
-                <div
-                    class="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-4 text-white shadow-[0_18px_40px_-24px_rgba(79,70,229,0.9)]">
-                    <div class="text-[11px] font-black uppercase tracking-[0.22em] text-white/70">Staff Focus</div>
-                    <div class="mt-2 text-sm font-semibold leading-6 text-white/95">
-                        Keep accounts, attendance, schedules, and messages moving smoothly.
-                    </div>
-                    <a href="{{ route('admin.settings') }}"
-                        class="mt-4 inline-flex items-center rounded-full bg-white/15 px-3 py-2 text-xs font-semibold hover:bg-white/20">
-                        Open Settings
-                    </a>
-                </div>
-            </div>
         </aside>
 
         <div class="flex min-h-screen flex-col transition-[padding] duration-300"
@@ -222,7 +237,7 @@
                     </button>
 
                     <div class="hidden min-w-0 flex-1 sm:block">
-                        <div class="relative max-w-xl">
+                        <div class="relative max-w-xl" @click.outside="searchOpen = false">
                             <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                     <path
@@ -230,7 +245,52 @@
                                 </svg>
                             </span>
                             <input type="text" placeholder="Search records, people, classes..."
+                                x-ref="staffSearchInput"
+                                x-model="searchTerm"
+                                @focus="searchOpen = true; closeMenus()"
+                                @input="searchOpen = true"
+                                @keydown.enter.prevent="goSearch()"
                                 class="w-full rounded-full border border-slate-200 bg-white py-2.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-200 focus:ring-4 focus:ring-indigo-100" />
+
+                            <div x-show="searchOpen" x-cloak x-transition.origin.top.left
+                                class="fixed left-3 right-3 top-20 z-[85] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl sm:absolute sm:left-0 sm:right-auto sm:top-auto sm:mt-2 sm:w-[min(36rem,calc(100vw-2rem))]">
+                                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                                    <div class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"
+                                        x-text="searchTerm.trim() ? 'Search in' : 'Quick places'"></div>
+                                    <button type="button"
+                                        class="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                                        x-show="searchTerm.trim()"
+                                        @click="searchTerm = ''; $nextTick(() => $refs.staffSearchInput?.focus())">
+                                        Clear
+                                    </button>
+                                </div>
+
+                                <div class="nav-scrollbar max-h-96 overflow-y-auto p-2">
+                                    <template x-for="item in filteredSearchItems()" :key="item.label">
+                                        <button type="button"
+                                            class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-indigo-50 focus:bg-indigo-50 focus:outline-none"
+                                            @click="goSearch(item)">
+                                            <span
+                                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-indigo-600">
+                                                <i :class="item.icon" aria-hidden="true"></i>
+                                            </span>
+                                            <span class="min-w-0 flex-1">
+                                                <span class="block truncate text-sm font-bold text-slate-900"
+                                                    x-text="item.label"></span>
+                                                <span class="block truncate text-xs text-slate-500"
+                                                    x-text="item.searchable && searchTerm.trim() ? `Find '${searchTerm.trim()}' here` : item.description"></span>
+                                            </span>
+                                            <i class="fa-solid fa-arrow-right text-xs text-slate-300"
+                                                aria-hidden="true"></i>
+                                        </button>
+                                    </template>
+
+                                    <div class="px-4 py-8 text-center" x-show="filteredSearchItems().length === 0">
+                                        <div class="text-sm font-bold text-slate-800">No matching page</div>
+                                        <div class="mt-1 text-xs text-slate-500">Try students, teachers, classes, finance, or attendance.</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -439,6 +499,9 @@
                 notifOpen: false,
                 messageOpen: false,
                 profileOpen: false,
+                searchOpen: false,
+                searchTerm: '',
+                searchItems: @json($staffSearchTargets),
 
                 get sidebarCollapsed() {
                     return this.isDesktop && this.collapsed;
@@ -458,9 +521,69 @@
                 },
 
                 closeAll() {
+                    this.searchOpen = false;
+                    this.closeMenus();
+                },
+
+                closeMenus() {
                     this.notifOpen = false;
                     this.messageOpen = false;
                     this.profileOpen = false;
+                },
+
+                filteredSearchItems() {
+                    const term = this.searchTerm.trim().toLowerCase();
+
+                    if (!term) {
+                        return this.searchItems.slice(0, 8);
+                    }
+
+                    const matches = this.searchItems.filter((item) => {
+                        return `${item.label} ${item.description} ${item.keywords}`.toLowerCase().includes(term);
+                    });
+
+                    if (matches.length > 0) {
+                        return matches.slice(0, 8);
+                    }
+
+                    const currentSearchable = this.searchItems.filter((item) => item.active && item.searchable);
+                    const searchable = this.searchItems.filter((item) => item.searchable);
+
+                    return [...currentSearchable, ...searchable]
+                        .filter((item, index, items) => items.findIndex((candidate) => candidate.label === item.label) === index)
+                        .slice(0, 8);
+                },
+
+                searchUrl(item) {
+                    const term = this.searchTerm.trim();
+                    const target = new URL(item.url, window.location.origin);
+
+                    if (term && item.searchable && !this.isPageSearch(item, term)) {
+                        target.searchParams.set('q', term);
+                    }
+
+                    return target.toString();
+                },
+
+                isPageSearch(item, term) {
+                    const normalizedTerm = term.toLowerCase();
+                    const normalizedLabel = String(item.label || '').toLowerCase();
+
+                    return normalizedLabel.includes(normalizedTerm) || normalizedTerm.includes(normalizedLabel);
+                },
+
+                goSearch(item = null) {
+                    const term = this.searchTerm.trim();
+                    const exactPageTarget = term ? this.filteredSearchItems().find((searchItem) => this.isPageSearch(searchItem, term)) : null;
+                    const target = item ||
+                        exactPageTarget ||
+                        (term ? this.searchItems.find((searchItem) => searchItem.active && searchItem.searchable) : null) ||
+                        this.filteredSearchItems()[0] ||
+                        this.searchItems.find((searchItem) => searchItem.searchable);
+
+                    if (!target) return;
+
+                    window.location.href = this.searchUrl(target);
                 },
 
                 toggleSidebar() {

@@ -251,19 +251,6 @@
                     </div>
                 @endforeach
             </nav>
-
-            {{-- FOOTER --}}
-            <div class="shrink-0 border-t border-slate-100 p-4" x-show="!collapsed" x-transition>
-                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 text-white shadow-lg">
-                    <div class="text-sm font-bold uppercase tracking-[0.18em] text-white/70">Student Focus</div>
-                    <div class="mt-2 text-sm font-semibold leading-6 text-white/95">
-                        Stay focused and keep learning.
-                    </div>
-                    <div class="mt-4 inline-flex items-center rounded-xl bg-white/15 px-3 py-2 text-xs font-semibold">
-                        Open your assignment, check notices, and keep moving forward.
-                    </div>
-                </div>
-            </div>
         </aside>
 
         {{-- MAIN --}}

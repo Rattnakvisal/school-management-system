@@ -154,9 +154,7 @@
         $facilityImage = $facilitySection?->image_path
             ? route('public.storage', ['path' => $facilitySection->image_path])
             : asset('images/study.jpg');
-        $footerLogo = $footerSection?->image_path
-            ? route('public.storage', ['path' => $footerSection->image_path])
-            : asset('images/techbridge-logo-mark.svg');
+        $footerLogo = $homeBrandLogo;
     @endphp
 
     @include('admin.settings._styles')
@@ -169,20 +167,24 @@
 
         <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-6">
             <div class="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
-                @include('admin.settings._sidebar')
+                @if ($isHomepageUiPage)
+                    @include('admin.homepage-ui._sidebar')
+                @else
+                    @include('admin.settings._sidebar')
+                @endif
 
                 <div class="min-w-0">
                     @if ($isHomepageUiPage)
-                        @include('admin.settings.panels.navbar-page')
-                        @include('admin.settings.panels.home-page')
-                        @include('admin.settings.panels.about-page')
-                        @include('admin.settings.panels.feature-page')
-                        @include('admin.settings.panels.program-page')
-                        @include('admin.settings.panels.facility-page')
-                        @include('admin.settings.panels.admission-page')
-                        @include('admin.settings.panels.faq-page')
-                        @include('admin.settings.panels.contact-page')
-                        @include('admin.settings.panels.footer-page')
+                        @include('admin.homepage-ui.panels.navbar-page')
+                        @include('admin.homepage-ui.panels.home-page')
+                        @include('admin.homepage-ui.panels.about-page')
+                        @include('admin.homepage-ui.panels.feature-page')
+                        @include('admin.homepage-ui.panels.program-page')
+                        @include('admin.homepage-ui.panels.facility-page')
+                        @include('admin.homepage-ui.panels.admission-page')
+                        @include('admin.homepage-ui.panels.faq-page')
+                        @include('admin.homepage-ui.panels.contact-page')
+                        @include('admin.homepage-ui.panels.footer-page')
                     @else
                         @include('admin.settings.panels.profile')
                         @include('admin.settings.panels.password')

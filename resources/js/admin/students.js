@@ -319,7 +319,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const option = document.createElement('option');
             option.value = String(item.id);
             const classLabel = classLabelById[String(item.school_class_id || '')] || '';
-            option.textContent = classLabel ? `${item.name} (${classLabel})` : `${item.name}`;
+            const tuitionFee = Number(item.tuition_fee || 0);
+            const feeLabel = tuitionFee > 0 ? ` - $${tuitionFee.toFixed(2)}` : '';
+            option.textContent = classLabel ? `${item.name}${feeLabel} (${classLabel})` : `${item.name}${feeLabel}`;
             if (selectedSet.has(String(item.id))) {
                 option.selected = true;
             }

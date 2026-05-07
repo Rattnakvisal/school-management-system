@@ -153,6 +153,46 @@ class User extends Authenticatable
         return $this->hasMany(StudentPayment::class, 'student_id');
     }
 
+    public function getTuitionSubjectsAttribute()
+    {
+        $subjects = collect();
+
+        if ($this->relationLoaded('majorSubjects')) {
+            $subjects = $subjects->merge($this->getRelation('majorSubjects'));
+        } else {
+            $subjects = $subjects->merge($this->majorSubjects);
+        }
+
+        if ($this->relationLoaded('majorSubject')) {
+            $majorSubject = $this->getRelation('majorSubject');
+        } else {
+            $majorSubject = $this->majorSubject;
+        }
+
+        if ($majorSubject) {
+            $subjects->push($majorSubject);
+        }
+
+        return $subjects
+            ->filter(fn ($subject) => $subject !== null)
+            ->unique(fn ($subject) => (int) $subject->id)
+            ->values();
+    }
+
+    public function getTuitionTotalAttribute(): float
+    {
+        return (float) $this->tuition_subjects
+            ->sum(fn ($subject): float => (float) ($subject->tuition_fee ?? 0));
+    }
+
+    public function getTuitionSubjectNamesAttribute(): string
+    {
+        return $this->tuition_subjects
+            ->pluck('name')
+            ->filter()
+            ->implode(', ');
+    }
+
     public function getAvatarUrlAttribute(): string
     {
         $avatar = trim((string) $this->avatar);

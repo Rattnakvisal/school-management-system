@@ -75,7 +75,7 @@ class NotificationController extends Controller
         $role = strtolower(trim($role));
         $teacherTag = '[teacher_id:' . $userId . ']';
         $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request', 'student_assignment_submitted'];
-        $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted'];
+        $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted', 'student_payment_saved'];
         $staffOnlyTypes = ['mission_event_staff', 'teacher_mission_submitted', 'staff_mission_submitted'];
 
         if ($role === 'teacher') {

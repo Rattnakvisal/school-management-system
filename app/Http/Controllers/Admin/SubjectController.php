@@ -32,6 +32,7 @@ class SubjectController extends Controller
                 $query->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', '%' . $search . '%')
                         ->orWhere('code', 'like', '%' . $search . '%')
+                        ->orWhere('tuition_fee', 'like', '%' . $search . '%')
                         ->orWhere('study_time', 'like', '%' . $search . '%')
                         ->orWhere('study_start_time', 'like', '%' . $search . '%')
                         ->orWhere('study_end_time', 'like', '%' . $search . '%')
@@ -241,6 +242,7 @@ class SubjectController extends Controller
         return [
             'name' => trim((string) $validated['name']),
             'code' => strtoupper(trim((string) $validated['code'])),
+            'tuition_fee' => (float) ($validated['tuition_fee'] ?? 0),
             'description' => $this->nullableTrim($validated['description'] ?? null),
             'is_active' => $isActive,
         ];
@@ -262,6 +264,7 @@ class SubjectController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:120'],
             'code' => ['required', 'string', 'max:40', $codeRule],
+            'tuition_fee' => ['nullable', 'numeric', 'min:0', 'max:999999999.99'],
             'study_start_time' => ['nullable', 'date_format:H:i', 'required_with:study_end_time'],
             'study_end_time' => ['nullable', 'date_format:H:i', 'required_with:study_start_time', 'after:study_start_time'],
             'study_slots' => ['nullable', 'array', 'max:12'],
@@ -271,6 +274,7 @@ class SubjectController extends Controller
             'additional_subjects' => ['nullable', 'array', 'max:20'],
             'additional_subjects.*.name' => ['nullable', 'string', 'max:120'],
             'additional_subjects.*.code' => ['nullable', 'string', 'max:40'],
+            'additional_subjects.*.tuition_fee' => ['nullable', 'numeric', 'min:0', 'max:999999999.99'],
             'additional_subjects.*.period' => ['nullable', 'string', 'max:20'],
             'additional_subjects.*.start_time' => ['nullable', 'date_format:H:i'],
             'additional_subjects.*.end_time' => ['nullable', 'date_format:H:i'],
@@ -330,8 +334,9 @@ class SubjectController extends Controller
                 $startTime = trim((string) ($row['start_time'] ?? ''));
                 $endTime = trim((string) ($row['end_time'] ?? ''));
                 $description = trim((string) ($row['description'] ?? ''));
+                $tuitionFee = trim((string) ($row['tuition_fee'] ?? ''));
 
-                $hasAnyValue = $name !== '' || $code !== '' || $period !== '' || $startTime !== '' || $endTime !== '' || $description !== '';
+                $hasAnyValue = $name !== '' || $code !== '' || $tuitionFee !== '' || $period !== '' || $startTime !== '' || $endTime !== '' || $description !== '';
                 if (!$hasAnyValue) {
                     continue;
                 }
@@ -494,9 +499,10 @@ class SubjectController extends Controller
             $period = strtolower(trim((string) ($row['period'] ?? '')));
             $startTime = trim((string) ($row['start_time'] ?? ''));
             $endTime = trim((string) ($row['end_time'] ?? ''));
+            $tuitionFee = trim((string) ($row['tuition_fee'] ?? ''));
             $description = $this->nullableTrim($row['description'] ?? null);
 
-            $hasAnyValue = $name !== '' || $code !== '' || $period !== '' || $startTime !== '' || $endTime !== '' || $description !== null;
+            $hasAnyValue = $name !== '' || $code !== '' || $tuitionFee !== '' || $period !== '' || $startTime !== '' || $endTime !== '' || $description !== null;
             if (!$hasAnyValue) {
                 continue;
             }
@@ -512,6 +518,7 @@ class SubjectController extends Controller
             $normalized[] = [
                 'name' => $name,
                 'code' => $code,
+                'tuition_fee' => $tuitionFee !== '' ? (float) $tuitionFee : 0,
                 'period' => $period,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
@@ -533,6 +540,7 @@ class SubjectController extends Controller
             $subject = Subject::create([
                 'name' => $row['name'],
                 'code' => $row['code'],
+                'tuition_fee' => $row['tuition_fee'],
                 'study_time' => $row['start_time'],
                 'study_start_time' => $row['start_time'],
                 'study_end_time' => $row['end_time'],

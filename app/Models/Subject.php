@@ -17,6 +17,7 @@ class Subject extends Model
         'teacher_id',
         'name',
         'code',
+        'tuition_fee',
         'study_time',
         'study_start_time',
         'study_end_time',
@@ -29,6 +30,7 @@ class Subject extends Model
         return [
             'is_active' => 'boolean',
             'teacher_id' => 'integer',
+            'tuition_fee' => 'decimal:2',
             'study_time' => 'string',
             'study_start_time' => 'string',
             'study_end_time' => 'string',

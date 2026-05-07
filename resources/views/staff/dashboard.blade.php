@@ -168,7 +168,7 @@
             'rounded-[26px] border border-white/80 bg-white/90 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur';
         $softPanelClass =
             'rounded-[26px] border border-[#ececff] bg-[#f7f6ff]/95 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.45)]';
-        $titleClass = 'text-[15px] tracking-[-0.02em] text-slate-800';
+        $titleClass = 'text-[15px] font-bold tracking-[-0.02em] text-slate-800';
     @endphp
 
     <div class="dashboard-stage staff-soft-dashboard -mx-2 rounded-[30px] bg-[#f5f6ff] p-3 sm:p-5 xl:p-7">
@@ -326,7 +326,7 @@
 
                 <section class="dash-reveal {{ $panelClass }} p-5 sm:p-6" style="--d: 5;">
                     <div class="mb-5 flex items-center justify-between gap-3">
-                        <h2 class="text-lg tracking-[-0.03em] text-slate-800">Teaching Lessons</h2>
+                        <h2 class="text-lg font-bold tracking-[-0.03em] text-slate-800">Teaching Lessons</h2>
                         <a href="{{ route('admin.time-studies.index') }}"
                             class="rounded-full bg-[#f3f0ff] px-4 py-2 text-xs text-indigo-500">View all</a>
                     </div>
@@ -382,7 +382,7 @@
 
                 <section class="dash-reveal {{ $panelClass }} p-5" style="--d: 6;">
                     <div class="mb-4 flex items-center justify-between gap-3">
-                        <h2 class="text-base text-slate-800">Team Pulse</h2>
+                        <h2 class="text-base font-bold text-slate-800">Team Pulse</h2>
                         <span class="text-xs text-slate-400">Recent team</span>
                     </div>
                     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -450,7 +450,7 @@
 
                 <section class="dash-reveal space-y-4" style="--d: 3;">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-base text-slate-800">Upcoming Events</h2>
+                        <h2 class="text-base font-bold text-slate-800">Upcoming Events</h2>
                         <span class="text-slate-300">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                                 <path
@@ -488,7 +488,7 @@
 
                 <section class="dash-reveal {{ $panelClass }} p-5" style="--d: 4;">
                     <div class="mb-4 flex items-center justify-between gap-3">
-                        <h2 class="text-base text-slate-800">My Notes</h2>
+                        <h2 class="text-base font-bold text-slate-800">My Notes</h2>
                         <span
                             class="rounded-full border border-indigo-100 bg-[#f7f5ff] px-3 py-1.5 text-[10px] text-indigo-500">
                             {{ number_format($focusCount) }} open
@@ -528,7 +528,7 @@
 
                 <section class="dash-reveal {{ $panelClass }} p-5" style="--d: 5;">
                     <div class="mb-4 flex items-center justify-between">
-                        <h2 class="text-base text-slate-800">Messages</h2>
+                        <h2 class="text-base font-bold text-slate-800">Messages</h2>
                         <a href="{{ route('admin.contacts.index') }}" class="text-xs text-indigo-500">View
                             all</a>
                     </div>

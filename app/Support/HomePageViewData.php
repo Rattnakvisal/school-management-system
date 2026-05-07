@@ -278,12 +278,12 @@ class HomePageViewData
         }
 
         $footerItem = $homePageItems->get('footer', collect())->firstWhere('key', 'main');
-        $footerTagline = $footerItem?->title ?: HomePageContent::text('footer.tagline');
+        $footerTagline = $brandTagline;
         $footerDescription = $footerItem?->description ?: HomePageContent::text('footer.description');
         $footerExploreLabel = $footerItem?->subtitle ?: HomePageContent::text('footer.explore');
         $footerContactLabel = $footerItem?->value ?: HomePageContent::text('footer.contact');
         $footerCopyright = $footerItem?->meta['copyright'] ?? HomePageContent::text('footer.copyright');
-        $footerLogo = self::imageUrl($footerItem?->image_path, 'images/techbridge-logo-mark.svg');
+        $footerLogo = $brandLogo;
 
         $dynamicFooterLinks = $homePageItems
             ->get('footer_links', collect())

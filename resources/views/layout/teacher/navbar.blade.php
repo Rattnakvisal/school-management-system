@@ -238,22 +238,6 @@
                     </div>
                 @endforeach
             </nav>
-
-            {{-- Footer card --}}
-            <div class="hidden shrink-0 border-t border-slate-200/80 p-4 sm:block" x-show="!sidebarCollapsed"
-                x-transition>
-                <div
-                    class="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-4 text-white shadow-[0_18px_40px_-24px_rgba(79,70,229,0.9)]">
-                    <div class="text-[11px] font-black uppercase tracking-[0.22em] text-white/70">Teacher Focus</div>
-                    <div class="mt-2 text-sm font-semibold leading-6 text-white/95">
-                        Manage classes, attendance, and student grades with a clean workflow.
-                    </div>
-                    <a href="{{ route('teacher.settings') }}"
-                        class="mt-4 inline-flex items-center rounded-full bg-white/15 px-3 py-2 text-xs font-semibold hover:bg-white/20">
-                        Open Settings
-                    </a>
-                </div>
-            </div>
         </aside>
 
         {{-- MAIN AREA --}}

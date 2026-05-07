@@ -339,10 +339,6 @@
                         <h2 class="text-base font-bold text-slate-900">Payment Status</h2>
                         <p class="mt-1 text-xs text-slate-500">Paid, pending, overdue, and waived amounts.</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('admin.finance.export.excel') }}" class="text-xs font-bold text-emerald-700">Excel</a>
-                        <a href="{{ route('admin.finance.export.pdf') }}" class="text-xs font-bold text-rose-700">PDF</a>
-                    </div>
                 </div>
                 <div class="dashboard-chart-box mt-4 h-64 sm:h-72">
                     <canvas id="financeStatusChart" class="h-full w-full"></canvas>

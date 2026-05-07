@@ -83,3 +83,80 @@ test('homepage uses active editable content and ignores inactive items', functio
         ->assertSee('Scholarships', false)
         ->assertDontSee('Hidden Link', false);
 });
+
+test('homepage footer branding follows navbar branding', function () {
+    HomePageItem::query()->create([
+        'section' => 'brand',
+        'key' => 'main',
+        'title' => 'Synced Academy',
+        'description' => 'Navbar brand description',
+        'image_path' => 'home-page/navbar-logo.png',
+        'is_active' => true,
+    ]);
+
+    HomePageItem::query()->create([
+        'section' => 'footer',
+        'key' => 'main',
+        'title' => 'Old footer tagline',
+        'description' => 'Footer long description',
+        'image_path' => 'home-page/footer-logo.png',
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('home'));
+
+    $response
+        ->assertOk()
+        ->assertViewHas('schoolName', 'Synced Academy')
+        ->assertViewHas('brandTagline', 'Navbar brand description')
+        ->assertViewHas('footerTagline', 'Navbar brand description');
+
+    expect($response->viewData('footerLogo'))->toBe($response->viewData('brandLogo'));
+});
+
+test('navbar settings update syncs footer brand fields', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+
+    HomePageItem::query()->create([
+        'section' => 'brand',
+        'key' => 'main',
+        'title' => 'Before Academy',
+        'description' => 'Before description',
+        'image_path' => 'home-page/before-logo.png',
+        'is_active' => true,
+    ]);
+
+    HomePageItem::query()->create([
+        'section' => 'footer',
+        'key' => 'main',
+        'title' => 'Old footer tagline',
+        'description' => 'Footer long description',
+        'image_path' => 'home-page/footer-logo.png',
+        'subtitle' => 'Explore',
+        'value' => 'Contact',
+        'meta' => ['copyright' => 'All rights reserved.'],
+        'is_active' => true,
+    ]);
+
+    $this
+        ->actingAs($admin)
+        ->put(route('admin.settings.navbar-page.update'), [
+            'brand' => [
+                'name' => 'After Academy',
+                'description' => 'After brand description',
+                'remove_logo' => 0,
+            ],
+            'navbar_links' => [],
+        ])
+        ->assertRedirect(route('admin.homepage.index'));
+
+    $footer = HomePageItem::query()
+        ->where('section', 'footer')
+        ->where('key', 'main')
+        ->first();
+
+    expect($footer?->title)->toBe('After brand description');
+    expect($footer?->image_path)->toBe('home-page/before-logo.png');
+});

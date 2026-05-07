@@ -94,7 +94,7 @@ class NotificationController extends Controller
         $query = Notification::query();
         $role = strtolower(trim($role));
         $teacherOnlyTypes = ['teacher_law_request_approved', 'teacher_attendance_checked', 'student_law_request', 'student_assignment_submitted'];
-        $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted'];
+        $studentOnlyTypes = ['student_law_request_approved', 'student_attendance_checked', 'student_assignment_posted', 'student_grade_posted', 'student_payment_saved'];
         $staffOnlyTypes = ['mission_event_staff', 'teacher_mission_submitted', 'staff_mission_submitted'];
         $teacherMissionTypes = ['mission_event_teacher'];
 
