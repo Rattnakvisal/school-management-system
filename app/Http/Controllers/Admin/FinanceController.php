@@ -291,10 +291,8 @@ class FinanceController extends Controller
             ->get(['student_id', 'amount', 'discount_amount', 'status']);
         $paymentRows = $this->paymentRows();
         $totalTuition = (float) $paymentRows->sum(fn(array $payment): float => (float) $payment['tuition_total']);
-        $collected = (float) $payments
-            ->whereIn('status', ['paid', 'partial'])
-            ->sum(fn(StudentPayment $payment): float => $payment->net_amount);
-        $discounts = (float) $payments->sum(fn(StudentPayment $payment): float => (float) $payment->discount_amount);
+        $collected = (float) $paymentRows->sum(fn(array $payment): float => (float) $payment['cash_collected']);
+        $discounts = (float) $paymentRows->sum(fn(array $payment): float => (float) $payment['discount_total']);
 
         return [
             'payments' => $payments->count(),

@@ -16,6 +16,8 @@
         $financeStats = $financeStats ?? [];
         $financeCollected = (float) ($financeStats['collected'] ?? 0);
         $financeOutstanding = (float) ($financeStats['outstanding'] ?? 0);
+        $financeDiscounts = (float) ($financeStats['discounts'] ?? 0);
+        $financeBillable = max((float) ($financeStats['billable'] ?? 0), $financeCollected + $financeOutstanding + $financeDiscounts);
         $financePayments = (int) ($financeStats['payments'] ?? 0);
         $adminStatCards = [
             [
@@ -58,12 +60,12 @@
                 'label' => 'Finance',
                 'activeLabel' => 'Collected',
                 'active' => (int) round($financeCollected),
-                'total' => max(1, (int) round($financeCollected + $financeOutstanding)),
+                'total' => max(1, (int) round($financeBillable)),
                 'route' => route('admin.finance.index'),
                 'icon' => 'finance',
                 'tone' => 'from-teal-100 to-white text-teal-600',
                 'display' => '$' . number_format($financeCollected, 2),
-                'totalDisplay' => '$' . number_format($financeOutstanding, 2) . ' due',
+                'totalDisplay' => '$' . number_format($financeBillable, 2) . ' billable',
             ],
             [
                 'label' => 'Messages',

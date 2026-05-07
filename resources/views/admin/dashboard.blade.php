@@ -14,8 +14,9 @@
         $financeStats = $financeStats ?? [];
         $incomeTotal = (float) ($financeStats['collected'] ?? 0);
         $expenseTotal = (float) ($financeStats['outstanding'] ?? 0);
-        $balanceTotal = $incomeTotal - $expenseTotal;
-        $balanceDisplay = ($balanceTotal < 0 ? '-$' : '$') . number_format(abs($balanceTotal));
+        $discountTotal = (float) ($financeStats['discounts'] ?? 0);
+        $billableTotal = max((float) ($financeStats['billable'] ?? 0), $incomeTotal + $expenseTotal + $discountTotal);
+        $outstandingDisplay = '$' . number_format($expenseTotal);
         $financeRecords = (int) ($financeStats['payments'] ?? 0);
 
         $dashboardChartData = $chartData ?? [];
@@ -55,9 +56,9 @@
                 'trend' => 'bg-emerald-50 text-emerald-600',
             ],
             [
-                'label' => 'Finance Balance',
-                'value' => $balanceDisplay,
-                'note' => number_format($financeRecords) . ' payment records',
+                'label' => 'Outstanding Balance',
+                'value' => $outstandingDisplay,
+                'note' => '$' . number_format($incomeTotal) . ' collected',
                 'route' => route('admin.finance.index'),
                 'icon' => 'fa-wallet',
                 'tile' => 'bg-orange-50 text-orange-500',
@@ -309,6 +310,7 @@
                         </span>
                         <p class="text-sm font-semibold text-slate-600">
                             {{ number_format($financeRecords) }} student payment records are available for finance reports.
+                            Billable total: ${{ number_format($billableTotal) }}.
                         </p>
                     </div>
                     <a href="{{ route('admin.finance.index') }}"
@@ -384,7 +386,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
-                            <div class="text-lg text-slate-950">{{ $balanceDisplay }}</div>
+                            <div class="text-lg text-slate-950">{{ $outstandingDisplay }}</div>
                             <span
                                 class="grid h-8 w-8 place-items-center rounded-full bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-600 group-hover:text-white">
                                 <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>

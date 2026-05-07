@@ -9,6 +9,7 @@ use App\Models\StudentPayment;
 use App\Models\Subject;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -78,16 +79,18 @@ class AdminDashboardViewData
             $monthlyLabels[] = $month->format('M Y');
         }
 
+        $monthKeyExpression = $this->monthKeyExpression('created_at');
+
         $studentsMonthlyRaw = (clone $studentsBaseQuery)
             ->where('created_at', '>=', Carbon::now()->subMonths(5)->startOfMonth())
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_key, COUNT(*) as total")
+            ->selectRaw($monthKeyExpression . ' as month_key, COUNT(*) as total')
             ->groupBy('month_key')
             ->pluck('total', 'month_key')
             ->all();
 
         $teachersMonthlyRaw = (clone $teachersBaseQuery)
             ->where('created_at', '>=', Carbon::now()->subMonths(5)->startOfMonth())
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_key, COUNT(*) as total")
+            ->selectRaw($monthKeyExpression . ' as month_key, COUNT(*) as total')
             ->groupBy('month_key')
             ->pluck('total', 'month_key')
             ->all();
@@ -208,29 +211,29 @@ class AdminDashboardViewData
             ];
         }
 
+        $studentBalances = $this->studentFinanceBalances();
         $payments = StudentPayment::query()
             ->get(['student_id', 'amount', 'discount_amount', 'status']);
-        $totalTuition = User::query()
-            ->with(['majorSubject', 'majorSubjects'])
-            ->where('role', 'student')
-            ->get(['id', 'role', 'major_subject_id'])
-            ->sum(fn(User $student): float => (float) $student->tuition_total);
-        $paymentGross = (float) $payments
-            ->sum(fn(StudentPayment $payment): float => (float) $payment->amount);
-        $billable = max($totalTuition, $paymentGross);
-        $collected = (float) $payments
-            ->whereIn('status', ['paid', 'partial'])
-            ->sum(fn(StudentPayment $payment): float => $payment->net_amount);
-        $discounts = (float) $payments->sum(fn(StudentPayment $payment): float => (float) $payment->discount_amount);
+        $totalTuition = (float) $studentBalances->sum('tuition_total');
+        $collected = (float) $studentBalances->sum('cash_collected');
+        $discounts = (float) $studentBalances->sum('discount_total');
+        $outstanding = (float) $studentBalances->sum('remaining_due');
 
         return [
             'payments' => $payments->count(),
             'collected' => $collected,
-            'outstanding' => max($billable - $collected - $discounts, 0),
+            'outstanding' => $outstanding,
             'discounts' => $discounts,
-            'billable' => $billable,
-            'students_paid' => $payments->where('status', 'paid')->pluck('student_id')->filter()->unique()->count(),
+            'billable' => $totalTuition,
+            'students_paid' => $studentBalances->where('status', 'paid')->count(),
         ];
+    }
+
+    private function monthKeyExpression(string $column): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', {$column})"
+            : "DATE_FORMAT({$column}, '%Y-%m')";
     }
 
     private function financeChartData(): array
@@ -254,6 +257,7 @@ class AdminDashboardViewData
             ];
         }
 
+        $outstandingTotal = (float) $this->studentFinanceBalances()->sum('remaining_due');
         $startDate = array_key_first($days);
         $rows = StudentPayment::query()
             ->whereDate('payment_date', '>=', $startDate)
@@ -270,10 +274,13 @@ class AdminDashboardViewData
 
             if (in_array($status, ['paid', 'partial'], true)) {
                 $days[$dayKey]['income'] += $total;
-            } elseif (in_array($status, ['pending', 'overdue'], true)) {
-                $days[$dayKey]['outstanding'] += $total;
             }
         }
+
+        foreach ($days as &$day) {
+            $day['outstanding'] = $outstandingTotal;
+        }
+        unset($day);
 
         return [
             'labels' => array_values(array_map(static fn(array $day): string => $day['label'], $days)),
@@ -292,18 +299,80 @@ class AdminDashboardViewData
             return compact('labels', 'values');
         }
 
-        $payments = StudentPayment::query()
-            ->get(['status', 'amount', 'discount_amount']);
-
         $keys = ['paid', 'partial', 'pending', 'overdue', 'waived'];
+        $studentBalances = $this->studentFinanceBalances();
         $values = array_map(
-            static fn(string $key): float => (float) $payments
+            static fn(string $key): float => (float) $studentBalances
                 ->where('status', $key)
-                ->sum(fn(StudentPayment $payment): float => $payment->net_amount),
+                ->sum(fn(array $balance): float => in_array($key, ['paid', 'waived'], true)
+                    ? (float) $balance['cash_collected']
+                    : (float) $balance['remaining_due']),
             $keys
         );
 
         return compact('labels', 'values');
+    }
+
+    private function studentFinanceBalances(): Collection
+    {
+        $students = User::query()
+            ->with(['majorSubject', 'majorSubjects'])
+            ->where('role', 'student')
+            ->orderBy('name')
+            ->get(['id', 'name', 'role', 'major_subject_id']);
+
+        if ($students->isEmpty()) {
+            return collect();
+        }
+
+        $paymentsByStudent = StudentPayment::query()
+            ->whereIn('student_id', $students->pluck('id')->all())
+            ->orderByDesc('payment_date')
+            ->latest()
+            ->get(['id', 'student_id', 'amount', 'discount_amount', 'status', 'payment_date', 'due_date'])
+            ->groupBy(fn(StudentPayment $payment): string => (string) $payment->student_id);
+
+        return $students
+            ->map(function (User $student) use ($paymentsByStudent): array {
+                $payments = $paymentsByStudent->get((string) $student->id, collect());
+                $latestPayment = $payments->first();
+                $paidPayments = $payments->whereIn('status', ['paid', 'partial']);
+                $tuitionTotal = (float) $student->tuition_total;
+                $paidTotal = (float) $paidPayments->sum(fn(StudentPayment $payment): float => (float) $payment->amount);
+                $discountTotal = (float) $payments->sum(fn(StudentPayment $payment): float => (float) $payment->discount_amount);
+                $remainingDue = max($tuitionTotal - $paidTotal, 0);
+                $status = $this->studentBalanceStatus($tuitionTotal, $paidTotal, $latestPayment);
+
+                return [
+                    'student_id' => (int) $student->id,
+                    'tuition_total' => $tuitionTotal,
+                    'paid_total' => $paidTotal,
+                    'discount_total' => $discountTotal,
+                    'cash_collected' => max($paidTotal - $discountTotal, 0),
+                    'remaining_due' => $remainingDue,
+                    'status' => $status,
+                ];
+            })
+            ->values();
+    }
+
+    private function studentBalanceStatus(float $tuitionTotal, float $paidTotal, ?StudentPayment $latestPayment): string
+    {
+        if ($tuitionTotal <= 0.009) {
+            return 'waived';
+        }
+
+        $remainingDue = max($tuitionTotal - $paidTotal, 0);
+
+        if ($remainingDue <= 0.009) {
+            return 'paid';
+        }
+
+        if (strtolower((string) ($latestPayment?->status ?? '')) === 'overdue') {
+            return 'overdue';
+        }
+
+        return $paidTotal > 0.009 ? 'partial' : 'pending';
     }
 
     private function latestPaymentChartData($latestFinancePayments): array
