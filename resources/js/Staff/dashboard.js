@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const numberNodes = Array.from(document.querySelectorAll('.staff-animate-number'));
     const progressFills = Array.from(document.querySelectorAll('.staff-progress-fill'));
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isDarkMode = () => document.documentElement.classList.contains('dark');
 
     let dashboardData = {};
     try {
@@ -211,10 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.save();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillStyle = '#111827';
+                ctx.fillStyle = isDarkMode() ? '#f8fafc' : '#111827';
                 ctx.font = '700 34px "Sora", sans-serif';
                 ctx.fillText(`${Math.round(animatedProgressValue)}%`, point.x, point.y - 6);
-                ctx.fillStyle = '#94a3b8';
+                ctx.fillStyle = isDarkMode() ? '#cbd5e1' : '#94a3b8';
                 ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
                 ctx.fillText('healthy', point.x, point.y + 22);
                 ctx.restore();

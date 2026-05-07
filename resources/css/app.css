@@ -1,8 +1,402 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @import "./app/foundation.css";
 @import "./app/stage-utilities.css";
 @import "./app/home-student-dashboard.css";
 @import "./app/teacher-dashboard.css";
 @import "./app/staff-dashboard.css";
+@import "./admin/settings.css";
+@import "./admin/darkmode.css";
+
+html.dark body[data-admin-shell] main[data-page-animate] {
+    color: #e2e8f0;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .bg-white,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-white\/60,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-white\/80,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-white\/90,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-white\/95 {
+    background-color: rgb(15 23 42 / 0.92) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] [class*="bg-[linear-gradient"],
+html.dark body[data-admin-shell] main[data-page-animate] [class*="bg-[radial-gradient"] {
+    background-image: linear-gradient(135deg, #0f172a 0%, #111827 48%, #020617 100%) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header {
+    border: 1px solid rgb(79 70 229 / 0.32) !important;
+    background:
+        radial-gradient(circle at 92% 12%, rgb(99 102 241 / 0.28), transparent 34%),
+        linear-gradient(135deg, #1e1b4b 0%, #111827 48%, #020617 100%) !important;
+    color: #f8fafc !important;
+    box-shadow:
+        0 24px 60px -42px rgb(0 0 0 / 0.75),
+        inset 0 1px 0 rgb(255 255 255 / 0.08) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header::after {
+    background: radial-gradient(circle, rgb(34 211 238 / 0.16), transparent 62%) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-title,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header h1,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header h2,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header h3 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 14px rgb(0 0 0 / 0.35);
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-subtitle,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header p,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header__eyebrow {
+    color: #dbeafe !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header__icon {
+    border-color: rgb(129 140 248 / 0.45) !important;
+    background-color: rgb(79 70 229 / 0.18) !important;
+    color: #c7d2fe !important;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-stat {
+    border-color: rgb(148 163 184 / 0.22) !important;
+    background-color: rgb(15 23 42 / 0.52) !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header__actions a.bg-white,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header__actions button.bg-white {
+    border-color: rgb(148 163 184 / 0.28) !important;
+    background-color: rgb(248 250 252 / 0.96) !important;
+    box-shadow: 0 12px 30px -24px rgb(0 0 0 / 0.85) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header__actions a.bg-white:hover,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header__actions button.bg-white:hover {
+    background-color: #ffffff !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .bg-slate-50,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-slate-50\/60,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-slate-50\/80,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-slate-50\/90,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-slate-100,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-slate-100\/60,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-slate-100\/80,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-slate-200 {
+    background-color: rgb(30 41 59 / 0.7) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .bg-indigo-50,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-indigo-50\/60,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-indigo-100,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-indigo-100\/60 {
+    background-color: rgb(67 56 202 / 0.18) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .bg-sky-50,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-blue-50,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-cyan-50 {
+    background-color: rgb(14 165 233 / 0.14) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .bg-emerald-50,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-green-50 {
+    background-color: rgb(16 185 129 / 0.14) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .bg-orange-50,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-amber-50,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-yellow-50 {
+    background-color: rgb(245 158 11 / 0.14) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .bg-teal-50 {
+    background-color: rgb(20 184 166 / 0.14) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .bg-rose-50,
+html.dark body[data-admin-shell] main[data-page-animate] .bg-red-50 {
+    background-color: rgb(244 63 94 / 0.14) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .border-slate-100,
+html.dark body[data-admin-shell] main[data-page-animate] .border-slate-200,
+html.dark body[data-admin-shell] main[data-page-animate] .border-white,
+html.dark body[data-admin-shell] main[data-page-animate] .border-white\/80 {
+    border-color: rgb(51 65 85 / 0.75) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .ring-slate-100,
+html.dark body[data-admin-shell] main[data-page-animate] .ring-slate-200 {
+    --tw-ring-color: rgb(51 65 85 / 0.75) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .text-slate-950,
+html.dark body[data-admin-shell] main[data-page-animate] .text-slate-900,
+html.dark body[data-admin-shell] main[data-page-animate] .text-slate-800 {
+    color: #f8fafc !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .text-slate-700,
+html.dark body[data-admin-shell] main[data-page-animate] .text-slate-600 {
+    color: #cbd5e1 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .text-slate-500,
+html.dark body[data-admin-shell] main[data-page-animate] .text-slate-400,
+html.dark body[data-admin-shell] main[data-page-animate] .text-slate-300 {
+    color: #94a3b8 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] p:not([class*="text-red"]):not([class*="text-rose"]):not([class*="text-pink"]):not([class*="text-orange"]):not([class*="text-amber"]):not([class*="text-yellow"]):not([class*="text-green"]):not([class*="text-emerald"]):not([class*="text-teal"]):not([class*="text-cyan"]):not([class*="text-sky"]):not([class*="text-blue"]):not([class*="text-indigo"]):not([class*="text-violet"]):not([class*="text-purple"]),
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-subtitle,
+html.dark body[data-admin-shell] main[data-page-animate] .dashboard-card-meta,
+html.dark body[data-admin-shell] main[data-page-animate] .card-description,
+html.dark body[data-admin-shell] main[data-page-animate] .section-description {
+    color: #cbd5e1 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .text-gray-950,
+html.dark body[data-admin-shell] main[data-page-animate] .text-gray-900,
+html.dark body[data-admin-shell] main[data-page-animate] .text-gray-800,
+html.dark body[data-admin-shell] main[data-page-animate] .text-zinc-950,
+html.dark body[data-admin-shell] main[data-page-animate] .text-zinc-900,
+html.dark body[data-admin-shell] main[data-page-animate] .text-neutral-950,
+html.dark body[data-admin-shell] main[data-page-animate] .text-neutral-900 {
+    color: #f8fafc !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .text-gray-700,
+html.dark body[data-admin-shell] main[data-page-animate] .text-gray-600,
+html.dark body[data-admin-shell] main[data-page-animate] .text-zinc-700,
+html.dark body[data-admin-shell] main[data-page-animate] .text-zinc-600,
+html.dark body[data-admin-shell] main[data-page-animate] .text-neutral-700,
+html.dark body[data-admin-shell] main[data-page-animate] .text-neutral-600 {
+    color: #cbd5e1 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .text-gray-500,
+html.dark body[data-admin-shell] main[data-page-animate] .text-gray-400,
+html.dark body[data-admin-shell] main[data-page-animate] .text-zinc-500,
+html.dark body[data-admin-shell] main[data-page-animate] .text-zinc-400,
+html.dark body[data-admin-shell] main[data-page-animate] .text-neutral-500,
+html.dark body[data-admin-shell] main[data-page-animate] .text-neutral-400 {
+    color: #94a3b8 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] label.text-slate-600,
+html.dark body[data-admin-shell] main[data-page-animate] label.text-slate-500,
+html.dark body[data-admin-shell] main[data-page-animate] .text-xs.text-slate-500,
+html.dark body[data-admin-shell] main[data-page-animate] .text-sm.text-slate-500 {
+    color: #b6c2d2 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] td,
+html.dark body[data-admin-shell] main[data-page-animate] th {
+    color: #dbeafe;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-table-head,
+html.dark body[data-admin-shell] main[data-page-animate] thead {
+    background-color: rgb(15 23 42 / 0.98) !important;
+    color: #94a3b8 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] tbody,
+html.dark body[data-admin-shell] main[data-page-animate] tbody.bg-white {
+    background-color: rgb(15 23 42 / 0.82) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr {
+    border-color: rgb(51 65 85 / 0.65) !important;
+    background-color: transparent !important;
+    transition:
+        background-color 160ms ease,
+        color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr:nth-child(odd) {
+    background-color: rgb(15 23 42 / 0.35) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr:hover,
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr.hover\:bg-slate-50\/80:hover,
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr.hover\:bg-slate-50:hover,
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr.hover\:bg-white:hover {
+    background-color: rgb(30 41 59 / 0.94) !important;
+    box-shadow: inset 3px 0 0 rgb(99 102 241 / 0.9);
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr:hover td {
+    color: #f8fafc !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr:hover .text-slate-500,
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr:hover .text-slate-400,
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr:hover .text-gray-500,
+html.dark body[data-admin-shell] main[data-page-animate] tbody tr:hover .text-gray-400 {
+    color: #cbd5e1 !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header [x-show],
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header .absolute.bg-white {
+    border-color: rgb(71 85 105 / 0.86) !important;
+    background-color: rgb(15 23 42 / 0.96) !important;
+    color: #e2e8f0 !important;
+    box-shadow: 0 24px 60px -36px rgb(0 0 0 / 0.95) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header [x-show] a:hover,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header .absolute.bg-white a:hover {
+    background-color: rgb(30 41 59 / 0.9) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .dashboard-card,
+html.dark body[data-admin-shell] main[data-page-animate] .dash-hover {
+    border-color: rgb(51 65 85 / 0.76) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .dash-hover:hover,
+html.dark body[data-admin-shell] main[data-page-animate] .dashboard-card:hover {
+    border-color: rgb(99 102 241 / 0.48) !important;
+    box-shadow: 0 28px 70px -46px rgb(0 0 0 / 0.95) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .dashboard-stage.staff-soft-dashboard {
+    background:
+        radial-gradient(circle at 8% 0%, rgb(99 102 241 / 0.2), transparent 30%),
+        radial-gradient(circle at 92% 8%, rgb(20 184 166 / 0.16), transparent 28%),
+        linear-gradient(180deg, #020617 0%, #0f172a 100%) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .dashboard-stage.staff-soft-dashboard::before {
+    background-image:
+        linear-gradient(rgb(148 163 184 / 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(148 163 184 / 0.07) 1px, transparent 1px) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .staff-workload-chart,
+html.dark body[data-admin-shell] main[data-page-animate] .teacher-chart-shell {
+    background:
+        radial-gradient(circle at 50% 45%, rgb(99 102 241 / 0.2), transparent 44%),
+        linear-gradient(180deg, rgb(15 23 42 / 0.96), rgb(2 6 23 / 0.94)) !important;
+    border: 1px solid rgb(51 65 85 / 0.72);
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .js-staff-slot,
+html.dark body[data-admin-shell] main[data-page-animate] .staff-team-card,
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard aside a,
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .rounded-2xl.bg-slate-50 {
+    border: 1px solid rgb(51 65 85 / 0.72);
+    background-color: rgb(15 23 42 / 0.76) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard aside a:hover,
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .dash-hover:hover {
+    background-color: rgb(30 41 59 / 0.92) !important;
+    border-color: rgb(99 102 241 / 0.48);
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .border-\[\#e4e4f5\] {
+    border-color: rgb(99 102 241 / 0.38) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .ring-\[\#f5f6ff\] {
+    --tw-ring-color: rgb(2 6 23 / 0.95) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .bg-\[\#f3f0ff\],
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .bg-\[\#f7f5ff\],
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .bg-\[\#f5f4ff\] {
+    background-color: rgb(79 70 229 / 0.18) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .teacher-calendar__day,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-dashboard-calendar .teacher-calendar__day {
+    background-color: rgb(30 41 59 / 0.84);
+    color: #cbd5e1;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .teacher-calendar__day--active,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-dashboard-calendar .teacher-calendar__day--active {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .staff-soft-dashboard .teacher-calendar__day--muted,
+html.dark body[data-admin-shell] main[data-page-animate] .admin-dashboard-calendar .teacher-calendar__day--muted {
+    background-color: transparent;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .from-indigo-50 {
+    --tw-gradient-from: rgb(67 56 202 / 0.28) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgb(67 56 202 / 0) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .via-violet-50 {
+    --tw-gradient-to: rgb(124 58 237 / 0) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), rgb(124 58 237 / 0.22) var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .to-white {
+    --tw-gradient-to: rgb(15 23 42 / 0.92) var(--tw-gradient-to-position) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .from-white {
+    --tw-gradient-from: rgb(15 23 42 / 0.92) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgb(15 23 42 / 0) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .to-slate-50\/90,
+html.dark body[data-admin-shell] main[data-page-animate] .to-slate-50 {
+    --tw-gradient-to: rgb(30 41 59 / 0.86) var(--tw-gradient-to-position) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .border-indigo-100,
+html.dark body[data-admin-shell] main[data-page-animate] .border-emerald-100,
+html.dark body[data-admin-shell] main[data-page-animate] .border-orange-100 {
+    border-color: rgb(99 102 241 / 0.32) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] input,
+html.dark body[data-admin-shell] main[data-page-animate] select,
+html.dark body[data-admin-shell] main[data-page-animate] textarea {
+    border-color: rgb(51 65 85 / 0.9);
+    background-color: rgb(15 23 42 / 0.9);
+    color: #f8fafc;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] input::placeholder,
+html.dark body[data-admin-shell] main[data-page-animate] textarea::placeholder {
+    color: #64748b;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip {
+    border-color: rgb(99 102 241 / 0.34) !important;
+    background-color: rgb(49 46 129 / 0.42) !important;
+    color: #c7d2fe !important;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip .text-indigo-700,
+html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip .text-indigo-500 {
+    color: #a5b4fc !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip .text-indigo-300 {
+    color: rgb(129 140 248 / 0.7) !important;
+}
+
+html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip .study-time-label,
+html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip .text-slate-700 {
+    color: #dbeafe !important;
+}

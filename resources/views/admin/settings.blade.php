@@ -157,8 +157,6 @@
         $footerLogo = $homeBrandLogo;
     @endphp
 
-    @include('admin.settings._styles')
-
     <div id="admin-settings-page" class="stage space-y-6"
         data-settings-default-tab="{{ $settingsDefaultTab }}"
         data-homepage-ui="{{ $isHomepageUiPage ? '1' : '0' }}">

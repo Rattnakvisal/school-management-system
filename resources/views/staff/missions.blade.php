@@ -1,4 +1,4 @@
-@extends('layout.staff.navbar')
+@extends('layout.admin.navbar.navbar')
 
 @section('page')
     @include('shared.mission-events', [

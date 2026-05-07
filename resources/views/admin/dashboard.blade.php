@@ -227,7 +227,7 @@
                 </div>
             </article>
 
-            <article class="dash-reveal {{ $teacherPanelClass }} p-5 sm:p-6" style="--d: 9;">
+            <article class="admin-dashboard-calendar dash-reveal {{ $teacherPanelClass }} p-5 sm:p-6" style="--d: 9;">
                 <div class="mb-5 flex items-center justify-between gap-3">
                     <div>
                         <div class="text-xs font-bold uppercase tracking-wide text-slate-400">Calendar</div>

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Teacher Dashboard' }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/navbar/teacher-navbar.js'])
 </head>
 
 <body class="min-h-full overflow-x-hidden bg-slate-100 text-slate-800" data-loading-shell>
@@ -245,7 +245,7 @@
             :class="isDesktop ? (sidebarCollapsed ? 'pl-24' : 'pl-72') : 'pl-0'">
 
             {{-- TOPBAR --}}
-            <header class="sticky top-0 z-30 border-b border-slate-200 bg-slate-100/80 backdrop-blur">
+            <header class="top-0 z-30">
                 <div class="flex h-16 items-center gap-3 px-4 sm:px-6">
                     <button
                         class="rounded-xl p-2 text-slate-600 transition hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100 lg:hidden"
@@ -255,20 +255,7 @@
                         </svg>
                     </button>
 
-                    <div class="hidden min-w-0 flex-1 sm:block">
-                        <div class="relative max-w-xl">
-                            <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path
-                                        d="M10 2a8 8 0 1 0 5.29 14.06l4.33 4.33 1.41-1.41-4.33-4.33A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z" />
-                                </svg>
-                            </span>
-                            <input type="text" placeholder="Search students, classes..."
-                                class="w-full rounded-full border border-slate-200 bg-white py-2.5 pl-11 pr-4 text-sm outline-none focus:border-indigo-200 focus:ring-4 focus:ring-indigo-100" />
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-2">
+                    <div class="ml-auto flex items-center gap-2">
                         <div class="relative" @click.outside="notifOpen = false">
                             <button
                                 class="relative rounded-xl border border-slate-200 bg-white p-2 hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
@@ -409,46 +396,6 @@
         </div>
     </div>
 
-    <script>
-        function teacherShell() {
-            return {
-                mobileOpen: false,
-                collapsed: false,
-                isDesktop: false,
-
-                notifOpen: false,
-                profileOpen: false,
-
-                get sidebarCollapsed() {
-                    return this.isDesktop && this.collapsed;
-                },
-
-                init() {
-                    const mq = window.matchMedia('(min-width: 1024px)');
-                    const handler = () => {
-                        this.isDesktop = mq.matches;
-                        if (mq.matches) this.mobileOpen = false;
-                    };
-                    handler();
-                    mq.addEventListener?.('change', handler);
-
-                    const saved = localStorage.getItem('teacher_sidebar_collapsed');
-                    if (saved !== null) this.collapsed = saved === '1';
-                },
-
-                closeAll() {
-                    this.notifOpen = false;
-                    this.profileOpen = false;
-                },
-
-                toggleSidebar() {
-                    if (!this.isDesktop) return;
-                    this.collapsed = !this.collapsed;
-                    localStorage.setItem('teacher_sidebar_collapsed', this.collapsed ? '1' : '0');
-                }
-            }
-        }
-    </script>
     <script src="//unpkg.com/alpinejs" defer></script>
 </body>
 

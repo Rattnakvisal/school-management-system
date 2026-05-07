@@ -8,6 +8,9 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/navbar/admin-navbar.js',
+                'resources/js/navbar/teacher-navbar.js',
+                'resources/js/navbar/student-navbar.js',
                 'resources/js/website/home/chat-bot.js',
                 'resources/js/admin/classes.js',
                 'resources/js/admin/admin-staff.js',

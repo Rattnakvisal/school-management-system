@@ -23,7 +23,6 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer([
             'layout.admin.navbar.navbar',
-            'layout.staff.navbar',
             'layout.teacher.navbar',
             'layout.students.navbar',
             'admin.dashboard',

@@ -78,11 +78,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const padding = compact
         ? { left: 4, right: 4, top: 2, bottom: 0 }
         : { left: 0, right: 0, top: 0, bottom: 0 };
+    const isDarkMode = document.documentElement.classList.contains("dark");
+    const chartTextColor = isDarkMode ? "#cbd5e1" : "#475569";
+    const chartMutedColor = isDarkMode ? "#94a3b8" : "#64748b";
+    const chartGridColor = isDarkMode
+        ? "rgba(148,163,184,0.18)"
+        : "rgba(148,163,184,0.2)";
+
+    Chart.defaults.color = chartTextColor;
+    Chart.defaults.borderColor = chartGridColor;
 
     const legend = (desktop = "top", mobile = "bottom") => ({
         position: compact ? mobile : desktop,
         labels: {
             boxWidth: compact ? 10 : 12,
+            color: chartTextColor,
             usePointStyle: true,
             padding: compact ? 10 : 14,
             font: { size: compact ? 11 : 12 },
@@ -131,11 +141,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const yScale = {
         beginAtZero: true,
-        ticks: { precision: 0 },
-        grid: { color: "rgba(148,163,184,0.2)" },
+        border: { color: chartGridColor },
+        ticks: { color: chartMutedColor, precision: 0 },
+        grid: { color: chartGridColor },
     };
 
-    const xGridless = { grid: { display: false } };
+    const xGridless = {
+        border: { color: chartGridColor },
+        ticks: { color: chartMutedColor },
+        grid: { display: false },
+    };
 
     const gradient = (ctx, start, end) => {
         const fill = ctx.createLinearGradient(0, 0, 0, 320);
@@ -245,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         pointRadius: 4,
                         pointHoverRadius: 6,
                         pointBackgroundColor: "#22c55e",
-                        pointBorderColor: "#ffffff",
+                        pointBorderColor: isDarkMode ? "#0f172a" : "#ffffff",
                         pointBorderWidth: 2,
                     },
                     {
@@ -265,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         pointRadius: 4,
                         pointHoverRadius: 6,
                         pointBackgroundColor: "#f97316",
-                        pointBorderColor: "#ffffff",
+                        pointBorderColor: isDarkMode ? "#0f172a" : "#ffffff",
                         pointBorderWidth: 2,
                     },
                 ],
@@ -285,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 scales: {
                     y: {
                         ...yScale,
-                        grid: { color: "rgba(148,163,184,0.22)" },
+                        grid: { color: chartGridColor },
                     },
                     x: xGridless,
                 },
@@ -379,7 +394,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                 },
                 scales: {
-                    y: compact ? { grid: { display: false } } : yScale,
+                    y: compact
+                        ? {
+                              border: { color: chartGridColor },
+                              ticks: { color: chartMutedColor },
+                              grid: { display: false },
+                          }
+                        : yScale,
                     x: compact ? yScale : xGridless,
                 },
             },
@@ -479,7 +500,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 animation: animation(220, 70, 1000),
                 layout: { padding },
                 plugins: { legend: legend("bottom", "bottom") },
-                scales: { r: { beginAtZero: true, ticks: { precision: 0 } } },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        angleLines: { color: chartGridColor },
+                        grid: { color: chartGridColor },
+                        pointLabels: { color: chartTextColor },
+                        ticks: {
+                            backdropColor: "transparent",
+                            color: chartMutedColor,
+                            precision: 0,
+                        },
+                    },
+                },
             },
         });
     }

@@ -633,7 +633,7 @@
                                                                 <div class="flex max-w-full flex-col gap-1">
                                                                     @foreach ($majorSubjects->take(3) as $majorSubject)
                                                                         <div
-                                                                            class="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
+                                                                            class="student-study-chip inline-flex max-w-full items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
                                                                             <span class="font-semibold text-indigo-700">
                                                                                 {{ $majorSubject->name }}
                                                                             </span>
@@ -695,7 +695,7 @@
                                                                             };
                                                                         @endphp
                                                                         <div
-                                                                            class="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
+                                                                            class="student-study-chip inline-flex max-w-full items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
                                                                             <span
                                                                                 class="font-bold uppercase tracking-wide text-indigo-700">
                                                                                 {{ $dayLabel }} | {{ $periodLabel }}

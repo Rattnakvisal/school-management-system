@@ -1,0 +1,418 @@
+#admin-settings-page .settings-sidebar-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+    overscroll-behavior: contain;
+}
+
+#admin-settings-page .settings-sidebar-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+
+#admin-settings-page .settings-sidebar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#admin-settings-page .settings-sidebar-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.32);
+    border-radius: 999px;
+}
+
+#admin-settings-page .settings-sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(79, 70, 229, 0.55);
+}
+
+#admin-settings-page input[type="color"] {
+    height: 2.5rem;
+    min-width: 3rem;
+    cursor: pointer;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    padding: 0.25rem;
+}
+
+#admin-settings-page .settings-sidebar-shell {
+    scrollbar-width: none;
+}
+
+#admin-settings-page .settings-sidebar-shell::-webkit-scrollbar {
+    display: none;
+}
+
+#admin-settings-page[data-homepage-ui="1"] {
+    --home-editor-accent: #2563eb;
+    --home-editor-accent-soft: #dbeafe;
+    --home-editor-ink: #0f172a;
+    --home-editor-muted: #64748b;
+    --home-editor-line: #dbe4f0;
+    --home-editor-surface: #ffffff;
+    --home-editor-soft: #f8fafc;
+}
+
+#admin-settings-page[data-homepage-ui="1"] > section {
+    border-color: #dbe4f0;
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.07), transparent 28rem),
+        linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    box-shadow: 0 24px 80px -48px rgba(15, 23, 42, 0.45);
+}
+
+#admin-settings-page[data-homepage-ui="1"] .settings-sidebar-shell {
+    border-color: rgba(148, 163, 184, 0.35);
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 18px 50px -36px rgba(15, 23, 42, 0.45);
+}
+
+#admin-settings-page[data-homepage-ui="1"] .settings-nav-item {
+    min-height: 2.75rem;
+    border-radius: 0.9rem;
+    color: #475569;
+}
+
+#admin-settings-page[data-homepage-ui="1"] .settings-nav-item:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-settings-panel] > form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-settings-panel] > form > div:not(.sticky) {
+    overflow: hidden;
+    border: 1px solid var(--home-editor-line);
+    border-radius: 1.35rem;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+    box-shadow: 0 18px 45px -34px rgba(15, 23, 42, 0.55);
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-settings-panel] > form > div:not(.sticky) > :first-child:not(.grid) {
+    padding-top: 0.15rem;
+}
+
+#admin-settings-page[data-homepage-ui="1"] h2,
+#admin-settings-page[data-homepage-ui="1"] h3 {
+    color: var(--home-editor-ink);
+    letter-spacing: 0;
+}
+
+#admin-settings-page[data-homepage-ui="1"] label {
+    color: #64748b;
+}
+
+#admin-settings-page[data-homepage-ui="1"] input[type="text"],
+#admin-settings-page[data-homepage-ui="1"] input[type="email"],
+#admin-settings-page[data-homepage-ui="1"] input[type="number"],
+#admin-settings-page[data-homepage-ui="1"] input[type="url"],
+#admin-settings-page[data-homepage-ui="1"] textarea,
+#admin-settings-page[data-homepage-ui="1"] select {
+    border-color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+#admin-settings-page[data-homepage-ui="1"] input[type="text"]:focus,
+#admin-settings-page[data-homepage-ui="1"] input[type="email"]:focus,
+#admin-settings-page[data-homepage-ui="1"] input[type="number"]:focus,
+#admin-settings-page[data-homepage-ui="1"] input[type="url"]:focus,
+#admin-settings-page[data-homepage-ui="1"] textarea:focus,
+#admin-settings-page[data-homepage-ui="1"] select:focus {
+    border-color: var(--home-editor-accent);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-home-editor-card] {
+    position: relative;
+    border-color: #dbe4f0;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 14px 34px -30px rgba(15, 23, 42, 0.55);
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-home-editor-card]:hover {
+    transform: translateY(-1px);
+    border-color: #bfdbfe;
+    box-shadow: 0 20px 46px -34px rgba(15, 23, 42, 0.62);
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-home-card-actions] {
+    align-items: center;
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-add-home-card],
+#admin-settings-page[data-homepage-ui="1"] button[type="submit"] {
+    border-radius: 0.9rem;
+    background: #1d4ed8;
+    box-shadow: 0 14px 28px -20px rgba(29, 78, 216, 0.72);
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-add-home-card]:hover,
+#admin-settings-page[data-homepage-ui="1"] button[type="submit"]:hover {
+    background: #2563eb;
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-home-remove-card] {
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-home-remove-card]:hover {
+    background: #fef2f2;
+}
+
+#admin-settings-page[data-homepage-ui="1"] .sticky.bottom-4 > div {
+    border-color: rgba(203, 213, 225, 0.86);
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 24px 60px -34px rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(18px);
+}
+
+#admin-settings-page[data-homepage-ui="1"] [data-home-inactive-badge] {
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+html.dark #admin-settings-page {
+    color: #e2e8f0;
+}
+
+html.dark #admin-settings-page > section {
+    border-color: rgba(71, 85, 105, 0.78);
+    background:
+        radial-gradient(circle at top left, rgba(79, 70, 229, 0.16), transparent 28rem),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.96));
+    box-shadow: 0 28px 90px -52px rgba(0, 0, 0, 0.88);
+}
+
+html.dark #admin-settings-page .settings-sidebar-shell,
+html.dark #admin-settings-page[data-homepage-ui="1"] .settings-sidebar-shell {
+    border-color: rgba(71, 85, 105, 0.78);
+    background: rgba(15, 23, 42, 0.88);
+    box-shadow: 0 22px 60px -38px rgba(0, 0, 0, 0.85);
+}
+
+html.dark #admin-settings-page .settings-nav-item,
+html.dark #admin-settings-page[data-homepage-ui="1"] .settings-nav-item {
+    color: #cbd5e1;
+}
+
+html.dark #admin-settings-page .settings-nav-item:hover,
+html.dark #admin-settings-page[data-homepage-ui="1"] .settings-nav-item:hover {
+    border-color: rgba(129, 140, 248, 0.42);
+    background: rgba(79, 70, 229, 0.16);
+    color: #eef2ff;
+}
+
+html.dark #admin-settings-page .settings-nav-item.is-active,
+html.dark #admin-settings-page .settings-nav-item[aria-current="page"],
+html.dark #admin-settings-page[data-homepage-ui="1"] .settings-nav-item.is-active,
+html.dark #admin-settings-page[data-homepage-ui="1"] .settings-nav-item[aria-current="page"] {
+    border-color: rgba(129, 140, 248, 0.48);
+    background: rgba(79, 70, 229, 0.24);
+    color: #ffffff;
+}
+
+html.dark #admin-settings-page[data-homepage-ui="1"] {
+    --home-editor-accent: #818cf8;
+    --home-editor-accent-soft: rgba(79, 70, 229, 0.22);
+    --home-editor-ink: #f8fafc;
+    --home-editor-muted: #cbd5e1;
+    --home-editor-line: rgba(71, 85, 105, 0.82);
+    --home-editor-surface: rgba(15, 23, 42, 0.92);
+    --home-editor-soft: rgba(30, 41, 59, 0.74);
+}
+
+html.dark #admin-settings-page[data-homepage-ui="1"] > section {
+    border-color: rgba(71, 85, 105, 0.82);
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 28rem),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(2, 6, 23, 0.96) 100%);
+}
+
+html.dark #admin-settings-page [data-settings-panel] > div,
+html.dark #admin-settings-page [data-settings-panel] > form,
+html.dark #admin-settings-page [data-settings-panel] > form > div:not(.sticky),
+html.dark #admin-settings-page[data-homepage-ui="1"] [data-settings-panel] > form > div:not(.sticky),
+html.dark #admin-settings-page [data-home-editor-card] {
+    border-color: rgba(71, 85, 105, 0.82);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.86));
+    box-shadow: 0 20px 54px -38px rgba(0, 0, 0, 0.86);
+}
+
+html.dark #admin-settings-page [data-settings-panel] > form {
+    background:
+        radial-gradient(circle at top right, rgba(79, 70, 229, 0.12), transparent 22rem),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
+}
+
+html.dark #admin-settings-page [data-settings-panel] > form > .border-b {
+    border-color: rgba(71, 85, 105, 0.82);
+}
+
+html.dark #admin-settings-page #admin_avatar_preview,
+html.dark #admin-settings-page img[id$="_preview"],
+html.dark #admin-settings-page img[id$="_image_preview"] {
+    border-color: rgba(129, 140, 248, 0.38);
+    background: rgba(2, 6, 23, 0.7);
+    box-shadow: 0 18px 48px -32px rgba(0, 0, 0, 0.95);
+}
+
+html.dark #admin-settings-page .sticky.top-24,
+html.dark #admin-settings-page [id$="_preview"],
+html.dark #admin-settings-page [class*="bg-white"][class*="shadow"] {
+    border-color: rgba(71, 85, 105, 0.82) !important;
+    background-color: rgba(15, 23, 42, 0.94) !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark #admin-settings-page .sticky.top-24 h3,
+html.dark #admin-settings-page .sticky.top-24 p,
+html.dark #admin-settings-page .sticky.top-24 .text-slate-950,
+html.dark #admin-settings-page .sticky.top-24 .text-slate-500 {
+    color: #e2e8f0 !important;
+}
+
+html.dark #admin-settings-page .bg-slate-950 {
+    background-color: rgba(2, 6, 23, 0.96) !important;
+}
+
+html.dark #admin-settings-page .bg-slate-50\/70,
+html.dark #admin-settings-page .bg-slate-50,
+html.dark #admin-settings-page .bg-slate-100 {
+    background-color: rgba(30, 41, 59, 0.74) !important;
+}
+
+html.dark #admin-settings-page .bg-white,
+html.dark #admin-settings-page .bg-white\/95 {
+    background-color: rgba(15, 23, 42, 0.9) !important;
+}
+
+html.dark #admin-settings-page .border-white {
+    border-color: rgba(129, 140, 248, 0.38) !important;
+}
+
+html.dark #admin-settings-page button.border-slate-300,
+html.dark #admin-settings-page .border-slate-300 {
+    border-color: rgba(71, 85, 105, 0.9) !important;
+}
+
+html.dark #admin-settings-page button.bg-white:hover,
+html.dark #admin-settings-page .hover\:bg-slate-100:hover,
+html.dark #admin-settings-page .hover\:bg-slate-50:hover {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+    color: #f8fafc !important;
+}
+
+html.dark #admin-settings-page[data-homepage-ui="1"] [data-home-editor-card]:hover,
+html.dark #admin-settings-page [data-home-editor-card]:hover {
+    border-color: rgba(129, 140, 248, 0.5);
+    box-shadow: 0 24px 60px -42px rgba(0, 0, 0, 0.9);
+}
+
+html.dark #admin-settings-page h2,
+html.dark #admin-settings-page h3,
+html.dark #admin-settings-page[data-homepage-ui="1"] h2,
+html.dark #admin-settings-page[data-homepage-ui="1"] h3 {
+    color: #f8fafc;
+}
+
+html.dark #admin-settings-page p,
+html.dark #admin-settings-page label,
+html.dark #admin-settings-page[data-homepage-ui="1"] label {
+    color: inherit;
+}
+
+html.dark #admin-settings-page label,
+html.dark #admin-settings-page .text-slate-500,
+html.dark #admin-settings-page .text-slate-600,
+html.dark #admin-settings-page[data-homepage-ui="1"] label {
+    color: #b6c2d2 !important;
+}
+
+html.dark #admin-settings-page .text-slate-900,
+html.dark #admin-settings-page .text-slate-950 {
+    color: #f8fafc !important;
+}
+
+html.dark #admin-settings-page input[type="text"],
+html.dark #admin-settings-page input[type="email"],
+html.dark #admin-settings-page input[type="number"],
+html.dark #admin-settings-page input[type="url"],
+html.dark #admin-settings-page input[type="password"],
+html.dark #admin-settings-page textarea,
+html.dark #admin-settings-page select,
+html.dark #admin-settings-page[data-homepage-ui="1"] input[type="text"],
+html.dark #admin-settings-page[data-homepage-ui="1"] input[type="email"],
+html.dark #admin-settings-page[data-homepage-ui="1"] input[type="number"],
+html.dark #admin-settings-page[data-homepage-ui="1"] input[type="url"],
+html.dark #admin-settings-page[data-homepage-ui="1"] textarea,
+html.dark #admin-settings-page[data-homepage-ui="1"] select {
+    border-color: rgba(71, 85, 105, 0.9);
+    background: rgba(2, 6, 23, 0.62);
+    color: #f8fafc;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html.dark #admin-settings-page input:focus,
+html.dark #admin-settings-page textarea:focus,
+html.dark #admin-settings-page select:focus,
+html.dark #admin-settings-page[data-homepage-ui="1"] input[type="text"]:focus,
+html.dark #admin-settings-page[data-homepage-ui="1"] input[type="email"]:focus,
+html.dark #admin-settings-page[data-homepage-ui="1"] input[type="number"]:focus,
+html.dark #admin-settings-page[data-homepage-ui="1"] input[type="url"]:focus,
+html.dark #admin-settings-page[data-homepage-ui="1"] textarea:focus,
+html.dark #admin-settings-page[data-homepage-ui="1"] select:focus {
+    border-color: #818cf8;
+    background: rgba(2, 6, 23, 0.82);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+}
+
+html.dark #admin-settings-page input::placeholder,
+html.dark #admin-settings-page textarea::placeholder {
+    color: #64748b;
+}
+
+html.dark #admin-settings-page input[type="color"] {
+    border-color: rgba(96, 165, 250, 0.42);
+    background: rgba(30, 41, 59, 0.9);
+}
+
+html.dark #admin-settings-page .sticky.bottom-4 > div,
+html.dark #admin-settings-page[data-homepage-ui="1"] .sticky.bottom-4 > div {
+    border-color: rgba(71, 85, 105, 0.82);
+    background: rgba(15, 23, 42, 0.88);
+    box-shadow: 0 24px 70px -42px rgba(0, 0, 0, 0.92);
+}
+
+html.dark #admin-settings-page[data-homepage-ui="1"] [data-home-inactive-badge] {
+    background: rgba(71, 85, 105, 0.75);
+    color: #cbd5e1;
+}
+
+html.dark #admin-settings-page [data-home-remove-card],
+html.dark #admin-settings-page[data-homepage-ui="1"] [data-home-remove-card] {
+    border-color: rgba(248, 113, 113, 0.38);
+    color: #fca5a5;
+}
+
+html.dark #admin-settings-page [data-home-remove-card]:hover,
+html.dark #admin-settings-page[data-homepage-ui="1"] [data-home-remove-card]:hover {
+    background: rgba(127, 29, 29, 0.24);
+}
+
+@media (max-width: 1279px) {
+    #admin-settings-page .settings-sidebar-shell {
+        max-height: calc(100vh - 4.75rem);
+        overflow-y: auto;
+    }
+
+    #admin-settings-page .settings-sidebar-scrollbar {
+        max-height: 16rem;
+    }
+}

@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Student Dashboard' }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/navbar/student-navbar.js'])
 </head>
 
 <body class="min-h-full overflow-x-hidden bg-slate-100 text-slate-800" data-loading-shell>
@@ -18,34 +18,7 @@
         </svg>
     </div>
 
-    <div x-data="{
-        mobileOpen: false,
-        collapsed: false,
-        isDesktop: window.innerWidth >= 1024,
-        notifOpen: false,
-        profileOpen: false,
-        init() {
-            const saved = localStorage.getItem('student_sidebar_collapsed');
-            this.collapsed = saved === '1';
-            this.syncViewport();
-            window.addEventListener('resize', () => this.syncViewport());
-        },
-        syncViewport() {
-            this.isDesktop = window.innerWidth >= 1024;
-            if (this.isDesktop) {
-                this.mobileOpen = false;
-            }
-        },
-        toggleSidebar() {
-            this.collapsed = !this.collapsed;
-            localStorage.setItem('student_sidebar_collapsed', this.collapsed ? '1' : '0');
-        },
-        closeAll() {
-            this.notifOpen = false;
-            this.profileOpen = false;
-            this.mobileOpen = false;
-        }
-    }" x-init="init()" @keydown.escape.window="closeAll()"
+    <div x-data="studentShell()" x-init="init()" @keydown.escape.window="closeAll()"
         class="min-h-screen overflow-x-hidden" data-student-notification-root
         data-notification-poll-url="{{ route('student.notifications.poll') }}"
         data-notification-readall-url="{{ route('student.notifications.readAll') }}"

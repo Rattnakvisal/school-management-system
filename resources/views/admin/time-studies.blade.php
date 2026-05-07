@@ -45,7 +45,7 @@
         ];
     @endphp
 
-    <div class="study-time-stage space-y-6">
+    <div class="study-time-stage admin-table-dark-scope admin-study-time-page space-y-6">
 
         <!-- Header -->
         <x-admin.page-header reveal-class="study-time-reveal" delay="1" icon="time" title="Time Studies"

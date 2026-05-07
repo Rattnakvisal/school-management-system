@@ -119,9 +119,9 @@
                             this.createOpen = false;
                         }
                     };
-            
+
                     update();
-            
+
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {
@@ -415,7 +415,7 @@
                                                                 <div class="flex max-w-sm flex-wrap gap-1.5">
                                                                     @foreach ($previewSubjectRows as $slot)
                                                                         <div
-                                                                            class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
+                                                                            class="student-study-chip inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px]">
                                                                             <span
                                                                                 class="font-bold uppercase tracking-wide text-indigo-700">
                                                                                 {{ $periodOptions[$slot->period] ?? ucfirst($slot->period) }}
@@ -747,7 +747,7 @@
                                                                                         )->format('h:i A');
                                                                                     @endphp
                                                                                     <div
-                                                                                        class="flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-800">
+                                                                                        class="student-study-chip flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-800">
                                                                                         <span
                                                                                             class="uppercase tracking-wide">
                                                                                             {{ $slotDayLabel }}
