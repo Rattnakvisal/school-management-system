@@ -63,7 +63,7 @@ test('student subjects page renders assigned subjects and schedule', function ()
     $response = $this->actingAs($student)->get(route('student.subjects.index'));
 
     $response->assertOk();
-    $response->assertSeeText('Student Subjects');
+    $response->assertSeeText('My Subjects');
     $response->assertSeeText('Mathematics');
     $response->assertSeeText('Physics');
     $response->assertSeeText('08:00 AM');

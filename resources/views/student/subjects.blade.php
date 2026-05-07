@@ -163,6 +163,61 @@
             </article>
         </section>
 
+        @if ($subjects->isNotEmpty())
+            <section
+                class="student-reveal student-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
+                style="--sd: 6;">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="text-lg font-bold text-slate-900">Assigned Subjects</h2>
+                    <span
+                        class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                        {{ number_format($subjects->count()) }} total
+                    </span>
+                </div>
+
+                <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach ($subjects as $subject)
+                        @php
+                            $slotCount = (int) ($subjectSlotCounts[$subject->id] ?? 0);
+                            $teacherName = trim((string) ($subject->teacher?->name ?? ''));
+                        @endphp
+                        <article class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <h3 class="truncate text-sm font-black text-slate-900">{{ $subject->name }}</h3>
+                                    <p class="mt-1 text-xs font-semibold text-slate-500">
+                                        {{ $subject->code ?: 'No code' }}
+                                    </p>
+                                </div>
+                                <span
+                                    class="shrink-0 rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
+                                    {{ number_format($slotCount) }} {{ \Illuminate\Support\Str::plural('slot', $slotCount) }}
+                                </span>
+                            </div>
+
+                            <p class="mt-3 line-clamp-2 text-xs leading-5 text-slate-600">
+                                {{ $subject->description ?: 'No description available.' }}
+                            </p>
+
+                            <div class="mt-4 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
+                                <span class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
+                                    {{ $teacherName !== '' ? $teacherName : 'Not assigned' }}
+                                </span>
+                                @if ($subject->is_major_subject)
+                                    <span
+                                        class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">Major</span>
+                                @endif
+                                @if ($subject->is_class_subject)
+                                    <span
+                                        class="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-700">Class</span>
+                                @endif
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         <section x-data="{ subjectFilterOpen: false }"
             class="student-reveal student-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
             style="--sd: 7;">

@@ -42,7 +42,7 @@ test('teacher can assign a grade and notify the targeted student', function () {
         ->post(route('teacher.grades.store'), [
             'student_id' => $student->id,
             'subject_id' => $subject->id,
-            'title' => 'Weekly Quiz',
+            'title' => 'Quiz',
             'score' => 18,
             'max_score' => 20,
             'graded_at' => now()->toDateString(),
@@ -159,7 +159,7 @@ test('teacher can edit an assigned grade', function () {
         ->put(route('teacher.grades.update', $grade), [
             'student_id' => $student->id,
             'subject_id' => $subject->id,
-            'title' => 'Updated Grade',
+            'title' => 'Midterm',
             'score' => 17,
             'max_score' => 20,
             'graded_at' => now()->addDay()->toDateString(),
@@ -173,6 +173,6 @@ test('teacher can edit an assigned grade', function () {
 
     $grade->refresh();
 
-    expect((string) $grade->title)->toBe('Updated Grade');
+    expect((string) $grade->title)->toBe('Midterm');
     expect((string) $grade->grade_letter)->toBe('B');
 });
