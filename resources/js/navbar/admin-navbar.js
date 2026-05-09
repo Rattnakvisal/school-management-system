@@ -21,6 +21,12 @@ window.adminShell = (searchItems = window.adminNavbarSearchItems || []) => ({
     searchOpen: false,
     searchTerm: "",
     searchItems: parseSearchItems(searchItems),
+    sidebarSections: {
+        main: true,
+        management: true,
+        attendance: true,
+        system: true,
+    },
 
     init() {
         const savedTheme = localStorage.getItem("admin_theme");
@@ -37,6 +43,13 @@ window.adminShell = (searchItems = window.adminNavbarSearchItems || []) => ({
 
         const saved = localStorage.getItem("admin_sidebar_collapsed");
         if (saved !== null) this.collapsed = saved === "1";
+
+        try {
+            const savedSections = JSON.parse(localStorage.getItem("admin_sidebar_sections") || "{}");
+            this.sidebarSections = { ...this.sidebarSections, ...savedSections };
+        } catch {
+            localStorage.removeItem("admin_sidebar_sections");
+        }
     },
 
     closeAll() {
@@ -111,6 +124,19 @@ window.adminShell = (searchItems = window.adminNavbarSearchItems || []) => ({
     toggleSidebar() {
         this.collapsed = !this.collapsed;
         localStorage.setItem("admin_sidebar_collapsed", this.collapsed ? "1" : "0");
+    },
+
+    isSidebarSectionOpen(section) {
+        return this.sidebarSections[section] !== false;
+    },
+
+    openSidebarSection(section) {
+        this.sidebarSections[section] = true;
+    },
+
+    toggleSidebarSection(section) {
+        this.sidebarSections[section] = !this.isSidebarSectionOpen(section);
+        localStorage.setItem("admin_sidebar_sections", JSON.stringify(this.sidebarSections));
     },
 
     applyTheme() {

@@ -1737,7 +1737,9 @@
         }
 
         .teacher-time-stage .teacher-attendance-table-scroller {
+            height: auto;
             max-height: none;
+            min-height: 0;
             overflow: visible;
             background: transparent;
         }

@@ -1,4 +1,4 @@
-@extends('layout.admin.navbar.navbar')
+@extends('layout.admin.navbar')
 
 @section('page')
     @php

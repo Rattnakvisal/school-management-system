@@ -32,11 +32,11 @@
                         </span>
                         <div>
                             <div class="admin-page-header__eyebrow">Mission Center</div>
-                            <h1 class="admin-page-title text-3xl font-black tracking-tight sm:text-4xl">Mission Events</h1>
+                            <h1 class="admin-page-title text-3xl font-black tracking-tight sm:text-4xl">Mission</h1>
                         </div>
                     </div>
                     <p class="admin-page-subtitle text-sm">
-                        Review active mission events and send your completed file to admin / staff.
+                        Review active mission and send your completed file to admin / staff.
                     </p>
                 </div>
             </div>
@@ -44,7 +44,7 @@
 
         <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
             @foreach ([
-                ['label' => 'Mission Events', 'meta' => 'Active', 'value' => $missionTotal, 'tone' => 'from-indigo-500 to-cyan-400', 'iconTone' => 'from-indigo-100 to-white text-indigo-600', 'icon' => 'flag'],
+                ['label' => 'Mission', 'meta' => 'Active', 'value' => $missionTotal, 'tone' => 'from-indigo-500 to-cyan-400', 'iconTone' => 'from-indigo-100 to-white text-indigo-600', 'icon' => 'flag'],
                 ['label' => 'Due Soon', 'meta' => 'Next 7 days', 'value' => $missionDueSoon, 'tone' => 'from-amber-500 to-cyan-400', 'iconTone' => 'from-amber-100 to-white text-amber-600', 'icon' => 'clock'],
                 ['label' => 'Urgent', 'meta' => 'Priority', 'value' => $missionUrgent, 'tone' => 'from-red-500 to-cyan-400', 'iconTone' => 'from-red-100 to-white text-red-600', 'icon' => 'alert'],
                 ['label' => 'Submitted', 'meta' => 'Sent', 'value' => $missionSubmitted, 'tone' => 'from-emerald-500 to-cyan-400', 'iconTone' => 'from-emerald-100 to-white text-emerald-600', 'icon' => 'check'],
@@ -361,8 +361,8 @@
             </div>
         @else
             <section class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center shadow-sm">
-                <div class="text-xl font-black text-slate-900">No mission events yet</div>
-                <p class="mt-2 text-sm text-slate-500">New mission events from admin will appear here.</p>
+                <div class="text-xl font-black text-slate-900">No mission yet</div>
+                <p class="mt-2 text-sm text-slate-500">New mission from admin will appear here.</p>
             </section>
         @endif
     </div>

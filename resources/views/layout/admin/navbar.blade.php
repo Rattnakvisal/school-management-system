@@ -6,9 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     @php
+        $adminShellUser = auth()->user();
         $adminShellRole = strtolower(trim((string) (auth()->user()?->role ?? 'admin')));
         $adminShellLabel = $adminShellRole === 'staff' ? 'Staff' : 'Admin';
-        $adminShellDashboardRoute = $adminShellRole === 'staff' ? 'staff.dashboard' : 'admin.dashboard';
+        $adminShellDashboardRoute =
+            $adminShellRole === 'staff'
+                ? \App\Support\StaffPermissions::firstRouteName($adminShellUser)
+                : 'admin.dashboard';
         $adminShellNotificationReadRoute = $adminShellRole === 'staff'
             ? 'staff.notifications.readAll'
             : 'admin.notifications.readAll';
@@ -58,18 +62,20 @@
             class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-slate-200 bg-white shadow-sm transition-all duration-300 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30 lg:translate-x-0"
             :class="[
                 mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-                collapsed ? 'w-24' : 'w-72'
+                collapsed ? 'w-16' : 'w-56'
             ]"
             aria-label="Sidebar">
             {{-- Header --}}
-            <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4 shrink-0 dark:border-slate-800">
-                <a href="{{ route($adminShellDashboardRoute) }}" class="flex items-center gap-3 min-w-0">
+            <div class="flex h-14 items-center border-b border-slate-200 shrink-0 dark:border-slate-800"
+                :class="collapsed ? 'justify-center px-2' : 'justify-between px-3'">
+                <a href="{{ route($adminShellDashboardRoute) }}" class="flex min-w-0 items-center gap-2"
+                    x-show="!collapsed" x-transition>
                     <img src="{{ $schoolBrandLogo ?? asset('images/techbridge-logo-mark.svg') }}"
                         alt="{{ $schoolBrandName ?? 'TechBridge Academy' }} logo"
-                        class="h-12 w-12 shrink-0 object-contain" />
+                        class="h-9 w-9 shrink-0 object-contain" />
 
-                    <div x-show="!collapsed" x-transition class="min-w-0">
-                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    <div class="min-w-0">
+                        <div class="truncate text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
                             {{ $schoolBrandName ?? 'TechBridge Academy' }}
                         </div>
                         <div class="truncate text-xs text-slate-500 dark:text-slate-400">
@@ -80,12 +86,12 @@
                 <div class="flex items-center gap-2">
                     {{-- desktop collapse --}}
                     <button type="button"
-                        class="hidden lg:inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white dark:focus:ring-indigo-500/20"
+                        class="hidden h-9 w-9 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white dark:focus:ring-indigo-500/20 lg:inline-flex"
                         @click="toggleSidebar()" :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
-                        <svg x-show="!collapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <svg x-show="!collapsed" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M4 6h16v2H4V6Zm0 5h10v2H4v-2Zm0 5h16v2H4v-2Z" />
                         </svg>
-                        <svg x-show="collapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <svg x-show="collapsed" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M4 6h10v2H4V6Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z" />
                         </svg>
                     </button>
@@ -100,10 +106,13 @@
             </div>
 
             {{-- Navigation --}}
-            <div class="nav-scrollbar flex-1 overflow-y-auto px-3 py-4">
+            <div class="nav-scrollbar flex-1 overflow-y-auto py-3" :class="collapsed ? 'px-2' : 'px-3'">
                 @php
                     $currentRole = strtolower(trim((string) (auth()->user()?->role ?? 'admin')));
                     $isStaffUser = $currentRole === 'staff';
+                    $staffUser = auth()->user();
+                    $staffIsRestricted = $isStaffUser && \App\Support\StaffPermissions::isRestricted($staffUser);
+                    $staffCan = fn($permission) => !$isStaffUser || \App\Support\StaffPermissions::can($staffUser, $permission);
 
                     $item = fn($route, $label, $icon, $badge = 0) => [
                         'route' => $route,
@@ -132,22 +141,46 @@
                         'settings' => 'fa-solid fa-gear',
                     ];
 
-                    $managementItems = [
-                        $item('admin.students.index', 'Students', 'users'),
-                        $item('admin.teachers.index', 'Teachers', 'user-cog'),
-                        $item('admin.classes.index', 'Classes', 'layers'),
-                        $item('admin.subjects.index', 'Subjects', 'book-open'),
-                        $item('admin.time-studies.index', 'Schedule', 'clock-3'),
-                        $item('admin.student-study.index', 'Student Progress', 'graduation-cap'),
-                        $item('admin.finance.index', 'School Finance', 'wallet'),
-                        $item('admin.contacts.index', 'Messages', 'mail', $contactUnread ?? 0),
-                    ];
+                    $managementItems = [];
+
+                    if ($staffCan('students')) {
+                        $managementItems[] = $item('admin.students.index', 'Students', 'users');
+                    }
+
+                    if ($staffCan('teachers')) {
+                        $managementItems[] = $item('admin.teachers.index', 'Teachers', 'user-cog');
+                    }
+
+                    if ($staffCan('classes')) {
+                        $managementItems[] = $item('admin.classes.index', 'Classes', 'layers');
+                    }
+
+                    if ($staffCan('subjects')) {
+                        $managementItems[] = $item('admin.subjects.index', 'Subjects', 'book-open');
+                    }
+
+                    if ($staffCan('schedule')) {
+                        $managementItems[] = $item('admin.time-studies.index', 'Schedule', 'clock-3');
+                    }
+
+                    if ($staffCan('student_progress')) {
+                        $managementItems[] = $item('admin.student-study.index', 'Student Progress', 'graduation-cap');
+                    }
+
+                    if ($staffCan('finance')) {
+                        $managementItems[] = $item('admin.finance.index', 'School Finance', 'wallet');
+                    }
+
+                    if ($staffCan('messages')) {
+                        $managementItems[] = $item('admin.contacts.index', 'Messages', 'mail', $contactUnread ?? 0);
+                    }
+
+                    if (!$isStaffUser || $staffCan('homepage')) {
+                        $managementItems[] = $item('admin.homepage.index', 'Home UI', 'palette');
+                    }
 
                     if (!$isStaffUser) {
                         array_unshift($managementItems, $item('admin.admin-staff.index', 'Admin / Staff', 'shield'));
-                        $managementItems[] = $item('admin.mission.index', 'Mission', 'flag', $missionUnread ?? 0);
-                    } else {
-                        $managementItems[] = $item('staff.missions.index', 'Mission Events', 'flag');
                     }
 
                     $mainItems = [$item($isStaffUser ? 'staff.dashboard' : 'admin.dashboard', 'Dashboard', 'layout-dashboard')];
@@ -156,38 +189,52 @@
                         $mainItems[] = $item('admin.reports', 'Reports', 'chart-line');
                     }
 
+                    $attendanceItems = [];
+
+                    if ($isStaffUser && $staffCan('teacher_attendance')) {
+                        $attendanceItems[] = $item(
+                            'admin.attendance.teachers.index',
+                            'Teacher Attendance',
+                            'clipboard-check',
+                            $teacherAttendanceUnread ?? 0,
+                        );
+                    }
+
+                    if ($isStaffUser && $staffCan('student_attendance')) {
+                        $attendanceItems[] = $item(
+                            'admin.attendance.index',
+                            'Student Attendance',
+                            'calendar-check',
+                            $studentAttendanceUnread ?? 0,
+                        );
+                    }
+
+                    $systemItems = [];
+
+                    if ($staffCan('settings')) {
+                        $systemItems[] = $item('admin.settings.index', 'Settings', 'settings');
+                    }
+
                     $sections = [
                         [
+                            'key' => 'main',
                             'title' => 'Main',
                             'items' => $mainItems,
                         ],
                         [
+                            'key' => 'management',
                             'title' => 'Management',
                             'items' => $managementItems,
                         ],
                         [
+                            'key' => 'attendance',
                             'title' => 'Attendance',
-                            'items' => [
-                                $item(
-                                    'admin.attendance.teachers.index',
-                                    'Teacher Attendance',
-                                    'clipboard-check',
-                                    $teacherAttendanceUnread ?? 0,
-                                ),
-                                $item(
-                                    'admin.attendance.index',
-                                    'Student Attendance',
-                                    'calendar-check',
-                                    $studentAttendanceUnread ?? 0,
-                                ),
-                            ],
+                            'items' => $attendanceItems,
                         ],
                         [
+                            'key' => 'system',
                             'title' => 'System',
-                            'items' => [
-                                $item('admin.homepage.index', 'Homepage UI', 'palette'),
-                                $item('admin.settings', 'Settings', 'settings'),
-                            ],
+                            'items' => $systemItems,
                         ],
                     ];
 
@@ -203,65 +250,112 @@
                         ];
                     };
 
-                    $adminSearchTargets = [
-                        $adminSearchTarget($isStaffUser ? 'staff.dashboard' : 'admin.dashboard', 'Dashboard', 'layout-dashboard', 'Overview, stats, events, and school summary.', ['home', 'overview'], false),
-                    ];
+                    $adminSearchTargets = [];
+
+                    $adminSearchTargets[] = $adminSearchTarget($isStaffUser ? 'staff.dashboard' : 'admin.dashboard', 'Dashboard', 'layout-dashboard', 'Overview, stats, events, and school summary.', ['home', 'overview'], false);
 
                     if (!$isStaffUser) {
                         $adminSearchTargets[] = $adminSearchTarget('admin.reports', 'Reports', 'chart-line', 'View admin reports and exports.', ['analytics', 'export'], false);
                         $adminSearchTargets[] = $adminSearchTarget('admin.admin-staff.index', 'Admin / Staff', 'shield', 'Search admins, staff accounts, emails, and roles.', ['users', 'account']);
                     }
 
-                    $adminSearchTargets = array_merge($adminSearchTargets, [
-                        $adminSearchTarget('admin.students.index', 'Students', 'users', 'Search students, email, phone, class, and subject.', ['learner', 'class']),
-                        $adminSearchTarget('admin.teachers.index', 'Teachers', 'user-cog', 'Search teachers, email, phone, and subjects.', ['staff', 'instructor']),
-                        $adminSearchTarget('admin.classes.index', 'Classes', 'layers', 'Search classes, sections, rooms, and study time.', ['room', 'section']),
-                        $adminSearchTarget('admin.subjects.index', 'Subjects', 'book-open', 'Search subjects, codes, schedules, and descriptions.', ['course', 'lesson']),
-                        $adminSearchTarget('admin.time-studies.index', 'Schedule', 'clock-3', 'Search class, subject, teacher, and study time records.', ['time study', 'period']),
-                        $adminSearchTarget('admin.student-study.index', 'Student Progress', 'graduation-cap', 'Search study records by student, class, subject, or teacher.', ['study', 'progress']),
-                        $adminSearchTarget('admin.finance.index', 'School Finance', 'wallet', 'Search payments, student balances, and finance notes.', ['payment', 'balance']),
-                        $adminSearchTarget('admin.attendance.teachers.index', 'Teacher Attendance', 'clipboard-check', 'Search teacher attendance and leave records.', ['present', 'absent', 'law request']),
-                        $adminSearchTarget('admin.attendance.index', 'Student Attendance', 'calendar-check', 'Search student attendance, classes, teachers, and remarks.', ['present', 'absent']),
-                        $adminSearchTarget('admin.contacts.index', 'Messages', 'mail', 'Search contact messages by name, email, subject, or text.', ['inbox', 'contact']),
-                    ]);
-
-                    if (!$isStaffUser) {
-                        $adminSearchTargets[] = $adminSearchTarget('admin.mission.index', 'Mission', 'flag', 'Search upcoming mission events and descriptions.', ['event', 'trip']);
-                    } else {
-                        $adminSearchTargets[] = $adminSearchTarget('staff.missions.index', 'Mission Events', 'flag', 'Search assigned mission events.', ['event', 'trip']);
+                    if ($staffCan('students')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.students.index', 'Students', 'users', 'Search students, email, phone, class, and subject.', ['learner', 'class']);
                     }
 
-                    $adminSearchTargets[] = $adminSearchTarget('admin.homepage.index', 'Homepage UI', 'palette', 'Open website content and homepage settings.', ['website', 'content'], false);
-                    $adminSearchTargets[] = $adminSearchTarget('admin.settings', 'Settings', 'settings', 'Open profile, password, and system settings.', ['profile', 'password'], false);
+                    if ($staffCan('teachers')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.teachers.index', 'Teachers', 'user-cog', 'Search teachers, email, phone, and subjects.', ['staff', 'instructor']);
+                    }
+
+                    if ($staffCan('classes')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.classes.index', 'Classes', 'layers', 'Search classes, sections, rooms, and study time.', ['room', 'section']);
+                    }
+
+                    if ($staffCan('subjects')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.subjects.index', 'Subjects', 'book-open', 'Search subjects, codes, schedules, and descriptions.', ['course', 'lesson']);
+                    }
+
+                    if ($staffCan('schedule')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.time-studies.index', 'Schedule', 'clock-3', 'Search class, subject, teacher, and study time records.', ['time study', 'period']);
+                    }
+
+                    if ($staffCan('student_progress')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.student-study.index', 'Student Progress', 'graduation-cap', 'Search study records by student, class, subject, or teacher.', ['study', 'progress']);
+                    }
+
+                    if ($staffCan('finance')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.finance.index', 'School Finance', 'wallet', 'Search payments, student balances, and finance notes.', ['payment', 'balance']);
+                    }
+
+                    if ($staffCan('teacher_attendance')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.attendance.teachers.index', 'Teacher Attendance', 'clipboard-check', 'Search teacher attendance and leave records.', ['present', 'absent', 'law request']);
+                    }
+
+                    if ($staffCan('student_attendance')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.attendance.index', 'Student Attendance', 'calendar-check', 'Search student attendance, classes, teachers, and remarks.', ['present', 'absent']);
+                    }
+
+                    if ($staffCan('messages')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.contacts.index', 'Messages', 'mail', 'Search contact messages by name, email, subject, or text.', ['inbox', 'contact']);
+                    }
+
+                    if (!$isStaffUser || $staffCan('homepage')) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.homepage.index', 'Homepage UI', 'palette', 'Open website content and homepage settings.', ['website', 'content'], false);
+                    }
+
+                    if (!$isStaffUser) {
+                        $adminSearchTargets[] = $adminSearchTarget('admin.settings.index', 'Settings', 'settings', 'Open profile, password, and system settings.', ['profile', 'password'], false);
+                    }
                 @endphp
 
-                <nav class="space-y-4">
+                <nav class="space-y-3">
                     @foreach ($sections as $section)
-                        <div class="space-y-1.5">
-                            <div x-show="!collapsed"
-                                class="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
-                                {{ $section['title'] }}
-                            </div>
+                        @php
+                            if (empty($section['items'])) {
+                                continue;
+                            }
 
-                            <div class="space-y-1.5">
+                            $sectionKey = $section['key'];
+                            $sectionIsActive = collect($section['items'])->contains(fn($navItem) => $navItem['active']);
+                            $sectionBadgeCount = collect($section['items'])->sum(fn($navItem) => $navItem['badge'] ?? 0);
+                        @endphp
+                        <div class="space-y-1" @if ($sectionIsActive) x-init="openSidebarSection('{{ $sectionKey }}')" @endif>
+                            <button type="button" x-show="!collapsed" x-transition
+                                @click="toggleSidebarSection('{{ $sectionKey }}')"
+                                :aria-expanded="isSidebarSectionOpen('{{ $sectionKey }}')"
+                                class="group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:text-slate-500 dark:hover:bg-slate-800/80 dark:hover:text-slate-200 dark:focus:ring-indigo-500/20">
+                                <span class="min-w-0 flex-1 truncate">{{ $section['title'] }}</span>
+                                @if ($sectionBadgeCount > 0)
+                                    <span
+                                        class="grid h-4 min-w-4 place-items-center rounded-full bg-red-100 px-1 text-[9px] font-black tracking-normal text-red-700 dark:bg-red-500/15 dark:text-red-300">
+                                        {{ $sectionBadgeCount > 99 ? '99+' : $sectionBadgeCount }}
+                                    </span>
+                                @endif
+                                <i class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200 group-hover:text-slate-600 dark:group-hover:text-slate-300"
+                                    :class="isSidebarSectionOpen('{{ $sectionKey }}') ? 'rotate-0' : '-rotate-90'"
+                                    aria-hidden="true"></i>
+                            </button>
+
+                            <div class="space-y-1" x-show="collapsed || isSidebarSectionOpen('{{ $sectionKey }}')"
+                                x-transition>
                                 @foreach ($section['items'] as $l)
                                     <a href="{{ route($l['route']) }}"
-                                        class="group relative flex items-center rounded-2xl transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-500/20 {{ $l['active'] ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_14px_30px_-18px_rgba(79,70,229,0.8)]' : 'text-slate-700 hover:-translate-y-px hover:bg-white hover:text-slate-900 hover:shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)] dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-white dark:hover:shadow-none' }}"
-                                        :class="collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3'">
+                                        class="group relative flex min-h-10 items-center rounded-xl text-sm transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-500/20 {{ $l['active'] ? 'bg-indigo-600 text-white shadow-[0_12px_24px_-18px_rgba(79,70,229,0.8)]' : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800/80 dark:hover:text-white' }}"
+                                        :class="collapsed ? 'justify-center px-2 py-2.5' : 'gap-2 px-3 py-2.5'">
 
                                         @if ($l['active'])
                                             <span
-                                                class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white"></span>
+                                                class="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-white"></span>
                                         @endif
 
                                         <span
-                                            class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-indigo-500/15 dark:group-hover:text-indigo-300' }}">
-                                            <i class="{{ $adminNavIconClasses[$l['icon']] ?? 'fa-solid fa-gear' }} text-base"
+                                            class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-white group-hover:text-indigo-600 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-slate-700 dark:group-hover:text-indigo-300' }}">
+                                            <i class="{{ $adminNavIconClasses[$l['icon']] ?? 'fa-solid fa-circle' }}"
                                                 aria-hidden="true"></i>
 
-                                            @if ($l['icon'] === 'mail' && ($l['badge'] ?? 0) > 0)
+                                            @if (($l['badge'] ?? 0) > 0)
                                                 <span
-                                                    class="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 {{ $l['active'] ? 'ring-indigo-600' : 'ring-white' }}"></span>
+                                                    class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 {{ $l['active'] ? 'ring-indigo-600' : 'ring-white dark:ring-slate-900' }}"></span>
                                             @endif
                                         </span>
 
@@ -281,7 +375,7 @@
                                         </div>
 
                                         <div x-show="collapsed"
-                                            class="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg ring-1 ring-white/10 group-hover:block dark:bg-slate-800 lg:group-hover:block">
+                                            class="pointer-events-none absolute left-full ml-2 hidden whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg ring-1 ring-white/10 group-hover:block dark:bg-slate-800 lg:group-hover:block">
                                             {{ $l['label'] }}
                                         </div>
                                     </a>
@@ -293,7 +387,7 @@
             </div>
         </aside>
         {{-- MAIN AREA --}}
-        <div class="min-h-screen flex flex-col overflow-x-hidden" :class="collapsed ? 'lg:pl-20' : 'lg:pl-72'">
+        <div class="min-h-screen flex flex-col overflow-x-hidden" :class="collapsed ? 'lg:pl-16' : 'lg:pl-56'">
 
             {{-- TOPBAR --}}
             <header class="sticky top-0 z-30 bg-slate-100/80 backdrop-blur border-b border-slate-200 transition-colors dark:border-slate-800 dark:bg-slate-950/80">
@@ -561,16 +655,18 @@
                                     <div class="text-xs text-slate-500 dark:text-slate-400">{{ auth()->user()->email }}</div>
                                 </div>
 
-                                <a href="{{ route('admin.settings') }}"
-                                    class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/80">
-                                    <span class="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center dark:bg-slate-800">
-                                        <svg class="h-5 w-5 text-indigo-600" viewBox="0 0 24 24" fill="currentColor">
-                                            <path
-                                                d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
-                                        </svg>
-                                    </span>
-                                    Settings
-                                </a>
+                                @if ($adminShellRole !== 'staff')
+                                    <a href="{{ route('admin.settings.index') }}"
+                                        class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/80">
+                                        <span class="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center dark:bg-slate-800">
+                                            <svg class="h-5 w-5 text-indigo-600" viewBox="0 0 24 24" fill="currentColor">
+                                                <path
+                                                    d="M19.14 12.94a7.6 7.6 0 0 0 .05-.94 7.6 7.6 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+                                            </svg>
+                                        </span>
+                                        Settings
+                                    </a>
+                                @endif
 
                                 <div class="border-t border-slate-100 dark:border-slate-800"></div>
 

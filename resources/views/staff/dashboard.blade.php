@@ -1,4 +1,4 @@
-@extends('layout.admin.navbar.navbar')
+@extends('layout.admin.navbar')
 
 @section('page')
     @php
@@ -295,7 +295,7 @@
 
                         <div class="space-y-4">
                             @foreach ($performanceItems as $item)
-                                <a href="{{ route('admin.settings') }}"
+                                <a href="{{ route('admin.settings.index') }}"
                                     class="dash-hover flex items-center gap-3 rounded-2xl p-1.5 transition hover:bg-slate-50">
                                     <span
                                         class="grid h-9 w-9 shrink-0 place-items-center rounded-full {{ $item['color'] }}">

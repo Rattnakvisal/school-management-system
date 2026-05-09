@@ -5,6 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ $title ?? ($schoolBrandName ?? 'TechBridge Academy') . ' | Student Dashboard' }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        referrerpolicy="no-referrer" />
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/navbar/student-navbar.js'])
 </head>
 
@@ -34,18 +36,20 @@
             class="fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-slate-200 bg-white shadow-sm transition-all duration-300 lg:translate-x-0"
             :class="[
                 mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-                collapsed ? 'w-24' : 'w-72'
+                sidebarCollapsed ? 'w-16' : 'w-56'
             ]"
             aria-label="Sidebar">
 
             {{-- Header --}}
-            <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4 shrink-0">
-                <a href="{{ route('student.dashboard') }}" class="flex min-w-0 items-center gap-3">
+            <div class="flex h-14 items-center border-b border-slate-200 shrink-0"
+                :class="sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-3'">
+                <a href="{{ route('student.dashboard') }}" class="flex min-w-0 items-center gap-2"
+                    x-show="!sidebarCollapsed" x-transition>
                     <img src="{{ $schoolBrandLogo ?? asset('images/techbridge-logo-mark.svg') }}"
                         alt="{{ $schoolBrandName ?? 'TechBridge Academy' }} logo"
-                        class="h-12 w-12 shrink-0 object-contain" />
-                    <div x-show="!collapsed" x-transition class="min-w-0">
-                        <div class="truncate text-base font-extrabold tracking-tight text-slate-900">
+                        class="h-9 w-9 shrink-0 object-contain" />
+                    <div class="min-w-0">
+                        <div class="truncate text-sm font-extrabold tracking-tight text-slate-900">
                             {{ $schoolBrandName ?? 'TechBridge Academy' }}</div>
                         <div class="truncate text-xs text-slate-500">{{ $schoolBrandTagline ?? 'Student Panel' }}</div>
                     </div>
@@ -53,12 +57,12 @@
 
                 <div class="flex items-center gap-2">
                     <button type="button"
-                        class="hidden h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100 lg:inline-flex"
-                        @click="toggleSidebar()" :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
-                        <svg x-show="!collapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        class="hidden h-9 w-9 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-100 lg:inline-flex"
+                        @click="toggleSidebar()" :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+                        <svg x-show="!sidebarCollapsed" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M4 6h16v2H4V6Zm0 5h10v2H4v-2Zm0 5h16v2H4v-2Z" />
                         </svg>
-                        <svg x-show="collapsed" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <svg x-show="sidebarCollapsed" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M4 6h10v2H4V6Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z" />
                         </svg>
                     </button>
@@ -72,7 +76,7 @@
             </div>
 
             {{-- NAVIGATION --}}
-            <nav class="nav-scrollbar flex-1 overflow-y-auto px-3 py-4">
+            <nav class="nav-scrollbar flex-1 space-y-3 overflow-y-auto py-3" :class="sidebarCollapsed ? 'px-2' : 'px-3'">
                 @php
                     $item = fn($route, $label, $icon) => [
                         'route' => $route,
@@ -81,12 +85,23 @@
                         'active' => request()->routeIs($route),
                     ];
 
+                    $studentNavIconClasses = [
+                        'home' => 'fa-solid fa-table-columns',
+                        'book' => 'fa-solid fa-book-open',
+                        'clipboard' => 'fa-solid fa-clipboard-list',
+                        'document' => 'fa-solid fa-file-lines',
+                        'bell' => 'fa-solid fa-bell',
+                        'cog' => 'fa-solid fa-gear',
+                    ];
+
                     $sections = [
                         [
+                            'key' => 'main',
                             'title' => 'Main',
                             'items' => [$item('student.dashboard', 'Dashboard', 'home')],
                         ],
                         [
+                            'key' => 'management',
                             'title' => 'Management',
                             'items' => [
                                 $item('student.subjects.index', 'My Subjects', 'book'),
@@ -94,6 +109,7 @@
                             ],
                         ],
                         [
+                            'key' => 'requests',
                             'title' => 'Requests',
                             'items' => [
                                 $item('student.law-requests.index', 'Law Requests', 'document'),
@@ -102,6 +118,7 @@
                             ],
                         ],
                         [
+                            'key' => 'system',
                             'title' => 'System',
                             'items' => [$item('student.settings', 'Settings', 'cog')],
                         ],
@@ -109,113 +126,50 @@
                 @endphp
 
                 @foreach ($sections as $section)
-                    <div class="space-y-1.5">
-                        <div x-show="!collapsed" x-transition
-                            class="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                            {{ $section['title'] }}
-                        </div>
+                    @php
+                        $sectionKey = $section['key'];
+                        $sectionIsActive = collect($section['items'])->contains(fn($navItem) => $navItem['active']);
+                    @endphp
+                    <div class="space-y-1" @if ($sectionIsActive) x-init="openSidebarSection('{{ $sectionKey }}')" @endif>
+                        <button type="button" x-show="!sidebarCollapsed" x-transition
+                            @click="toggleSidebarSection('{{ $sectionKey }}')"
+                            :aria-expanded="isSidebarSectionOpen('{{ $sectionKey }}')"
+                            class="group flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-100">
+                            <span class="min-w-0 flex-1 truncate">{{ $section['title'] }}</span>
+                            <i class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200 group-hover:text-slate-600"
+                                :class="isSidebarSectionOpen('{{ $sectionKey }}') ? 'rotate-0' : '-rotate-90'"
+                                aria-hidden="true"></i>
+                        </button>
 
-                        <div class="space-y-1.5">
+                        <div class="space-y-1" x-show="sidebarCollapsed || isSidebarSectionOpen('{{ $sectionKey }}')"
+                            x-transition>
                             @foreach ($section['items'] as $l)
                                 <a href="{{ route($l['route']) }}"
-                                    class="group relative flex items-center rounded-2xl transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_14px_30px_-18px_rgba(79,70,229,0.8)]' : 'text-slate-700 hover:-translate-y-px hover:bg-white hover:text-slate-900 hover:shadow-[0_12px_24px_-18px_rgba(15,23,42,0.35)]' }}"
-                                    :class="collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3'">
+                                    class="group relative flex min-h-10 items-center rounded-xl text-sm transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 {{ $l['active'] ? 'bg-indigo-600 text-white shadow-[0_12px_24px_-18px_rgba(79,70,229,0.8)]' : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950' }}"
+                                    :class="sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'gap-2 px-3 py-2.5'">
 
                                     @if ($l['active'])
-                                        <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white"></span>
+                                        <span class="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-white"></span>
                                     @endif
 
                                     <span
-                                        class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
-                                        @switch($l['icon'])
-                                            @case('home')
-                                                @include('layout.admin.navbar.partials.sidebar-icon', [
-                                                    'icon' => 'layout-dashboard',
-                                                ])
-                                            @break
-
-                                            @case('book')
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
-                                                    viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M6 4.5A2.5 2.5 0 0 1 8.5 2h10v16h-10A2.5 2.5 0 0 0 6 20.5V4.5Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M6 4.5c0-1.38 1.12-2.5 2.5-2.5H18v16H8.5A2.5 2.5 0 0 0 6 20.5" />
-                                                </svg>
-                                            @break
-
-                                            @case('check')
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
-                                                    viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M19 12v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7" />
-                                                </svg>
-                                            @break
-
-                                            @case('clipboard')
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
-                                                    viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9 4.5h6A1.5 1.5 0 0 1 16.5 6v1H19v13H5V7h2.5V6A1.5 1.5 0 0 1 9 4.5Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9 4.5h6v3H9v-3Z" />
-                                                </svg>
-                                            @break
-
-                                            @case('calendar')
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
-                                                    viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M7 3.5v3M17 3.5v3M4.5 8.5h15" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M6.5 5.5h11A2 2 0 0 1 19.5 7.5v11A2 2 0 0 1 17.5 20.5h-11A2 2 0 0 1 4.5 18.5v-11A2 2 0 0 1 6.5 5.5Z" />
-                                                </svg>
-                                            @break
-
-                                            @case('bell')
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M15 17.5H9m6-9A3 3 0 0 0 9 8.5c0 3.5-1 4.5-2 5.5h10c-1-1-2-2-2-6Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M13.5 17.5a1.5 1.5 0 0 1-3 0" />
-                                                </svg>
-                                            @break
-
-                                            @case('document')
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
-                                                    viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M8 3.5h6l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20V5A1.5 1.5 0 0 1 7.5 3.5Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 3.5V8h4" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 16h6" />
-                                                </svg>
-                                            @break
-
-                                            @case('cog')
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.9"
-                                                    viewBox="0 0 24 24" aria-hidden="true">
-                                                    <circle cx="12" cy="12" r="3" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-2 3.46-.08-.03a1.65 1.65 0 0 0-2.11.73l-.03.08h-4l-.03-.08a1.65 1.65 0 0 0-2.11-.73l-.08.03-2-3.46.06-.06A1.65 1.65 0 0 0 4.6 15l-.03-.08V9l.03-.08A1.65 1.65 0 0 0 4.27 7.1l-.06-.06 2-3.46.08.03a1.65 1.65 0 0 0 2.11-.73l.03-.08h4l.03.08a1.65 1.65 0 0 0 2.11.73l.08-.03 2 3.46-.06.06A1.65 1.65 0 0 0 19.4 9l.03.08v5.84Z" />
-                                                </svg>
-                                            @break
-                                        @endswitch
+                                        class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm transition {{ $l['active'] ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-white group-hover:text-indigo-600' }}">
+                                        <i class="{{ $studentNavIconClasses[$l['icon']] ?? 'fa-solid fa-circle' }}"
+                                            aria-hidden="true"></i>
                                     </span>
 
-                                    <div x-show="!collapsed" x-transition class="min-w-0 flex-1">
+                                    <div x-show="!sidebarCollapsed" x-transition class="min-w-0 flex-1">
                                         <div class="truncate text-sm font-semibold">{{ $l['label'] }}</div>
                                     </div>
 
-                                    <div x-show="!collapsed">
+                                    <div x-show="!sidebarCollapsed">
                                         @if ($l['active'])
                                             <span class="h-2.5 w-2.5 rounded-full bg-white"></span>
                                         @endif
                                     </div>
 
-                                    <div x-show="collapsed"
-                                        class="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg group-hover:block lg:group-hover:block">
+                                    <div x-show="sidebarCollapsed"
+                                        class="pointer-events-none absolute left-full ml-2 hidden whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-lg group-hover:block lg:group-hover:block">
                                         {{ $l['label'] }}
                                     </div>
                                 </a>
@@ -228,7 +182,7 @@
 
         {{-- MAIN --}}
         <div class="flex min-h-screen flex-col overflow-x-hidden transition-[padding] duration-300"
-            :class="isDesktop ? (collapsed ? 'pl-20' : 'pl-72') : 'pl-0'">
+            :class="isDesktop ? (sidebarCollapsed ? 'pl-16' : 'pl-56') : 'pl-0'">
 
             {{-- TOPBAR --}}
             <header class="sticky top-0 z-30 border-b border-slate-200 bg-slate-100/80 backdrop-blur">

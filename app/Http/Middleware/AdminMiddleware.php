@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use App\Models\User;
+use App\Support\StaffPermissions;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,6 +41,12 @@ class AdminMiddleware
             return redirect()
                 ->route($targetRoute)
                 ->with('error', 'Admin or staff access is required to open that page.');
+        }
+
+        if ($role === 'staff' && !StaffPermissions::canAccessRoute($user, $request->route()?->getName())) {
+            return redirect()
+                ->route(StaffPermissions::firstRouteName($user))
+                ->with('error', 'Your staff account is not assigned to that page.');
         }
 
         return $next($request);

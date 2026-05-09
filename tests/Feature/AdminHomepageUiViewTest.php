@@ -27,7 +27,7 @@ test('admin account settings still renders account settings sidebar', function (
 
     $response = $this
         ->actingAs($admin)
-        ->get(route('admin.settings'));
+        ->get(route('admin.settings.index'));
 
     $response
         ->assertOk()

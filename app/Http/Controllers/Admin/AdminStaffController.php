@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use App\Support\StaffPermissions;
 
 class AdminStaffController extends Controller
 {
     private const ROLES = ['admin', 'staff'];
-    private const EDIT_ROLES = ['admin', 'staff', 'teacher', 'student'];
+    private const ASSIGNABLE_ROLES = ['admin', 'staff'];
 
     public function index(Request $request)
     {
@@ -49,9 +50,11 @@ class AdminStaffController extends Controller
             'status' => $filters['status'],
             'stats' => $stats,
             'roles' => self::ROLES,
-            'editRoles' => self::EDIT_ROLES,
+            'assignableRoles' => self::ASSIGNABLE_ROLES,
+            'staffPermissionOptions' => StaffPermissions::OPTIONS,
             'hasStatusColumn' => $filters['hasStatusColumn'],
             'hasPhoneColumn' => $filters['hasPhoneColumn'],
+            'hasStaffPermissionsColumn' => $this->hasStaffPermissionsColumn(),
         ]);
     }
 
@@ -73,6 +76,12 @@ class AdminStaffController extends Controller
             'provider' => null,
             'google_id' => null,
         ];
+
+        if ($this->hasStaffPermissionsColumn()) {
+            $payload['staff_permissions'] = $validated['role'] === 'staff'
+                ? StaffPermissions::normalize($request->input('staff_permissions', []))
+                : null;
+        }
 
         if ($this->hasPhoneColumn()) {
             $payload['phone_number'] = $validated['phone_number'] ?? null;
@@ -116,6 +125,12 @@ class AdminStaffController extends Controller
             'email' => $validated['email'],
             'role' => $validated['role'],
         ];
+
+        if ($this->hasStaffPermissionsColumn()) {
+            $payload['staff_permissions'] = $validated['role'] === 'staff'
+                ? StaffPermissions::normalize($request->input('staff_permissions', []))
+                : null;
+        }
 
         if ($this->hasPhoneColumn()) {
             $payload['phone_number'] = $validated['phone_number'] ?? null;
@@ -204,9 +219,14 @@ class AdminStaffController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email' . ($account ? ',' . $account->id : '')],
             'password' => [$account ? 'nullable' : 'required', 'confirmed', Password::min(8)],
-            'role' => ['required', Rule::in($account ? self::EDIT_ROLES : self::ROLES)],
+            'role' => ['required', Rule::in(self::ASSIGNABLE_ROLES)],
             'is_active' => ['nullable', 'boolean'],
         ];
+
+        if ($this->hasStaffPermissionsColumn()) {
+            $rules['staff_permissions'] = ['nullable', 'array'];
+            $rules['staff_permissions.*'] = ['string', Rule::in(StaffPermissions::keys())];
+        }
 
         if ($this->hasPhoneColumn()) {
             $rules['phone_number'] = ['nullable', 'string', 'max:30'];
@@ -289,6 +309,11 @@ class AdminStaffController extends Controller
     private function hasPhoneColumn(): bool
     {
         return Schema::hasColumn('users', 'phone_number');
+    }
+
+    private function hasStaffPermissionsColumn(): bool
+    {
+        return Schema::hasColumn('users', 'staff_permissions');
     }
 
     private function uploadAvatarImage(Request $request, ?User $account = null): ?string

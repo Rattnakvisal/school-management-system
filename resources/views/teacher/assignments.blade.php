@@ -135,7 +135,7 @@
                     }
                 }
             }" x-init="init()"
-                class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
+                class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
                 style="--sd: 3;">
                 <div class="flex items-start justify-between gap-3">
                     <div>
@@ -307,7 +307,7 @@
             </section>
 
             <section x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true"
-                class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
+                class="teacher-reveal teacher-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--sd: 4;">
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <div>

@@ -12,7 +12,7 @@ test('admin page renders the shared admin staff navbar layout', function () {
 
     $this
         ->actingAs($admin)
-        ->get(route('admin.settings'))
+        ->get(route('admin.settings.index'))
         ->assertOk()
         ->assertSeeText('Dashboard')
         ->assertSeeText('Reports');
@@ -29,6 +29,6 @@ test('staff dashboard renders the shared admin staff navbar layout with staff ro
         ->assertOk()
         ->assertSee(route('staff.dashboard'), false)
         ->assertSee(route('staff.notifications.readAll'), false)
-        ->assertSeeText('Mission Events')
+        ->assertDontSeeText('Mission Events')
         ->assertDontSeeText('Reports');
 });

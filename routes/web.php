@@ -111,7 +111,6 @@ Route::middleware('guest')->group(function () {
 */
 Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
-    // Close website from dashboard: clears remember token and logs out permanently
     Route::post('/dashboard/close', [AuthController::class, 'closeWebsite'])->name('dashboard.close');
 
     require __DIR__ . '/admin.php';

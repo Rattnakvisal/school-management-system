@@ -67,7 +67,7 @@
                                             <div data-home-editor-card data-addable-card="footer-links"
                                                 class="{{ $showLink ? '' : 'hidden' }} rounded-xl border border-slate-200 bg-slate-50 p-3">
                                                 <input type="hidden" name="footer_links[{{ $i }}][id]"
-                                                    value="{{ $link?->id }}">
+                                                    value="{{ old('footer_links.' . $i . '.id', $link?->id) }}">
                                                 <input type="hidden" name="footer_links[{{ $i }}][delete]"
                                                     data-home-delete-field value="0">
                                                 <div class="mb-2 flex items-center justify-between gap-2">
@@ -89,12 +89,26 @@
                                                             class="rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-bold text-red-600">Remove</button>
                                                     </div>
                                                 </div>
-                                                <input name="footer_links[{{ $i }}][label]" type="text"
+                                                <input data-navbar-label-input
+                                                    name="footer_links[{{ $i }}][label]" type="text"
                                                     value="{{ $label }}" placeholder="Label"
                                                     class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold">
-                                                <input name="footer_links[{{ $i }}][href]" type="text"
-                                                    value="{{ $href }}" placeholder="#about"
-                                                    class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                                                <select data-navbar-page-select
+                                                    name="footer_links[{{ $i }}][href]"
+                                                    class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                                    <option value="">Select page</option>
+                                                    @foreach ($navbarPageOptions as $pageHref => $pageLabel)
+                                                        <option value="{{ $pageHref }}"
+                                                            data-label="{{ $pageLabel }}"
+                                                            @selected($href === $pageHref)>
+                                                            {{ $pageLabel }}
+                                                        </option>
+                                                    @endforeach
+                                                    @if (filled($href) && !array_key_exists($href, $navbarPageOptions))
+                                                        <option value="{{ $href }}" selected>
+                                                            {{ $href }}</option>
+                                                    @endif
+                                                </select>
                                             </div>
                                         @endfor
                                     </div>

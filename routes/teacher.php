@@ -8,7 +8,6 @@ use App\Http\Controllers\Teacher\NotificationController;
 use App\Http\Controllers\Teacher\ScheduleController;
 use App\Http\Controllers\Teacher\AttendanceController;
 use App\Http\Controllers\Teacher\LawRequestController;
-use App\Http\Controllers\Teacher\MissionEventController;
 use App\Http\Controllers\Teacher\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,9 +31,7 @@ Route::middleware(['auth', 'role:teacher', 'session.timeout'])
         Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments.index');
         Route::post('/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
         Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
-        Route::get('/missions', [MissionEventController::class, 'index'])->name('missions.index');
-        Route::post('/missions/{mission}/submit', [MissionEventController::class, 'submit'])->name('missions.submit');
-        Route::delete('/missions/{mission}/submission', [MissionEventController::class, 'destroySubmission'])->name('missions.submission.destroy');
+        // Mission routes removed
         Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
         Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
         Route::put('/grades/{grade}', [GradeController::class, 'update'])->name('grades.update');

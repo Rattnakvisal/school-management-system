@@ -11,7 +11,7 @@
         $attendanceTotal = max(0, $attendancePresent + $attendanceAbsent + $attendanceLate + $attendanceExcused);
     @endphp
 
-    <div class="teacher-time-stage space-y-6">
+    <div class="teacher-time-stage min-h-[calc(100vh-6rem)] w-full space-y-6">
         @if (session('success'))
             <div class="js-inline-flash teacher-time-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
                 style="--sd: 2;">
@@ -39,7 +39,8 @@
                 {{ $errors->first() }}
             </div>
         @endif
-        <section class="teacher-time-reveal teacher-time-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+        <section
+            class="teacher-time-reveal teacher-time-float flex min-h-[calc(100vh-9rem)] w-full flex-col rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
             style="--sd: 3;" x-data="{ filterOpen: false, showClassGrid: {{ ($classId ?? '') === '' ? 'true' : 'false' }} }">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
@@ -146,7 +147,7 @@
             @endif
 
             @if (($classes ?? collect())->count() > 0)
-                <div class="mt-5" x-show="showClassGrid" x-cloak x-transition.opacity>
+                <div class="mt-5 flex-1" x-show="showClassGrid" x-cloak x-transition.opacity>
                     <h3 class="text-sm font-black text-slate-900">Classes Grid</h3>
                     <p class="mt-1 text-xs text-slate-500">Showing only classes taught on
                         {{ $selectedDayLabel ?? 'this day' }}.
@@ -196,7 +197,7 @@
                         }
                     @endphp
 
-                    <div class="mt-3 grid gap-5 xl:grid-cols-3">
+                    <div class="mt-3 grid w-full gap-5 xl:grid-cols-3">
                         @foreach ($periodOrder as $periodKey => $periodRank)
                             @php
                                 $periodCards = collect($periodBuckets->get($periodKey, collect()))->values();
@@ -383,6 +384,20 @@
                         @endforeach
                     </div>
                 </div>
+            @elseif (($classId ?? '') === '')
+                <div
+                    class="mt-5 flex min-h-[26rem] flex-1 items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center">
+                    <div class="max-w-md">
+                        <div
+                            class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                            <i class="fa-solid fa-calendar-check text-xl" aria-hidden="true"></i>
+                        </div>
+                        <h3 class="mt-4 text-lg font-black text-slate-900">No classes for this day</h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">
+                            Choose another date or filter to a day where your classes are scheduled.
+                        </p>
+                    </div>
+                </div>
             @endif
 
             @if (($classId ?? '') === '')
@@ -390,7 +405,7 @@
                 @php
                     $isSelectedSubjectSaved = ($selectedSubjectAttendanceStatus['state'] ?? '') === 'saved';
                 @endphp
-                <div class="mt-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <div class="mt-5 flex min-h-[calc(100vh-15rem)] flex-1 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-200 bg-slate-50/80 px-4 py-4 sm:px-5">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
@@ -489,7 +504,7 @@
                     </div>
 
                     <form method="POST" action="{{ route('teacher.attendance.store') }}"
-                        class="js-attendance-submit-form space-y-4 p-4 sm:p-5">
+                        class="js-attendance-submit-form flex min-h-0 flex-1 flex-col space-y-4 p-4 sm:p-5">
                         @csrf
                         <input type="hidden" name="school_class_id" value="{{ $classId }}">
                         <input type="hidden" name="subject_id" value="{{ $subjectId }}">
@@ -528,8 +543,9 @@
                         </div>
 
                         <div
-                            class="teacher-attendance-table-wrap overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
-                            <div class="teacher-attendance-table-scroller max-h-[620px] overflow-auto">
+                            class="teacher-attendance-table-wrap min-h-0 flex-1 overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+                            <div
+                                class="teacher-attendance-table-scroller h-[calc(100vh-24rem)] min-h-[420px] max-h-[760px] overflow-auto">
                                 <table class="teacher-attendance-table w-full min-w-[1220px] text-left text-sm">
                                     <thead
                                         class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 text-xs uppercase tracking-wide text-slate-500 backdrop-blur">

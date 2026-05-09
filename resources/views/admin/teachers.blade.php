@@ -1,4 +1,4 @@
-@extends('layout.admin.navbar.navbar')
+@extends('layout.admin.navbar')
 
 @section('page')
     @php
@@ -116,9 +116,9 @@
                             this.createOpen = false;
                         }
                     };
-            
+
                     update();
-            
+
                     if (typeof media.addEventListener === 'function') {
                         media.addEventListener('change', update);
                     } else if (typeof media.addListener === 'function') {

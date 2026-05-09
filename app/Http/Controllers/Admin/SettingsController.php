@@ -93,7 +93,7 @@ class SettingsController extends Controller
         $admin->save();
 
         return redirect()
-            ->route('admin.settings')
+            ->route('admin.settings.index')
             ->with('success', 'Profile updated successfully.');
     }
 
@@ -146,7 +146,7 @@ class SettingsController extends Controller
         $admin->save();
 
         return redirect()
-            ->route('admin.settings')
+            ->route('admin.settings.index')
             ->with('success', 'Password updated successfully.');
     }
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Support\StaffPermissions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -190,7 +191,7 @@ class AuthService
 
         return match ($role) {
             'admin'   => redirect()->route('admin.dashboard'),
-            'staff'   => redirect()->route('staff.dashboard'),
+            'staff'   => redirect()->route(StaffPermissions::firstRouteName(auth()->user())),
             'teacher' => redirect()->route('teacher.dashboard'),
             default   => redirect()->route('student.dashboard'),
         };
@@ -215,7 +216,7 @@ class AuthService
 
             $routeName = match ($role) {
                 'admin' => 'admin.dashboard',
-                'staff' => 'staff.dashboard',
+                'staff' => StaffPermissions::firstRouteName($user),
                 'teacher' => 'teacher.dashboard',
                 default => 'student.dashboard',
             };

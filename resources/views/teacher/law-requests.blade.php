@@ -114,7 +114,7 @@
 
         <div class="grid gap-6 xl:grid-cols-12">
             <section
-                class="teacher-time-reveal teacher-time-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
+                class="teacher-time-reveal teacher-time-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
                 style="--sd: 3;">
                 <h2 class="text-lg font-black text-slate-900">{{ $isEditing ? 'Edit Request' : 'Create Request' }}</h2>
                 <p class="mt-1 text-xs font-semibold text-slate-500">
@@ -236,7 +236,7 @@
             </section>
 
             <section x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true"
-                class="teacher-time-reveal teacher-time-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
+                class="teacher-time-reveal teacher-time-float min-w-0 rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--sd: 4;">
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h2 class="text-lg font-black text-slate-900">Request History</h2>

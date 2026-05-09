@@ -1,4 +1,4 @@
-@extends('layout.admin.navbar.navbar')
+@extends('layout.admin.navbar')
 
 @section('page')
     @php
@@ -57,15 +57,37 @@
                 'tone' => 'from-amber-100 to-white text-amber-600',
             ],
             [
-                'label' => 'Finance',
-                'activeLabel' => 'Collected',
+                'label' => 'Collected',
+                'activeLabel' => 'Cash',
                 'active' => (int) round($financeCollected),
                 'total' => max(1, (int) round($financeBillable)),
                 'route' => route('admin.finance.index'),
                 'icon' => 'finance',
-                'tone' => 'from-teal-100 to-white text-teal-600',
+                'tone' => 'from-emerald-100 to-white text-emerald-600',
                 'display' => '$' . number_format($financeCollected, 2),
-                'totalDisplay' => '$' . number_format($financeBillable, 2) . ' billable',
+                'totalDisplay' => '$' . number_format($financeBillable, 2) . '',
+            ],
+            [
+                'label' => 'Outstanding',
+                'activeLabel' => 'Due',
+                'active' => (int) round($financeOutstanding),
+                'total' => max(1, (int) round($financeBillable)),
+                'route' => route('admin.finance.index'),
+                'icon' => 'finance',
+                'tone' => 'from-amber-100 to-white text-amber-600',
+                'display' => '$' . number_format($financeOutstanding, 2),
+                'totalDisplay' => '$' . number_format($financeBillable, 2) . '',
+            ],
+            [
+                'label' => 'Discounts',
+                'activeLabel' => 'Given',
+                'active' => (int) round($financeDiscounts),
+                'total' => max(1, (int) round($financeBillable)),
+                'route' => route('admin.finance.index'),
+                'icon' => 'finance',
+                'tone' => 'from-sky-100 to-white text-sky-600',
+                'display' => '$' . number_format($financeDiscounts, 2),
+                'totalDisplay' => '$' . number_format($financeBillable, 2) . '',
             ],
             [
                 'label' => 'Messages',
@@ -124,6 +146,7 @@
                         {{ $greeting }} {{ $fullName }}. Review school performance, attendance, enrollment,
                         study profile, and message activity from one reporting page.
                     </p>
+                    <p class="mt-1 text-xs text-slate-500">{{ '$' . number_format($financeBillable, 2) }} billable</p>
 
                     <div class="relative z-50 mt-4 flex flex-wrap items-center gap-2 admin-page-header__actions">
                         <a href="{{ route('admin.reports.export.excel') }}"
@@ -204,7 +227,7 @@
             </div>
         </section>
 
-        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
             @foreach ($adminStatCards as $index => $card)
                 @php
                     $progress = (int) round(($card['active'] / max(1, $card['total'])) * 100);
