@@ -128,7 +128,6 @@ class SubjectController extends Controller
         $classes = SchoolClass::query()
             ->with('studySchedules')
             ->orderBy('name')
-            ->orderBy('section')
             ->get();
         $teachers = User::query()
             ->where('role', 'teacher')

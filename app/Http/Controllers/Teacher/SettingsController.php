@@ -35,8 +35,7 @@ class SettingsController extends Controller
                 ->whereIn('id', $classIds->all())
                 ->withCount('students')
                 ->orderBy('name')
-                ->orderBy('section')
-                ->get(['id', 'name', 'section', 'room']);
+                ->get(['id', 'name', 'room']);
 
             $subjectCountsByClass = SubjectStudyTime::query()
                 ->where('teacher_id', $teacherId)
@@ -63,8 +62,7 @@ class SettingsController extends Controller
                     },
                 ])
                 ->orderBy('name')
-                ->orderBy('section')
-                ->get(['id', 'name', 'section', 'room']);
+                ->get(['id', 'name', 'room']);
         }
 
         $classIds = $classes->pluck('id')->map(fn($id) => (int) $id)->values();
@@ -137,7 +135,7 @@ class SettingsController extends Controller
             }
 
             $recentAttendances = (clone $attendanceBase)
-                ->with(['student:id,name,email', 'schoolClass:id,name,section'])
+                ->with(['student:id,name,email', 'schoolClass:id,name'])
                 ->orderByDesc('checked_at')
                 ->orderByDesc('id')
                 ->limit(8)

@@ -17,7 +17,7 @@ class GradeController extends Controller
         abort_unless($student instanceof User, 403);
 
         $student->loadMissing([
-            'schoolClass:id,name,section',
+            'schoolClass:id,name',
             'majorSubject:id,name,code',
             'majorSubjects:id,name,code',
         ]);
@@ -26,7 +26,7 @@ class GradeController extends Controller
             ->with([
                 'teacher:id,name',
                 'subject:id,name,code,school_class_id',
-                'subject.schoolClass:id,name,section',
+                'subject.schoolClass:id,name',
             ])
             ->where('student_id', (int) $student->id);
 

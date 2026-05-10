@@ -35,7 +35,6 @@
         })();
     </script>
 
-    {{-- Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/navbar/admin-navbar.js'])
 </head>
 
@@ -390,7 +389,7 @@
         <div class="min-h-screen flex flex-col overflow-x-hidden" :class="collapsed ? 'lg:pl-16' : 'lg:pl-56'">
 
             {{-- TOPBAR --}}
-            <header class="sticky top-0 z-30 bg-slate-100/80 backdrop-blur border-b border-slate-200 transition-colors dark:border-slate-800 dark:bg-slate-950/80">
+            <header class="top-0 z-30 transition-colors dark:border-slate-800 dark:bg-slate-950/80">
                 <div class="min-h-16 px-4 sm:px-4 lg:px-4 flex flex-wrap items-center gap-2 sm:gap-3 md:flex-nowrap">
 
                     {{-- Mobile menu button --}}
@@ -421,7 +420,7 @@
 
                             <div x-show="searchOpen" x-cloak x-transition.origin.top.left
                                 class="fixed left-3 right-3 top-20 z-[85] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40
-                                       sm:absolute sm:left-0 sm:right-auto sm:top-auto sm:mt-2 sm:w-[min(36rem,calc(100vw-2rem))]">
+                                sm:absolute sm:left-0 sm:right-auto sm:top-auto sm:mt-2 sm:w-[min(36rem,calc(100vw-2rem))]">
                                 <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
                                     <div class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500"
                                         x-text="searchTerm.trim() ? 'Search in' : 'Quick places'"></div>

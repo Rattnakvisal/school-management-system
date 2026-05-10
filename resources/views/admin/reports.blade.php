@@ -18,7 +18,6 @@
         $financeOutstanding = (float) ($financeStats['outstanding'] ?? 0);
         $financeDiscounts = (float) ($financeStats['discounts'] ?? 0);
         $financeBillable = max((float) ($financeStats['billable'] ?? 0), $financeCollected + $financeOutstanding + $financeDiscounts);
-        $financePayments = (int) ($financeStats['payments'] ?? 0);
         $adminStatCards = [
             [
                 'label' => 'Students',
@@ -367,23 +366,6 @@
                 </div>
                 <div class="dashboard-chart-box mt-4 h-64 sm:h-72">
                     <canvas id="financeStatusChart" class="h-full w-full"></canvas>
-                </div>
-            </article>
-        </section>
-
-        <section class="grid gap-6 xl:grid-cols-12">
-            <article
-                class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-12"
-                style="--d: 9;">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900">Latest Student Payments</h2>
-                        <p class="mt-1 text-xs text-slate-500">Newest payment amounts by student.</p>
-                    </div>
-                    <a href="{{ route('admin.finance.index') }}" class="text-xs font-bold text-indigo-700">Manage payments</a>
-                </div>
-                <div class="dashboard-chart-box dashboard-chart-box--medium mt-4 h-64 sm:h-72 lg:h-[300px]">
-                    <canvas id="latestStudentPaymentsChart" class="h-full w-full"></canvas>
                 </div>
             </article>
         </section>

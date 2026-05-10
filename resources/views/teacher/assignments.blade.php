@@ -314,8 +314,16 @@
                         <h2 class="text-lg font-black text-slate-900">Assignment History</h2>
                         <p class="mt-1 text-xs font-semibold text-slate-500">Latest assignments you have posted.</p>
                     </div>
-                    <button type="button" @click="filterOpen = true"
-                        class="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
+                    <div class="flex items-center gap-3">
+                        <form method="GET" action="{{ route('teacher.assignments.index') }}" class="flex items-center gap-2">
+                            <input name="q" type="text" value="{{ $filterSearch }}"
+                                placeholder="Search assignment, student, or subject"
+                                class="rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
+                            <input type="hidden" name="subject_id" value="{{ $filterSubjectId }}">
+                            <input type="hidden" name="due" value="{{ $filterDue }}">
+                        </form>
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>

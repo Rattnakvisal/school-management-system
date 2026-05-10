@@ -1,10 +1,25 @@
-window.teacherShell = () => ({
+const parseSearchItems = (searchItems) => {
+    if (Array.isArray(searchItems)) {
+        return searchItems;
+    }
+
+    try {
+        return JSON.parse(searchItems || "[]");
+    } catch {
+        return [];
+    }
+};
+
+window.teacherShell = (searchItems = window.teacherNavbarSearchItems || []) => ({
     mobileOpen: false,
     collapsed: false,
     isDesktop: false,
 
     notifOpen: false,
     profileOpen: false,
+    searchOpen: false,
+    searchTerm: "",
+    searchItems: parseSearchItems(searchItems),
     sidebarSections: {
         main: true,
         learning: true,
@@ -37,8 +52,71 @@ window.teacherShell = () => ({
     },
 
     closeAll() {
+        this.searchOpen = false;
+        this.closeMenus();
+    },
+
+    closeMenus() {
         this.notifOpen = false;
         this.profileOpen = false;
+    },
+
+    filteredSearchItems() {
+        const term = this.searchTerm.trim().toLowerCase();
+
+        if (!term) {
+            return this.searchItems.slice(0, 8);
+        }
+
+        const matches = this.searchItems.filter((item) => {
+            return `${item.label} ${item.description} ${item.keywords}`.toLowerCase().includes(term);
+        });
+
+        if (matches.length > 0) {
+            return matches.slice(0, 8);
+        }
+
+        const currentSearchable = this.searchItems.filter((item) => item.active && item.searchable);
+        const searchable = this.searchItems.filter((item) => item.searchable);
+
+        return [...currentSearchable, ...searchable]
+            .filter((item, index, items) => items.findIndex((candidate) => candidate.label === item.label) === index)
+            .slice(0, 8);
+    },
+
+    searchUrl(item) {
+        const term = this.searchTerm.trim();
+        const target = new URL(item.url, window.location.origin);
+
+        if (term && item.searchable && !this.isPageSearch(item, term)) {
+            target.searchParams.set("q", term);
+        }
+
+        return target.toString();
+    },
+
+    isPageSearch(item, term) {
+        const normalizedTerm = term.toLowerCase();
+        const normalizedLabel = String(item.label || "").toLowerCase();
+
+        return normalizedLabel.includes(normalizedTerm) || normalizedTerm.includes(normalizedLabel);
+    },
+
+    goSearch(item = null) {
+        const term = this.searchTerm.trim();
+        const exactPageTarget = term
+            ? this.filteredSearchItems().find((searchItem) => this.isPageSearch(searchItem, term))
+            : null;
+        const target =
+            item ||
+            exactPageTarget ||
+            (term ? this.searchItems.find((searchItem) => searchItem.active && searchItem.searchable) : null) ||
+            this.filteredSearchItems()[0] ||
+            this.searchItems.find((searchItem) => searchItem.searchable);
+
+        if (!target) return;
+
+        window.location.href = this.searchUrl(target);
     },
 
     toggleSidebar() {

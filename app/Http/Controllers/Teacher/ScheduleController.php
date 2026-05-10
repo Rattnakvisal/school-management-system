@@ -48,16 +48,14 @@ class ScheduleController extends Controller
             $teacherClasses = SchoolClass::query()
                 ->whereIn('id', $teacherClassIds->all())
                 ->orderBy('name')
-                ->orderBy('section')
-                ->get(['id', 'name', 'section']);
+                ->get(['id', 'name']);
         } else {
             $teacherClasses = SchoolClass::query()
                 ->whereHas('subjects', function ($query) use ($teacherId) {
                     $query->where('teacher_id', $teacherId);
                 })
                 ->orderBy('name')
-                ->orderBy('section')
-                ->get(['id', 'name', 'section']);
+                ->get(['id', 'name']);
         }
 
         $classIds = $teacherClasses->pluck('id')->map(fn($id) => (int) $id)->values();
@@ -89,8 +87,7 @@ class ScheduleController extends Controller
                     }
 
                     $inner->orWhereHas('schoolClass', function ($classQuery) use ($search) {
-                        $classQuery->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('section', 'like', '%' . $search . '%')
+                            $classQuery->where('name', 'like', '%' . $search . '%')
                             ->orWhere('room', 'like', '%' . $search . '%');
                     });
                 });
@@ -195,7 +192,6 @@ class ScheduleController extends Controller
                             ->orWhere('code', 'like', '%' . $search . '%');
                     })->orWhereHas('schoolClass', function ($classQuery) use ($search) {
                         $classQuery->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('section', 'like', '%' . $search . '%')
                             ->orWhere('room', 'like', '%' . $search . '%');
                     });
                 });

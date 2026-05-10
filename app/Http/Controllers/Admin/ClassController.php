@@ -22,7 +22,6 @@ class ClassController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('section', 'like', '%' . $search . '%')
                         ->orWhere('room', 'like', '%' . $search . '%')
                         ->orWhere('study_time', 'like', '%' . $search . '%')
                         ->orWhere('study_start_time', 'like', '%' . $search . '%')
@@ -130,10 +129,8 @@ class ClassController extends Controller
     {
         return [
             'name' => trim((string) $validated['name']),
-            'section' => $this->nullableTrim($validated['section'] ?? null),
             'room' => $this->nullableTrim($validated['room'] ?? null),
             'capacity' => $validated['capacity'] ?? null,
-            'description' => $this->nullableTrim($validated['description'] ?? null),
             'is_active' => $isActive,
         ];
     }
@@ -148,7 +145,6 @@ class ClassController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:120'],
-            'section' => ['nullable', 'string', 'max:80'],
             'room' => ['nullable', 'string', 'max:80'],
             'study_start_time' => ['nullable', 'date_format:H:i', 'required_with:study_end_time'],
             'study_end_time' => ['nullable', 'date_format:H:i', 'required_with:study_start_time', 'after:study_start_time'],
@@ -157,7 +153,6 @@ class ClassController extends Controller
             'study_slots.*.start_time' => ['nullable', 'date_format:H:i'],
             'study_slots.*.end_time' => ['nullable', 'date_format:H:i'],
             'capacity' => ['nullable', 'integer', 'min:1', 'max:500'],
-            'description' => ['nullable', 'string', 'max:1000'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 

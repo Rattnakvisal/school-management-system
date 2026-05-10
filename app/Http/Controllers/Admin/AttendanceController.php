@@ -30,8 +30,7 @@ class AttendanceController extends Controller
 
         $classes = SchoolClass::query()
             ->orderBy('name')
-            ->orderBy('section')
-            ->get(['id', 'name', 'section', 'room']);
+            ->get(['id', 'name', 'room']);
 
         $teachers = User::query()
             ->where('role', 'teacher')
@@ -79,7 +78,6 @@ class AttendanceController extends Controller
                         ->orWhere('teachers.name', 'like', '%' . $search . '%')
                         ->orWhere('teachers.email', 'like', '%' . $search . '%')
                         ->orWhere('classes.name', 'like', '%' . $search . '%')
-                        ->orWhere('classes.section', 'like', '%' . $search . '%')
                         ->orWhere('attendance.remark', 'like', '%' . $search . '%');
                 });
             })
@@ -98,7 +96,6 @@ class AttendanceController extends Controller
                 'teachers.name as teacher_name',
                 'teachers.email as teacher_email',
                 'classes.name as class_name',
-                'classes.section as class_section',
                 'classes.room as class_room',
             ]);
 
@@ -117,10 +114,7 @@ class AttendanceController extends Controller
 
         $records->getCollection()->transform(function ($row) {
             $classLabel = trim((string) ($row->class_name ?? ''));
-            $section = trim((string) ($row->class_section ?? ''));
-            if ($classLabel !== '' && $section !== '') {
-                $classLabel .= ' - ' . $section;
-            } elseif ($classLabel === '') {
+            if ($classLabel === '') {
                 $classLabel = 'Unassigned';
             }
 

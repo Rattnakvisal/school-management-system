@@ -12,13 +12,11 @@ class SchoolClass extends Model
 
     protected $fillable = [
         'name',
-        'section',
         'room',
         'study_time',
         'study_start_time',
         'study_end_time',
         'capacity',
-        'description',
         'is_active',
     ];
 
@@ -57,13 +55,6 @@ class SchoolClass extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        $name = trim((string) $this->name);
-        $section = trim((string) ($this->section ?? ''));
-
-        if ($section === '') {
-            return $name;
-        }
-
-        return $name . ' - ' . $section;
+        return trim((string) $this->name);
     }
 }

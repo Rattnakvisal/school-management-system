@@ -176,7 +176,7 @@ class DashboardController extends Controller
         }
 
         return ClassStudyTime::query()
-            ->with('schoolClass:id,name,section')
+            ->with('schoolClass:id,name')
             ->orderBy('sort_order')
             ->orderBy('start_time')
             ->get($columns)

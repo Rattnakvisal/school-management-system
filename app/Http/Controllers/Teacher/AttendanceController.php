@@ -76,8 +76,7 @@ class AttendanceController extends Controller
                     'studySchedules as class_slots_count',
                 ])
                 ->orderBy('name')
-                ->orderBy('section')
-                ->get(['id', 'name', 'section', 'room']);
+                ->get(['id', 'name', 'room']);
 
             $subjectsByClass = collect();
             if ($teacherClassIds->isNotEmpty()) {
@@ -115,7 +114,7 @@ class AttendanceController extends Controller
                 }
 
                 $teacherStudyTimesByClass = SubjectStudyTime::query()
-                    ->with(['subject:id,name', 'schoolClass:id,name,section'])
+                    ->with(['subject:id,name', 'schoolClass:id,name'])
                     ->select($slotSelect)
                     ->where('teacher_id', $teacherId)
                     ->whereIn('school_class_id', $teacherClassIds->all())
@@ -187,8 +186,7 @@ class AttendanceController extends Controller
                     'studySchedules as class_slots_count',
                 ])
                 ->orderBy('name')
-                ->orderBy('section')
-                ->get(['id', 'name', 'section', 'room']);
+                ->get(['id', 'name', 'room']);
         }
 
         $classIds = $classes->pluck('id')->map(fn($id) => (int) $id)->values();

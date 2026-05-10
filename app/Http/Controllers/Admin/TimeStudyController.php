@@ -63,12 +63,12 @@ class TimeStudyController extends Controller
                             ->orWhere('end_time', 'like', '%' . $search . '%');
                     }
 
-                    $innerQuery->orWhereHas('schoolClass', function ($classQuery) use ($search) {
-                        $classQuery
-                            ->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('section', 'like', '%' . $search . '%')
-                            ->orWhereRaw("CONCAT(name, ' - ', section) like ?", ['%' . $search . '%']);
-                    });
+                        $innerQuery->orWhereHas('schoolClass', function ($classQuery) use ($search) {
+                            $classQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('room', 'like', '%' . $search . '%');
+                        })->orWhereHas('teacher', function ($teacherQuery) use ($search) {
+                            $teacherQuery->where('name', 'like', '%' . $search . '%');
+                        });
                 });
             })
             ->when($classId !== null, function ($query) use ($classId) {
@@ -120,21 +120,14 @@ class TimeStudyController extends Controller
                             ->where('name', 'like', '%' . $search . '%')
                             ->orWhere('code', 'like', '%' . $search . '%')
                             ->orWhereHas('schoolClass', function ($classQuery) use ($search) {
-                                $classQuery
-                                    ->where('name', 'like', '%' . $search . '%')
-                                    ->orWhere('section', 'like', '%' . $search . '%')
-                                    ->orWhereRaw("CONCAT(name, ' - ', section) like ?", ['%' . $search . '%']);
-                            });
+                                    $classQuery->where('name', 'like', '%' . $search . '%');
+                                });
                     });
 
-                    $innerQuery->orWhereHas('schoolClass', function ($classQuery) use ($search) {
-                        $classQuery
-                            ->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('section', 'like', '%' . $search . '%')
-                            ->orWhereRaw("CONCAT(name, ' - ', section) like ?", ['%' . $search . '%']);
-                    })->orWhereHas('teacher', function ($teacherQuery) use ($search) {
-                        $teacherQuery->where('name', 'like', '%' . $search . '%');
-                    });
+                        $innerQuery->orWhereHas('schoolClass', function ($classQuery) use ($search) {
+                            $classQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('room', 'like', '%' . $search . '%');
+                        });
                 });
             })
             ->when($subjectId !== null, function ($query) use ($subjectId) {
@@ -215,10 +208,8 @@ class TimeStudyController extends Controller
                             ->where('name', 'like', '%' . $search . '%')
                             ->orWhere('code', 'like', '%' . $search . '%');
                     })->orWhereHas('schoolClass', function ($classQuery) use ($search) {
-                        $classQuery
-                            ->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('section', 'like', '%' . $search . '%')
-                            ->orWhereRaw("CONCAT(name, ' - ', section) like ?", ['%' . $search . '%']);
+                        $classQuery->where('name', 'like', '%' . $search . '%')
+                            ->orWhere('room', 'like', '%' . $search . '%');
                     })->orWhereHas('teacher', function ($teacherQuery) use ($search) {
                         $teacherQuery->where('name', 'like', '%' . $search . '%');
                     })->orWhereHas('subject.teacher', function ($teacherQuery) use ($search) {
@@ -280,8 +271,7 @@ class TimeStudyController extends Controller
 
         $classes = SchoolClass::query()
             ->orderBy('name')
-            ->orderBy('section')
-            ->get(['id', 'name', 'section']);
+            ->get(['id', 'name']);
 
         $subjects = Subject::query()
             ->with('schoolClass')

@@ -210,8 +210,87 @@
                             <path d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z" />
                         </svg>
                     </button>
+                <div class="flex-1 min-w-0">
+                    <div class="relative max-w-xl" @click.outside="searchOpen=false">
+                            <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input type="text" placeholder="Search"
+                                x-model="searchTerm"
+                                @focus="searchOpen=true; closeMenus()"
+                                @input="searchOpen=true"
+                                @keydown.enter.prevent="goSearch()"
+                                class="w-full rounded-full bg-white border border-slate-200 pl-11 pr-4 py-2.5 text-sm text-slate-900
+                                    outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500/20" />
 
+                            <div x-show="searchOpen" x-cloak x-transition.origin.top.left
+                                class="fixed left-3 right-3 top-20 z-[85] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40
+                                sm:absolute sm:left-0 sm:right-auto sm:top-auto sm:mt-2 sm:w-[min(36rem,calc(100vw-2rem))]">
+                                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                                    <div class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400"
+                                        x-text="searchTerm.trim() ? 'Search in' : 'Quick places'"></div>
+                                    <button type="button"
+                                        class="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                                        x-show="searchTerm.trim()"
+                                        @click="searchTerm=''; $nextTick(() => $root.querySelector('input[placeholder=Search]')?.focus())">
+                                        Clear
+                                    </button>
+                                </div>
+
+                                <div class="nav-scrollbar max-h-96 overflow-y-auto p-2">
+                                    <template x-for="item in filteredSearchItems()" :key="item.label">
+                                        <button type="button"
+                                            class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-indigo-50 focus:bg-indigo-50 focus:outline-none"
+                                            @click="goSearch(item)">
+                                            <span
+                                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-indigo-600">
+                                                <i :class="item.icon" aria-hidden="true"></i>
+                                            </span>
+                                            <span class="min-w-0 flex-1">
+                                                <span class="block truncate text-sm font-bold text-slate-900"
+                                                    x-text="item.label"></span>
+                                                <span class="block truncate text-xs text-slate-500"
+                                                    x-text="item.searchable && searchTerm.trim() ? `Find '${searchTerm.trim()}' here` : item.description"></span>
+                                            </span>
+                                            <i class="fa-solid fa-arrow-right text-xs text-slate-300" aria-hidden="true"></i>
+                                        </button>
+                                    </template>
+
+                                    <div class="px-4 py-8 text-center" x-show="filteredSearchItems().length === 0">
+                                        <div class="text-sm font-bold text-slate-800">No matching page</div>
+                                        <div class="mt-1 text-xs text-slate-500">Try classes, schedule, assignments, or attendance.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="ml-auto flex items-center gap-2">
+                        {{-- Search (teacher) --}}
+                        @php
+                            $teacherSearchTarget = function ($route, $label, $icon, $description, $keywords = [], $searchable = true) use ($teacherNavIconClasses) {
+                                return [
+                                    'label' => $label,
+                                    'description' => $description,
+                                    'url' => route($route),
+                                    'icon' => $teacherNavIconClasses[$icon] ?? 'fa-solid fa-magnifying-glass',
+                                    'keywords' => implode(' ', array_merge([$label, $description], $keywords)),
+                                    'searchable' => $searchable,
+                                    'active' => request()->routeIs($route),
+                                ];
+                            };
+
+                            $teacherSearchTargets = [];
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.dashboard', 'Dashboard', 'home', 'Overview and quick links.', [], false);
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.classes.index', 'My Classes', 'grid', 'View and manage your classes.', ['class', 'room']);
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.schedule.index', 'Schedule', 'clock', 'View your schedule and periods.', ['timetable', 'time']);
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.attendance.index', 'Attendance', 'check', 'Manage attendance and records.', ['present', 'absent']);
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.assignments.index', 'Assignments', 'clipboard', 'Search assignments by title, student, or subject.', ['homework', 'task']);
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.grades.index', 'Grades', 'book', 'View and enter student grades.', ['marks', 'scores']);
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.law-requests.index', 'Law Requests', 'document', 'View and respond to law requests.', ['request', 'leave']);
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.notices.index', 'Notifications', 'bell', 'Open notices and announcements.', ['alerts', 'messages']);
+                            $teacherSearchTargets[] = $teacherSearchTarget('teacher.settings', 'Settings', 'cog', 'Profile and account settings.', [], false);
+                        @endphp
+
                         <div class="relative" @click.outside="notifOpen = false">
                             <button
                                 class="relative rounded-xl border border-slate-200 bg-white p-2 hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-indigo-100"
@@ -352,6 +431,9 @@
         </div>
     </div>
 
+    <script>
+        window.teacherNavbarSearchItems = @json($teacherSearchTargets ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    </script>
     <script src="//unpkg.com/alpinejs" defer></script>
 </body>
 

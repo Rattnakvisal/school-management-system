@@ -100,14 +100,12 @@ class ClassController extends Controller
 
                 $query->whereDoesntHave('studySchedules');
             })
-            ->orderBy('name')
-            ->orderBy('section');
+            ->orderBy('name');
 
         if ($useSlotAssignments) {
             $classQuery->when($search !== '', function ($query) use ($search, $teacherId) {
                 $query->where(function ($inner) use ($search, $teacherId) {
                     $inner->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('section', 'like', '%' . $search . '%')
                         ->orWhere('room', 'like', '%' . $search . '%')
                         ->orWhereExists(function ($slotQuery) use ($teacherId, $search) {
                             $slotQuery->select(DB::raw('1'))
@@ -137,7 +135,6 @@ class ClassController extends Controller
                 ->when($search !== '', function ($query) use ($search) {
                     $query->where(function ($inner) use ($search) {
                         $inner->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('section', 'like', '%' . $search . '%')
                             ->orWhere('room', 'like', '%' . $search . '%')
                             ->orWhereHas('subjects', function ($subjectQuery) use ($search) {
                                 $subjectQuery
@@ -180,7 +177,7 @@ class ClassController extends Controller
                 }
 
                 $teacherStudyTimesByClass = SubjectStudyTime::query()
-                    ->with(['subject:id,name', 'schoolClass:id,name,section'])
+                    ->with(['subject:id,name', 'schoolClass:id,name'])
                     ->select($slotSelect)
                     ->where('teacher_id', $teacherId)
                     ->whereIn('school_class_id', $classIds->all())

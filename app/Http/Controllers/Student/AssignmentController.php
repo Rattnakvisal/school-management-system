@@ -23,7 +23,7 @@ class AssignmentController extends Controller
             ->with([
                 'teacher:id,name',
                 'subject:id,name,code,school_class_id',
-                'subject.schoolClass:id,name,section',
+                'subject.schoolClass:id,name',
                 'students' => function ($query) use ($student) {
                     $query->where('users.id', (int) $student->id);
                 },

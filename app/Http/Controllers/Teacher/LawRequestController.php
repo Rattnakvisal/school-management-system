@@ -623,8 +623,7 @@ class LawRequestController extends Controller
                 'subjects.study_time',
                 'subjects.study_start_time',
                 'subjects.study_end_time',
-                'classes.name as class_name',
-                'classes.section as class_section',
+                    'classes.name as class_name',
             ]);
 
         if ($hasSlotTeacherColumn) {
@@ -640,7 +639,6 @@ class LawRequestController extends Controller
             ->distinct()
             ->orderBy('subjects.name')
             ->orderBy('classes.name')
-            ->orderBy('classes.section')
             ->get();
     }
 

@@ -272,7 +272,7 @@ class FinanceController extends Controller
                 ? StudentPayment::query()->where('status', 'paid')->pluck('student_id')->map(fn($id) => (int) $id)->all()
                 : [],
             'classes' => Schema::hasTable('school_classes')
-                ? SchoolClass::query()->orderBy('name')->orderBy('section')->get()
+                ? SchoolClass::query()->orderBy('name')->get()
                 : collect(),
             'statuses' => StudentPayment::STATUSES,
             'paymentMethods' => StudentPayment::PAYMENT_METHODS,

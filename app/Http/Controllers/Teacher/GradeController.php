@@ -48,7 +48,7 @@ class GradeController extends Controller
             $editingGrade = Grade::query()
                 ->with([
                     'student:id,name,school_class_id',
-                    'student.schoolClass:id,name,section',
+                    'student.schoolClass:id,name',
                     'subject:id,name,code,school_class_id',
                 ])
                 ->where('teacher_id', $teacherId)
@@ -58,9 +58,9 @@ class GradeController extends Controller
         $gradeBaseQuery = Grade::query()
             ->with([
                 'student:id,name,school_class_id',
-                'student.schoolClass:id,name,section',
+                'student.schoolClass:id,name',
                 'subject:id,name,code,school_class_id',
-                'subject.schoolClass:id,name,section',
+                'subject.schoolClass:id,name',
             ])
             ->where('teacher_id', $teacherId);
 
@@ -395,7 +395,7 @@ class GradeController extends Controller
         $hasStudyTimeTeacherColumn = $hasStudyTimesTable && Schema::hasColumn('subject_study_times', 'teacher_id');
 
         $query = Subject::query()
-            ->with('schoolClass:id,name,section')
+            ->with('schoolClass:id,name')
             ->orderBy('name');
 
         if ($hasStudyTimeTeacherColumn) {
@@ -482,7 +482,7 @@ class GradeController extends Controller
 
         $studentQuery = User::query()
             ->where('role', 'student')
-            ->with('schoolClass:id,name,section')
+            ->with('schoolClass:id,name')
             ->orderBy('name');
 
         if ($classIds->isNotEmpty() || $majorStudentIds->isNotEmpty()) {

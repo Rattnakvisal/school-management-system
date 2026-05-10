@@ -40,7 +40,7 @@ class AssignmentController extends Controller
         $assignmentBaseQuery = Assignment::query()
             ->with([
                 'subject:id,name,code,school_class_id',
-                'subject.schoolClass:id,name,section',
+                'subject.schoolClass:id,name',
                 'students:id,name,email',
             ])
             ->withCount('students')
@@ -300,7 +300,7 @@ class AssignmentController extends Controller
         $hasStudyTimeTeacherColumn = $hasStudyTimesTable && Schema::hasColumn('subject_study_times', 'teacher_id');
 
         $query = Subject::query()
-            ->with('schoolClass:id,name,section')
+            ->with('schoolClass:id,name')
             ->orderBy('name');
 
         if ($hasStudyTimeTeacherColumn) {
@@ -387,7 +387,7 @@ class AssignmentController extends Controller
 
         $studentQuery = User::query()
             ->where('role', 'student')
-            ->with('schoolClass:id,name,section')
+            ->with('schoolClass:id,name')
             ->orderBy('name');
 
         if ($classIds->isNotEmpty() || $majorStudentIds->isNotEmpty()) {

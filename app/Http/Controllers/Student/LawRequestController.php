@@ -22,7 +22,7 @@ class LawRequestController extends Controller
     {
         $student = $request->user();
         $studentId = (int) ($student?->id ?? 0);
-        $student->loadMissing('schoolClass:id,name,section');
+        $student->loadMissing('schoolClass:id,name');
 
         $lawTypes = $this->lawTypes();
         $subjectOptions = $this->studentSubjects($student);
@@ -556,7 +556,6 @@ class LawRequestController extends Controller
                 'subjects.study_end_time',
                 'subjects.school_class_id',
                 'classes.name as class_name',
-                'classes.section as class_section',
                 'teachers.name as teacher_name',
             ])
             ->where('subjects.school_class_id', $classId);
@@ -583,7 +582,6 @@ class LawRequestController extends Controller
                     'subjects.study_end_time',
                     'subjects.school_class_id',
                     'classes.name as class_name',
-                    'classes.section as class_section',
                     'teachers.name as teacher_name',
                 ]);
 

@@ -145,7 +145,6 @@ class StudentStudyController extends Controller
             'students.avatar as student_avatar',
             'students.created_at as student_created_at',
             'classes.name as class_name',
-            'classes.section as class_section',
             'classes.room as class_room',
             'class_slots.id as class_study_time_id',
             DB::raw($classStudyStartExpression . ' as class_study_start_time'),
@@ -210,7 +209,6 @@ class StudentStudyController extends Controller
                 $query->where('students.name', 'like', '%' . $search . '%')
                     ->orWhere('students.email', 'like', '%' . $search . '%')
                     ->orWhere('classes.name', 'like', '%' . $search . '%')
-                    ->orWhere('classes.section', 'like', '%' . $search . '%')
                     ->orWhere('classes.room', 'like', '%' . $search . '%')
                     ->orWhere('classes.study_time', 'like', '%' . $search . '%')
                     ->orWhere('classes.study_start_time', 'like', '%' . $search . '%')
@@ -288,7 +286,6 @@ class StudentStudyController extends Controller
                     'cst.start_time',
                     'cst.end_time',
                     'classes.name as class_name',
-                    'classes.section as class_section',
                 ])
                 ->groupBy('student_id')
                 ->map(function ($rows) {
@@ -339,7 +336,6 @@ class StudentStudyController extends Controller
 
         $classes = SchoolClass::query()
             ->orderBy('name')
-            ->orderBy('section')
             ->get();
 
         $subjects = Subject::query()

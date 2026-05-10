@@ -20,7 +20,7 @@ class SubjectController extends Controller
         abort_unless($student instanceof User, 403);
 
         $student->loadMissing([
-            'schoolClass:id,name,section,room',
+              'schoolClass:id,name,room',
             'majorSubject',
             'majorSubject.teacher:id,name',
         ]);
@@ -134,11 +134,7 @@ class SubjectController extends Controller
                         ?? $slot->subject?->schoolClass?->display_name
                         ?? $student->schoolClass?->display_name
                         ?? 'Unassigned',
-                    'class_code' => trim((string) (
-                        $slot->schoolClass?->section
-                        ?? $slot->subject?->schoolClass?->section
-                        ?? ''
-                    )),
+                    'class_code' => '',
                     'period_label' => $this->periodLabel((string) ($slot->period ?? '')),
                     'start_label' => $this->formatTime((string) ($slot->start_time ?? '')),
                     'end_label' => $this->formatTime((string) ($slot->end_time ?? '')),
@@ -233,7 +229,7 @@ class SubjectController extends Controller
             ->with([
                 'subject:id,name,code,description,teacher_id,school_class_id',
                 'subject.teacher:id,name,email',
-                'schoolClass:id,name,section',
+                'schoolClass:id,name',
                 'teacher:id,name,email',
             ])
             ->whereIn('subject_id', $subjectIds);

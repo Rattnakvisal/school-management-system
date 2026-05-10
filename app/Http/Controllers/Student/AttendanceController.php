@@ -38,7 +38,7 @@ class AttendanceController extends Controller
             ->where('student_id', $studentId)
             ->with([
                 'teacher:id,name,email',
-                'schoolClass:id,name,section',
+                    'schoolClass:id,name',
                 'subject:id,name,code',
             ]);
 

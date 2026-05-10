@@ -105,7 +105,7 @@
                     }
                 }
             }" x-init="init()"
-                class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-5"
+                class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
                 style="--sd: 3;">
                 <div class="flex items-start justify-between gap-3">
                     <div>
@@ -141,25 +141,14 @@
                         @enderror
                     </div>
 
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="section" class="mb-1 block text-xs font-semibold text-slate-600">Section</label>
-                            <input id="section" name="section" type="text" value="{{ old('section') }}"
-                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                placeholder="A">
-                            @error('section')
-                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="room" class="mb-1 block text-xs font-semibold text-slate-600">Room</label>
-                            <input id="room" name="room" type="text" value="{{ old('room') }}"
-                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                                placeholder="B-201">
-                            @error('room')
-                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div>
+                        <label for="room" class="mb-1 block text-xs font-semibold text-slate-600">Room</label>
+                        <input id="room" name="room" type="text" value="{{ old('room') }}"
+                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                            placeholder="B-201">
+                        @error('room')
+                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
@@ -182,16 +171,7 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="description" class="mb-1 block text-xs font-semibold text-slate-600">Description
-                            (Optional)</label>
-                        <textarea id="description" name="description" rows="3"
-                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
-                            placeholder="Notes about this class...">{{ old('description') }}</textarea>
-                        @error('description')
-                            <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    {{-- Description removed as requested --}}
 
                     <label class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">
                         <span class="text-sm font-semibold text-slate-700">Initial Status</span>
@@ -210,7 +190,7 @@
             </section>
 
             <section
-                class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-7"
+                class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
                 style="--sd: 4;">
                 <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                     <div class="flex items-center justify-between gap-3">
@@ -319,7 +299,6 @@
                                             class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                                             <tr>
                                                 <th class="px-3 py-3 font-semibold">Class</th>
-                                                <th class="px-3 py-3 font-semibold">Section</th>
                                                 <th class="px-3 py-3 font-semibold">Room</th>
                                                 <th class="whitespace-nowrap px-3 py-3 font-semibold">Study Time</th>
                                                 <th class="px-3 py-3 font-semibold">Capacity</th>
@@ -350,12 +329,6 @@
                                                     <td class="whitespace-nowrap px-3 py-3">
                                                         <div class="font-semibold text-slate-800">
                                                             {{ $schoolClass->name }}</div>
-                                                        <div class="mt-0.5 text-xs leading-relaxed text-slate-400">
-                                                            {{ \Illuminate\Support\Str::limit($schoolClass->description ?: 'No description', 60) }}
-                                                        </div>
-                                                    </td>
-                                                    <td class="whitespace-nowrap px-3 py-3 text-slate-600">
-                                                        {{ $schoolClass->section ?: '-' }}
                                                     </td>
                                                     <td class="whitespace-nowrap px-3 py-3 text-slate-600">
                                                         {{ $schoolClass->room ?: '-' }}
@@ -605,16 +578,7 @@
                                                                                 </span>
                                                                             </div>
                                                                         </div>
-                                                                        <div
-                                                                            class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-                                                                            <div
-                                                                                class="text-xs font-bold uppercase tracking-wide text-slate-500">
-                                                                                Description</div>
-                                                                            <p
-                                                                                class="mt-2 text-sm leading-6 text-slate-600">
-                                                                                {{ $schoolClass->description ?: 'No description available.' }}
-                                                                            </p>
-                                                                        </div>
+                                                                        {{-- Description removed from class details --}}
                                                                     </div>
 
                                                                     <div
@@ -722,25 +686,13 @@
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
-                                                                    <div class="grid gap-4 sm:grid-cols-2">
-                                                                        <div>
-                                                                            <label
-                                                                                for="edit_section_{{ $schoolClass->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Section</label>
-                                                                            <input
-                                                                                id="edit_section_{{ $schoolClass->id }}"
-                                                                                name="section" type="text"
-                                                                                value="{{ $schoolClass->section }}"
-                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                        </div>
-                                                                        <div>
-                                                                            <label for="edit_room_{{ $schoolClass->id }}"
-                                                                                class="mb-1 block text-xs font-semibold text-slate-600">Room</label>
-                                                                            <input id="edit_room_{{ $schoolClass->id }}"
-                                                                                name="room" type="text"
-                                                                                value="{{ $schoolClass->room }}"
-                                                                                class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
-                                                                        </div>
+                                                                    <div>
+                                                                        <label for="edit_room_{{ $schoolClass->id }}"
+                                                                            class="mb-1 block text-xs font-semibold text-slate-600">Room</label>
+                                                                        <input id="edit_room_{{ $schoolClass->id }}"
+                                                                            name="room" type="text"
+                                                                            value="{{ $schoolClass->room }}"
+                                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
                                                                     <div>
@@ -766,13 +718,7 @@
                                                                             class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">
                                                                     </div>
 
-                                                                    <div>
-                                                                        <label
-                                                                            for="edit_description_{{ $schoolClass->id }}"
-                                                                            class="mb-1 block text-xs font-semibold text-slate-600">Description</label>
-                                                                        <textarea id="edit_description_{{ $schoolClass->id }}" name="description" rows="3"
-                                                                            class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100">{{ $schoolClass->description }}</textarea>
-                                                                    </div>
+                                                                    {{-- Description removed from edit form --}}
 
                                                                     <label
                                                                         class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5">

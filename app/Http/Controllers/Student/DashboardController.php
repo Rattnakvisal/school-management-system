@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $student = $request->user();
 
         $student->loadMissing([
-            'schoolClass:id,name,section,room,study_time,study_start_time,study_end_time',
+            'schoolClass:id,name,room,study_time,study_start_time,study_end_time',
             'majorSubject:id,name,code',
         ]);
 

@@ -503,16 +503,13 @@ class AdminDashboardViewData
         ];
 
         return ClassStudyTime::query()
-            ->with('schoolClass:id,name,section')
+            ->with('schoolClass:id,name')
             ->orderBy('sort_order')
             ->orderBy('start_time')
             ->get($columns)
             ->map(function (ClassStudyTime $slot) use ($now, $hasDayColumn, $weekIndexByDay): array {
                 $className = trim((string) ($slot->schoolClass?->name ?? ''));
-                $classSection = trim((string) ($slot->schoolClass?->section ?? ''));
-                $classLabel = $className !== ''
-                    ? ($classSection !== '' ? $className . ' - ' . $classSection : $className)
-                    : 'Unassigned Class';
+                $classLabel = $className !== '' ? $className : 'Unassigned Class';
 
                 $dayKey = $hasDayColumn
                     ? strtolower(trim((string) ($slot->day_of_week ?? 'all')))

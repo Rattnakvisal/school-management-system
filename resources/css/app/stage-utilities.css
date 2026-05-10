@@ -370,16 +370,7 @@
      Page header (upgrade)
   ======================= */
     .admin-page-header {
-        border: 1px solid var(--border);
-        border-radius: var(--radius-xl);
         padding: 1.5rem;
-        background: linear-gradient(
-            135deg,
-            #f8fafc 0%,
-            #eef2ff 55%,
-            #f5f3ff 100%
-        );
-        box-shadow: var(--shadow-sm);
         position: relative;
         overflow: hidden;
     }
@@ -392,12 +383,6 @@
         top: -4rem;
         width: 14rem;
         height: 14rem;
-        border-radius: 9999px;
-        background: radial-gradient(
-            circle at 30% 30%,
-            rgba(99, 102, 241, 0.22),
-            transparent 60%
-        );
         pointer-events: none;
         filter: blur(1px);
     }
@@ -486,13 +471,6 @@
     }
 
     .teacher-page-header {
-        border-color: #d9e2f2;
-        background: linear-gradient(
-            128deg,
-            #f8fafc 0%,
-            #eef2ff 52%,
-            #ecfeff 100%
-        );
         padding: clamp(1.2rem, 2vw, 1.6rem);
     }
 
@@ -850,9 +828,6 @@
         box-shadow: none;
     }
 
-    /* ==================================
-     Tables (cleaner â€œcardsâ€, sticky head)
-  =================================== */
     .stage .overflow-x-auto {
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);

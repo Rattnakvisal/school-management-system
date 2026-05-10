@@ -51,7 +51,7 @@ class StudentController extends Controller
         ];
 
         $classes = $hasClassColumn
-            ? SchoolClass::query()->orderBy('name')->orderBy('section')->get()
+            ? SchoolClass::query()->orderBy('name')->get()
             : collect();
         $subjectsByClass = $this->subjectsByClassMap($hasClassColumn, $hasMajorSubjectColumn);
         $studyTimesByClass = $this->studyTimesByClassMap($hasClassColumn, $hasClassStudyTimeColumn);
@@ -375,7 +375,7 @@ class StudentController extends Controller
                     if ($filters['hasClassColumn']) {
                         $inner->orWhereHas('schoolClass', function ($classQuery) use ($search) {
                             $classQuery->where('name', 'like', '%' . $search . '%')
-                                ->orWhere('section', 'like', '%' . $search . '%');
+                                ->orWhere('room', 'like', '%' . $search . '%');
                         });
                     }
 

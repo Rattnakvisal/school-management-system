@@ -58,8 +58,7 @@ class DashboardController extends Controller
                 ->whereIn('id', $teacherClassIds->all())
                 ->withCount('students')
                 ->orderBy('name')
-                ->orderBy('section')
-                ->get(['id', 'name', 'section']);
+                ->get(['id', 'name']);
 
             $subjectCountsByClass = SubjectStudyTime::query()
                 ->where('teacher_id', $teacherId)
@@ -86,15 +85,14 @@ class DashboardController extends Controller
                     },
                 ])
                 ->orderBy('name')
-                ->orderBy('section')
-                ->get(['id', 'name', 'section']);
+                ->get(['id', 'name']);
         }
 
         $classIds = $teacherClasses->pluck('id')->map(fn($id) => (int) $id)->values();
         $teacherStudents = User::query()
             ->where('role', 'student')
             ->whereIn('school_class_id', $classIds->all())
-            ->with('schoolClass:id,name,section')
+            ->with('schoolClass:id,name')
             ->orderBy('name')
             ->get(['id', 'name', 'avatar', 'school_class_id']);
 
@@ -111,7 +109,7 @@ class DashboardController extends Controller
             ->keyBy('student_id');
 
         $classSlotsQuery = ClassStudyTime::query()
-            ->with('schoolClass:id,name,section')
+            ->with('schoolClass:id,name')
             ->whereIn('school_class_id', $classIds)
             ->orderBy('school_class_id');
 
@@ -132,7 +130,7 @@ class DashboardController extends Controller
             ->get();
 
         $subjectSlotsQuery = SubjectStudyTime::query()
-            ->with(['subject.schoolClass:id,name,section', 'schoolClass:id,name,section'])
+            ->with(['subject.schoolClass:id,name', 'schoolClass:id,name'])
             ->when($useSlotAssignments, function ($query) use ($teacherId) {
                 $query->where('teacher_id', $teacherId);
             }, function ($query) use ($teacherId) {
