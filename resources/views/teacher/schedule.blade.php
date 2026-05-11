@@ -9,32 +9,6 @@
             'dayLabels' => $dayOptions ?? [],
             'selectedDay' => $selectedDay ?? 'all',
         ];
-        $teacherScheduleStatCards = [
-            [
-                'label' => 'Classes',
-                'activeLabel' => 'Assigned',
-                'active' => (int) ($stats['classes'] ?? 0),
-                'total' => (int) ($stats['classes'] ?? 0),
-                'icon' => 'classes',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Class Slots',
-                'activeLabel' => 'Slots',
-                'active' => (int) ($stats['classSlots'] ?? 0),
-                'total' => (int) (($stats['classSlots'] ?? 0) + ($stats['subjectSlots'] ?? 0)),
-                'icon' => 'time',
-                'tone' => 'from-sky-100 to-white text-sky-600',
-            ],
-            [
-                'label' => 'Subject Slots',
-                'activeLabel' => 'Teaching',
-                'active' => (int) ($stats['subjectSlots'] ?? 0),
-                'total' => (int) (($stats['classSlots'] ?? 0) + ($stats['subjectSlots'] ?? 0)),
-                'icon' => 'subjects',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-            ],
-        ];
     @endphp
 
     <div class="teacher-time-stage space-y-6">
@@ -54,46 +28,13 @@
                         <div>
                             <div class="admin-page-header__eyebrow">Teacher Panel</div>
                             <h1 class="admin-page-title text-3xl font-black tracking-tight">My Schedule</h1>
+                            <p class="admin-page-subtitle mt-1 text-sm">View your teaching list by day, time, subject, and
+                                class.</p>
                         </div>
                     </div>
-                </div>
-                <p class="admin-page-subtitle mt-1 text-sm">View your teaching list by day, time, subject, and class.</p>
-            </div>
-
-            <div class="mt-4 grid gap-3 sm:grid-cols-3">
-                <div class="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3">
-                    <div class="flex items-center gap-3">
-                        <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 status-dot"></span>
-                        <div>
-                            <div id="schedule-live-time" class="text-sm font-black text-slate-900">--:--:--</div>
-                            <div id="schedule-live-day" class="text-xs font-semibold text-slate-500">--</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3">
-                    <div id="schedule-live-current-title" class="text-sm font-black text-emerald-800">No live slot now</div>
-                    <div id="schedule-live-current-meta" class="mt-0.5 text-xs font-semibold text-emerald-700/80">Waiting
-                        for next slot...</div>
-                    <div class="mt-2 h-1.5 rounded-full bg-emerald-100">
-                        <div id="schedule-live-progress"
-                            class="h-1.5 w-0 rounded-full bg-emerald-500 transition-all duration-500">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3">
-                    <div id="schedule-live-next-title" class="text-sm font-black text-amber-800">No upcoming slot</div>
-                    <div id="schedule-live-next-meta" class="mt-0.5 text-xs font-semibold text-amber-700/80">All slots
-                        finished for selected day</div>
                 </div>
             </div>
-
-            <p id="schedule-live-hint" class="mt-3 text-xs font-semibold text-slate-500">Checking live schedule...</p>
         </section>
-
-        <x-admin.stat-cards :cards="$teacherScheduleStatCards" reveal-class="teacher-time-reveal" float-class="teacher-time-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" />
 
         <section class="teacher-time-reveal teacher-time-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
             style="--sd: 2;" x-data="{ filterOpen: false, tab: 'teach' }">

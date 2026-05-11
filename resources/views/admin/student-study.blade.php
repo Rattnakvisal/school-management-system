@@ -60,7 +60,7 @@
         <x-admin.stat-cards :cards="$studyStatCards" reveal-class="study-reveal" float-class="study-float" />
 
         <section
-            class="study-reveal study-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200"
+            class="study-reveal study-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:ring-slate-700"
             style="--sd: 2;">
             <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                 <div class="flex items-center justify-between gap-3">
@@ -325,11 +325,11 @@
                                                     $scheduleStatus = 'matched';
                                                     $scheduleLabel = 'Matched';
                                                     $scheduleClass =
-                                                        'border-emerald-200 bg-emerald-50 text-emerald-700';
+                                                        'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300';
                                                 } else {
                                                     $scheduleStatus = 'mismatch';
                                                     $scheduleLabel = 'Mismatch';
-                                                    $scheduleClass = 'border-amber-200 bg-amber-50 text-amber-700';
+                                                    $scheduleClass = 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300';
                                                 }
 
                                                 $studentId = (int) ($row->student_id ?? 0);
@@ -593,7 +593,7 @@
                                                         @endif
                                                     </div>
                                                     @if ($scheduleStatus === 'mismatch')
-                                                        <div class="mt-1 text-[11px] text-amber-700">Class time and subject
+                                                        <div class="mt-1 text-[11px] text-amber-700 dark:text-amber-300">Class time and subject
                                                             time are different.</div>
                                                     @endif
 

@@ -77,9 +77,9 @@
             ],
         ];
         $statusTone = [
-            'paid' => 'bg-emerald-50 text-emerald-700 ring-emerald-100',
+            'paid' => 'bg-emerald-50 text-emerald-700 dark:text-emerald-300 ring-emerald-100',
             'partial' => 'bg-sky-50 text-sky-700 ring-sky-100',
-            'pending' => 'bg-amber-50 text-amber-700 ring-amber-100',
+            'pending' => 'bg-amber-50 text-amber-700 dark:text-amber-300 ring-amber-100',
             'overdue' => 'bg-rose-50 text-rose-700 ring-rose-100',
             'waived' => 'bg-slate-100 text-slate-700 ring-slate-200',
         ];
@@ -120,7 +120,7 @@
             grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (!$tableReady)
-            <div class="student-reveal rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800"
+            <div class="student-reveal rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20 dark:border-amber-900/50 dark:bg-amber-900/20 px-4 py-3 text-sm font-semibold text-amber-800"
                 style="--sd: 2;">
                 Finance is ready, but the database table is not installed yet. Run <span class="font-black">php artisan
                     migrate</span> to enable payment records.
@@ -128,28 +128,28 @@
         @endif
 
         @if (session('success'))
-            <div class="student-reveal hidden rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
+            <div class="student-reveal hidden rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:border-emerald-900/50 dark:bg-emerald-900/20 px-4 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300"
                 style="--sd: 2;">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="student-reveal hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+            <div class="student-reveal hidden rounded-2xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 dark:border-red-900/50 dark:bg-red-900/20 px-4 py-3 text-sm font-semibold text-red-700 dark:text-red-300"
                 style="--sd: 2;">
                 {{ session('error') }}
             </div>
         @endif
 
         @if (session('warning'))
-            <div class="student-reveal hidden rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700"
+            <div class="student-reveal hidden rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20 dark:border-amber-900/50 dark:bg-amber-900/20 px-4 py-3 text-sm font-semibold text-amber-700 dark:text-amber-300"
                 style="--sd: 2;">
                 {{ session('warning') }}
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="student-reveal hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+            <div class="student-reveal hidden rounded-2xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 dark:border-red-900/50 dark:bg-red-900/20 px-4 py-3 text-sm font-semibold text-red-700 dark:text-red-300"
                 style="--sd: 2;">
                 Please check the finance form and try again.
             </div>
@@ -157,7 +157,7 @@
 
         <div class="grid gap-6 xl:grid-cols-12">
             <section
-                class="student-reveal student-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
+                class="student-reveal student-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:ring-slate-700 xl:col-span-4"
                 style="--sd: 3;">
                 <div>
                     <h2 class="text-lg font-black text-slate-900">Record Payment</h2>
@@ -202,7 +202,7 @@
                             </div>
                             <div class="mt-1 flex items-center justify-between gap-3">
                                 <span class="font-semibold text-slate-500">Already covered</span>
-                                <span class="font-black text-emerald-700" data-finance-paid-total>$0.00</span>
+                                <span class="font-black text-emerald-700 dark:text-emerald-300" data-finance-paid-total>$0.00</span>
                             </div>
                             <div class="mt-1 flex items-center justify-between gap-3">
                                 <span class="font-semibold text-slate-500">Tuition discount</span>
@@ -214,7 +214,7 @@
                             </div>
                             <div class="mt-1 flex items-center justify-between gap-3">
                                 <span class="font-semibold text-slate-500">Additional due</span>
-                                <span class="font-black text-amber-700" data-finance-remaining-total>$0.00</span>
+                                <span class="font-black text-amber-700 dark:text-amber-300" data-finance-remaining-total>$0.00</span>
                             </div>
                             <p class="mt-1 text-[11px] font-semibold text-slate-500" data-finance-tuition-subjects>
                                 Select a student to load tuition fee.
@@ -366,9 +366,9 @@
                                         </span>
                                     </a>
                                     <a href="{{ route('admin.finance.export.excel', $financeExportQuery) }}"
-                                        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                                        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300 transition hover:bg-emerald-50">
                                         <span
-                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:text-emerald-300">
                                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                                                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                 stroke-linejoin="round" aria-hidden="true">
@@ -622,7 +622,7 @@
                                                         @csrf
                                                         @method('DELETE')
                                                         <button
-                                                            class=" rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50">
+                                                            class=" rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 dark:border-red-900/50 dark:bg-red-900/20 px-3 py-1.5 text-xs font-semibold text-red-700 dark:text-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50">
                                                                 Delete
                                                         </button>
                                                     </form>
@@ -688,7 +688,7 @@
                                                                     </div>
                                                                     <div class="mt-1 flex items-center justify-between gap-3">
                                                                         <span class="font-semibold text-slate-500">Already covered</span>
-                                                                        <span class="font-black text-emerald-700" data-finance-paid-total>$0.00</span>
+                                                                        <span class="font-black text-emerald-700 dark:text-emerald-300" data-finance-paid-total>$0.00</span>
                                                                     </div>
                                                                     <div class="mt-1 flex items-center justify-between gap-3">
                                                                         <span class="font-semibold text-slate-500">Tuition discount</span>
@@ -700,7 +700,7 @@
                                                                     </div>
                                                                     <div class="mt-1 flex items-center justify-between gap-3">
                                                                         <span class="font-semibold text-slate-500">Additional due</span>
-                                                                        <span class="font-black text-amber-700" data-finance-remaining-total>$0.00</span>
+                                                                        <span class="font-black text-amber-700 dark:text-amber-300" data-finance-remaining-total>$0.00</span>
                                                                     </div>
                                                                     <p class="mt-1 text-[11px] font-semibold text-slate-500" data-finance-tuition-subjects>
                                                                         Select a student to load tuition fee.

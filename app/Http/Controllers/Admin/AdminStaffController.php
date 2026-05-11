@@ -16,7 +16,7 @@ use App\Support\StaffPermissions;
 class AdminStaffController extends Controller
 {
     private const ROLES = ['admin', 'staff'];
-    private const ASSIGNABLE_ROLES = ['admin', 'staff'];
+    private const ASSIGNABLE_ROLES = [ 'admin', 'staff' , 'teacher', 'student'];
 
     public function index(Request $request)
     {

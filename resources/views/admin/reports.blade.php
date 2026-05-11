@@ -17,105 +17,10 @@
         $financeCollected = (float) ($financeStats['collected'] ?? 0);
         $financeOutstanding = (float) ($financeStats['outstanding'] ?? 0);
         $financeDiscounts = (float) ($financeStats['discounts'] ?? 0);
-        $financeBillable = max((float) ($financeStats['billable'] ?? 0), $financeCollected + $financeOutstanding + $financeDiscounts);
-        $adminStatCards = [
-            [
-                'label' => 'Students',
-                'activeLabel' => 'Active',
-                'active' => (int) ($studentsActive ?? 0),
-                'total' => (int) ($studentsTotal ?? 0),
-                'route' => route('admin.students.index'),
-                'icon' => 'students',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Teachers',
-                'activeLabel' => 'Active',
-                'active' => (int) ($teachersActive ?? 0),
-                'total' => (int) ($teachersTotal ?? 0),
-                'route' => route('admin.teachers.index'),
-                'icon' => 'teachers',
-                'tone' => 'from-sky-100 to-white text-sky-600',
-            ],
-            [
-                'label' => 'Classes',
-                'activeLabel' => 'Active',
-                'active' => (int) ($classesActive ?? 0),
-                'total' => (int) ($classesTotal ?? 0),
-                'route' => route('admin.classes.index'),
-                'icon' => 'classes',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-            ],
-            [
-                'label' => 'Subjects',
-                'activeLabel' => 'Active',
-                'active' => (int) ($subjectsActive ?? 0),
-                'total' => (int) ($subjectsTotal ?? 0),
-                'route' => route('admin.subjects.index'),
-                'icon' => 'subjects',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-            ],
-            [
-                'label' => 'Collected',
-                'activeLabel' => 'Cash',
-                'active' => (int) round($financeCollected),
-                'total' => max(1, (int) round($financeBillable)),
-                'route' => route('admin.finance.index'),
-                'icon' => 'finance',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-                'display' => '$' . number_format($financeCollected, 2),
-                'totalDisplay' => '$' . number_format($financeBillable, 2) . '',
-            ],
-            [
-                'label' => 'Outstanding',
-                'activeLabel' => 'Due',
-                'active' => (int) round($financeOutstanding),
-                'total' => max(1, (int) round($financeBillable)),
-                'route' => route('admin.finance.index'),
-                'icon' => 'finance',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-                'display' => '$' . number_format($financeOutstanding, 2),
-                'totalDisplay' => '$' . number_format($financeBillable, 2) . '',
-            ],
-            [
-                'label' => 'Discounts',
-                'activeLabel' => 'Given',
-                'active' => (int) round($financeDiscounts),
-                'total' => max(1, (int) round($financeBillable)),
-                'route' => route('admin.finance.index'),
-                'icon' => 'finance',
-                'tone' => 'from-sky-100 to-white text-sky-600',
-                'display' => '$' . number_format($financeDiscounts, 2),
-                'totalDisplay' => '$' . number_format($financeBillable, 2) . '',
-            ],
-            [
-                'label' => 'Messages',
-                'activeLabel' => 'Unread',
-                'active' => (int) ($messagesUnread ?? 0),
-                'total' => (int) ($messagesTotal ?? 0),
-                'route' => route('admin.contacts.index'),
-                'icon' => 'messages',
-                'tone' => 'from-rose-100 to-white text-rose-600',
-            ],
-            [
-                'label' => 'Study Time',
-                'activeLabel' => 'Assigned',
-                'active' => (int) ($studentsWithStudyTime ?? 0),
-                'total' => (int) ($studentsTotal ?? 0),
-                'route' => route('admin.student-study.index'),
-                'icon' => 'study-time',
-                'tone' => 'from-violet-100 to-white text-violet-600',
-            ],
-            [
-                'label' => 'Major Subjects',
-                'activeLabel' => 'Assigned',
-                'active' => (int) ($studentsWithMajor ?? 0),
-                'total' => (int) ($studentsTotal ?? 0),
-                'route' => route('admin.student-study.index'),
-                'icon' => 'major-subjects',
-                'tone' => 'from-cyan-100 to-white text-cyan-600',
-            ],
-        ];
+        $financeBillable = max(
+            (float) ($financeStats['billable'] ?? 0),
+            $financeCollected + $financeOutstanding + $financeDiscounts,
+        );
         $statPanelClass =
             'rounded-[26px] border border-white/80 bg-white/90 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur';
     @endphp
@@ -141,15 +46,10 @@
                         Reports
                     </div>
                     <h1 class="mt-1 admin-page-title font-black tracking-tight">Reports Overview</h1>
-                    <p class="mt-2 max-w-2xl text-sm admin-page-subtitle">
-                        {{ $greeting }} {{ $fullName }}. Review school performance, attendance, enrollment,
-                        study profile, and message activity from one reporting page.
-                    </p>
-                    <p class="mt-1 text-xs text-slate-500">{{ '$' . number_format($financeBillable, 2) }} billable</p>
-
+                    <p class="mt-2 text-sm text-white-500">Key insights and data visualizations about your school.</p>
                     <div class="relative z-50 mt-4 flex flex-wrap items-center gap-2 admin-page-header__actions">
                         <a href="{{ route('admin.reports.export.excel') }}"
-                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/35 bg-white px-4 py-2 text-xs font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-50 sm:w-auto">
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/35 bg-white px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 shadow-sm transition hover:bg-emerald-50 sm:w-auto">
                             <i class="fa-solid fa-file-excel" aria-hidden="true"></i>
                             Excel
                         </a>
@@ -189,6 +89,16 @@
                                     <i class="fa-solid fa-file-pdf text-rose-600" aria-hidden="true"></i>
                                     Teachers PDF
                                 </a>
+                                <a href="{{ route('admin.finance.export.excel') }}"
+                                    class="flex items-center gap-3 px-4 py-3 text-xs font-bold hover:bg-slate-50">
+                                    <i class="fa-solid fa-file-excel text-emerald-600" aria-hidden="true"></i>
+                                    Finance Excel
+                                </a>
+                                <a href="{{ route('admin.finance.export.pdf') }}"
+                                    class="flex items-center gap-3 px-4 py-3 text-xs font-bold hover:bg-slate-50">
+                                    <i class="fa-solid fa-file-pdf text-rose-600" aria-hidden="true"></i>
+                                    Finance PDF
+                                </a>
                                 <div class="border-t border-slate-100"></div>
                                 <a href="{{ route('admin.contacts.index') }}"
                                     class="flex items-center gap-3 px-4 py-3 text-xs font-bold hover:bg-slate-50">
@@ -226,114 +136,6 @@
             </div>
         </section>
 
-        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
-            @foreach ($adminStatCards as $index => $card)
-                @php
-                    $progress = (int) round(($card['active'] / max(1, $card['total'])) * 100);
-                @endphp
-                <a href="{{ $card['route'] }}" class="dash-reveal dash-hover {{ $statPanelClass }} min-h-[132px] p-5"
-                    style="--d: {{ $index + 2 }};">
-                    <div class="flex items-start justify-between gap-4">
-                        <span class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br {{ $card['tone'] }}">
-                            @switch($card['icon'])
-                                @case('students')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M16 21v-2a4 4 0 0 0-8 0v2" />
-                                        <circle cx="12" cy="7" r="4" />
-                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                    </svg>
-                                @break
-
-                                @case('teachers')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="7" r="4" />
-                                        <path d="M6 21v-2a6 6 0 0 1 12 0v2" />
-                                        <path d="M9 11h6" />
-                                    </svg>
-                                @break
-
-                                @case('classes')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m12 3 8 4-8 4-8-4 8-4Z" />
-                                        <path d="m4 12 8 4 8-4" />
-                                        <path d="m4 17 8 4 8-4" />
-                                    </svg>
-                                @break
-
-                                @case('subjects')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M4 19.5V5a2 2 0 0 1 2-2h11a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H6a2 2 0 0 0-2 1.5Z" />
-                                        <path d="M8 7h7" />
-                                        <path d="M8 11h5" />
-                                    </svg>
-                                @break
-
-                                @case('finance')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H20v14H6.5A2.5 2.5 0 0 1 4 16.5v-9Z" />
-                                        <path d="M20 9H6.5A2.5 2.5 0 0 1 4 6.5" />
-                                        <path d="M16.5 13.5h.01" />
-                                    </svg>
-                                @break
-
-                                @case('study-time')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="9" />
-                                        <path d="M12 7v5l3 2" />
-                                        <path d="M7 3 4 6" />
-                                        <path d="m20 6-3-3" />
-                                    </svg>
-                                @break
-
-                                @case('major-subjects')
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12 3 3 8l9 5 9-5-9-5Z" />
-                                        <path d="M6 10v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
-                                        <path d="M21 8v5" />
-                                    </svg>
-                                @break
-
-                                @default
-                                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z" />
-                                    </svg>
-                            @endswitch
-                        </span>
-
-                        <span class="text-slate-300">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
-                            </svg>
-                        </span>
-                    </div>
-
-                    <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
-                        <span>{{ $card['display'] ?? number_format($card['active']) }}</span>
-                        <span class="pb-0.5 text-base font-extrabold text-slate-300">/
-                            {{ $card['totalDisplay'] ?? number_format($card['total']) }}</span>
-                    </div>
-                    <div class="mt-1 text-sm font-bold text-slate-600">{{ $card['label'] }}</div>
-                    <div class="mt-1 text-[11px] font-semibold text-slate-400">
-                        {{ $card['activeLabel'] }}: {{ number_format($card['active']) }}
-                    </div>
-                    <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                        <span class="block h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
-                            style="width: {{ min(100, max(0, $progress)) }}%"></span>
-                    </div>
-                </a>
-            @endforeach
-        </section>
-
         <section class="grid gap-6 xl:grid-cols-12">
             <article
                 class="dashboard-card dash-reveal dash-hover min-w-0 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
@@ -341,7 +143,8 @@
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
                         <h2 class="text-base font-bold text-slate-900">School Finance Detail</h2>
-                        <p class="mt-1 text-xs text-slate-500">Collected and outstanding student payments for the last 7 days.</p>
+                        <p class="mt-1 text-xs text-slate-500">Collected and outstanding student payments for the last 7
+                            days.</p>
                     </div>
                     <a href="{{ route('admin.finance.index') }}"
                         class="inline-flex items-center gap-2 rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-bold text-teal-700 transition hover:bg-teal-100">

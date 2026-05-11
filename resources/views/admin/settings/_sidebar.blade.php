@@ -1,5 +1,5 @@
                 <aside
-                    class="settings-sidebar-shell sticky top-16 z-20 self-start rounded-2xl border border-slate-200 bg-slate-50/95 p-3 shadow-sm backdrop-blur xl:top-20">
+                    class="settings-sidebar-shell sticky top-16 z-20 self-start rounded-2xl border border-slate-200 bg-slate-50/95 p-3 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/50 xl:top-0">
                     <div class="grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:block xl:space-y-2">
                         <div data-settings-nav-group class="space-y-1 p-2">
                             <button type="button" data-settings-nav="profile"
@@ -33,7 +33,7 @@
                                 </span>
                             </button>
                             <button type="button" data-settings-nav="verification"
-                                class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 lg:h-full xl:h-auto">
+                                class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
                                 <span class="inline-flex items-center gap-2 lg:justify-center xl:justify-start">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                                         <path

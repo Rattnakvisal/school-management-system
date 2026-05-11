@@ -21,9 +21,7 @@
 
     <div id="teacher-settings-page" class="teacher-stage teacher-settings-stage space-y-6"
         data-settings-default-tab="{{ $settingsDefaultTab }}">
-        <section
-            class="teacher-reveal teacher-settings-hero rounded-3xl border border-slate-200 bg-white p-5 shadow-sm ring-1 ring-slate-100 sm:p-6"
-            style="--sd: 1;">
+        <section class="p-5 sm:p-6" style="--sd: 1;">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h1 class="admin-page-title text-3xl font-black tracking-tight">Teacher Settings</h1>

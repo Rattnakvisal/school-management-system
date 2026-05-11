@@ -3,32 +3,6 @@
 @section('page')
     @php
         $classTotal = max(0, (int) ($stats['classes'] ?? 0));
-        $teacherClassStatCards = [
-            [
-                'label' => 'Classes',
-                'activeLabel' => 'Assigned',
-                'active' => $classTotal,
-                'total' => $classTotal,
-                'icon' => 'classes',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Students',
-                'activeLabel' => 'Linked',
-                'active' => (int) ($stats['students'] ?? 0),
-                'total' => (int) ($stats['students'] ?? 0),
-                'icon' => 'students',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-            ],
-            [
-                'label' => 'Subjects',
-                'activeLabel' => 'Teaching',
-                'active' => (int) ($stats['subjects'] ?? 0),
-                'total' => (int) ($stats['subjects'] ?? 0),
-                'icon' => 'subjects',
-                'tone' => 'from-sky-100 to-white text-sky-600',
-            ],
-        ];
     @endphp
 
     <div class="teacher-classes-stage space-y-6">
@@ -55,16 +29,14 @@
                 </div>
             </div>
         </section>
-
-        <x-admin.stat-cards :cards="$teacherClassStatCards" reveal-class="teacher-classes-reveal" float-class="teacher-classes-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" />
-
         <section
             class="teacher-classes-reveal teacher-classes-float rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
             style="--sd: 2;">
             <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <h2 class="text-lg font-black text-slate-900">Class List</h2>
+                    <h2 class="text-lg font-black text-slate-900">Class List <span
+                            class="text-sm font-normal text-slate-500"></span>({{ number_format($stats['students'] ?? 0) }}
+                        students)</span></h2>
                     <button type="button" @click="filterOpen = true"
                         class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

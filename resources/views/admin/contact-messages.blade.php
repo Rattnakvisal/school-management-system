@@ -3,63 +3,18 @@
 @section('page')
     @php
         $contactTotal = max(0, (int) ($stats['total'] ?? 0));
-        $contactStatCards = [
-            [
-                'label' => 'Messages',
-                'activeLabel' => 'Total',
-                'active' => $contactTotal,
-                'total' => $contactTotal,
-                'icon' => 'contacts',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Unread',
-                'activeLabel' => 'Needs Reply',
-                'active' => (int) ($stats['unread'] ?? 0),
-                'total' => $contactTotal,
-                'icon' => 'contacts',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-                'barTone' => 'from-amber-500 to-orange-400',
-                'badgeTone' => 'bg-amber-50 text-amber-700 ring-amber-100',
-                'showPercent' => true,
-                'progressText' =>
-                    $contactTotal > 0
-                        ? ((int) ($stats['unread'] ?? 0)) . ' of ' . $contactTotal . ' messages unread'
-                        : 'Inbox is empty',
-            ],
-            [
-                'label' => 'Read',
-                'activeLabel' => 'Handled',
-                'active' => (int) ($stats['read'] ?? 0),
-                'total' => $contactTotal,
-                'icon' => 'active',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-                'barTone' => 'from-emerald-500 to-cyan-400',
-                'badgeTone' => 'bg-emerald-50 text-emerald-700 ring-emerald-100',
-                'showPercent' => true,
-                'progressText' =>
-                    $contactTotal > 0
-                        ? ((int) ($stats['read'] ?? 0)) . ' of ' . $contactTotal . ' messages read'
-                        : 'Inbox is empty',
-            ],
-        ];
     @endphp
 
     <div class="contact-stage space-y-6">
-        <x-admin.page-header reveal-class="contact-reveal" delay="1" icon="contacts" title="Contact Messages"
-            subtitle="Messages from the home page contact form." />
-
-        <x-admin.stat-cards :cards="$contactStatCards" reveal-class="contact-reveal" float-class="contact-float" />
-
         @if (session('success'))
-            <div class="contact-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
+            <div class="contact-reveal rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:border-emerald-900/50 dark:bg-emerald-900/20 px-4 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300"
                 style="--sd: 2;">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="contact-reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+            <div class="contact-reveal rounded-2xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 dark:border-red-900/50 dark:bg-red-900/20 px-4 py-3 text-sm font-semibold text-red-700 dark:text-red-300"
                 style="--sd: 2;">
                 {{ session('error') }}
             </div>
@@ -181,12 +136,12 @@
                                                 <td class="px-3 py-3">
                                                     @if ($message->is_read)
                                                         <span
-                                                            class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                                            class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                                                             <span class="h-2 w-2 rounded-full bg-emerald-500"></span>Read
                                                         </span>
                                                     @else
                                                         <span
-                                                            class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                                                            class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
                                                             <span
                                                                 class="status-dot h-2 w-2 rounded-full bg-amber-500"></span>Unread
                                                         </span>
@@ -221,7 +176,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit"
-                                                                class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                                                class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 dark:border-red-900/50 dark:bg-red-900/20 px-3 py-1.5 text-xs font-semibold text-red-700 dark:text-red-300 hover:bg-red-100">
                                                                 Delete
                                                             </button>
                                                         </form>
@@ -250,4 +205,5 @@
     </div>
 
     @vite(['resources/js/admin/contact.js'])
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

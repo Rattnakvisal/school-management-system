@@ -1,21 +1,22 @@
                     <section data-settings-panel="profile" class="space-y-6">
                         <form method="POST" action="{{ route('admin.settings.profile.update') }}"
                             enctype="multipart/form-data"
-                            class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-6">
+                            class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-6 dark:border-slate-700 dark:bg-slate-800/40">
                             @csrf
                             @method('PUT')
 
                             <input type="hidden" id="remove_admin_avatar" name="remove_avatar" value="0">
 
-                            <div class="flex flex-wrap items-center gap-4 border-b border-slate-200 pb-5">
+                            <div
+                                class="flex flex-wrap items-center gap-4 border-b border-slate-200 pb-5 dark:border-slate-700">
                                 <div class="relative">
                                     <img id="admin_avatar_preview"
-                                        class="h-24 w-24 rounded-full border-4 border-white object-cover shadow-sm"
+                                        class="h-24 w-24 rounded-full border-4 border-white object-cover shadow-sm dark:border-slate-800"
                                         src="{{ $admin->avatar_url }}" data-fallback="{{ $admin->fallback_avatar_url }}"
                                         onerror="this.onerror=null;this.src='{{ $admin->fallback_avatar_url }}';"
                                         alt="admin avatar">
                                     <button type="button" id="trigger_avatar_upload"
-                                        class="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-indigo-600 text-white shadow transition hover:bg-indigo-500"
+                                        class="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-indigo-600 text-white shadow transition hover:bg-indigo-500 dark:border-slate-800"
                                         aria-label="Upload avatar">
                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M12 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z" />
@@ -33,32 +34,35 @@
                                         Upload New
                                     </button>
                                     <button type="button" id="delete_avatar_btn"
-                                        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100">
+                                        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
                                         Delete avatar
                                     </button>
-                                    <span class="text-xs text-slate-500">JPG, PNG, WEBP up to 4MB.</span>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400">JPG, PNG, WEBP up to
+                                        4MB.</span>
                                 </div>
                             </div>
 
                             <div class="mt-5 grid gap-4 md:grid-cols-2">
                                 <div>
-                                    <label for="first_name" class="mb-1 block text-xs font-semibold text-slate-600">First
+                                    <label for="first_name"
+                                        class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">First
                                         Name
                                         <span class="text-red-500">*</span></label>
                                     <input id="first_name" name="first_name" type="text"
                                         value="{{ old('first_name', $defaultFirstName) }}" required
-                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-900/30">
                                     @error('first_name', 'profileUpdate')
                                         <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="last_name" class="mb-1 block text-xs font-semibold text-slate-600">Last
+                                    <label for="last_name"
+                                        class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Last
                                         Name</label>
                                     <input id="last_name" name="last_name" type="text"
                                         value="{{ old('last_name', $defaultLastName) }}"
-                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-900/30">
                                     @error('last_name', 'profileUpdate')
                                         <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                                     @enderror
@@ -66,10 +70,10 @@
 
                                 <div>
                                     <label for="email"
-                                        class="mb-1 block text-xs font-semibold text-slate-600">Email</label>
+                                        class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Email</label>
                                     <input id="email" name="email" type="email"
                                         value="{{ old('email', $admin->email) }}" required
-                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-900/30">
                                     @error('email', 'profileUpdate')
                                         <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                                     @enderror
@@ -77,11 +81,11 @@
 
                                 <div>
                                     <label for="phone_number"
-                                        class="mb-1 block text-xs font-semibold text-slate-600">Mobile
+                                        class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Mobile
                                         Number</label>
                                     <input id="phone_number" name="phone_number" type="text"
                                         value="{{ old('phone_number', $admin->phone_number) }}"
-                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-indigo-400 dark:focus:ring-indigo-900/30"
                                         placeholder="+855 ...">
                                     @error('phone_number', 'profileUpdate')
                                         <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
@@ -89,15 +93,17 @@
                                 </div>
 
                                 <div>
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">Role</label>
+                                    <label
+                                        class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Role</label>
                                     <input type="text" readonly value="{{ ucfirst((string) $admin->role) }}"
-                                        class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600">
+                                        class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                                 </div>
 
                                 <div>
-                                    <label class="mb-1 block text-xs font-semibold text-slate-600">ID</label>
+                                    <label
+                                        class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">ID</label>
                                     <input type="text" readonly value="ID #{{ $admin->formatted_id }}"
-                                        class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600">
+                                        class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                                 </div>
                             </div>
 

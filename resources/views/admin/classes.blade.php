@@ -47,21 +47,21 @@
             grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success'))
-            <div class="class-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"
+            <div class="class-reveal rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:border-emerald-900/50 dark:bg-emerald-900/20 px-4 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300"
                 style="--sd: 2;">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="class-reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+            <div class="class-reveal rounded-2xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 dark:border-red-900/50 dark:bg-red-900/20 px-4 py-3 text-sm font-semibold text-red-700 dark:text-red-300"
                 style="--sd: 2;">
                 {{ session('error') }}
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="class-reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            <div class="class-reveal rounded-2xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 dark:border-red-900/50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-300"
                 style="--sd: 2;">
                 <div class="font-semibold">Please check the form fields and try again.</div>
             </div>
@@ -105,7 +105,7 @@
                     }
                 }
             }" x-init="init()"
-                class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-4"
+                class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:ring-slate-700 xl:col-span-4"
                 style="--sd: 3;">
                 <div class="flex items-start justify-between gap-3">
                     <div>
@@ -190,7 +190,7 @@
             </section>
 
             <section
-                class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 xl:col-span-8"
+                class="class-reveal class-float rounded-3xl border border-slate-100 bg-white/95 p-5 shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-800/50 dark:ring-slate-700 xl:col-span-8"
                 style="--sd: 4;">
                 <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
                     <div class="flex items-center justify-between gap-3">
@@ -389,7 +389,7 @@
                                                                             )->format('h:i A');
                                                                         @endphp
                                                                         <div
-                                                                            class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                                                                            class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:border-emerald-900/50 dark:bg-emerald-900/20 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
                                                                             <span class="uppercase tracking-wide">
                                                                                 {{ $scheduleDayLabel }}
                                                                             </span>
@@ -445,7 +445,7 @@
                                                     <td class="whitespace-nowrap px-3 py-3">
                                                         @if ($schoolClass->is_active)
                                                             <span
-                                                                class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                                                                class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                                                                 <span
                                                                     class="status-dot h-2 w-2 rounded-full bg-emerald-500"></span>Active
                                                             </span>
@@ -480,7 +480,7 @@
                                                                 @csrf
                                                                 @method('PATCH')
                                                                 <button type="submit"
-                                                                    class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold {{ $schoolClass->is_active ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                                                                    class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold {{ $schoolClass->is_active ? 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100' }}">
                                                                     {{ $schoolClass->is_active ? 'Set Inactive' : 'Set Active' }}
                                                                 </button>
                                                             </form>
@@ -492,7 +492,7 @@
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit"
-                                                                    class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100">
+                                                                    class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 dark:border-red-900/50 dark:bg-red-900/20 px-3 py-1.5 text-xs font-semibold text-red-700 dark:text-red-300 hover:bg-red-100">
                                                                     Delete
                                                                 </button>
                                                             </form>
@@ -573,7 +573,7 @@
                                                                                 class="flex items-center justify-between gap-3">
                                                                                 <span class="text-slate-500">Status</span>
                                                                                 <span
-                                                                                    class="font-semibold {{ $schoolClass->is_active ? 'text-emerald-700' : 'text-rose-700' }}">
+                                                                                    class="font-semibold {{ $schoolClass->is_active ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700' }}">
                                                                                     {{ $schoolClass->is_active ? 'Active' : 'Inactive' }}
                                                                                 </span>
                                                                             </div>
@@ -624,7 +624,7 @@
                                                                                     )->format('h:i A');
                                                                                 @endphp
                                                                                 <div
-                                                                                    class="flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
+                                                                                    class="flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:border-emerald-900/50 dark:bg-emerald-900/20 px-3 py-2 text-xs font-semibold text-emerald-800">
                                                                                     <span
                                                                                         class="uppercase tracking-wide">{{ $scheduleDayLabel }}</span>
                                                                                     <span class="text-emerald-300">|</span>

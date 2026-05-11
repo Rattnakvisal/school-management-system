@@ -49,42 +49,6 @@
             $filterSubjectId > 0 ||
             ($filterTitle !== '' && $filterTitle !== 'all') ||
             $filterMonth !== '';
-        $teacherGradeStatCards = [
-            [
-                'label' => 'Grades',
-                'activeLabel' => 'Posted',
-                'active' => $gradeTotal,
-                'total' => $gradeTotal,
-                'icon' => 'grades',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Students',
-                'activeLabel' => 'Graded',
-                'active' => (int) ($stats['students'] ?? 0),
-                'total' => (int) ($stats['students'] ?? 0),
-                'icon' => 'students',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-            ],
-            [
-                'label' => 'Subjects',
-                'activeLabel' => 'With grades',
-                'active' => (int) ($stats['subjects'] ?? 0),
-                'total' => (int) ($stats['subjects'] ?? 0),
-                'icon' => 'subjects',
-                'tone' => 'from-sky-100 to-white text-sky-600',
-            ],
-            [
-                'label' => 'Average',
-                'activeLabel' => 'Overall',
-                'active' => $gradeAverage !== null ? (int) round($gradeAverage) : 0,
-                'total' => 100,
-                'displayActive' => $gradeAverage !== null ? number_format($gradeAverage, 1) . '%' : 'N/A',
-                'hideTotal' => true,
-                'icon' => 'average',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-            ],
-        ];
     @endphp
 
     <div class="teacher-stage teacher-grade-stage space-y-6">
@@ -112,9 +76,6 @@
                 </div>
             </div>
         </section>
-
-        <x-admin.stat-cards :cards="$teacherGradeStatCards" reveal-class="teacher-reveal" float-class="teacher-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success') && session('grade_action') !== 'updated')
             <div

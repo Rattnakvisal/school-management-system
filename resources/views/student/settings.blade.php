@@ -17,9 +17,7 @@
 
     <div id="student-settings-page" class="student-stage space-y-6"
         data-settings-default-tab="{{ $passwordErrors->any() ? 'password' : 'profile' }}">
-        <section
-            class="student-reveal student-float admin-page-header overflow-hidden rounded-[32px] border border-indigo-100/80 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.97),rgba(243,247,255,0.92))] p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] sm:p-6"
-            style="--sd: 1;">
+        <section class="p-5 sm:p-6" style="--sd: 1;">
             <div class="admin-page-header__main flex flex-wrap items-start gap-5">
                 <div class="admin-page-header__intro space-y-2">
                     <div class="admin-page-header__title-row flex items-start gap-3">

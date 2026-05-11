@@ -174,7 +174,7 @@
         </section>
 
         @if (!$hasAttendanceTable)
-            <div class="attendence-reveal rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700"
+            <div class="attendence-reveal rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20 dark:border-amber-900/50 dark:bg-amber-900/20 px-4 py-3 text-sm font-semibold text-amber-700 dark:text-amber-300"
                 style="--sd: 2;">
                 Attendance table is missing. Run <code>php artisan migrate</code> to enable this page.
             </div>
@@ -315,7 +315,7 @@
                     @endif
                     @if ($selectedTeacherLabel)
                         <span
-                            class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">
+                            class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:border-emerald-900/50 dark:bg-emerald-900/20 px-2.5 py-1 text-emerald-700 dark:text-emerald-300">
                             Teacher: {{ $selectedTeacherLabel }}
                         </span>
                     @endif
@@ -354,9 +354,9 @@
                                         $statusKey = strtolower((string) ($row->status ?? ''));
                                         $statusText = $statusLabels[$statusKey] ?? ucfirst($statusKey);
                                         $statusClass = match ($statusKey) {
-                                            'present' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                            'present' => 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300',
                                             'absent' => 'border-rose-200 bg-rose-50 text-rose-700',
-                                            'late' => 'border-amber-200 bg-amber-50 text-amber-700',
+                                            'late' => 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300',
                                             'excused' => 'border-sky-200 bg-sky-50 text-sky-700',
                                             default => 'border-slate-200 bg-slate-50 text-slate-700',
                                         };

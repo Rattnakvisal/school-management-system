@@ -1,4 +1,4 @@
-@php
+{{-- @php
     $isHomepageUiPage = $isHomepageUiPage ?? request()->routeIs('admin.homepage.index');
 @endphp
 
@@ -11,4 +11,4 @@
             {{ $isHomepageUiPage ? 'View Homepage' : 'Open Dashboard' }}
         </a>
     </x-slot:actions>
-</x-admin.page-header>
+</x-admin.page-header> --}}

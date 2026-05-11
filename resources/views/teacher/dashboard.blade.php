@@ -403,52 +403,6 @@
                         @endforelse
                     </div>
                 </section>
-
-                {{-- Updates --}}
-                <section class="dash-reveal {{ $panelClass }} {{ $panelPadding }}" style="--d: 5;">
-                    <div class="mb-5 flex items-center justify-between gap-3">
-                        <div>
-                            <h2 class="{{ $titleClass }}">Completed Tasks</h2>
-                            <p class="mt-1 text-sm text-slate-400">Recent notices and completed items</p>
-                        </div>
-
-                        <a href="{{ route('teacher.notices.index') }}" class="{{ $mutedLinkClass }}">
-                            View all
-                        </a>
-                    </div>
-
-                    <div class="space-y-3">
-                        @forelse ($recentUpdates as $notice)
-                            <article
-                                class="dash-hover flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition hover:border-slate-200 hover:bg-white">
-                                <span
-                                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        class="h-4 w-4">
-                                        <path d="M5 12h14" stroke-linecap="round" />
-                                        <path d="M12 5v14" stroke-linecap="round" />
-                                    </svg>
-                                </span>
-
-                                <div class="min-w-0">
-                                    <div class="truncate text-sm text-slate-900">
-                                        {{ $notice->title }}
-                                    </div>
-                                    <div class="mt-0.5 text-xs text-slate-400">
-                                        {{ $notice->created_at?->diffForHumans() }}
-                                    </div>
-                                </div>
-
-                                <span class="ml-auto text-xl text-slate-300">›</span>
-                            </article>
-                        @empty
-                            <div
-                                class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-400">
-                                No recent tasks are available yet.
-                            </div>
-                        @endforelse
-                    </div>
-                </section>
             </aside>
         </div>
     </div>

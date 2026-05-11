@@ -68,8 +68,7 @@
         $softText = 'text-sm text-slate-500';
     @endphp
 
-    <div
-        class="dashboard-stage space-y-6 bg-[linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)] font-[Plus Jakarta Sans] tracking-[-0.01em]">
+    <div class="dashboard-stage space-y-6 font-[Plus Jakarta Sans] tracking-[-0.01em]">
         {{-- Hero / Profile --}}
         <section
             class="dash-reveal relative overflow-hidden rounded-[32px] border border-white/70 bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(167,139,250,0.10),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.98))] px-6 py-6 shadow-[0_24px_70px_-30px_rgba(15,23,42,0.22)] sm:px-8 sm:py-8"
@@ -88,10 +87,7 @@
                         </span>
                         <h1
                             class="font-[Sora] text-[clamp(1.8rem,4vw,2.8rem)] font-bold leading-[0.95] tracking-[-0.06em] text-slate-900">
-                            Welcome back,
-                            <span class="bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">
-                                {{ $firstName }}
-                            </span>
+                            Welcome back
                         </h1>
                         <p class="max-w-2xl text-sm leading-7 text-slate-500 sm:text-[0.98rem]">
                             Here is your academic overview, attendance summary, and current study focus.

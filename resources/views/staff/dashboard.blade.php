@@ -164,14 +164,12 @@
             ],
         ];
 
-        $panelClass =
-            'rounded-[26px] border border-white/80 bg-white/90 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.55)] backdrop-blur';
-        $softPanelClass =
-            'rounded-[26px] border border-[#ececff] bg-[#f7f6ff]/95 shadow-[0_24px_55px_-36px_rgba(78,85,135,0.45)]';
+        $panelClass = 'rounded-[26px] border border-white/80 bg-white/90 backdrop-blur';
+        $softPanelClass = 'rounded-[26px] border border-[#ececff] bg-[#f7f6ff]/95';
         $titleClass = 'text-[15px] font-bold tracking-[-0.02em] text-slate-800';
     @endphp
 
-    <div class="dashboard-stage staff-soft-dashboard -mx-2 rounded-[30px] bg-[#f5f6ff] p-3 sm:p-5 xl:p-7">
+    <div class="dashboard-stage staff-soft-dashboard -mx-2 rounded-[30px] p-3 sm:p-5 xl:p-7">
         <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
             <main class="space-y-6">
                 <section class="staff-hero dash-reveal" style="--d: 1;">
@@ -324,62 +322,6 @@
                     </div>
                 </section>
 
-                <section class="dash-reveal {{ $panelClass }} p-5 sm:p-6" style="--d: 5;">
-                    <div class="mb-5 flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-bold tracking-[-0.03em] text-slate-800">Teaching Lessons</h2>
-                        <a href="{{ route('admin.time-studies.index') }}"
-                            class="rounded-full bg-[#f3f0ff] px-4 py-2 text-xs text-indigo-500">View all</a>
-                    </div>
-
-                    <div class="space-y-3">
-                        @forelse ($todaySchedule as $slot)
-                            <article
-                                class="js-staff-slot grid gap-4 rounded-2xl bg-white px-4 py-4 shadow-[0_14px_34px_-30px_rgba(78,85,135,0.7)] sm:grid-cols-[auto_minmax(0,1fr)_minmax(120px,0.8fr)_minmax(110px,0.7fr)_auto] sm:items-center"
-                                data-start="{{ $slot['start_24'] ?? '' }}" data-end="{{ $slot['end_24'] ?? '' }}">
-                                <span class="grid h-10 w-10 place-items-center rounded-2xl bg-[#f5f4ff] text-indigo-500">
-                                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M4 19V5" />
-                                        <path d="M8 19V5" />
-                                        <path d="M4 7h4" />
-                                        <path d="M4 17h4" />
-                                        <path d="M14 6h6" />
-                                        <path d="M14 12h6" />
-                                        <path d="M14 18h6" />
-                                    </svg>
-                                </span>
-
-                                <div class="min-w-0">
-                                    <div class="text-sm text-slate-800">Start from</div>
-                                    <div class="mt-0.5 text-[11px] font-semibold text-slate-400">
-                                        {{ $slot['day_label'] }}, {{ $slot['start'] }}
-                                    </div>
-                                </div>
-
-                                <div class="min-w-0">
-                                    <div class="truncate text-sm text-slate-800">{{ $slot['class_name'] }}
-                                    </div>
-                                    <div class="mt-1 flex flex-wrap gap-3 text-[11px] font-semibold text-slate-400">
-                                        <span>{{ $slot['period'] }}</span>
-                                        <span>{{ $slot['start'] }} - {{ $slot['end'] }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="text-sm text-slate-700">School Schedule</div>
-
-                                <span class="js-staff-slot-status teacher-lesson__status teacher-lesson__status--default">
-                                    Scheduled
-                                </span>
-                            </article>
-                        @empty
-                            <div
-                                class="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-400">
-                                No class schedule items are available for today.
-                            </div>
-                        @endforelse
-                    </div>
-                </section>
-
                 <section class="dash-reveal {{ $panelClass }} p-5" style="--d: 6;">
                     <div class="mb-4 flex items-center justify-between gap-3">
                         <h2 class="text-base font-bold text-slate-800">Team Pulse</h2>
@@ -391,7 +333,7 @@
                                 $isOnline = (bool) ($account->is_online ?? false);
                             @endphp
                             <div
-                                class="staff-team-card group rounded-2xl border border-slate-100 bg-gradient-to-br from-white to-slate-50/90 p-3 shadow-[0_14px_34px_-30px_rgba(78,85,135,0.8)] transition duration-200 hover:-translate-y-0.5 hover:border-indigo-100 hover:shadow-[0_18px_38px_-28px_rgba(79,70,229,0.5)]">
+                                class="staff-team-card group rounded-2xl border border-slate-100 bg-gradient-to-br from-white to-slate-50/90 p-3 transition duration-200 hover:-translate-y-0.5 hover:border-indigo-100">
                                 <div class="flex items-start justify-between gap-2">
                                     <span class="relative shrink-0">
                                         <img src="{{ $account->avatar_url }}"

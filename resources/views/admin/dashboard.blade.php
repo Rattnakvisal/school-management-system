@@ -275,7 +275,8 @@
                 <div class="flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-extrabold tracking-[-0.03em] text-slate-950">School Finance</h2>
-                        <div class="mt-2 text-sm font-semibold text-slate-400">Weekly collected and outstanding payments</div>
+                        <div class="mt-2 text-sm font-semibold text-slate-400">Weekly collected and outstanding payments
+                        </div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="rounded-full bg-emerald-50 px-4 py-2 text-xs text-emerald-600">

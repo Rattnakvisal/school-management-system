@@ -27,32 +27,6 @@
             ($filterStatus !== '' && $filterStatus !== 'all') ||
             ($filterType !== '' && $filterType !== 'all') ||
             ($filterSubjectId !== '' && $filterSubjectId !== 'all');
-        $teacherLawRequestStatCards = [
-            [
-                'label' => 'Requests',
-                'activeLabel' => 'Submitted',
-                'active' => $lawRequestTotal,
-                'total' => $lawRequestTotal,
-                'icon' => 'records',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Pending',
-                'activeLabel' => 'Waiting review',
-                'active' => ($lawRequests ?? collect())->where('status', 'pending')->count(),
-                'total' => $lawRequestTotal,
-                'icon' => 'pending',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-            ],
-            [
-                'label' => 'Approved',
-                'activeLabel' => 'Accepted',
-                'active' => ($lawRequests ?? collect())->where('status', 'approved')->count(),
-                'total' => $lawRequestTotal,
-                'icon' => 'active',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-            ],
-        ];
     @endphp
 
     <div class="teacher-time-stage space-y-6">
@@ -81,9 +55,6 @@
                 </div>
             </div>
         </section>
-
-        <x-admin.stat-cards :cards="$teacherLawRequestStatCards" reveal-class="teacher-time-reveal" float-class="teacher-time-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" />
 
         @if (session('success'))
             <div

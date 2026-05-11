@@ -31,40 +31,6 @@
         $filterSubjectId = (int) ($filters['subject_id'] ?? 0);
         $filterDue = (string) ($filters['due'] ?? 'all');
         $hasActiveFilters = $filterSearch !== '' || $filterSubjectId > 0 || ($filterDue !== '' && $filterDue !== 'all');
-        $teacherAssignmentStatCards = [
-            [
-                'label' => 'Assignments',
-                'activeLabel' => 'Posted',
-                'active' => $assignmentTotal,
-                'total' => $assignmentTotal,
-                'icon' => 'assignment',
-                'tone' => 'from-indigo-100 to-white text-indigo-600',
-            ],
-            [
-                'label' => 'Students',
-                'activeLabel' => 'Assigned',
-                'active' => (int) ($stats['students'] ?? 0),
-                'total' => (int) ($stats['students'] ?? 0),
-                'icon' => 'students',
-                'tone' => 'from-emerald-100 to-white text-emerald-600',
-            ],
-            [
-                'label' => 'Subjects',
-                'activeLabel' => 'Available',
-                'active' => (int) ($stats['subjects'] ?? 0),
-                'total' => (int) ($stats['subjects'] ?? 0),
-                'icon' => 'subjects',
-                'tone' => 'from-sky-100 to-white text-sky-600',
-            ],
-            [
-                'label' => 'Due Soon',
-                'activeLabel' => 'Next 7 days',
-                'active' => (int) ($stats['dueSoon'] ?? 0),
-                'total' => $assignmentTotal,
-                'icon' => 'pending',
-                'tone' => 'from-amber-100 to-white text-amber-600',
-            ],
-        ];
     @endphp
 
     <div class="teacher-stage teacher-assignment-stage space-y-6">
@@ -92,9 +58,6 @@
                 </div>
             </div>
         </section>
-
-        <x-admin.stat-cards :cards="$teacherAssignmentStatCards" reveal-class="teacher-reveal" float-class="teacher-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
 
         @if (session('success'))
             <div

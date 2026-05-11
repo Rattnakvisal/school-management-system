@@ -1,9 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const liveTimeEl = document.getElementById("schedule-live-time");
-    const liveDayEl = document.getElementById("schedule-live-day");
-    const liveHintEl = document.getElementById("schedule-live-hint");
     const liveCurrentTitleEl = document.getElementById("schedule-live-current-title");
-    const liveCurrentMetaEl = document.getElementById("schedule-live-current-meta");
     const liveNextTitleEl = document.getElementById("schedule-live-next-title");
     const liveNextMetaEl = document.getElementById("schedule-live-next-meta");
     const liveProgressEl = document.getElementById("schedule-live-progress");
@@ -102,22 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const dayLabel = dayLabels[dayKey] || dayKey;
         const selectedDayIsSpecific = validDayKeys.has(selectedDay);
         const selectedDayLabel = dayLabels[selectedDay] || selectedDay;
-
-        if (liveTimeEl) {
-            liveTimeEl.textContent = now.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-            });
-        }
-
-        if (liveDayEl) {
-            liveDayEl.textContent = `${dayLabel} | ${now.toLocaleDateString([], {
-                month: "short",
-                day: "2-digit",
-                year: "numeric",
-            })}`;
-        }
 
         if (selectedDayPillEl) {
             if (selectedDayIsSpecific) {
@@ -220,21 +200,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     `${current.type === "subject" ? "Subject" : "Class"}: ${current.label}`;
             }
 
-            if (liveCurrentMetaEl) {
-                liveCurrentMetaEl.textContent =
-                    `${formatClock(current.startSeconds)} - ${formatClock(current.endSeconds)} | ${formatDuration(current.remainingSeconds)} left`;
-            }
-
             if (liveProgressEl) {
                 liveProgressEl.style.width = `${progress}%`;
             }
         } else {
             if (liveCurrentTitleEl) {
                 liveCurrentTitleEl.textContent = "No live slot now";
-            }
-
-            if (liveCurrentMetaEl) {
-                liveCurrentMetaEl.textContent = "Waiting for next slot...";
             }
 
             if (liveProgressEl) {
@@ -263,31 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (liveNextMetaEl) {
                 liveNextMetaEl.textContent = "All slots finished for selected day";
             }
-        }
-
-        if (liveHintEl) {
-            if (selectedDayIsSpecific && selectedDay !== dayKey) {
-                liveHintEl.textContent =
-                    `Viewing ${selectedDayLabel} schedule. Today is ${dayLabel}. Real-time status is for today only.`;
-                return;
-            }
-
-            if (activeSlots.length > 0) {
-                liveHintEl.textContent = `${activeSlots.length} slot(s) live now`;
-                return;
-            }
-
-            if (upcomingSlots.length > 0) {
-                liveHintEl.textContent = `${upcomingSlots.length} upcoming slot(s) today`;
-                return;
-            }
-
-            if (todayRelevantCount > 0 && finishedCount >= todayRelevantCount) {
-                liveHintEl.textContent = `All ${todayRelevantCount} slot(s) finished for ${dayLabel}`;
-                return;
-            }
-
-            liveHintEl.textContent = `No schedule matched for ${dayLabel}`;
         }
     };
 

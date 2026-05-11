@@ -207,7 +207,8 @@
                     {{-- Main Image --}}
                     <div
                         class="home-hero-media-shell relative overflow-hidden rounded-[3rem] border border-white/80 bg-white/80 p-3 shadow-[0_30px_60px_-30px_rgba(37,99,235,0.35)] backdrop-blur lg:rounded-[40%]">
-                        <img src="{{ $heroImage ?? asset('images/school.jpg') }}" alt="{{ \App\Support\HomePageContent::text('hero.image_alt') }}"
+                        <img src="{{ $heroImage ?? asset('images/school.jpg') }}"
+                            alt="{{ \App\Support\HomePageContent::text('hero.image_alt') }}"
                             class="home-hero-image h-[24rem] w-full rounded-[2.4rem] object-cover sm:h-[28rem] lg:h-[34rem] lg:rounded-[38%]" />
 
                         <div
@@ -271,49 +272,6 @@
                         @endforeach
                     </div>
                 </div>
-            </div>
-        </div>
-
-        {{-- Feature Strip --}}
-        <div data-reveal style="--d:.34s"
-            class="home-hero-strip relative mt-10 overflow-hidden rounded-[2rem] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-4 text-white shadow-[0_28px_70px_-36px_rgba(15,23,42,0.75)] sm:p-5 lg:p-6">
-
-            <div
-                class="pointer-events-none absolute inset-y-0 right-0 w-72 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.3),transparent_70%)]">
-            </div>
-
-            <div class="relative grid gap-4"
-                style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));">
-                @foreach ($heroFeatureStrip as $item)
-                    @php
-                        $stripIcon =
-                            $item['icon'] ??
-                            match ($loop->index) {
-                                0 => 'graduation',
-                                1 => 'users',
-                                2 => 'calendar',
-                                default => 'shield',
-                            };
-                        $stripColor = $item['color'] ?? null;
-                        $stripIconStyle = $heroIconToneStyle($stripColor, '1F', '40');
-                    @endphp
-
-                    <article
-                        class="group min-h-[15rem] rounded-[1.5rem] border border-white/10 bg-white/[0.06] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur transition duration-200 hover:-translate-y-1 hover:border-blue-300/40 hover:bg-white/[0.09]">
-                        <span
-                            class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl {{ $stripIconStyle ? '' : 'bg-blue-600/90 text-white' }} shadow-[0_16px_30px_-20px_rgba(59,130,246,0.9)] transition group-hover:scale-105 [&_i]:text-xl [&_svg]:h-5 [&_svg]:w-5"
-                            @if ($stripIconStyle) style="{{ $stripIconStyle }}" @endif>
-                            {!! $heroIconSvg($stripIcon, 'shield') !!}
-                        </span>
-
-                        <div class="mt-5">
-                            <p class="text-lg font-bold leading-7 text-white">{{ $item['title'] }}</p>
-                            <p class="mt-3 text-sm leading-7 text-blue-100/85">
-                                {{ $item['description'] }}
-                            </p>
-                        </div>
-                    </article>
-                @endforeach
             </div>
         </div>
     </div>

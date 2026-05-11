@@ -35,7 +35,7 @@
 
     <div class="student-stage space-y-6 overflow-x-hidden">
         {{-- Page Header --}}
-        <section class="student-reveal student-float admin-page-header" style="--sd: 1;">
+        <section class="admin-page-header" style="--sd: 1;">
             <div class="admin-page-header__main flex flex-wrap items-start gap-4">
                 <div class="admin-page-header__intro space-y-2">
                     <div class="admin-page-header__title-row flex items-start gap-3">
@@ -68,100 +68,6 @@
                 </div>
             </div>
         </section>
-
-        {{-- Stats --}}
-        <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            <article class="student-reveal student-float {{ $studentStatPanelClass }} min-h-[132px] p-5" style="--sd: 2;">
-                <div class="flex items-start justify-between gap-4">
-                    <span
-                        class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-indigo-100 to-white text-indigo-600">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z" />
-                            <path d="M14 2v5h5" />
-                            <path d="M9 13h6" />
-                        </svg>
-                    </span>
-                </div>
-
-                <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
-                    <span>{{ number_format($lawRequestTotal) }}</span>
-                    <span class="pb-0.5 text-base font-extrabold text-slate-300">
-                        / {{ number_format(max(1, $lawRequestTotal)) }}
-                    </span>
-                </div>
-
-                <div class="mt-1 text-sm font-bold text-slate-600">Requests</div>
-
-                <div class="mt-1 text-[11px] font-semibold text-slate-400">
-                    Submitted: {{ number_format($lawRequestTotal) }}
-                </div>
-
-                <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                    <span class="block h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
-                        style="width: {{ $lawRequestTotal > 0 ? 100 : 0 }}%"></span>
-                </div>
-            </article>
-
-            <article class="student-reveal student-float {{ $studentStatPanelClass }} min-h-[132px] p-5" style="--sd: 3;">
-                <div class="flex items-start justify-between gap-4">
-                    <span
-                        class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-amber-100 to-white text-amber-600">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="9" />
-                            <path d="M12 7v5l3 3" />
-                        </svg>
-                    </span>
-                </div>
-
-                <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
-                    <span>{{ number_format($lawRequestPending) }}</span>
-                    <span class="pb-0.5 text-base font-extrabold text-slate-300">
-                        / {{ number_format(max(1, $lawRequestTotal)) }}
-                    </span>
-                </div>
-
-                <div class="mt-1 text-sm font-bold text-slate-600">Pending</div>
-
-                <div class="mt-1 text-[11px] font-semibold text-slate-400">
-                    Waiting review: {{ number_format($lawRequestPending) }}
-                </div>
-
-                <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                    <span class="block h-full rounded-full bg-gradient-to-r from-amber-500 to-cyan-400"
-                        style="width: {{ min(100, max(0, (int) round(($lawRequestPending / max(1, $lawRequestTotal)) * 100))) }}%"></span>
-                </div>
-            </article>
-
-            <article class="student-reveal student-float {{ $studentStatPanelClass }} min-h-[132px] p-5" style="--sd: 4;">
-                <div class="flex items-start justify-between gap-4">
-                    <span
-                        class="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-emerald-100 to-white text-emerald-600">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 6 9 17l-5-5" />
-                        </svg>
-                    </span>
-                </div>
-
-                <div class="mt-5 flex items-end gap-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
-                    <span>{{ number_format($lawRequestApproved) }}</span>
-                    <span class="pb-0.5 text-base font-extrabold text-slate-300">
-                        / {{ number_format(max(1, $lawRequestTotal)) }}
-                    </span>
-                </div>
-
-                <div class="mt-1 text-sm font-bold text-slate-600">Approved</div>
-
-                <div class="mt-1 text-[11px] font-semibold text-slate-400">
-                    Accepted: {{ number_format($lawRequestApproved) }}
-                </div>
-
-                <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                    <span class="block h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400"
-                        style="width: {{ min(100, max(0, (int) round(($lawRequestApproved / max(1, $lawRequestTotal)) * 100))) }}%"></span>
-                </div>
-            </article>
-        </section>
-
         {{-- Flash Messages --}}
         @if (session('success'))
             <div
