@@ -99,7 +99,7 @@
             'relative z-10 flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900';
     @endphp
 
-    <div class="subject-stage subject-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
+    <div class="subject-stage admin-management-page subject-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
         <x-admin.page-header reveal-class="subject-reveal" delay="1" icon="subjects" title="Subject Management"
             subtitle="Create subjects and manage schedules in Time Studies." />
 
@@ -133,63 +133,47 @@
             </div>
         @endif
 
-        <div class="grid gap-6 xl:grid-cols-12">
+        <div x-data="{ createOpen: @js($showCreateFormOnLoad) }"
+            @open-subject-create.window="
+                createOpen = true;
+                $nextTick(() => document.getElementById('name')?.focus());
+            "
+            class="grid gap-6 xl:grid-cols-12">
             {{-- CREATE SUBJECT --}}
-            <section x-data="{
-                createOpen: @js($showCreateFormOnLoad),
-                isDesktop: false,
-                init() {
-                    const media = window.matchMedia('(min-width: 1280px)');
-            
-                    const update = () => {
-                        this.isDesktop = media.matches;
-            
-                        if (this.isDesktop) {
-                            this.createOpen = true;
-                        } else if (!@js($showCreateFormOnLoad)) {
-                            this.createOpen = false;
-                        }
-                    };
-            
-                    update();
-            
-                    if (typeof media.addEventListener === 'function') {
-                        media.addEventListener('change', update);
-                    } else if (typeof media.addListener === 'function') {
-                        media.addListener(update);
-                    }
-                }
-            }" x-init="init()" class="{{ $panelClass }} xl:col-span-4"
+            <section x-show="createOpen" x-cloak x-transition.opacity.duration.150ms
+                @keydown.escape.window="createOpen = false" @click.self="createOpen = false" role="dialog"
+                aria-modal="true" aria-labelledby="create-subject-title"
+                class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-slate-950/65 px-4 py-6 backdrop-blur-sm sm:py-10"
                 style="--sd: 3;">
+                <div
+                    class="w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
 
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-950 dark:text-white">Create Subject</h2>
-                        <p class="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            Create a new subject. Manage class and time from Time Studies.
-                        </p>
+                    <div
+                        class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5 dark:border-slate-700">
+                        <div>
+                            <h2 id="create-subject-title" class="text-2xl font-black text-slate-950 dark:text-white">
+                                Create Subject
+                            </h2>
+                            <p class="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                                Create a new subject. Manage class and time from Time Studies.
+                            </p>
+                        </div>
+
+                        <button type="button" @click="createOpen = false" aria-controls="create-subject-form-panel"
+                            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-600 text-lg font-black leading-none text-white shadow-sm transition hover:bg-red-500 focus:outline-none focus:ring-4 focus:ring-red-200 dark:focus:ring-red-500/25"
+                            aria-label="Close create subject form">
+                            &times;
+                        </button>
                     </div>
 
-                    <button type="button" @click="createOpen = !createOpen"
-                        :aria-expanded="(createOpen || isDesktop).toString()" aria-controls="create-subject-form-panel"
-                        class="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-100 xl:hidden dark:border-indigo-400/20 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M12 5v14M5 12h14" x-show="!(createOpen || isDesktop)"></path>
-                            <path d="M5 12h14" x-show="createOpen || isDesktop"></path>
-                        </svg>
-
-                        <span x-show="!(createOpen || isDesktop)">Create Subject</span>
-                        <span x-show="createOpen || isDesktop">Hide Form</span>
-                    </button>
-                </div>
-
                 <form id="create-subject-form-panel" method="POST" action="{{ route('admin.subjects.store') }}"
-                    class="js-create-form mt-5 space-y-4" x-show="createOpen || isDesktop" x-cloak
-                    x-transition.opacity.duration.150ms>
+                    class="js-create-form">
                     @csrf
 
                     <input type="hidden" name="_form" value="create_subject">
+
+                    <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
+                        <div class="grid gap-5 lg:grid-cols-2">
 
                     <div>
                         <label for="name" class="{{ $labelClass }}">Subject Name</label>
@@ -257,25 +241,45 @@
                         </span>
                     </label>
 
-                    <button type="submit"
-                        class="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400">
-                        Create Subject
-                    </button>
+                        </div>
+                    </div>
+
+                    <div
+                        class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
+                        <button type="button" @click="createOpen = false"
+                            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                            Cancel
+                        </button>
+
+                        <button type="submit"
+                            class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                            Create Subject
+                        </button>
+                    </div>
                 </form>
+                </div>
             </section>
 
             {{-- SUBJECT LIST --}}
-            <section class="{{ $panelClass }} xl:col-span-8" style="--sd: 4;">
+            <section class="{{ $panelClass }} xl:col-span-12" style="--sd: 4;">
                 <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
 
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <h2 class="text-lg font-black text-slate-950 dark:text-white">Subject List</h2>
 
-                        <button type="button" @click="filterOpen = true"
-                            class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                            <i class="fa-solid fa-filter text-xs"></i>
-                            Filters
-                        </button>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="button" @click="window.dispatchEvent(new CustomEvent('open-subject-create'))"
+                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                                Create
+                            </button>
+
+                            <button type="button" @click="filterOpen = true"
+                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                <i class="fa-solid fa-filter text-xs"></i>
+                                Filters
+                            </button>
+                        </div>
                     </div>
 
                     {{-- FILTER OVERLAY --}}

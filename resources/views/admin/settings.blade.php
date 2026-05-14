@@ -157,9 +157,8 @@
         $footerLogo = $homeBrandLogo;
     @endphp
 
-    <div id="admin-settings-page" class="stage space-y-6" data-settings-default-tab="{{ $settingsDefaultTab }}"
-        data-homepage-ui="{{ $isHomepageUiPage ? '1' : '0' }}">
-        @include('admin.settings._header')
+    <div id="admin-settings-page" class="stage admin-management-page space-y-6"
+        data-settings-default-tab="{{ $settingsDefaultTab }}" data-homepage-ui="{{ $isHomepageUiPage ? '1' : '0' }}">
         @include('admin.settings._alerts')
 
         <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm ring-1 ring-slate-100 sm:p-6">

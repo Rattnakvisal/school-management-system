@@ -91,7 +91,7 @@
 
         $statusTone = [
             'paid' =>
-                'bg-emerald-50 text-emerald-700 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20',
+                'bg-emerald-50 text-emerald-700 ring-emerald-100 dark:bg-emerald-500/15 dark:text-white-300 dark:ring-emerald-400/20',
             'partial' =>
                 'bg-sky-50 text-sky-700 ring-sky-100 dark:bg-sky-500/15 dark:text-sky-300 dark:ring-sky-400/20',
             'pending' =>
@@ -151,7 +151,8 @@
         }
     </style>
 
-    <div class="student-stage finance-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
+    <div
+        class="student-stage admin-management-page finance-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
         <x-admin.page-header reveal-class="student-reveal" delay="1" icon="finance" title="School Finance"
             subtitle="Record student payments, track outstanding balances, and export finance details for reports." />
 
@@ -167,189 +168,240 @@
             </div>
         @endif
 
-        <div class="grid gap-6 xl:grid-cols-12">
+        <div x-data="{ createOpen: @js($errors->any()) }"
+            @open-finance-create.window="
+                createOpen = true;
+                $nextTick(() => document.getElementById('student_id')?.focus());
+            "
+            class="grid gap-6 xl:grid-cols-12">
             {{-- RECORD PAYMENT --}}
-            <section class="{{ $panelClass }} xl:col-span-4" style="--sd: 3;">
-                <div>
-                    <h2 class="text-lg font-black text-slate-950 dark:text-white">Record Payment</h2>
+            <section x-show="createOpen" x-cloak x-transition.opacity.duration.150ms
+                @keydown.escape.window="createOpen = false" @click.self="createOpen = false" role="dialog"
+                aria-modal="true" aria-labelledby="create-finance-title"
+                class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-slate-950/65 px-4 py-6 backdrop-blur-sm sm:py-10"
+                style="--sd: 3;">
+                <div
+                    class="w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
 
-                    <p class="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                        Add a student payment, due item, discount, or scholarship waiver.
-                    </p>
+                    <div
+                        class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5 dark:border-slate-700">
+                        <div>
+                            <h2 id="create-finance-title" class="text-2xl font-black text-slate-950 dark:text-white">
+                                Record Payment
+                            </h2>
+
+                            <p class="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                                Add a student payment, due item, discount, or scholarship waiver.
+                            </p>
+                        </div>
+
+                        <button type="button" @click="createOpen = false" aria-controls="create-finance-form-panel"
+                            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-600 text-lg font-black leading-none text-white shadow-sm transition hover:bg-red-500 focus:outline-none focus:ring-4 focus:ring-red-200 dark:focus:ring-red-500/25"
+                            aria-label="Close record payment form">
+                            &times;
+                        </button>
+                    </div>
+
+                    <form id="create-finance-form-panel" method="POST" action="{{ route('admin.finance.store') }}"
+                        enctype="multipart/form-data" data-finance-payment-form data-current-net="0">
+                        @csrf
+
+                        <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
+                            <div class="grid gap-5 lg:grid-cols-2">
+                                <div class="lg:col-span-2">
+                                    <label for="student_id" class="{{ $labelClass }}">Student</label>
+
+                                    <select id="student_id" name="student_id" @disabled(!$tableReady)
+                                        class="js-finance-student-select {{ $inputClass }}">
+                                        <option value="">Select student</option>
+
+                                        @foreach ($students as $student)
+                                            @php
+                                                $studentTuitionTotal = (float) ($student->tuition_total ?? 0);
+                                                $studentPaidTotal =
+                                                    (float) ($studentPaidTotalSet[(string) $student->id] ?? 0);
+                                                $studentRemainingTotal = max(
+                                                    $studentTuitionTotal - $studentPaidTotal,
+                                                    0,
+                                                );
+
+                                                $studentPaidInFull =
+                                                    $studentPaidTotal > 0 &&
+                                                    ($studentTuitionTotal <= 0 || $studentRemainingTotal <= 0.009);
+                                            @endphp
+
+                                            <option value="{{ $student->id }}" @disabled($studentPaidInFull)
+                                                {{ (string) old('student_id') === (string) $student->id ? 'selected' : '' }}>
+                                                {{ $student->name }} - {{ $student->email }}
+
+                                                @if ($studentTuitionTotal > 0)
+                                                    - Due ${{ number_format($studentRemainingTotal, 2) }}
+                                                @endif
+
+                                                {{ $studentPaidInFull ? ' (Paid in full)' : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    @error('student_id')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                        </p>
+                                    @enderror
+
+                                    <p class="mt-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                                        Students can pay again while they still have tuition due.
+                                    </p>
+
+                                    <div class="{{ $summaryBoxClass }}">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="font-semibold text-slate-600 dark:text-slate-300">Tuition from
+                                                subjects</span>
+                                            <span class="font-black text-indigo-700 dark:text-indigo-300"
+                                                data-finance-tuition-total>$0.00</span>
+                                        </div>
+
+                                        <div class="mt-1 flex items-center justify-between gap-3">
+                                            <span class="font-semibold text-slate-500 dark:text-slate-400">Already
+                                                covered</span>
+                                            <span class="font-black text-emerald-700 dark:text-emerald-300"
+                                                data-finance-paid-total>$0.00</span>
+                                        </div>
+
+                                        <div class="mt-1 flex items-center justify-between gap-3">
+                                            <span class="font-semibold text-slate-500 dark:text-slate-400">Tuition
+                                                discount</span>
+                                            <span class="font-black text-sky-700 dark:text-sky-300"
+                                                data-finance-discount-total>$0.00</span>
+                                        </div>
+
+                                        <div class="mt-1 flex items-center justify-between gap-3">
+                                            <span class="font-semibold text-slate-500 dark:text-slate-400">Cash to
+                                                collect</span>
+                                            <span class="font-black text-slate-700 dark:text-slate-100"
+                                                data-finance-net-total>$0.00</span>
+                                        </div>
+
+                                        <div class="mt-1 flex items-center justify-between gap-3">
+                                            <span class="font-semibold text-slate-500 dark:text-slate-400">Additional
+                                                due</span>
+                                            <span class="font-black text-amber-700 dark:text-amber-300"
+                                                data-finance-remaining-total>$0.00</span>
+                                        </div>
+
+                                        <p class="mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400"
+                                            data-finance-tuition-subjects>
+                                            Select a student to load tuition fee.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="amount" class="{{ $labelClass }}">Amount</label>
+
+                                        <input id="amount" name="amount" type="number" step="0.01" min="0"
+                                            value="{{ old('amount') }}" data-auto-filled="{{ old('amount') ? '0' : '1' }}"
+                                            @disabled(!$tableReady) class="js-finance-amount {{ $inputClass }}"
+                                            placeholder="0.00">
+
+                                        @error('amount')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="discount_amount" class="{{ $labelClass }}">Discount</label>
+
+                                        <input id="discount_amount" name="discount_amount" type="number" step="0.01"
+                                            min="0" value="{{ old('discount_amount') }}"
+                                            @disabled(!$tableReady) class="js-finance-discount {{ $inputClass }}"
+                                            placeholder="0.00">
+
+                                        @error('discount_amount')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+
+                                        <p class="mt-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                                            Discount must be less than or equal to the amount.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="payment_date" class="{{ $labelClass }}">Payment Date</label>
+
+                                        <input id="payment_date" name="payment_date" type="date"
+                                            value="{{ old('payment_date', now()->toDateString()) }}"
+                                            @disabled(!$tableReady) class="{{ $inputClass }}">
+                                    </div>
+
+                                    <div>
+                                        <label for="due_date" class="{{ $labelClass }}">Due Date</label>
+
+                                        <input id="due_date" name="due_date" type="date"
+                                            value="{{ old('due_date') }}" @disabled(!$tableReady)
+                                            class="{{ $inputClass }}">
+                                    </div>
+                                </div>
+
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="status" class="{{ $labelClass }}">Status</label>
+
+                                        <div
+                                            class="flex min-h-[43px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                            Automatic after save
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="payment_method" class="{{ $labelClass }}">Method</label>
+
+                                        <select id="payment_method" name="payment_method" @disabled(!$tableReady)
+                                            class="{{ $inputClass }}">
+                                            <option value="">Select method</option>
+
+                                            @foreach ($paymentMethods as $methodOption)
+                                                <option value="{{ $methodOption }}"
+                                                    {{ old('payment_method') === $methodOption ? 'selected' : '' }}>
+                                                    {{ \App\Models\StudentPayment::methodLabel($methodOption) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="note" class="{{ $labelClass }}">Note</label>
+
+                                    <textarea id="note" name="note" rows="3" @disabled(!$tableReady) class="{{ $textareaClass }}"
+                                        placeholder="Optional payment detail">{{ old('note') }}</textarea>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
+                            <button type="button" @click="createOpen = false"
+                                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                Cancel
+                            </button>
+
+                            <button type="submit" @disabled(!$tableReady)
+                                class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:disabled:bg-slate-700 dark:focus:ring-indigo-500/25">
+                                Save Payment
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <form method="POST" action="{{ route('admin.finance.store') }}" enctype="multipart/form-data"
-                    class="mt-5 space-y-4" data-finance-payment-form data-current-net="0">
-                    @csrf
-
-                    <div>
-                        <label for="student_id" class="{{ $labelClass }}">Student</label>
-
-                        <select id="student_id" name="student_id" @disabled(!$tableReady)
-                            class="js-finance-student-select {{ $inputClass }}">
-                            <option value="">Select student</option>
-
-                            @foreach ($students as $student)
-                                @php
-                                    $studentTuitionTotal = (float) ($student->tuition_total ?? 0);
-                                    $studentPaidTotal = (float) ($studentPaidTotalSet[(string) $student->id] ?? 0);
-                                    $studentRemainingTotal = max($studentTuitionTotal - $studentPaidTotal, 0);
-
-                                    $studentPaidInFull =
-                                        $studentPaidTotal > 0 &&
-                                        ($studentTuitionTotal <= 0 || $studentRemainingTotal <= 0.009);
-                                @endphp
-
-                                <option value="{{ $student->id }}" @disabled($studentPaidInFull)
-                                    {{ (string) old('student_id') === (string) $student->id ? 'selected' : '' }}>
-                                    {{ $student->name }} - {{ $student->email }}
-
-                                    @if ($studentTuitionTotal > 0)
-                                        - Due ${{ number_format($studentRemainingTotal, 2) }}
-                                    @endif
-
-                                    {{ $studentPaidInFull ? ' (Paid in full)' : '' }}
-                                </option>
-                            @endforeach
-                        </select>
-
-                        @error('student_id')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-
-                        <p class="mt-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                            Students can pay again while they still have tuition due.
-                        </p>
-
-                        <div class="{{ $summaryBoxClass }}">
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="font-semibold text-slate-600 dark:text-slate-300">Tuition from subjects</span>
-                                <span class="font-black text-indigo-700 dark:text-indigo-300"
-                                    data-finance-tuition-total>$0.00</span>
-                            </div>
-
-                            <div class="mt-1 flex items-center justify-between gap-3">
-                                <span class="font-semibold text-slate-500 dark:text-slate-400">Already covered</span>
-                                <span class="font-black text-emerald-700 dark:text-emerald-300"
-                                    data-finance-paid-total>$0.00</span>
-                            </div>
-
-                            <div class="mt-1 flex items-center justify-between gap-3">
-                                <span class="font-semibold text-slate-500 dark:text-slate-400">Tuition discount</span>
-                                <span class="font-black text-sky-700 dark:text-sky-300"
-                                    data-finance-discount-total>$0.00</span>
-                            </div>
-
-                            <div class="mt-1 flex items-center justify-between gap-3">
-                                <span class="font-semibold text-slate-500 dark:text-slate-400">Cash to collect</span>
-                                <span class="font-black text-slate-700 dark:text-slate-100"
-                                    data-finance-net-total>$0.00</span>
-                            </div>
-
-                            <div class="mt-1 flex items-center justify-between gap-3">
-                                <span class="font-semibold text-slate-500 dark:text-slate-400">Additional due</span>
-                                <span class="font-black text-amber-700 dark:text-amber-300"
-                                    data-finance-remaining-total>$0.00</span>
-                            </div>
-
-                            <p class="mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400"
-                                data-finance-tuition-subjects>
-                                Select a student to load tuition fee.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="amount" class="{{ $labelClass }}">Amount</label>
-
-                            <input id="amount" name="amount" type="number" step="0.01" min="0"
-                                value="{{ old('amount') }}" data-auto-filled="{{ old('amount') ? '0' : '1' }}"
-                                @disabled(!$tableReady) class="js-finance-amount {{ $inputClass }}"
-                                placeholder="0.00">
-
-                            @error('amount')
-                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="discount_amount" class="{{ $labelClass }}">Discount</label>
-
-                            <input id="discount_amount" name="discount_amount" type="number" step="0.01" min="0"
-                                value="{{ old('discount_amount') }}" @disabled(!$tableReady)
-                                class="js-finance-discount {{ $inputClass }}" placeholder="0.00">
-
-                            @error('discount_amount')
-                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                            @enderror
-
-                            <p class="mt-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                                Discount must be less than or equal to the amount.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="payment_date" class="{{ $labelClass }}">Payment Date</label>
-
-                            <input id="payment_date" name="payment_date" type="date"
-                                value="{{ old('payment_date', now()->toDateString()) }}" @disabled(!$tableReady)
-                                class="{{ $inputClass }}">
-                        </div>
-
-                        <div>
-                            <label for="due_date" class="{{ $labelClass }}">Due Date</label>
-
-                            <input id="due_date" name="due_date" type="date" value="{{ old('due_date') }}"
-                                @disabled(!$tableReady) class="{{ $inputClass }}">
-                        </div>
-                    </div>
-
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="status" class="{{ $labelClass }}">Status</label>
-
-                            <div
-                                class="flex min-h-[43px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                Automatic after save
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="payment_method" class="{{ $labelClass }}">Method</label>
-
-                            <select id="payment_method" name="payment_method" @disabled(!$tableReady)
-                                class="{{ $inputClass }}">
-                                <option value="">Select method</option>
-
-                                @foreach ($paymentMethods as $methodOption)
-                                    <option value="{{ $methodOption }}"
-                                        {{ old('payment_method') === $methodOption ? 'selected' : '' }}>
-                                        {{ \App\Models\StudentPayment::methodLabel($methodOption) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="note" class="{{ $labelClass }}">Note</label>
-
-                        <textarea id="note" name="note" rows="3" @disabled(!$tableReady) class="{{ $textareaClass }}"
-                            placeholder="Optional payment detail">{{ old('note') }}</textarea>
-                    </div>
-
-                    <button type="submit" @disabled(!$tableReady)
-                        class="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-300 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:disabled:bg-slate-700">
-                        Save Payment
-                    </button>
-                </form>
             </section>
 
             {{-- PAYMENT DETAILS --}}
-            <section class="xl:col-span-8">
+            <section class="xl:col-span-12">
                 @php
                     $financeExportQuery = array_filter(
                         [
@@ -368,10 +420,16 @@
 
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <h2 class="text-xl font-black tracking-[-0.03em] text-slate-950 dark:text-white">
-                            Payment Details
+                            Payment
                         </h2>
 
                         <div class="flex flex-wrap items-center gap-3">
+                            <button type="button" @click="window.dispatchEvent(new CustomEvent('open-finance-create'))"
+                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                                Create
+                            </button>
+
                             {{-- EXPORT --}}
                             <div class="relative" @keydown.escape.window="exportOpen = false">
                                 <button type="button" @click="exportOpen = !exportOpen"
@@ -536,7 +594,7 @@
                     {{-- TABLE --}}
                     <div class="mt-5">
                         <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div class="finance-table-scroller max-h-[760px] overflow-auto"
+                            <div class="finance-table-scroller max-h-[720px] overflow-auto"
                                 style="scrollbar-gutter: stable;">
                                 <table class="admin-table finance-payment-table w-full min-w-[1280px] text-left text-sm">
                                     <thead class="{{ $tableHeadClass }}">

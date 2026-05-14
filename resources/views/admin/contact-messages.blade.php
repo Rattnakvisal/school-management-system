@@ -18,7 +18,7 @@
         $tableBodyClass = 'divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900';
     @endphp
 
-    <div class="contact-stage contact-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
+    <div class="contact-stage admin-management-page contact-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
         <x-admin.page-header reveal-class="contact-reveal" delay="1" icon="messages" title="Contact Inbox"
             subtitle="Review, filter, mark as read, and delete contact messages." />
 

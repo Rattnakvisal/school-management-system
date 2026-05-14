@@ -158,12 +158,14 @@
                     @if ($eyebrow !== '')
                         <div class="admin-page-header__eyebrow">{{ $eyebrow }}</div>
                     @endif
-                    <h1 class="admin-page-title text-2xl font-black tracking-tight sm:text-3xl">{{ $title }}</h1>
+                    <h1 class="admin-page-title text-2xl font-black tracking-tight text-slate-950 dark:!text-white sm:text-3xl">
+                        {{ $title }}
+                    </h1>
                 </div>
             </div>
 
             @if ($subtitle !== '')
-                <p class="admin-page-subtitle mt-2 text-sm">{{ $subtitle }}</p>
+                <p class="admin-page-subtitle mt-2 text-sm text-slate-600 dark:!text-slate-100">{{ $subtitle }}</p>
             @endif
 
             @isset($actions)

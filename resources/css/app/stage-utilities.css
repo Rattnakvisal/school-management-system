@@ -1507,6 +1507,62 @@
         max-width: 18rem;
     }
 
+    /* Shared responsive shell for admin Management pages */
+    .admin-management-page {
+        width: 100%;
+        max-width: min(100%, 1500px);
+        min-width: 0;
+        overflow-x: clip;
+    }
+
+    .admin-management-page > .grid,
+    .admin-management-page section,
+    .admin-management-page .min-w-0 {
+        min-width: 0;
+    }
+
+    .admin-management-page .overflow-auto,
+    .admin-management-page .overflow-x-auto {
+        max-width: 100%;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-management-page .admin-table {
+        max-width: none;
+    }
+
+    .admin-management-page nav[role="navigation"] {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-management-page nav[role="navigation"] > div {
+        min-width: max-content;
+    }
+
+    .admin-management-page > .grid > section.fixed {
+        overflow-x: hidden;
+    }
+
+    .admin-management-page > .grid > section.fixed > div {
+        display: flex;
+        max-height: calc(100dvh - 2rem);
+        flex-direction: column;
+    }
+
+    .admin-management-page > .grid > section.fixed form {
+        display: flex;
+        min-height: 0;
+        flex-direction: column;
+    }
+
+    .admin-management-page > .grid > section.fixed form > [class*="max-h-[calc(100vh-"],
+    .admin-management-page > .grid > section.fixed #time-study-create-panel {
+        min-height: 0;
+        flex: 1 1 auto;
+    }
+
     /* ==============================
      Define per-stage accent easily
   =============================== */
@@ -1612,6 +1668,20 @@
             padding: 1.2rem;
         }
 
+        .admin-management-page {
+            max-width: 100%;
+        }
+
+        .admin-management-page > .grid {
+            gap: 1rem;
+        }
+
+        .admin-management-page > .grid > section:not(.fixed),
+        .admin-management-page > section {
+            border-radius: 1.25rem;
+            padding: 1rem;
+        }
+
         .teacher-page-header .admin-page-title {
             font-size: clamp(1.55rem, 5vw, 2rem);
         }
@@ -1689,6 +1759,98 @@
     }
 
     @media (max-width: 640px) {
+        body[data-admin-shell] main[data-page-animate] {
+            padding-right: 0.75rem;
+            padding-left: 0.75rem;
+        }
+
+        .admin-management-page {
+            padding-bottom: 1rem;
+        }
+
+        .admin-management-page .admin-page-header {
+            border-radius: 1.25rem;
+            padding: 1rem;
+        }
+
+        .admin-management-page .admin-page-header__main,
+        .admin-management-page .admin-page-header__title-row {
+            align-items: flex-start;
+        }
+
+        .admin-management-page .admin-page-title {
+            line-height: 1.08;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-management-page .admin-page-subtitle,
+        .admin-management-page .admin-page-header p {
+            max-width: 100%;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-management-page > .grid > section.fixed {
+            padding: 0.75rem;
+        }
+
+        .admin-management-page > .grid > section.fixed > div {
+            max-height: calc(100dvh - 1.5rem);
+            border-radius: 1.25rem;
+        }
+
+        .admin-management-page > .grid > section.fixed > div > .border-b,
+        .admin-management-page > .grid > section.fixed form > .border-t {
+            padding-right: 1rem;
+            padding-left: 1rem;
+        }
+
+        .admin-management-page > .grid > section.fixed form > [class*="max-h-[calc(100vh-"],
+        .admin-management-page > .grid > section.fixed #time-study-create-panel {
+            max-height: none;
+            padding: 1rem;
+        }
+
+        .admin-management-page [class*="min-w-[150px]"],
+        .admin-management-page [class*="min-w-[130px]"] {
+            min-width: 0 !important;
+        }
+
+        .admin-management-page button[class*="min-w-[150px]"],
+        .admin-management-page a[class*="min-w-[150px]"],
+        .admin-management-page button[class*="min-w-[130px]"],
+        .admin-management-page a[class*="min-w-[130px]"] {
+            flex: 1 1 100%;
+            width: 100%;
+        }
+
+        .admin-management-page .admin-table {
+            font-size: 0.8125rem;
+        }
+
+        .admin-staff-page .admin-table,
+        .teacher-page .teacher-table {
+            min-width: 980px !important;
+        }
+
+        .student-page .student-table,
+        .finance-page .finance-payment-table,
+        .study-time-stage .study-time-table,
+        .student-study-page .student-study-table {
+            min-width: 1080px !important;
+        }
+
+        .class-page .class-table,
+        .subject-page .subject-table,
+        .contact-page .contact-table {
+            min-width: 980px !important;
+        }
+
+        .admin-management-page .admin-table th,
+        .admin-management-page .admin-table td {
+            padding-right: 0.75rem;
+            padding-left: 0.75rem;
+        }
+
         .teacher-page-header__stats,
         .teacher-page-header__actions {
             margin-left: 0;
