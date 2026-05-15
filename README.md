@@ -95,8 +95,8 @@ docker compose exec app php artisan migrate:status
 
 `DatabaseSeeder` creates/updates an admin user:
 
-- Email: `visalchunrathanak@gmail.com`
-- Password: `Wq_76wZtR2aPRmq`
+- Email:
+- Password: 
 - Role: `admin`
 
 ## Role Routes
