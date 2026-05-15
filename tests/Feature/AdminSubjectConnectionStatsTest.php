@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('subject dashboard cards count time study class teacher and student connections', function () {
+test('subject index counts time study class teacher and student connections', function () {
     $admin = User::factory()->create([
         'role' => 'admin',
     ]);
@@ -52,10 +52,12 @@ test('subject dashboard cards count time study class teacher and student connect
 
     $response
         ->assertOk()
-        ->assertSeeText('Class Links')
-        ->assertSeeText('1 of 1 subjects connected')
-        ->assertSeeText('Teacher Links')
-        ->assertSeeText('1 of 1 subjects with teachers')
-        ->assertSeeText('Students Learning')
-        ->assertSeeText('1 of 1 students connected');
+        ->assertSeeText('Financial Accounting I');
+
+    $stats = $response->viewData('stats');
+    expect((int) $stats['total'])->toBe(1);
+    expect((int) $stats['assigned'])->toBe(1);
+    expect((int) $stats['withTeacher'])->toBe(1);
+    expect((int) $stats['students'])->toBe(1);
+    expect((int) $stats['studentsLearning'])->toBe(1);
 });

@@ -37,6 +37,8 @@ class StudentController extends Controller
         $hasStudentMajorSubjectsTable = $filters['hasStudentMajorSubjectsTable'];
         $hasClassStudyTimeColumn = $filters['hasClassStudyTimeColumn'];
         $hasPhoneColumn = $filters['hasPhoneColumn'];
+        $hasGenderColumn = $filters['hasGenderColumn'];
+        $hasAgeColumn = $filters['hasAgeColumn'];
         $classId = $filters['classId'];
         $search = $filters['search'];
         $status = $filters['status'];
@@ -78,6 +80,8 @@ class StudentController extends Controller
             'hasStudentMajorSubjectsTable' => $hasStudentMajorSubjectsTable,
             'hasClassStudyTimeColumn' => $hasClassStudyTimeColumn,
             'hasPhoneColumn' => $hasPhoneColumn,
+            'hasGenderColumn' => $hasGenderColumn,
+            'hasAgeColumn' => $hasAgeColumn,
         ]);
     }
 
@@ -136,6 +140,14 @@ class StudentController extends Controller
 
         if ($this->hasPhoneColumn()) {
             $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
+
+        if ($this->hasGenderColumn()) {
+            $payload['gender'] = $validated['gender'] ?? null;
+        }
+
+        if ($this->hasAgeColumn()) {
+            $payload['age'] = $validated['age'] ?? null;
         }
 
         if ($this->hasStatusColumn()) {
@@ -199,6 +211,14 @@ class StudentController extends Controller
 
         if ($this->hasPhoneColumn()) {
             $payload['phone_number'] = $validated['phone_number'] ?? null;
+        }
+
+        if ($this->hasGenderColumn()) {
+            $payload['gender'] = $validated['gender'] ?? null;
+        }
+
+        if ($this->hasAgeColumn()) {
+            $payload['age'] = $validated['age'] ?? null;
         }
 
         if ($avatarResult['path'] !== $student->avatar) {
@@ -325,6 +345,8 @@ class StudentController extends Controller
         $hasClassStudyTimeColumn = $this->hasClassStudyTimeColumn();
         $hasStudentStudyTimesTable = $this->hasStudentStudyTimesTable();
         $hasPhoneColumn = $this->hasPhoneColumn();
+        $hasGenderColumn = $this->hasGenderColumn();
+        $hasAgeColumn = $this->hasAgeColumn();
         $status = (string) $request->query('status', 'all');
         $classIdRaw = (string) $request->query('class_id', 'all');
 
@@ -339,6 +361,8 @@ class StudentController extends Controller
             'hasClassStudyTimeColumn' => $hasClassStudyTimeColumn,
             'hasStudentStudyTimesTable' => $hasStudentStudyTimesTable,
             'hasPhoneColumn' => $hasPhoneColumn,
+            'hasGenderColumn' => $hasGenderColumn,
+            'hasAgeColumn' => $hasAgeColumn,
         ];
     }
 
@@ -421,6 +445,16 @@ class StudentController extends Controller
         return Schema::hasColumn('users', 'phone_number');
     }
 
+    private function hasGenderColumn(): bool
+    {
+        return Schema::hasColumn('users', 'gender');
+    }
+
+    private function hasAgeColumn(): bool
+    {
+        return Schema::hasColumn('users', 'age');
+    }
+
     private function hasMajorSubjectColumn(): bool
     {
         return Schema::hasColumn('users', 'major_subject_id');
@@ -467,6 +501,14 @@ class StudentController extends Controller
             $rules['phone_number'] = ['nullable', 'string', 'max:30'];
         }
 
+        if ($this->hasGenderColumn()) {
+            $rules['gender'] = ['nullable', Rule::in(['female', 'male'])];
+        }
+
+        if ($this->hasAgeColumn()) {
+            $rules['age'] = ['nullable', 'integer', 'min:1', 'max:120'];
+        }
+
         $hasClassColumn = $this->hasClassColumn();
         $hasMajorSubjectColumn = $this->hasMajorSubjectColumn();
         $hasClassStudyTimeColumn = $this->hasClassStudyTimeColumn();
@@ -510,6 +552,8 @@ class StudentController extends Controller
             'school_class_id' => 'home class',
             'major_subject_ids' => 'major subjects',
             'class_study_time_ids' => 'study times',
+            'gender' => 'gender',
+            'age' => 'age',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages, $attributes);

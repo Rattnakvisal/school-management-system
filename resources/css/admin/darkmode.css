@@ -1,18 +1,14 @@
 /* ── Admin page header ─────────────────────────────── */
 html.dark body [data-admin-shell] main[data-page-animate] section.admin-page-header {
-    border-color: rgba(139, 120, 255, 0.22) !important;
-    background:
-        radial-gradient(ellipse at 6% 0%,   rgba(100, 80, 240, 0.30), transparent 22rem),
-        radial-gradient(ellipse at 95% 10%,  rgba(34, 211, 238, 0.18), transparent 24rem),
-        linear-gradient(145deg, #0b1120 0%, #060c1e 55%, #03050d 100%) !important;
+    border-color: transparent !important;
+    background: transparent !important;
     color: #f0f4ff !important;
-    box-shadow:
-        0 28px 80px -52px rgba(2, 4, 14, 1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
 }
 
 html.dark body [data-admin-shell] main[data-page-animate] section.admin-page-header::after {
-    background: radial-gradient(circle, rgba(139, 120, 255, 0.20), transparent 62%) !important;
+    display: none !important;
+    background: transparent !important;
 }
 
 html.dark body [data-admin-shell] main[data-page-animate] section.admin-page-header .admin-page-title,

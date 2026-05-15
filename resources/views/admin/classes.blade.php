@@ -4,44 +4,6 @@
     @php
         $classTotal = max(0, (int) ($stats['total'] ?? 0));
 
-        $classStatCards = [
-            [
-                'label' => 'Classes',
-                'activeLabel' => 'Total',
-                'active' => $classTotal,
-                'total' => $classTotal,
-                'icon' => 'classes',
-                'tone' =>
-                    'from-indigo-100 to-white text-indigo-600 dark:from-indigo-500/20 dark:to-slate-900 dark:text-indigo-300',
-            ],
-            [
-                'label' => 'Active',
-                'activeLabel' => 'Active',
-                'active' => (int) ($stats['active'] ?? 0),
-                'total' => $classTotal,
-                'icon' => 'active',
-                'tone' =>
-                    'from-emerald-100 to-white text-emerald-600 dark:from-emerald-500/20 dark:to-slate-900 dark:text-emerald-300',
-            ],
-            [
-                'label' => 'Inactive',
-                'activeLabel' => 'Inactive',
-                'active' => (int) ($stats['inactive'] ?? 0),
-                'total' => $classTotal,
-                'icon' => 'inactive',
-                'tone' =>
-                    'from-rose-100 to-white text-rose-600 dark:from-rose-500/20 dark:to-slate-900 dark:text-rose-300',
-            ],
-            [
-                'label' => 'With Schedule',
-                'activeLabel' => 'Scheduled',
-                'active' => (int) ($stats['withSchedule'] ?? 0),
-                'total' => $classTotal,
-                'icon' => 'time',
-                'tone' => 'from-sky-100 to-white text-sky-600 dark:from-sky-500/20 dark:to-slate-900 dark:text-sky-300',
-            ],
-        ];
-
         $showCreateFormOnLoad = old('_form') === 'create_class';
 
         $dayLabels = [
@@ -56,7 +18,7 @@
         ];
 
         $panelClass =
-            'class-reveal class-float rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_24px_55px_-42px_rgba(15,23,42,0.75)] ring-1 ring-slate-200/70 dark:border-slate-700/80 dark:bg-slate-900/95 dark:ring-slate-700/80 dark:shadow-[0_24px_70px_-42px_rgba(0,0,0,0.9)]';
+            'class-reveal rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-800';
 
         $labelClass = 'mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300';
 
@@ -70,12 +32,31 @@
             'relative z-10 flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900';
     @endphp
 
-    <div class="class-stage admin-management-page class-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
-        <x-admin.page-header reveal-class="class-reveal" delay="1" icon="classes" title="Class Management"
-            subtitle="Create, organize, and manage classroom groups." />
+    <div
+        class="class-stage admin-management-page class-page mx-auto max-w-[1500px] space-y-5 pb-8 text-slate-900 dark:text-slate-100">
+        <section class="class-reveal flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between" style="--sd: 1;">
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-950 dark:text-white">Classes</h1>
+                <p class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                        <path d="M4 4v15.5" />
+                        <path d="M8 4h12v13H8z" />
+                    </svg>
+                    Total: {{ number_format($classTotal) }}
+                </p>
+            </div>
 
-        <x-admin.stat-cards :cards="$classStatCards" reveal-class="class-reveal" float-class="class-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
+            <button type="button" onclick="window.dispatchEvent(new CustomEvent('open-class-create'))"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Add class
+            </button>
+        </section>
 
         @if (session('success'))
             <div class="class-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300"
@@ -131,109 +112,132 @@
                         </button>
                     </div>
 
-                <form id="create-class-form-panel" method="POST" action="{{ route('admin.classes.store') }}"
-                    class="js-create-form">
-                    @csrf
+                    <form id="create-class-form-panel" method="POST" action="{{ route('admin.classes.store') }}"
+                        class="js-create-form">
+                        @csrf
 
-                    <input type="hidden" name="_form" value="create_class">
+                        <input type="hidden" name="_form" value="create_class">
 
-                    <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
-                        <div class="grid gap-5 lg:grid-cols-2">
+                        <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
+                            <div class="grid gap-5 lg:grid-cols-2">
 
-                    <div>
-                        <label for="name" class="{{ $labelClass }}">Class Name</label>
-                        <input id="name" name="name" type="text" value="{{ old('name') }}"
-                            class="{{ $inputClass }}" placeholder="Grade 10">
+                                <div>
+                                    <label for="name" class="{{ $labelClass }}">Class Name</label>
+                                    <input id="name" name="name" type="text" value="{{ old('name') }}"
+                                        class="{{ $inputClass }}" placeholder="Grade 10">
 
-                        @error('name')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
+                                    @error('name')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                    <div>
-                        <label for="room" class="{{ $labelClass }}">Room</label>
-                        <input id="room" name="room" type="text" value="{{ old('room') }}"
-                            class="{{ $inputClass }}" placeholder="B-201">
+                                <div>
+                                    <label for="room" class="{{ $labelClass }}">Room</label>
+                                    <input id="room" name="room" type="text" value="{{ old('room') }}"
+                                        class="{{ $inputClass }}" placeholder="B-201">
 
-                        @error('room')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
+                                    @error('room')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
 
-                    <div>
-                        <label class="{{ $labelClass }}">Study Times</label>
-                        <div class="{{ $softBoxClass }}">
-                            Study times are now managed in Time Studies.
-                            <a href="{{ route('admin.time-studies.index', ['tab' => 'class']) }}"
-                                class="font-semibold text-indigo-700 transition hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
-                                Manage class times
-                            </a>
+                                <div>
+                                    <label class="{{ $labelClass }}">Study Times</label>
+                                    <div class="{{ $softBoxClass }}">
+                                        Study times are now managed in Time Studies.
+                                        <a href="{{ route('admin.time-studies.index', ['tab' => 'class']) }}"
+                                            class="font-semibold text-indigo-700 transition hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
+                                            Manage class times
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="capacity" class="{{ $labelClass }}">Capacity</label>
+                                    <input id="capacity" name="capacity" type="number" min="1" max="500"
+                                        value="{{ old('capacity') }}" class="{{ $inputClass }}" placeholder="40">
+
+                                    @error('capacity')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <label
+                                    class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+                                    <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initial
+                                        Status</span>
+
+                                    <span
+                                        class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                        <input type="checkbox" name="is_active" value="1"
+                                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
+                                            {{ old('is_active', '1') ? 'checked' : '' }}>
+                                        Active
+                                    </span>
+                                </label>
+
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <label for="capacity" class="{{ $labelClass }}">Capacity</label>
-                        <input id="capacity" name="capacity" type="number" min="1" max="500"
-                            value="{{ old('capacity') }}" class="{{ $inputClass }}" placeholder="40">
+                        <div
+                            class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
+                            <button type="button" @click="createOpen = false"
+                                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                Cancel
+                            </button>
 
-                        @error('capacity')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <label
-                        class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
-                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initial Status</span>
-
-                        <span
-                            class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            <input type="checkbox" name="is_active" value="1"
-                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
-                                {{ old('is_active', '1') ? 'checked' : '' }}>
-                            Active
-                        </span>
-                    </label>
-
+                            <button type="submit"
+                                class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                                Create Class
+                            </button>
                         </div>
-                    </div>
-
-                    <div
-                        class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
-                        <button type="button" @click="createOpen = false"
-                            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                            Cancel
-                        </button>
-
-                        <button type="submit"
-                            class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                            Create Class
-                        </button>
-                    </div>
-                </form>
+                    </form>
                 </div>
             </section>
 
             {{-- CLASS LIST --}}
             <section class="{{ $panelClass }} xl:col-span-12" style="--sd: 4;">
-                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4 p-5">
 
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 class="text-lg font-black text-slate-950 dark:text-white">Class List</h2>
+                    <form method="GET" action="{{ route('admin.classes.index') }}"
+                        class="flex flex-wrap items-center gap-3">
+                        <select name="status"
+                            class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="all" {{ $status === 'all' ? 'selected' : '' }}>Status</option>
+                            <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
 
-                        <div class="flex flex-wrap items-center gap-3">
-                            <button type="button" @click="window.dispatchEvent(new CustomEvent('open-class-create'))"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                                <i class="fa-solid fa-plus text-xs"></i>
-                                Create
-                            </button>
+                        <select name="period"
+                            class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="all" {{ $period === 'all' ? 'selected' : '' }}>Periods</option>
+                            @foreach ($periodOptions as $periodKey => $periodLabel)
+                                <option value="{{ $periodKey }}" {{ $period === $periodKey ? 'selected' : '' }}>
+                                    {{ $periodLabel }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                            <button type="button" @click="filterOpen = true"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                                <i class="fa-solid fa-filter text-xs"></i>
-                                Filters
-                            </button>
-                        </div>
-                    </div>
+                        <input name="q" type="search" value="{{ $search }}" placeholder="Search classes"
+                            class="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 sm:max-w-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500">
+
+                        <button type="submit"
+                            class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            Apply
+                        </button>
+
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 6h16M7 12h10M10 18h4" />
+                            </svg>
+                            All filters
+                        </button>
+                    </form>
 
                     {{-- FILTER OVERLAY --}}
                     <div x-show="filterOpen" x-cloak x-transition.opacity
@@ -367,26 +371,28 @@
                     @endif
 
                     <div class="min-w-0">
-                        <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div class="class-table-scroller max-h-[700px] overflow-auto">
-                                <table class="admin-table class-table w-full min-w-[1400px] text-left text-sm">
+                        <div
+                            class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+                            <div class="class-table-scroller min-h-[520px] max-h-[720px] overflow-auto">
+                                <table class="student-roster-table class-table w-full min-w-[1180px] text-left text-sm">
                                     <thead
-                                        class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                                        class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
                                         <tr>
-                                            <th class="px-3 py-3 font-semibold">Class</th>
-                                            <th class="px-3 py-3 font-semibold">Room</th>
-                                            <th class="whitespace-nowrap px-3 py-3 font-semibold">Study Time</th>
-                                            <th class="px-3 py-3 font-semibold">Capacity</th>
-                                            <th class="px-3 py-3 font-semibold">Subjects</th>
-                                            <th class="px-3 py-3 font-semibold">Students</th>
-                                            <th class="px-3 py-3 font-semibold">Status</th>
-                                            <th class="whitespace-nowrap px-3 py-3 font-semibold">Created</th>
-                                            <th class="px-3 py-3 text-right font-semibold">Actions</th>
+                                            <th class="w-20 whitespace-nowrap px-3 py-3 font-bold">ID</th>
+                                            <th class="min-w-[180px] px-3 py-3 font-bold">Class</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Room</th>
+                                            <th class="min-w-[260px] whitespace-nowrap px-3 py-3 font-bold">Study Time</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Capacity</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Subjects</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Students</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Status</th>
+                                            <th class="w-32 whitespace-nowrap px-3 py-3 font-bold">Created</th>
+                                            <th class="w-36 whitespace-nowrap px-4 py-3 text-right font-bold">Actions</th>
                                         </tr>
                                     </thead>
 
                                     <tbody
-                                        class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
+                                        class="divide-y divide-slate-100 bg-white text-slate-700 dark:divide-slate-700 dark:bg-slate-900 dark:text-slate-300">
                                         @php
                                             /** @var iterable<int, \App\Models\SchoolClass> $classRows */
                                             $classRows =
@@ -432,8 +438,13 @@
                                                 $previewStudySchedules = $studyScheduleRows->take(3);
                                             @endphp
 
-                                            <tr class="align-top transition hover:bg-slate-50/80 dark:hover:bg-slate-800/70"
-                                                x-data="{ openEdit: false, detailOpen: false }">
+                                            <tr class="align-middle transition hover:bg-indigo-50/40 dark:hover:bg-slate-800/70"
+                                                x-data="{ openEdit: false, detailOpen: false, menuOpen: false }">
+                                                <td
+                                                    class="whitespace-nowrap px-3 py-3 text-xs font-bold tabular-nums text-slate-500 dark:text-slate-400">
+                                                    {{ $schoolClass->id }}
+                                                </td>
+
                                                 <td class="whitespace-nowrap px-3 py-3">
                                                     <div class="font-semibold text-slate-800 dark:text-slate-100">
                                                         {{ $schoolClass->name }}
@@ -554,48 +565,83 @@
                                                     {{ $schoolClass->created_at->format('M d, Y') }}
                                                 </td>
 
-                                                <td class="whitespace-nowrap px-3 py-3">
-                                                    <div
-                                                        class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
-                                                        <button @click="detailOpen = true" type="button"
-                                                            class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                            View Detail
+                                                <td class="whitespace-nowrap px-4 py-3 text-right">
+                                                    <div class="relative flex items-center justify-end gap-2"
+                                                        @click.outside="menuOpen = false">
+                                                        <button type="button" @click="menuOpen = !menuOpen"
+                                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                            aria-label="Open class actions">
+                                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"
+                                                                aria-hidden="true">
+                                                                <path
+                                                                    d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                                                            </svg>
                                                         </button>
 
-                                                        <button @click="openEdit = true" type="button"
-                                                            class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                            Edit
-                                                        </button>
-
-                                                        <form method="POST"
-                                                            action="{{ route('admin.classes.status', $schoolClass) }}"
-                                                            class="js-status-form"
-                                                            data-class="{{ $schoolClass->display_name }}"
-                                                            data-action="{{ $schoolClass->is_active ? 'set inactive' : 'set active' }}">
-                                                            @csrf
-                                                            @method('PATCH')
-
-                                                            <button type="submit"
-                                                                class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold transition
-                                                                {{ $schoolClass->is_active
-                                                                    ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25'
-                                                                    : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25' }}">
-                                                                {{ $schoolClass->is_active ? 'Set Inactive' : 'Set Active' }}
+                                                        <div x-show="menuOpen" x-cloak
+                                                            x-transition.opacity.scale.origin.top.right
+                                                            class="absolute right-0 top-9 z-30 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-left shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
+                                                            <button @click="detailOpen = true; menuOpen = false"
+                                                                type="button"
+                                                                class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                                View detail
                                                             </button>
-                                                        </form>
 
-                                                        <form method="POST"
-                                                            action="{{ route('admin.classes.destroy', $schoolClass) }}"
-                                                            class="js-delete-form"
-                                                            data-class="{{ $schoolClass->display_name }}">
-                                                            @csrf
-                                                            @method('DELETE')
-
-                                                            <button type="submit"
-                                                                class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                                                Delete
+                                                            <button @click="openEdit = true; menuOpen = false"
+                                                                type="button"
+                                                                class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-300">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    aria-hidden="true">
+                                                                    <path d="M12 20h9" />
+                                                                    <path
+                                                                        d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                                                </svg>
+                                                                Edit
                                                             </button>
-                                                        </form>
+
+                                                            <form method="POST"
+                                                                action="{{ route('admin.classes.status', $schoolClass) }}"
+                                                                class="js-status-form"
+                                                                data-class="{{ $schoolClass->display_name }}"
+                                                                data-action="{{ $schoolClass->is_active ? 'set inactive' : 'set active' }}">
+                                                                @csrf
+                                                                @method('PATCH')
+
+                                                                <button type="submit"
+                                                                    class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                        fill="none" stroke="currentColor"
+                                                                        stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                        <path d="M20 6 9 17l-5-5" />
+                                                                    </svg>
+                                                                    {{ $schoolClass->is_active ? 'Set inactive' : 'Set active' }}
+                                                                </button>
+                                                            </form>
+
+                                                            <form method="POST"
+                                                                action="{{ route('admin.classes.destroy', $schoolClass) }}"
+                                                                class="js-delete-form"
+                                                                data-class="{{ $schoolClass->display_name }}">
+                                                                @csrf
+                                                                @method('DELETE')
+
+                                                                <button type="submit"
+                                                                    class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/15">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                        fill="none" stroke="currentColor"
+                                                                        stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                        <path d="M3 6h18" />
+                                                                        <path d="M8 6V4h8v2" />
+                                                                        <path d="M19 6l-1 14H6L5 6" />
+                                                                    </svg>
+                                                                    Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
 
                                                     {{-- DETAIL MODAL --}}
@@ -885,7 +931,8 @@
                             </div>
                         </div>
 
-                        <div class="class-pagination mt-5 text-slate-700 dark:text-slate-300">
+                        <div
+                            class="class-pagination -mx-5 -mb-5 border-t border-slate-100 bg-slate-50/70 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                             {{ $classes->links() }}
                         </div>
                     </div>

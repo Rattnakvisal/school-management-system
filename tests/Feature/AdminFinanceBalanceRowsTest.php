@@ -129,6 +129,42 @@ test('incomplete payment is automatically stored as partial', function () {
     expect(StudentPayment::query()->where('student_id', $student->id)->value('status'))->toBe('partial');
 });
 
+test('finance payment can be edited and recalculates balance status', function () {
+    $admin = financeAdmin();
+    $student = financeStudentWithTuition('Edit Student', 'edit@example.com', 240);
+
+    $payment = StudentPayment::query()->create([
+        'student_id' => $student->id,
+        'amount' => 80,
+        'discount_amount' => 0,
+        'payment_date' => now()->subDay()->toDateString(),
+        'status' => 'partial',
+        'payment_method' => 'cash',
+        'note' => 'Original note',
+    ]);
+
+    $this
+        ->actingAs($admin)
+        ->put(route('admin.finance.update', $payment), [
+            'student_id' => $student->id,
+            'amount' => 240,
+            'discount_amount' => 20,
+            'payment_date' => now()->toDateString(),
+            'due_date' => now()->addWeek()->toDateString(),
+            'payment_method' => 'qr_code',
+            'note' => 'Updated note',
+        ])
+        ->assertRedirect(route('admin.finance.index'));
+
+    $payment->refresh();
+
+    expect((float) $payment->amount)->toBe(240.0);
+    expect((float) $payment->discount_amount)->toBe(20.0);
+    expect($payment->status)->toBe('paid');
+    expect($payment->payment_method)->toBe('qr_code');
+    expect($payment->note)->toBe('Updated note');
+});
+
 test('dashboard outstanding includes partial and unpaid student balances', function () {
     $admin = financeAdmin();
     $partialStudent = financeStudentWithTuition('Dashboard Partial', 'dashboard-partial@example.com', 240);
@@ -181,10 +217,7 @@ test('reports outstanding uses the same student balance totals as dashboard', fu
         ->actingAs($admin)
         ->get(route('admin.reports'));
 
-    $response
-        ->assertOk()
-        ->assertSeeText('$100.00')
-        ->assertSeeText('$450.00 billable');
+    $response->assertOk();
 
     $financeStats = $response->viewData('financeStats');
     expect((float) $financeStats['collected'])->toBe(100.0);
@@ -193,7 +226,7 @@ test('reports outstanding uses the same student balance totals as dashboard', fu
     expect((float) $financeStats['billable'])->toBe(450.0);
 });
 
-test('finance page cards use the same collected outstanding and billable totals', function () {
+test('finance page uses the same collected outstanding and billable totals', function () {
     $admin = financeAdmin();
     $partialStudent = financeStudentWithTuition('Finance Partial', 'finance-partial@example.com', 300);
     financeStudentWithTuition('Finance Pending', 'finance-pending@example.com', 150);
@@ -211,13 +244,7 @@ test('finance page cards use the same collected outstanding and billable totals'
         ->actingAs($admin)
         ->get(route('admin.finance.index'));
 
-    $response
-        ->assertOk()
-        ->assertSeeText('Collected')
-        ->assertSeeText('$100.00')
-        ->assertSeeText('Outstanding')
-        ->assertSeeText('$325.00')
-        ->assertSeeText('$450.00');
+    $response->assertOk();
 
     $stats = $response->viewData('stats');
     expect((float) $stats['collected'])->toBe(100.0);

@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('admin contact messages page shows dashboard cards', function () {
+test('admin contact messages page exposes read and unread totals', function () {
     $admin = User::factory()->create([
         'role' => 'admin',
     ]);
@@ -36,7 +36,10 @@ test('admin contact messages page shows dashboard cards', function () {
         ->assertOk()
         ->assertSeeText('Messages')
         ->assertSeeText('Unread')
-        ->assertSeeText('1 of 2 messages unread')
-        ->assertSeeText('Read')
-        ->assertSeeText('1 of 2 messages read');
+        ->assertSeeText('Read');
+
+    $stats = $response->viewData('stats');
+    expect((int) $stats['total'])->toBe(2);
+    expect((int) $stats['unread'])->toBe(1);
+    expect((int) $stats['read'])->toBe(1);
 });

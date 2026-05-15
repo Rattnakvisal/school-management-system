@@ -398,7 +398,7 @@
                 <div
                     class="admin-teacher-attendance-table-wrap overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/60 dark:border-slate-700 dark:bg-slate-800/60">
                     <div class="admin-teacher-attendance-table-scroller max-h-[620px] overflow-auto">
-                        <table class="admin-teacher-attendance-table admin-table w-full min-w-[1180px] text-left text-sm">
+                        <table class="admin-teacher-attendance-table admin-table w-full min-w-[1040px] text-left text-sm">
                             <thead class="{{ $tableHeadClass }}">
                                 <tr>
                                     <th class="admin-teacher-col-teacher px-3 py-3 font-semibold">Teacher</th>

@@ -5,7 +5,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('teacher management shows women and men cards', function () {
+test('teacher management exposes women and men totals', function () {
     $admin = User::factory()->create([
         'role' => 'admin',
     ]);
@@ -27,8 +27,12 @@ test('teacher management shows women and men cards', function () {
     $response
         ->assertOk()
         ->assertSeeText('Women')
-        ->assertSeeText('1 of 2 teachers')
         ->assertSeeText('Men');
+
+    $stats = $response->viewData('stats');
+    expect((int) $stats['total'])->toBe(2);
+    expect((int) $stats['female'])->toBe(1);
+    expect((int) $stats['male'])->toBe(1);
 });
 
 test('admin can save teacher gender', function () {

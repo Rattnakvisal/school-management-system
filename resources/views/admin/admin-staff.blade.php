@@ -4,55 +4,8 @@
     @php
         $accountTotal = max(0, (int) ($stats['total'] ?? 0));
 
-        $adminStaffStatCards = [
-            [
-                'label' => 'Accounts',
-                'activeLabel' => 'Total',
-                'active' => $accountTotal,
-                'total' => $accountTotal,
-                'icon' => 'staff',
-                'tone' =>
-                    'from-indigo-100 to-white text-indigo-600 dark:from-indigo-500/20 dark:to-slate-900 dark:text-indigo-300',
-            ],
-            [
-                'label' => 'Admins',
-                'activeLabel' => 'Admins',
-                'active' => (int) ($stats['admins'] ?? 0),
-                'total' => $accountTotal,
-                'icon' => 'staff',
-                'tone' => 'from-sky-100 to-white text-sky-600 dark:from-sky-500/20 dark:to-slate-900 dark:text-sky-300',
-            ],
-            [
-                'label' => 'Staff',
-                'activeLabel' => 'Staff',
-                'active' => (int) ($stats['staff'] ?? 0),
-                'total' => $accountTotal,
-                'icon' => 'teachers',
-                'tone' =>
-                    'from-amber-100 to-white text-amber-600 dark:from-amber-500/20 dark:to-slate-900 dark:text-amber-300',
-            ],
-            [
-                'label' => 'Active',
-                'activeLabel' => 'Active',
-                'active' => (int) ($stats['active'] ?? 0),
-                'total' => $accountTotal,
-                'icon' => 'active',
-                'tone' =>
-                    'from-emerald-100 to-white text-emerald-600 dark:from-emerald-500/20 dark:to-slate-900 dark:text-emerald-300',
-            ],
-            [
-                'label' => 'Inactive',
-                'activeLabel' => 'Inactive',
-                'active' => (int) ($stats['inactive'] ?? 0),
-                'total' => $accountTotal,
-                'icon' => 'inactive',
-                'tone' =>
-                    'from-rose-100 to-white text-rose-600 dark:from-rose-500/20 dark:to-slate-900 dark:text-rose-300',
-            ],
-        ];
-
         $panelClass =
-            'teacher-reveal teacher-float rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_24px_55px_-42px_rgba(15,23,42,0.75)] ring-1 ring-slate-200/70 dark:border-slate-700/80 dark:bg-slate-900/95 dark:ring-slate-700/80 dark:shadow-[0_24px_70px_-42px_rgba(0,0,0,0.9)]';
+            'teacher-reveal rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-800';
 
         $labelClass = 'mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300';
 
@@ -65,12 +18,31 @@
         $smallMutedClass = 'text-xs font-semibold text-slate-500 dark:text-slate-400';
     @endphp
 
-    <div class="teacher-stage admin-management-page admin-staff-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
+    <div
+        class="teacher-stage admin-management-page admin-staff-page mx-auto max-w-[1500px] space-y-5 pb-8 text-slate-900 dark:text-slate-100">
 
-        <x-admin.page-header reveal-class="teacher-reveal" delay="1" icon="staff" title="Admin / Staff Management"
-            subtitle="Create and manage school administrator and staff accounts." />
+        <section class="teacher-reveal flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between" style="--sd: 1;">
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-950 dark:text-white">Admin / Staff</h1>
+                <p class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-8 0v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Total: {{ number_format($accountTotal) }}
+                </p>
+            </div>
 
-        <x-admin.stat-cards :cards="$adminStaffStatCards" reveal-class="teacher-reveal" float-class="teacher-float" />
+            <button type="button" onclick="window.dispatchEvent(new CustomEvent('open-admin-staff-create'))"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Add account
+            </button>
+        </section>
 
         @if (session('success'))
             <div class="teacher-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300"
@@ -113,8 +85,8 @@
 
             {{-- CREATE ACCOUNT --}}
             <section x-show="createOpen" x-cloak x-transition.opacity.duration.150ms
-                @keydown.escape.window="createOpen = false" @click.self="createOpen = false"
-                role="dialog" aria-modal="true" aria-labelledby="create-admin-staff-title"
+                @keydown.escape.window="createOpen = false" @click.self="createOpen = false" role="dialog"
+                aria-modal="true" aria-labelledby="create-admin-staff-title"
                 class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-slate-950/65 px-4 py-6 backdrop-blur-sm sm:py-10"
                 style="--sd: 3;">
                 <div
@@ -139,222 +111,246 @@
                         </button>
                     </div>
 
-                <form id="create-admin-staff-form-panel" method="POST" action="{{ route('admin.admin-staff.store') }}"
-                    enctype="multipart/form-data" class="js-create-form">
-                    @csrf
+                    <form id="create-admin-staff-form-panel" method="POST" action="{{ route('admin.admin-staff.store') }}"
+                        enctype="multipart/form-data" class="js-create-form">
+                        @csrf
 
-                    <input type="hidden" name="_form" value="create_admin_staff">
+                        <input type="hidden" name="_form" value="create_admin_staff">
 
-                    <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
-                        <div class="grid gap-5 lg:grid-cols-2">
-                    <div>
-                        <label for="role" class="{{ $labelClass }}">Role</label>
-                        <select id="role" name="role" class="{{ $inputClass }} capitalize">
-                            @foreach ($assignableRoles as $roleOption)
-                                <option value="{{ $roleOption }}"
-                                    {{ old('role', 'staff') === $roleOption ? 'selected' : '' }}>
-                                    {{ ucfirst($roleOption) }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
+                            <div class="grid gap-5 lg:grid-cols-2">
+                                <div>
+                                    <label for="role" class="{{ $labelClass }}">Role</label>
+                                    <select id="role" name="role" class="{{ $inputClass }} capitalize">
+                                        @foreach ($assignableRoles as $roleOption)
+                                            <option value="{{ $roleOption }}"
+                                                {{ old('role', 'staff') === $roleOption ? 'selected' : '' }}>
+                                                {{ ucfirst($roleOption) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
 
-                        @error('role')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
+                                    @error('role')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
 
-                    @if ($hasStaffPermissionsColumn ?? false)
-                        @php
-                            $selectedCreateStaffPermissions = old('staff_permissions', []);
-                            $selectedCreateStaffPermissions = is_array($selectedCreateStaffPermissions)
-                                ? $selectedCreateStaffPermissions
-                                : [];
-                        @endphp
+                                @if ($hasStaffPermissionsColumn ?? false)
+                                    @php
+                                        $selectedCreateStaffPermissions = old('staff_permissions', []);
+                                        $selectedCreateStaffPermissions = is_array($selectedCreateStaffPermissions)
+                                            ? $selectedCreateStaffPermissions
+                                            : [];
+                                    @endphp
 
-                        <div x-data="{ staffAccessOpen: false }"
-                            class="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-800/70 lg:col-span-2">
-                            <button type="button" @click="staffAccessOpen = !staffAccessOpen"
-                                :aria-expanded="staffAccessOpen.toString()"
-                                class="flex w-full items-center justify-between gap-3 text-left">
-                                <span class="min-w-0">
-                                    <span
-                                        class="block text-xs font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                                        Staff page access
-                                    </span>
-                                    <span class="mt-1 block text-[11px] leading-5 text-slate-500 dark:text-slate-400">
-                                        Used only when role is Staff. Leave all unchecked for no admin pages.
-                                    </span>
-                                </span>
-
-                                <span class="flex shrink-0 items-center gap-2">
-                                    <span
-                                        class="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700">
-                                        {{ count($selectedCreateStaffPermissions) }} selected
-                                    </span>
-
-                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200"
-                                        :class="staffAccessOpen ? 'rotate-180' : ''"></i>
-                                </span>
-                            </button>
-
-                            <div x-show="staffAccessOpen" x-cloak x-transition class="mt-3 max-h-72 overflow-y-auto pr-1">
-                                <div class="grid gap-2">
-                                    @foreach ($staffPermissionOptions as $permissionKey => $permissionOption)
-                                        <label
-                                            class="flex gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
-                                            <input type="checkbox" name="staff_permissions[]" value="{{ $permissionKey }}"
-                                                @checked(in_array($permissionKey, $selectedCreateStaffPermissions, true))
-                                                class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-800">
-
+                                    <div x-data="{ staffAccessOpen: false }"
+                                        class="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-800/70 lg:col-span-2">
+                                        <button type="button" @click="staffAccessOpen = !staffAccessOpen"
+                                            :aria-expanded="staffAccessOpen.toString()"
+                                            class="flex w-full items-center justify-between gap-3 text-left">
                                             <span class="min-w-0">
-                                                <span class="block text-xs font-bold text-slate-700 dark:text-slate-200">
-                                                    {{ $permissionOption['label'] }}
-                                                </span>
-
                                                 <span
-                                                    class="block text-[11px] leading-4 text-slate-500 dark:text-slate-400">
-                                                    {{ $permissionOption['description'] }}
+                                                    class="block text-xs font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                                                    Staff page access
+                                                </span>
+                                                <span
+                                                    class="mt-1 block text-[11px] leading-5 text-slate-500 dark:text-slate-400">
+                                                    Used only when role is Staff. Leave all unchecked for no admin pages.
                                                 </span>
                                             </span>
-                                        </label>
-                                    @endforeach
+
+                                            <span class="flex shrink-0 items-center gap-2">
+                                                <span
+                                                    class="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700">
+                                                    {{ count($selectedCreateStaffPermissions) }} selected
+                                                </span>
+
+                                                <i class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform duration-200"
+                                                    :class="staffAccessOpen ? 'rotate-180' : ''"></i>
+                                            </span>
+                                        </button>
+
+                                        <div x-show="staffAccessOpen" x-cloak x-transition
+                                            class="mt-3 max-h-72 overflow-y-auto pr-1">
+                                            <div class="grid gap-2">
+                                                @foreach ($staffPermissionOptions as $permissionKey => $permissionOption)
+                                                    <label
+                                                        class="flex gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
+                                                        <input type="checkbox" name="staff_permissions[]"
+                                                            value="{{ $permissionKey }}" @checked(in_array($permissionKey, $selectedCreateStaffPermissions, true))
+                                                            class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-800">
+
+                                                        <span class="min-w-0">
+                                                            <span
+                                                                class="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                                                                {{ $permissionOption['label'] }}
+                                                            </span>
+
+                                                            <span
+                                                                class="block text-[11px] leading-4 text-slate-500 dark:text-slate-400">
+                                                                {{ $permissionOption['description'] }}
+                                                            </span>
+                                                        </span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        @error('staff_permissions')
+                                            <p class="mt-2 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endif
+
+                                <div>
+                                    <label for="name" class="{{ $labelClass }}">Full Name</label>
+                                    <input id="name" name="name" type="text" value="{{ old('name') }}"
+                                        class="{{ $inputClass }}" placeholder="Full name">
+
+                                    @error('name')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
                                 </div>
+
+                                <div>
+                                    <label for="email" class="{{ $labelClass }}">Email</label>
+                                    <input id="email" name="email" type="email" value="{{ old('email') }}"
+                                        class="{{ $inputClass }}" placeholder="account@example.com">
+
+                                    @error('email')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                @if ($hasPhoneColumn ?? false)
+                                    <div>
+                                        <label for="phone_number" class="{{ $labelClass }}">Phone Number</label>
+                                        <input id="phone_number" name="phone_number" type="text"
+                                            value="{{ old('phone_number') }}" class="{{ $inputClass }}"
+                                            placeholder="+855 12 345 678">
+
+                                        @error('phone_number')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endif
+
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="password" class="{{ $labelClass }}">Password</label>
+                                        <input id="password" name="password" type="password"
+                                            class="{{ $inputClass }}" placeholder="Minimum 8 characters">
+                                    </div>
+
+                                    <div>
+                                        <label for="password_confirmation" class="{{ $labelClass }}">Confirm</label>
+                                        <input id="password_confirmation" name="password_confirmation" type="password"
+                                            class="{{ $inputClass }}" placeholder="Re-enter password">
+                                    </div>
+                                </div>
+
+                                @error('password')
+                                    <p class="-mt-2 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                    </p>
+                                @enderror
+
+                                <div>
+                                    <label for="avatar_image" class="{{ $labelClass }}">Avatar Image (Optional)</label>
+                                    <input id="avatar_image" name="avatar_image" type="file" accept="image/*"
+                                        class="{{ $fileInputClass }}">
+
+                                    <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                        Allowed: JPG, PNG, WEBP max 5MB.
+                                    </p>
+
+                                    @error('avatar_image')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                @if ($hasStatusColumn)
+                                    <label
+                                        class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+                                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initial
+                                            Status</span>
+
+                                        <span
+                                            class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
+                                                {{ old('is_active', '1') ? 'checked' : '' }}>
+                                            Active
+                                        </span>
+                                    </label>
+                                @endif
                             </div>
-
-                            @error('staff_permissions')
-                                <p class="mt-2 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    @endif
-
-                    <div>
-                        <label for="name" class="{{ $labelClass }}">Full Name</label>
-                        <input id="name" name="name" type="text" value="{{ old('name') }}"
-                            class="{{ $inputClass }}" placeholder="Full name">
-
-                        @error('name')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="email" class="{{ $labelClass }}">Email</label>
-                        <input id="email" name="email" type="email" value="{{ old('email') }}"
-                            class="{{ $inputClass }}" placeholder="account@example.com">
-
-                        @error('email')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    @if ($hasPhoneColumn ?? false)
-                        <div>
-                            <label for="phone_number" class="{{ $labelClass }}">Phone Number</label>
-                            <input id="phone_number" name="phone_number" type="text"
-                                value="{{ old('phone_number') }}" class="{{ $inputClass }}"
-                                placeholder="+855 12 345 678">
-
-                            @error('phone_number')
-                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    @endif
-
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="password" class="{{ $labelClass }}">Password</label>
-                            <input id="password" name="password" type="password" class="{{ $inputClass }}"
-                                placeholder="Minimum 8 characters">
                         </div>
 
-                        <div>
-                            <label for="password_confirmation" class="{{ $labelClass }}">Confirm</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password"
-                                class="{{ $inputClass }}" placeholder="Re-enter password">
+                        <div
+                            class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
+                            <button type="button" @click="createOpen = false"
+                                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                Cancel
+                            </button>
+
+                            <button type="submit"
+                                class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                                Create account
+                            </button>
                         </div>
-                    </div>
-
-                    @error('password')
-                        <p class="-mt-2 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                    @enderror
-
-                    <div>
-                        <label for="avatar_image" class="{{ $labelClass }}">Avatar Image (Optional)</label>
-                        <input id="avatar_image" name="avatar_image" type="file" accept="image/*"
-                            class="{{ $fileInputClass }}">
-
-                        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                            Allowed: JPG, PNG, WEBP max 5MB.
-                        </p>
-
-                        @error('avatar_image')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    @if ($hasStatusColumn)
-                        <label
-                            class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
-                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initial Status</span>
-
-                            <span
-                                class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                <input type="checkbox" name="is_active" value="1"
-                                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
-                                    {{ old('is_active', '1') ? 'checked' : '' }}>
-                                Active
-                            </span>
-                        </label>
-                    @endif
-                        </div>
-                    </div>
-
-                    <div
-                        class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
-                        <button type="button" @click="createOpen = false"
-                            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                            Cancel
-                        </button>
-
-                        <button type="submit"
-                            class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                            Create account
-                        </button>
-                    </div>
-                </form>
+                    </form>
                 </div>
             </section>
 
             {{-- LIST --}}
             <section x-data="{ filterOpen: false, editing: null }" @open-filter-panel.window="filterOpen = true"
-                class="{{ $panelClass }} min-w-0 xl:col-span-12"
-                style="--sd: 4;">
+                class="{{ $panelClass }} min-w-0 xl:col-span-12" style="--sd: 4;">
 
-                <div class="space-y-4">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 class="text-lg font-black text-slate-950 dark:text-white">Admin / Staff List</h2>
+                <div class="space-y-4 p-5">
+                    <form method="GET" action="{{ route('admin.admin-staff.index') }}"
+                        class="flex flex-wrap items-center gap-3">
+                        <select name="role"
+                            class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="all" {{ $role === 'all' ? 'selected' : '' }}>Roles</option>
+                            @foreach ($roles as $roleOption)
+                                <option value="{{ $roleOption }}" {{ $role === $roleOption ? 'selected' : '' }}>
+                                    {{ ucfirst($roleOption) }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                            <button type="button" id="admin-staff-create-alert-button"
-                                @click="window.dispatchEvent(new CustomEvent('open-admin-staff-create'))"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M12 5v14M5 12h14"></path>
-                                </svg>
-                                Create
-                            </button>
+                        @if ($hasStatusColumn)
+                            <select name="status"
+                                class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                <option value="all" {{ $status === 'all' ? 'selected' : '' }}>Status</option>
+                                <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        @endif
 
-                            <button type="button" @click="filterOpen = true"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
-                                </svg>
-                                Filters
-                            </button>
-                        </div>
-                    </div>
+                        <input name="q" type="search" value="{{ $search }}" placeholder="Search accounts"
+                            class="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 sm:max-w-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500">
+
+                        <button type="submit"
+                            class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            Apply
+                        </button>
+
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 6h16M7 12h10M10 18h4" />
+                            </svg>
+                            All filters
+                        </button>
+                    </form>
 
                     {{-- FILTER OVERLAY --}}
                     <div x-show="filterOpen" x-cloak x-transition.opacity
@@ -483,28 +479,30 @@
 
                         {{-- TABLE --}}
                         <div class="min-w-0">
-                            <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-                                <div class="max-h-[700px] overflow-auto">
-                                    <table class="admin-table w-full min-w-[1280px] text-left text-sm">
+                            <div
+                                class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+                                <div class="admin-staff-table-scroller min-h-[520px] max-h-[720px] overflow-auto">
+                                    <table class="student-roster-table admin-staff-table w-full min-w-[1120px] text-left text-sm">
                                         <thead
-                                            class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                                            class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
                                             <tr>
-                                                <th class="px-3 py-3 font-semibold">Account</th>
-                                                <th class="px-3 py-3 font-semibold">Email</th>
+                                                <th class="w-20 whitespace-nowrap px-3 py-3 font-bold">ID</th>
+                                                <th class="min-w-[220px] px-3 py-3 font-bold">Account</th>
+                                                <th class="min-w-[220px] px-3 py-3 font-bold">Email</th>
 
                                                 @if ($hasPhoneColumn ?? false)
-                                                    <th class="whitespace-nowrap px-3 py-3 font-semibold">Phone Number</th>
+                                                    <th class="w-36 whitespace-nowrap px-3 py-3 font-bold">Phone Number</th>
                                                 @endif
 
-                                                <th class="px-3 py-3 font-semibold">Role</th>
-                                                <th class="px-3 py-3 font-semibold">Status</th>
-                                                <th class="whitespace-nowrap px-3 py-3 font-semibold">Created</th>
-                                                <th class="px-3 py-3 text-right font-semibold">Actions</th>
+                                                <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Role</th>
+                                                <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Status</th>
+                                                <th class="w-32 whitespace-nowrap px-3 py-3 font-bold">Created</th>
+                                                <th class="w-36 whitespace-nowrap px-4 py-3 text-right font-bold">Actions</th>
                                             </tr>
                                         </thead>
 
                                         <tbody
-                                            class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
+                                            class="divide-y divide-slate-100 bg-white text-slate-700 dark:divide-slate-700 dark:bg-slate-900 dark:text-slate-300">
                                             @forelse ($accounts as $account)
                                                 @php
                                                     $isSelf = (int) auth()->id() === (int) $account->id;
@@ -523,7 +521,12 @@
                                                 @endphp
 
                                                 <tr
-                                                    class="align-top transition hover:bg-slate-50/80 dark:hover:bg-slate-800/70">
+                                                    class="align-middle transition hover:bg-indigo-50/40 dark:hover:bg-slate-800/70">
+                                                    <td
+                                                        class="whitespace-nowrap px-3 py-3 text-xs font-bold tabular-nums text-slate-500 dark:text-slate-400">
+                                                        {{ $account->id }}
+                                                    </td>
+
                                                     <td class="px-3 py-3">
                                                         <div class="flex items-center gap-3">
                                                             <img src="{{ $account->avatar_url }}"
@@ -544,7 +547,7 @@
                                                                 </div>
 
                                                                 <div class="text-xs text-slate-400 dark:text-slate-500">
-                                                                    ID #{{ $account->formatted_id }}
+                                                                    {{ ucfirst($account->role) }} account
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -597,52 +600,116 @@
                                                         {{ $account->created_at->format('M d, Y') }}
                                                     </td>
 
-                                                    <td class="whitespace-nowrap px-3 py-3">
-                                                        <div
-                                                            class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
-                                                            <button @click="editing = {{ $account->id }}" type="button"
-                                                                class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                                Edit
-                                                            </button>
-
-                                                            @if ($hasStatusColumn)
-                                                                <form method="POST"
-                                                                    action="{{ route('admin.admin-staff.status', $account) }}"
-                                                                    class="js-status-form"
-                                                                    data-account="{{ $account->name }}"
-                                                                    data-action="{{ $account->is_active ? 'set inactive' : 'set active' }}">
-                                                                    @csrf
-                                                                    @method('PATCH')
-
-                                                                    <button type="submit" {{ $isSelf ? 'disabled' : '' }}
-                                                                        class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50
-                                                                        {{ $account->is_active
-                                                                            ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25'
-                                                                            : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25' }}">
-                                                                        {{ $account->is_active ? 'Set Inactive' : 'Set Active' }}
-                                                                    </button>
-                                                                </form>
+                                                    <td class="whitespace-nowrap px-4 py-3 text-right">
+                                                        <div class="relative flex items-center justify-end gap-2"
+                                                            x-data="{ menuOpen: false }" @click.outside="menuOpen = false">
+                                                            @if ($hasPhoneColumn ?? false)
+                                                                <a href="{{ $account->phone_number ? 'tel:' . $account->phone_number : '#' }}"
+                                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                                    aria-label="Call {{ $account->name }}">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                        fill="none" stroke="currentColor"
+                                                                        stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                        <path
+                                                                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L8.09 9.64a16 16 0 0 0 6.27 6.27l1.21-1.21a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z" />
+                                                                    </svg>
+                                                                </a>
                                                             @endif
 
-                                                            <form method="POST"
-                                                                action="{{ route('admin.admin-staff.destroy', $account) }}"
-                                                                class="js-delete-form"
-                                                                data-account="{{ $account->name }}">
-                                                                @csrf
-                                                                @method('DELETE')
+                                                            <a href="mailto:{{ $account->email }}"
+                                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                                aria-label="Email {{ $account->name }}">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    aria-hidden="true">
+                                                                    <rect x="3" y="5" width="18" height="14"
+                                                                        rx="2" />
+                                                                    <path d="m3 7 9 6 9-6" />
+                                                                </svg>
+                                                            </a>
 
-                                                                <button type="submit"
-                                                                    {{ $deleteDisabled ? 'disabled' : '' }}
-                                                                    class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                                                    Delete
+                                                            <button type="button" @click="menuOpen = !menuOpen"
+                                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                                aria-label="Open account actions">
+                                                                <svg class="h-5 w-5" viewBox="0 0 24 24"
+                                                                    fill="currentColor" aria-hidden="true">
+                                                                    <path
+                                                                        d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                                                                </svg>
+                                                            </button>
+
+                                                            <div x-show="menuOpen" x-cloak
+                                                                x-transition.opacity.scale.origin.top.right
+                                                                class="absolute right-0 top-9 z-30 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-left shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
+                                                                <button
+                                                                    @click="editing = {{ $account->id }}; menuOpen = false"
+                                                                    type="button"
+                                                                    class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-300">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                        fill="none" stroke="currentColor"
+                                                                        stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                        <path d="M12 20h9" />
+                                                                        <path
+                                                                            d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                                                    </svg>
+                                                                    Edit
                                                                 </button>
-                                                            </form>
+
+                                                                @if ($hasStatusColumn)
+                                                                    <form method="POST"
+                                                                        action="{{ route('admin.admin-staff.status', $account) }}"
+                                                                        class="js-status-form"
+                                                                        data-account="{{ $account->name }}"
+                                                                        data-action="{{ $account->is_active ? 'set inactive' : 'set active' }}">
+                                                                        @csrf
+                                                                        @method('PATCH')
+
+                                                                        <button type="submit"
+                                                                            {{ $isSelf ? 'disabled' : '' }}
+                                                                            class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                                            <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                                fill="none" stroke="currentColor"
+                                                                                stroke-width="2" stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                aria-hidden="true">
+                                                                                <path d="M20 6 9 17l-5-5" />
+                                                                            </svg>
+                                                                            {{ $account->is_active ? 'Set inactive' : 'Set active' }}
+                                                                        </button>
+                                                                    </form>
+                                                                @endif
+
+                                                                <form method="POST"
+                                                                    action="{{ route('admin.admin-staff.destroy', $account) }}"
+                                                                    class="js-delete-form"
+                                                                    data-account="{{ $account->name }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+
+                                                                    <button type="submit"
+                                                                        {{ $deleteDisabled ? 'disabled' : '' }}
+                                                                        class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-300 dark:hover:bg-red-500/15">
+                                                                        <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2" stroke-linecap="round"
+                                                                            stroke-linejoin="round" aria-hidden="true">
+                                                                            <path d="M3 6h18" />
+                                                                            <path d="M8 6V4h8v2" />
+                                                                            <path d="M19 6l-1 14H6L5 6" />
+                                                                        </svg>
+                                                                        Delete
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="{{ $hasPhoneColumn ?? false ? 7 : 6 }}"
+                                                    <td colspan="{{ $hasPhoneColumn ?? false ? 8 : 7 }}"
                                                         class="px-3 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                                                         No admin or staff accounts found.
                                                     </td>
@@ -774,7 +841,8 @@
                                         @endif
 
                                         <div>
-                                            <label for="edit_name_{{ $account->id }}" class="{{ $labelClass }}">Full
+                                            <label for="edit_name_{{ $account->id }}"
+                                                class="{{ $labelClass }}">Full
                                                 Name</label>
                                             <input id="edit_name_{{ $account->id }}" name="name" type="text"
                                                 value="{{ $account->name }}" class="{{ $inputClass }}">
@@ -924,7 +992,8 @@
                         </div>
                     @endforeach
 
-                    <div class="admin-staff-pagination text-slate-700 dark:text-slate-300">
+                    <div
+                        class="admin-staff-pagination -mx-5 -mb-5 border-t border-slate-100 bg-slate-50/70 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                         {{ $accounts->links() }}
                     </div>
                 </div>

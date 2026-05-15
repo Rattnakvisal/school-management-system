@@ -28,18 +28,15 @@ html.dark body[data-admin-shell] main[data-page-animate] [class*="bg-[radial-gra
 }
 
 html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header {
-    border: 1px solid rgb(79 70 229 / 0.32) !important;
-    background:
-        radial-gradient(circle at 92% 12%, rgb(99 102 241 / 0.28), transparent 34%),
-        linear-gradient(135deg, #1e1b4b 0%, #111827 48%, #020617 100%) !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
     color: #f8fafc !important;
-    box-shadow:
-        0 24px 60px -42px rgb(0 0 0 / 0.75),
-        inset 0 1px 0 rgb(255 255 255 / 0.08) !important;
+    box-shadow: none !important;
 }
 
 html.dark body[data-admin-shell] main[data-page-animate] .admin-page-header::after {
-    background: radial-gradient(circle, rgb(34 211 238 / 0.16), transparent 62%) !important;
+    display: none !important;
+    background: transparent !important;
 }
 
 html.dark body[data-admin-shell] main[data-page-animate] .admin-page-title,
@@ -399,4 +396,15 @@ html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip .te
 html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip .study-time-label,
 html.dark body[data-admin-shell] main[data-page-animate] .student-study-chip .text-slate-700 {
     color: #dbeafe !important;
+}
+
+body [data-admin-shell] main[data-page-animate] .admin-page-header {
+    border-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body [data-admin-shell] main[data-page-animate] .admin-page-header::after {
+    display: none !important;
+    background: transparent !important;
 }

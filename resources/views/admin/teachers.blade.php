@@ -3,79 +3,18 @@
 @section('page')
     @php
         $teacherTotal = max(0, (int) ($stats['total'] ?? 0));
-
-        $teacherStatCards = [
+        $teacherExportQuery = array_filter(
             [
-                'label' => 'Teachers',
-                'activeLabel' => 'Total',
-                'active' => $teacherTotal,
-                'total' => $teacherTotal,
-                'icon' => 'teachers',
-                'tone' =>
-                    'from-indigo-100 to-white text-indigo-600 dark:from-indigo-500/20 dark:to-slate-900 dark:text-indigo-300',
+                'q' => $search,
+                'status' => $status !== 'all' ? $status : null,
             ],
-            [
-                'label' => 'Active',
-                'activeLabel' => 'Active',
-                'active' => (int) ($stats['active'] ?? 0),
-                'total' => $teacherTotal,
-                'icon' => 'active',
-                'tone' =>
-                    'from-emerald-100 to-white text-emerald-600 dark:from-emerald-500/20 dark:to-slate-900 dark:text-emerald-300',
-            ],
-            [
-                'label' => 'Inactive',
-                'activeLabel' => 'Inactive',
-                'active' => (int) ($stats['inactive'] ?? 0),
-                'total' => $teacherTotal,
-                'icon' => 'inactive',
-                'tone' =>
-                    'from-rose-100 to-white text-rose-600 dark:from-rose-500/20 dark:to-slate-900 dark:text-rose-300',
-            ],
-        ];
+            fn($value) => $value !== null && $value !== '',
+        );
 
-        if ($hasGenderColumn ?? false) {
-            $teacherStatCards[] = [
-                'label' => 'Women',
-                'activeLabel' => 'Women',
-                'active' => (int) ($stats['female'] ?? 0),
-                'total' => $teacherTotal,
-                'icon' => 'female',
-                'tone' =>
-                    'from-pink-100 to-white text-pink-600 dark:from-pink-500/20 dark:to-slate-900 dark:text-pink-300',
-                'barTone' => 'from-pink-500 to-rose-400',
-                'badgeTone' =>
-                    'bg-pink-50 text-pink-700 ring-pink-100 dark:bg-pink-500/15 dark:text-pink-300 dark:ring-pink-400/20',
-                'showPercent' => true,
-                'progressText' =>
-                    $teacherTotal > 0
-                        ? ((int) ($stats['female'] ?? 0)) . ' of ' . $teacherTotal . ' teachers'
-                        : 'No teachers yet',
-            ];
-
-            $teacherStatCards[] = [
-                'label' => 'Men',
-                'activeLabel' => 'Men',
-                'active' => (int) ($stats['male'] ?? 0),
-                'total' => $teacherTotal,
-                'icon' => 'male',
-                'tone' =>
-                    'from-blue-100 to-white text-blue-600 dark:from-blue-500/20 dark:to-slate-900 dark:text-blue-300',
-                'barTone' => 'from-blue-500 to-cyan-400',
-                'badgeTone' =>
-                    'bg-blue-50 text-blue-700 ring-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/20',
-                'showPercent' => true,
-                'progressText' =>
-                    $teacherTotal > 0
-                        ? ((int) ($stats['male'] ?? 0)) . ' of ' . $teacherTotal . ' teachers'
-                        : 'No teachers yet',
-            ];
-        }
-
-        $teacherTableColspan = 5 + ($hasPhoneColumn ?? false ? 1 : 0) + ($hasGenderColumn ?? false ? 1 : 0);
+        $teacherTableColspan = 6 + ($hasPhoneColumn ?? false ? 1 : 0) + ($hasGenderColumn ?? false ? 1 : 0);
 
         $panelClass =
-            'teacher-reveal teacher-float rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_24px_55px_-42px_rgba(15,23,42,0.75)] ring-1 ring-slate-200/70 dark:border-slate-700/80 dark:bg-slate-900/95 dark:ring-slate-700/80 dark:shadow-[0_24px_70px_-42px_rgba(0,0,0,0.9)]';
+            'teacher-reveal rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-800';
 
         $labelClass = 'mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300';
 
@@ -86,11 +25,43 @@
             'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:file:bg-indigo-500/15 dark:file:text-indigo-300 dark:hover:file:bg-indigo-500/25 dark:focus:border-indigo-400 dark:focus:ring-indigo-500/20';
     @endphp
 
-    <div class="teacher-stage admin-management-page teacher-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
-        <x-admin.page-header reveal-class="teacher-reveal" delay="1" icon="teachers" title="Teacher Management"
-            subtitle="Create, edit, activate, deactivate, and remove teacher accounts." />
+    <div
+        class="teacher-stage admin-management-page teacher-page mx-auto max-w-[1500px] space-y-5 pb-8 text-slate-900 dark:text-slate-100">
+        <section class="teacher-reveal flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between" style="--sd: 1;">
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-950 dark:text-white">Teachers</h1>
+                <p class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-8 0v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Total: {{ number_format($teacherTotal) }}
+                </p>
+            </div>
 
-        <x-admin.stat-cards :cards="$teacherStatCards" reveal-class="teacher-reveal" float-class="teacher-float" />
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('admin.teachers.export.excel', $teacherExportQuery) }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <path d="M7 10l5 5 5-5" />
+                        <path d="M12 15V3" />
+                    </svg>
+                    Export data
+                </a>
+
+                <button type="button" onclick="window.dispatchEvent(new CustomEvent('open-teacher-create'))"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Add teacher
+                </button>
+            </div>
+        </section>
 
         @if (session('success'))
             <div class="teacher-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300"
@@ -150,136 +121,146 @@
                             </p>
                         </div>
 
-                        <button type="button" @click="createOpen = false"
-                            aria-controls="create-teacher-form-panel"
+                        <button type="button" @click="createOpen = false" aria-controls="create-teacher-form-panel"
                             class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-600 text-lg font-black leading-none text-white shadow-sm transition hover:bg-red-500 focus:outline-none focus:ring-4 focus:ring-red-200 dark:focus:ring-red-500/25"
                             aria-label="Close create teacher form">
                             &times;
                         </button>
                     </div>
 
-                <form id="create-teacher-form-panel" method="POST" action="{{ route('admin.teachers.store') }}"
-                    enctype="multipart/form-data" class="js-create-form">
-                    @csrf
+                    <form id="create-teacher-form-panel" method="POST" action="{{ route('admin.teachers.store') }}"
+                        enctype="multipart/form-data" class="js-create-form">
+                        @csrf
 
-                    <input type="hidden" name="_form" value="create_teacher">
+                        <input type="hidden" name="_form" value="create_teacher">
 
-                    <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
-                        <div class="grid gap-5 lg:grid-cols-2">
+                        <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
+                            <div class="grid gap-5 lg:grid-cols-2">
 
-                    <div>
-                        <label for="name" class="{{ $labelClass }}">Full Name</label>
-                        <input id="name" name="name" type="text" value="{{ old('name') }}"
-                            class="{{ $inputClass }}" placeholder="Teacher full name">
+                                <div>
+                                    <label for="name" class="{{ $labelClass }}">Full Name</label>
+                                    <input id="name" name="name" type="text" value="{{ old('name') }}"
+                                        class="{{ $inputClass }}" placeholder="Teacher full name">
 
-                        @error('name')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
+                                    @error('name')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
 
-                    <div>
-                        <label for="email" class="{{ $labelClass }}">Email</label>
-                        <input id="email" name="email" type="email" value="{{ old('email') }}"
-                            class="{{ $inputClass }}" placeholder="teacher@example.com">
+                                <div>
+                                    <label for="email" class="{{ $labelClass }}">Email</label>
+                                    <input id="email" name="email" type="email" value="{{ old('email') }}"
+                                        class="{{ $inputClass }}" placeholder="teacher@example.com">
 
-                        @error('email')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
+                                    @error('email')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
 
-                    @if ($hasPhoneColumn ?? false)
-                        <div>
-                            <label for="phone_number" class="{{ $labelClass }}">Phone Number</label>
-                            <input id="phone_number" name="phone_number" type="text" value="{{ old('phone_number') }}"
-                                class="{{ $inputClass }}" placeholder="+855 12 345 678">
+                                @if ($hasPhoneColumn ?? false)
+                                    <div>
+                                        <label for="phone_number" class="{{ $labelClass }}">Phone Number</label>
+                                        <input id="phone_number" name="phone_number" type="text"
+                                            value="{{ old('phone_number') }}" class="{{ $inputClass }}"
+                                            placeholder="+855 12 345 678">
 
-                            @error('phone_number')
-                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                            @enderror
+                                        @error('phone_number')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endif
+
+                                @if ($hasGenderColumn ?? false)
+                                    <div>
+                                        <label for="gender" class="{{ $labelClass }}">Gender</label>
+                                        <select id="gender" name="gender" class="{{ $inputClass }}">
+                                            <option value=""
+                                                {{ old('gender') === null || old('gender') === '' ? 'selected' : '' }}>
+                                                Not set
+                                            </option>
+                                            <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>
+                                                Women
+                                            </option>
+                                            <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Men
+                                            </option>
+                                        </select>
+
+                                        @error('gender')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endif
+
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="password" class="{{ $labelClass }}">Password</label>
+                                        <input id="password" name="password" type="password"
+                                            class="{{ $inputClass }}" placeholder="Minimum 8 characters">
+                                    </div>
+
+                                    <div>
+                                        <label for="password_confirmation" class="{{ $labelClass }}">Confirm</label>
+                                        <input id="password_confirmation" name="password_confirmation" type="password"
+                                            class="{{ $inputClass }}" placeholder="Re-enter password">
+                                    </div>
+                                </div>
+
+                                @error('password')
+                                    <p class="-mt-2 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                    </p>
+                                @enderror
+
+                                <div>
+                                    <label for="avatar_image" class="{{ $labelClass }}">Avatar Image Optional</label>
+                                    <input id="avatar_image" name="avatar_image" type="file" accept="image/*"
+                                        class="{{ $fileInputClass }}">
+
+                                    <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                        Allowed: JPG, PNG, WEBP max 5MB.
+                                    </p>
+
+                                    @error('avatar_image')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                @if ($hasStatusColumn)
+                                    <label
+                                        class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+                                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initial
+                                            Status</span>
+
+                                        <span
+                                            class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
+                                                {{ old('is_active', '1') ? 'checked' : '' }}>
+                                            Active
+                                        </span>
+                                    </label>
+                                @endif
+
+                            </div>
                         </div>
-                    @endif
 
-                    @if ($hasGenderColumn ?? false)
-                        <div>
-                            <label for="gender" class="{{ $labelClass }}">Gender</label>
-                            <select id="gender" name="gender" class="{{ $inputClass }}">
-                                <option value=""
-                                    {{ old('gender') === null || old('gender') === '' ? 'selected' : '' }}>
-                                    Not set
-                                </option>
-                                <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Women</option>
-                                <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Men</option>
-                            </select>
+                        <div
+                            class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
+                            <button type="button" @click="createOpen = false"
+                                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                Cancel
+                            </button>
 
-                            @error('gender')
-                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                            @enderror
+                            <button type="submit"
+                                class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                                Create Teacher
+                            </button>
                         </div>
-                    @endif
-
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="password" class="{{ $labelClass }}">Password</label>
-                            <input id="password" name="password" type="password" class="{{ $inputClass }}"
-                                placeholder="Minimum 8 characters">
-                        </div>
-
-                        <div>
-                            <label for="password_confirmation" class="{{ $labelClass }}">Confirm</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password"
-                                class="{{ $inputClass }}" placeholder="Re-enter password">
-                        </div>
-                    </div>
-
-                    @error('password')
-                        <p class="-mt-2 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                    @enderror
-
-                    <div>
-                        <label for="avatar_image" class="{{ $labelClass }}">Avatar Image Optional</label>
-                        <input id="avatar_image" name="avatar_image" type="file" accept="image/*"
-                            class="{{ $fileInputClass }}">
-
-                        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                            Allowed: JPG, PNG, WEBP max 5MB.
-                        </p>
-
-                        @error('avatar_image')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    @if ($hasStatusColumn)
-                        <label
-                            class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
-                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initial Status</span>
-
-                            <span
-                                class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                <input type="checkbox" name="is_active" value="1"
-                                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
-                                    {{ old('is_active', '1') ? 'checked' : '' }}>
-                                Active
-                            </span>
-                        </label>
-                    @endif
-
-                        </div>
-                    </div>
-
-                    <div
-                        class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
-                        <button type="button" @click="createOpen = false"
-                            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                            Cancel
-                        </button>
-
-                        <button type="submit"
-                            class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                            Create Teacher
-                        </button>
-                    </div>
-                </form>
+                    </form>
                 </div>
             </section>
 
@@ -295,71 +276,36 @@
                     );
                 @endphp
 
-                <div x-data="{ filterOpen: false, exportOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                <div x-data="{ filterOpen: false, exportOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4 p-5">
 
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 class="text-lg font-black text-slate-950 dark:text-white">Teacher List</h2>
+                    <form method="GET" action="{{ route('admin.teachers.index') }}"
+                        class="flex flex-wrap items-center gap-3">
+                        @if ($hasStatusColumn)
+                            <select name="status"
+                                class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                <option value="all" {{ $status === 'all' ? 'selected' : '' }}>Status</option>
+                                <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        @endif
 
-                        <div class="flex flex-wrap items-center gap-3">
-                            <button type="button" @click="window.dispatchEvent(new CustomEvent('open-teacher-create'))"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                                <i class="fa-solid fa-plus text-xs"></i>
-                                Create
-                            </button>
+                        <input name="q" type="search" value="{{ $search }}" placeholder="Search teachers"
+                            class="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 sm:max-w-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500">
 
-                            {{-- EXPORT --}}
-                            <div class="relative" @keydown.escape.window="exportOpen = false">
-                                <button type="button" @click="exportOpen = !exportOpen"
-                                    :aria-expanded="exportOpen.toString()" aria-haspopup="menu"
-                                    class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100 dark:border-rose-400/20 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25">
-                                    <i class="fa-solid fa-file-export"></i>
-                                    Export
-                                    <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"
-                                        :class="{ 'rotate-180': exportOpen }"></i>
-                                </button>
+                        <button type="submit"
+                            class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            Apply
+                        </button>
 
-                                <div x-show="exportOpen" x-cloak x-transition.opacity.scale.origin.top.right
-                                    @click.outside="exportOpen = false"
-                                    class="absolute right-0 z-20 mt-3 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
-
-                                    <a href="{{ route('admin.teachers.export.pdf', $teacherExportQuery) }}"
-                                        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/15">
-                                        <span
-                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">
-                                            <i class="fa-solid fa-file-pdf"></i>
-                                        </span>
-                                        <span>
-                                            <span class="block">PDF Report</span>
-                                            <span
-                                                class="block text-xs font-medium text-slate-500 dark:text-slate-400">Download
-                                                as PDF</span>
-                                        </span>
-                                    </a>
-
-                                    <a href="{{ route('admin.teachers.export.excel', $teacherExportQuery) }}"
-                                        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-500/15">
-                                        <span
-                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                            <i class="fa-solid fa-file-excel"></i>
-                                        </span>
-                                        <span>
-                                            <span class="block">Excel Report</span>
-                                            <span
-                                                class="block text-xs font-medium text-slate-500 dark:text-slate-400">Download
-                                                as workbook</span>
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            {{-- FILTER --}}
-                            <button type="button" @click="filterOpen = true"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                                <i class="fa-solid fa-filter text-xs"></i>
-                                Filters
-                            </button>
-                        </div>
-                    </div>
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 6h16M7 12h10M10 18h4" />
+                            </svg>
+                            All filters
+                        </button>
+                    </form>
 
                     {{-- FILTER OVERLAY --}}
                     <div x-show="filterOpen" x-cloak x-transition.opacity
@@ -457,34 +403,41 @@
 
                     {{-- TABLE --}}
                     <div class="min-w-0">
-                        <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div class="teacher-table-scroller max-h-[700px] overflow-auto">
-                                <table class="admin-table teacher-table w-full min-w-[1280px] text-left text-sm">
+                        <div
+                            class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+                            <div class="teacher-table-scroller min-h-[520px] max-h-[720px] overflow-auto">
+                                <table class="student-roster-table teacher-table w-full min-w-[1120px] text-left text-sm">
                                     <thead
-                                        class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                                        class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
                                         <tr>
-                                            <th class="px-3 py-3 font-semibold">Teacher</th>
-                                            <th class="px-3 py-3 font-semibold">Email</th>
+                                            <th class="w-20 whitespace-nowrap px-3 py-3 font-bold">ID</th>
+                                            <th class="min-w-[220px] px-3 py-3 font-bold">Teacher</th>
+                                            <th class="min-w-[220px] px-3 py-3 font-bold">Email</th>
 
                                             @if ($hasPhoneColumn ?? false)
-                                                <th class="whitespace-nowrap px-3 py-3 font-semibold">Phone Number</th>
+                                                <th class="w-36 whitespace-nowrap px-3 py-3 font-bold">Phone Number</th>
                                             @endif
 
                                             @if ($hasGenderColumn ?? false)
-                                                <th class="whitespace-nowrap px-3 py-3 font-semibold">Gender</th>
+                                                <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Gender</th>
                                             @endif
 
-                                            <th class="px-3 py-3 font-semibold">Status</th>
-                                            <th class="whitespace-nowrap px-3 py-3 font-semibold">Created</th>
-                                            <th class="px-3 py-3 text-right font-semibold">Actions</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Status</th>
+                                            <th class="w-32 whitespace-nowrap px-3 py-3 font-bold">Created</th>
+                                            <th class="w-36 whitespace-nowrap px-4 py-3 text-right font-bold">Actions</th>
                                         </tr>
                                     </thead>
 
                                     <tbody
-                                        class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
+                                        class="divide-y divide-slate-100 bg-white text-slate-700 dark:divide-slate-700 dark:bg-slate-900 dark:text-slate-300">
                                         @forelse ($teachers as $teacher)
-                                            <tr class="align-top transition hover:bg-slate-50/80 dark:hover:bg-slate-800/70"
-                                                x-data="{ open: false }">
+                                            <tr class="align-middle transition hover:bg-indigo-50/40 dark:hover:bg-slate-800/70"
+                                                x-data="{ open: false, menuOpen: false }">
+                                                <td
+                                                    class="whitespace-nowrap px-3 py-3 text-xs font-bold tabular-nums text-slate-500 dark:text-slate-400">
+                                                    {{ $teacher->id }}
+                                                </td>
+
                                                 <td class="px-3 py-3">
                                                     <div class="flex items-center gap-3">
                                                         <img src="{{ $teacher->avatar_url }}" alt="{{ $teacher->name }}"
@@ -496,7 +449,7 @@
                                                             </div>
 
                                                             <div class="text-xs text-slate-400 dark:text-slate-500">
-                                                                ID #{{ $teacher->formatted_id }}
+                                                                Teacher account
                                                             </div>
                                                         </div>
                                                     </div>
@@ -558,44 +511,105 @@
                                                     {{ $teacher->created_at->format('M d, Y') }}
                                                 </td>
 
-                                                <td class="whitespace-nowrap px-3 py-3">
-                                                    <div
-                                                        class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
-                                                        <button @click="open = true" type="button"
-                                                            class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                            Edit
-                                                        </button>
-
-                                                        @if ($hasStatusColumn)
-                                                            <form method="POST"
-                                                                action="{{ route('admin.teachers.status', $teacher) }}"
-                                                                class="js-status-form"
-                                                                data-teacher="{{ $teacher->name }}"
-                                                                data-action="{{ $teacher->is_active ? 'set inactive' : 'set active' }}">
-                                                                @csrf
-                                                                @method('PATCH')
-
-                                                                <button type="submit"
-                                                                    class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold transition
-                                                                    {{ $teacher->is_active
-                                                                        ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25'
-                                                                        : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25' }}">
-                                                                    {{ $teacher->is_active ? 'Set Inactive' : 'Set Active' }}
-                                                                </button>
-                                                            </form>
+                                                <td class="whitespace-nowrap px-4 py-3 text-right">
+                                                    <div class="relative flex items-center justify-end gap-2"
+                                                        @click.outside="menuOpen = false">
+                                                        @if ($hasPhoneColumn ?? false)
+                                                            <a href="{{ $teacher->phone_number ? 'tel:' . $teacher->phone_number : '#' }}"
+                                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                                aria-label="Call {{ $teacher->name }}">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    aria-hidden="true">
+                                                                    <path
+                                                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L8.09 9.64a16 16 0 0 0 6.27 6.27l1.21-1.21a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z" />
+                                                                </svg>
+                                                            </a>
                                                         @endif
 
-                                                        <form method="POST"
-                                                            action="{{ route('admin.teachers.destroy', $teacher) }}"
-                                                            class="js-delete-form" data-teacher="{{ $teacher->name }}">
-                                                            @csrf
-                                                            @method('DELETE')
+                                                        <a href="mailto:{{ $teacher->email }}"
+                                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                            aria-label="Email {{ $teacher->name }}">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                                aria-hidden="true">
+                                                                <rect x="3" y="5" width="18" height="14"
+                                                                    rx="2" />
+                                                                <path d="m3 7 9 6 9-6" />
+                                                            </svg>
+                                                        </a>
 
-                                                            <button type="submit"
-                                                                class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                                                Delete
+                                                        <button type="button" @click="menuOpen = !menuOpen"
+                                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                            aria-label="Open teacher actions">
+                                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"
+                                                                aria-hidden="true">
+                                                                <path
+                                                                    d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                                                            </svg>
+                                                        </button>
+
+                                                        <div x-show="menuOpen" x-cloak
+                                                            x-transition.opacity.scale.origin.top.right
+                                                            class="absolute right-0 top-9 z-30 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-left shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
+                                                            <button type="button" @click="open = true; menuOpen = false"
+                                                                class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-300">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    aria-hidden="true">
+                                                                    <path d="M12 20h9" />
+                                                                    <path
+                                                                        d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                                                </svg>
+                                                                Edit
                                                             </button>
-                                                        </form>
+
+                                                            @if ($hasStatusColumn)
+                                                                <form method="POST"
+                                                                    action="{{ route('admin.teachers.status', $teacher) }}"
+                                                                    class="js-status-form"
+                                                                    data-teacher="{{ $teacher->name }}"
+                                                                    data-action="{{ $teacher->is_active ? 'set inactive' : 'set active' }}">
+                                                                    @csrf
+                                                                    @method('PATCH')
+
+                                                                    <button type="submit"
+                                                                        class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                                        <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2" stroke-linecap="round"
+                                                                            stroke-linejoin="round" aria-hidden="true">
+                                                                            <path d="M20 6 9 17l-5-5" />
+                                                                        </svg>
+                                                                        {{ $teacher->is_active ? 'Set inactive' : 'Set active' }}
+                                                                    </button>
+                                                                </form>
+                                                            @endif
+
+                                                            <form method="POST"
+                                                                action="{{ route('admin.teachers.destroy', $teacher) }}"
+                                                                class="js-delete-form"
+                                                                data-teacher="{{ $teacher->name }}">
+                                                                @csrf
+                                                                @method('DELETE')
+
+                                                                <button type="submit"
+                                                                    class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/15">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                        fill="none" stroke="currentColor"
+                                                                        stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                        <path d="M3 6h18" />
+                                                                        <path d="M8 6V4h8v2" />
+                                                                        <path d="M19 6l-1 14H6L5 6" />
+                                                                    </svg>
+                                                                    Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
 
                                                     {{-- EDIT MODAL --}}
@@ -778,7 +792,8 @@
                             </div>
                         </div>
 
-                        <div class="teacher-pagination mt-5 text-slate-700 dark:text-slate-300">
+                        <div
+                            class="teacher-pagination -mx-5 -mb-5 border-t border-slate-100 bg-slate-50/70 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                             {{ $teachers->links() }}
                         </div>
                     </div>

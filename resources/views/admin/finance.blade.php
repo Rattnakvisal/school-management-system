@@ -9,6 +9,17 @@
         $studentsPaid = (int) ($stats['students_paid'] ?? 0);
 
         $billableTotal = max((float) ($stats['billable'] ?? 0), $collectedTotal + $outstandingTotal + $discountTotal);
+        $financeExportQuery = array_filter(
+            [
+                'q' => $search,
+                'student_id' => $studentId !== 'all' ? $studentId : null,
+                'status' => $status !== 'all' ? $status : null,
+                'class_id' => $classId !== 'all' ? $classId : null,
+                'from' => $from !== '' ? $from : null,
+                'to' => $to !== '' ? $to : null,
+            ],
+            fn($value) => $value !== null && $value !== '',
+        );
 
         $studentPaidTotalSet = collect($studentPaidTotals ?? [])->mapWithKeys(
             fn($value, $id) => [(string) $id => (float) $value],
@@ -40,55 +51,6 @@
             ];
         });
 
-        $financeCards = [
-            [
-                'label' => 'Collected',
-                'activeLabel' => 'Income',
-                'active' => (int) round($collectedTotal),
-                'total' => max(1, (int) round($billableTotal)),
-                'displayActive' => '$' . number_format($collectedTotal, 2),
-                'displayTotal' => '$' . number_format($billableTotal, 2),
-                'icon' => 'active',
-                'tone' =>
-                    'from-emerald-100 to-white text-emerald-600 dark:from-emerald-500/20 dark:to-slate-900 dark:text-emerald-300',
-                'barTone' => 'from-emerald-500 to-teal-400',
-            ],
-            [
-                'label' => 'Outstanding',
-                'activeLabel' => 'Due',
-                'active' => (int) round($outstandingTotal),
-                'total' => max(1, (int) round($billableTotal)),
-                'displayActive' => '$' . number_format($outstandingTotal, 2),
-                'displayTotal' => '$' . number_format($billableTotal, 2),
-                'icon' => 'pending',
-                'tone' =>
-                    'from-amber-100 to-white text-amber-600 dark:from-amber-500/20 dark:to-slate-900 dark:text-amber-300',
-                'barTone' => 'from-amber-500 to-orange-400',
-            ],
-            [
-                'label' => 'Discounts',
-                'activeLabel' => 'Given',
-                'active' => (int) round($discountTotal),
-                'total' => max(1, (int) round($billableTotal)),
-                'displayActive' => '$' . number_format($discountTotal, 2),
-                'displayTotal' => '$' . number_format($billableTotal, 2),
-                'icon' => 'records',
-                'tone' => 'from-sky-100 to-white text-sky-600 dark:from-sky-500/20 dark:to-slate-900 dark:text-sky-300',
-                'barTone' => 'from-sky-500 to-indigo-400',
-            ],
-            [
-                'label' => 'Payment Records',
-                'activeLabel' => 'Records',
-                'active' => $paymentTotal,
-                'total' => max(1, $paymentTotal),
-                'displayActive' => number_format($paymentTotal),
-                'displayTotal' => number_format($studentsPaid) . ' students',
-                'icon' => 'assignment',
-                'tone' =>
-                    'from-indigo-100 to-white text-indigo-600 dark:from-indigo-500/20 dark:to-slate-900 dark:text-indigo-300',
-            ],
-        ];
-
         $statusTone = [
             'paid' =>
                 'bg-emerald-50 text-emerald-700 ring-emerald-100 dark:bg-emerald-500/15 dark:text-white-300 dark:ring-emerald-400/20',
@@ -103,7 +65,7 @@
         ];
 
         $panelClass =
-            'student-reveal student-float rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_24px_55px_-42px_rgba(15,23,42,0.75)] ring-1 ring-slate-200/70 dark:border-slate-700/80 dark:bg-slate-900/95 dark:ring-slate-700/80 dark:shadow-[0_24px_70px_-42px_rgba(0,0,0,0.9)]';
+            'student-reveal rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-800';
 
         $labelClass = 'mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300';
 
@@ -152,12 +114,42 @@
     </style>
 
     <div
-        class="student-stage admin-management-page finance-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
-        <x-admin.page-header reveal-class="student-reveal" delay="1" icon="finance" title="School Finance"
-            subtitle="Record student payments, track outstanding balances, and export finance details for reports." />
+        class="student-stage admin-management-page finance-page mx-auto max-w-[1500px] space-y-5 pb-8 text-slate-900 dark:text-slate-100">
+        <section class="student-reveal flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between" style="--sd: 1;">
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-950 dark:text-white">School Finance</h1>
+                <p class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 2v20" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                    Total: {{ number_format($paymentTotal) }}
+                </p>
+            </div>
 
-        <x-admin.stat-cards :cards="$financeCards" reveal-class="student-reveal" float-class="student-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('admin.finance.export.excel', $financeExportQuery) }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <path d="M7 10l5 5 5-5" />
+                        <path d="M12 15V3" />
+                    </svg>
+                    Export data
+                </a>
+
+                <button type="button" onclick="window.dispatchEvent(new CustomEvent('open-finance-create'))"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Add payment
+                </button>
+            </div>
+        </section>
 
         @if (!$tableReady)
             <div class="student-reveal rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300"
@@ -244,7 +236,8 @@
                                     </select>
 
                                     @error('student_id')
-                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}
                                         </p>
                                     @enderror
 
@@ -300,7 +293,8 @@
                                         <label for="amount" class="{{ $labelClass }}">Amount</label>
 
                                         <input id="amount" name="amount" type="number" step="0.01" min="0"
-                                            value="{{ old('amount') }}" data-auto-filled="{{ old('amount') ? '0' : '1' }}"
+                                            value="{{ old('amount') }}"
+                                            data-auto-filled="{{ old('amount') ? '0' : '1' }}"
                                             @disabled(!$tableReady) class="js-finance-amount {{ $inputClass }}"
                                             placeholder="0.00">
 
@@ -416,75 +410,48 @@
                     );
                 @endphp
 
-                <div class="{{ $panelClass }}" style="--sd: 4;" x-data="{ filterOpen: false, exportOpen: false }">
+                <div class="{{ $panelClass }} p-5" style="--sd: 4;" x-data="{ filterOpen: false, exportOpen: false }">
 
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 class="text-xl font-black tracking-[-0.03em] text-slate-950 dark:text-white">
-                            Payment
-                        </h2>
+                    <form method="GET" action="{{ route('admin.finance.index') }}"
+                        class="flex flex-wrap items-center gap-3">
+                        <select name="class_id"
+                            class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>Classes</option>
+                            @foreach ($classes as $classOption)
+                                <option value="{{ $classOption->id }}"
+                                    {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                    {{ $classOption->display_name }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                        <div class="flex flex-wrap items-center gap-3">
-                            <button type="button" @click="window.dispatchEvent(new CustomEvent('open-finance-create'))"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                                <i class="fa-solid fa-plus text-xs"></i>
-                                Create
-                            </button>
+                        <select name="status"
+                            class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="all" {{ $status === 'all' ? 'selected' : '' }}>Status</option>
+                            @foreach ($statuses as $statusOption)
+                                <option value="{{ $statusOption }}" {{ $status === $statusOption ? 'selected' : '' }}>
+                                    {{ ucfirst($statusOption) }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                            {{-- EXPORT --}}
-                            <div class="relative" @keydown.escape.window="exportOpen = false">
-                                <button type="button" @click="exportOpen = !exportOpen"
-                                    :aria-expanded="exportOpen.toString()" aria-haspopup="menu"
-                                    class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100 dark:border-rose-400/20 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25">
-                                    <i class="fa-solid fa-file-export text-xs"></i>
-                                    Export
-                                    <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200"
-                                        :class="{ 'rotate-180': exportOpen }"></i>
-                                </button>
+                        <input name="q" type="search" value="{{ $search }}" placeholder="Search finance"
+                            class="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 sm:max-w-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500">
 
-                                <div x-show="exportOpen" x-cloak x-transition.opacity.scale.origin.top.right
-                                    @click.outside="exportOpen = false"
-                                    class="absolute right-0 z-40 mt-3 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
+                        <button type="submit"
+                            class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            Apply
+                        </button>
 
-                                    <a href="{{ route('admin.finance.export.pdf', $financeExportQuery) }}"
-                                        class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/15">
-                                        <span
-                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">
-                                            <i class="fa-solid fa-file-pdf"></i>
-                                        </span>
-
-                                        <span>
-                                            <span class="block">PDF Report</span>
-                                            <span class="block text-xs font-medium text-slate-500 dark:text-slate-400">
-                                                Download as PDF
-                                            </span>
-                                        </span>
-                                    </a>
-
-                                    <a href="{{ route('admin.finance.export.excel', $financeExportQuery) }}"
-                                        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-500/15">
-                                        <span
-                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                            <i class="fa-solid fa-file-excel"></i>
-                                        </span>
-
-                                        <span>
-                                            <span class="block">Excel Report</span>
-                                            <span class="block text-xs font-medium text-slate-500 dark:text-slate-400">
-                                                Download as workbook
-                                            </span>
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            {{-- FILTER --}}
-                            <button type="button" @click="filterOpen = true"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                                <i class="fa-solid fa-filter text-xs"></i>
-                                Filters
-                            </button>
-                        </div>
-                    </div>
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 6h16M7 12h10M10 18h4" />
+                            </svg>
+                            All filters
+                        </button>
+                    </form>
 
                     {{-- FILTER OVERLAY --}}
                     <div x-show="filterOpen" x-cloak x-transition.opacity
@@ -594,7 +561,7 @@
                     {{-- TABLE --}}
                     <div class="mt-5">
                         <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div class="finance-table-scroller max-h-[720px] overflow-auto"
+                            <div class="finance-table-scroller min-h-[520px] max-h-[720px] overflow-auto"
                                 style="scrollbar-gutter: stable;">
                                 <table class="admin-table finance-payment-table w-full min-w-[1280px] text-left text-sm">
                                     <thead class="{{ $tableHeadClass }}">
@@ -770,24 +737,48 @@
                                                 </td>
 
                                                 <td class="student-col-actions px-3 py-3 align-top">
-                                                    <div class="flex justify-end gap-2" x-data="{ editOpen: false }">
+                                                    <div class="relative flex items-center justify-end gap-2"
+                                                        x-data="{ editOpen: false, menuOpen: false }" @click.outside="menuOpen = false">
                                                         @if ($latestPayment)
-                                                            <button type="button" @click="editOpen = true"
-                                                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                                Edit
+                                                            <button type="button" @click="menuOpen = !menuOpen"
+                                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                                aria-label="Open payment actions">
+                                                                <svg class="h-5 w-5" viewBox="0 0 24 24"
+                                                                    fill="currentColor" aria-hidden="true">
+                                                                    <path
+                                                                        d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                                                                </svg>
                                                             </button>
 
-                                                            <form method="POST"
-                                                                action="{{ route('admin.finance.destroy', $latestPayment) }}"
-                                                                class="js-finance-delete-form">
-                                                                @csrf
-                                                                @method('DELETE')
-
-                                                                <button type="submit"
-                                                                    class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                                                    Delete
+                                                            <div x-show="menuOpen" x-cloak
+                                                                x-transition.opacity.scale.origin.top.right
+                                                                class="absolute right-0 top-9 z-30 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-left shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
+                                                                <button type="button"
+                                                                    @click="editOpen = true; menuOpen = false"
+                                                                    class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-300">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                        fill="none" stroke="currentColor"
+                                                                        stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                        <path d="M12 20h9" />
+                                                                        <path
+                                                                            d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                                                    </svg>
+                                                                    Edit
                                                                 </button>
-                                                            </form>
+
+                                                                <form method="POST"
+                                                                    action="{{ route('admin.finance.destroy', $latestPayment) }}"
+                                                                    class="js-finance-delete-form">
+                                                                    @csrf
+                                                                    @method('DELETE')
+
+                                                                    <button type="submit"
+                                                                        class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-300 dark:hover:bg-red-500/15">
+                                                                        Delete
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         @else
                                                             <span
                                                                 class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
@@ -797,254 +788,261 @@
 
                                                         @if ($latestPayment)
                                                             {{-- EDIT MODAL --}}
-                                                            <div x-show="editOpen" x-cloak x-transition.opacity
-                                                                class="fixed inset-0 z-[70] grid place-items-center p-4"
-                                                                aria-modal="true" role="dialog">
+                                                            <template x-teleport="body">
+                                                                <div x-show="editOpen" x-cloak x-transition.opacity
+                                                                    class="fixed inset-0 z-[70] grid place-items-center p-4"
+                                                                    aria-modal="true" role="dialog">
 
-                                                                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-                                                                    @click="editOpen = false"></div>
+                                                                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                                                                        @click="editOpen = false"></div>
 
-                                                                <div class="{{ $modalPanelClass }}">
-                                                                    <div
-                                                                        class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-700">
-                                                                        <h3
-                                                                            class="text-lg font-black text-slate-950 dark:text-white">
-                                                                            Edit Payment
-                                                                        </h3>
-
-                                                                        <button type="button" @click="editOpen = false"
-                                                                            class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200">
-                                                                            <svg class="h-5 w-5" viewBox="0 0 24 24"
-                                                                                fill="currentColor">
-                                                                                <path
-                                                                                    d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
-                                                                            </svg>
-                                                                        </button>
-                                                                    </div>
-
-                                                                    <form method="POST"
-                                                                        action="{{ route('admin.finance.update', $latestPayment) }}"
-                                                                        enctype="multipart/form-data"
-                                                                        class="js-edit-form flex min-h-0 flex-1 flex-col"
-                                                                        data-finance-payment-form
-                                                                        data-current-net="{{ $latestPaymentAmount }}">
-                                                                        @csrf
-                                                                        @method('PUT')
-
+                                                                    <div class="{{ $modalPanelClass }}">
                                                                         <div
-                                                                            class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 pb-4 pt-4">
-                                                                            <div class="grid gap-4 sm:grid-cols-2">
-                                                                                <div class="sm:col-span-2">
-                                                                                    <label
-                                                                                        class="{{ $labelClass }}">Student</label>
+                                                                            class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-700">
+                                                                            <h3
+                                                                                class="text-lg font-black text-slate-950 dark:text-white">
+                                                                                Edit Payment
+                                                                            </h3>
 
-                                                                                    <select name="student_id"
-                                                                                        class="js-finance-student-select {{ $inputClass }}">
-                                                                                        @foreach ($students as $student)
-                                                                                            @php
-                                                                                                $isCurrentPaymentStudent =
-                                                                                                    (int) $latestPayment->student_id ===
-                                                                                                    (int) $student->id;
-                                                                                                $studentTuitionTotal =
-                                                                                                    (float) ($student->tuition_total ??
-                                                                                                        0);
-                                                                                                $studentPaidTotal =
-                                                                                                    (float) ($studentPaidTotalSet[
-                                                                                                        (string) $student->id
-                                                                                                    ] ?? 0);
-                                                                                                $studentRemainingTotal = max(
-                                                                                                    $studentTuitionTotal -
-                                                                                                        $studentPaidTotal,
-                                                                                                    0,
-                                                                                                );
-
-                                                                                                $studentPaidInFull =
-                                                                                                    $studentPaidTotal >
-                                                                                                        0 &&
-                                                                                                    ($studentTuitionTotal <=
-                                                                                                        0 ||
-                                                                                                        $studentRemainingTotal <=
-                                                                                                            0.009);
-                                                                                            @endphp
-
-                                                                                            <option
-                                                                                                value="{{ $student->id }}"
-                                                                                                @disabled($studentPaidInFull && !$isCurrentPaymentStudent)
-                                                                                                {{ $isCurrentPaymentStudent ? 'selected' : '' }}>
-                                                                                                {{ $student->name }} -
-                                                                                                {{ $student->email }}
-
-                                                                                                @if ($studentTuitionTotal > 0)
-                                                                                                    - Due
-                                                                                                    ${{ number_format($studentRemainingTotal, 2) }}
-                                                                                                @endif
-
-                                                                                                {{ $studentPaidInFull && !$isCurrentPaymentStudent ? ' (Paid in full)' : '' }}
-                                                                                            </option>
-                                                                                        @endforeach
-                                                                                    </select>
-
-                                                                                    <div class="{{ $summaryBoxClass }}">
-                                                                                        <div
-                                                                                            class="flex items-center justify-between gap-3">
-                                                                                            <span
-                                                                                                class="font-semibold text-slate-600 dark:text-slate-300">Tuition
-                                                                                                from subjects</span>
-                                                                                            <span
-                                                                                                class="font-black text-indigo-700 dark:text-indigo-300"
-                                                                                                data-finance-tuition-total>$0.00</span>
-                                                                                        </div>
-
-                                                                                        <div
-                                                                                            class="mt-1 flex items-center justify-between gap-3">
-                                                                                            <span
-                                                                                                class="font-semibold text-slate-500 dark:text-slate-400">Already
-                                                                                                covered</span>
-                                                                                            <span
-                                                                                                class="font-black text-emerald-700 dark:text-emerald-300"
-                                                                                                data-finance-paid-total>$0.00</span>
-                                                                                        </div>
-
-                                                                                        <div
-                                                                                            class="mt-1 flex items-center justify-between gap-3">
-                                                                                            <span
-                                                                                                class="font-semibold text-slate-500 dark:text-slate-400">Tuition
-                                                                                                discount</span>
-                                                                                            <span
-                                                                                                class="font-black text-sky-700 dark:text-sky-300"
-                                                                                                data-finance-discount-total>$0.00</span>
-                                                                                        </div>
-
-                                                                                        <div
-                                                                                            class="mt-1 flex items-center justify-between gap-3">
-                                                                                            <span
-                                                                                                class="font-semibold text-slate-500 dark:text-slate-400">Cash
-                                                                                                to collect</span>
-                                                                                            <span
-                                                                                                class="font-black text-slate-700 dark:text-slate-100"
-                                                                                                data-finance-net-total>$0.00</span>
-                                                                                        </div>
-
-                                                                                        <div
-                                                                                            class="mt-1 flex items-center justify-between gap-3">
-                                                                                            <span
-                                                                                                class="font-semibold text-slate-500 dark:text-slate-400">Additional
-                                                                                                due</span>
-                                                                                            <span
-                                                                                                class="font-black text-amber-700 dark:text-amber-300"
-                                                                                                data-finance-remaining-total>$0.00</span>
-                                                                                        </div>
-
-                                                                                        <p class="mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400"
-                                                                                            data-finance-tuition-subjects>
-                                                                                            Select a student to load tuition
-                                                                                            fee.
-                                                                                        </p>
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                <div>
-                                                                                    <label
-                                                                                        class="{{ $labelClass }}">Amount</label>
-
-                                                                                    <input name="amount" type="number"
-                                                                                        step="0.01" min="0"
-                                                                                        value="{{ $latestPayment->amount }}"
-                                                                                        data-auto-filled="0"
-                                                                                        class="js-finance-amount {{ $inputClass }}">
-                                                                                </div>
-
-                                                                                <div>
-                                                                                    <label
-                                                                                        class="{{ $labelClass }}">Discount</label>
-
-                                                                                    <input name="discount_amount"
-                                                                                        type="number" step="0.01"
-                                                                                        min="0"
-                                                                                        value="{{ $latestPayment->discount_amount }}"
-                                                                                        class="js-finance-discount {{ $inputClass }}">
-
-                                                                                    <p
-                                                                                        class="mt-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                                                                                        Cannot be greater than amount.
-                                                                                    </p>
-                                                                                </div>
-
-                                                                                <div>
-                                                                                    <label
-                                                                                        class="{{ $labelClass }}">Payment
-                                                                                        Date</label>
-
-                                                                                    <input name="payment_date"
-                                                                                        type="date"
-                                                                                        value="{{ optional($latestPayment->payment_date)->toDateString() }}"
-                                                                                        class="{{ $inputClass }}">
-                                                                                </div>
-
-                                                                                <div>
-                                                                                    <label
-                                                                                        class="{{ $labelClass }}">Due
-                                                                                        Date</label>
-
-                                                                                    <input name="due_date" type="date"
-                                                                                        value="{{ optional($latestPayment->due_date)->toDateString() }}"
-                                                                                        class="{{ $inputClass }}">
-                                                                                </div>
-
-                                                                                <div>
-                                                                                    <label
-                                                                                        class="{{ $labelClass }}">Status</label>
-
-                                                                                    <div
-                                                                                        class="flex min-h-[43px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                                                                        Automatic after save
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                <div>
-                                                                                    <label
-                                                                                        class="{{ $labelClass }}">Method</label>
-
-                                                                                    <select name="payment_method"
-                                                                                        class="{{ $inputClass }}">
-                                                                                        <option value="">Select
-                                                                                            method</option>
-
-                                                                                        @foreach ($paymentMethods as $methodOption)
-                                                                                            <option
-                                                                                                value="{{ $methodOption }}"
-                                                                                                {{ $latestPayment->payment_method === $methodOption ? 'selected' : '' }}>
-                                                                                                {{ \App\Models\StudentPayment::methodLabel($methodOption) }}
-                                                                                            </option>
-                                                                                        @endforeach
-                                                                                    </select>
-                                                                                </div>
-
-                                                                                <div class="sm:col-span-2">
-                                                                                    <label
-                                                                                        class="{{ $labelClass }}">Note</label>
-
-                                                                                    <textarea name="note" rows="3" class="{{ $textareaClass }}">{{ $latestPayment->note }}</textarea>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div
-                                                                            class="flex justify-end gap-2 border-t border-slate-100 px-5 py-4 dark:border-slate-700">
                                                                             <button type="button"
                                                                                 @click="editOpen = false"
-                                                                                class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                                                Cancel
-                                                                            </button>
-
-                                                                            <button type="submit"
-                                                                                class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400">
-                                                                                Save Changes
+                                                                                class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+                                                                                <svg class="h-5 w-5" viewBox="0 0 24 24"
+                                                                                    fill="currentColor">
+                                                                                    <path
+                                                                                        d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.7 2.89 18.3 9.17 12 2.9 5.71 4.3 4.29l6.29 6.3 6.3-6.3 1.41 1.42Z" />
+                                                                                </svg>
                                                                             </button>
                                                                         </div>
-                                                                    </form>
+
+                                                                        <form method="POST"
+                                                                            action="{{ route('admin.finance.update', $latestPayment) }}"
+                                                                            enctype="multipart/form-data"
+                                                                            class="js-edit-form flex min-h-0 flex-1 flex-col"
+                                                                            data-finance-payment-form
+                                                                            data-current-net="{{ $latestPaymentAmount }}">
+                                                                            @csrf
+                                                                            @method('PUT')
+
+                                                                            <div
+                                                                                class="flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 pb-4 pt-4">
+                                                                                <div class="grid gap-4 sm:grid-cols-2">
+                                                                                    <div class="sm:col-span-2">
+                                                                                        <label
+                                                                                            class="{{ $labelClass }}">Student</label>
+
+                                                                                        <select name="student_id"
+                                                                                            class="js-finance-student-select {{ $inputClass }}">
+                                                                                            @foreach ($students as $student)
+                                                                                                @php
+                                                                                                    $isCurrentPaymentStudent =
+                                                                                                        (int) $latestPayment->student_id ===
+                                                                                                        (int) $student->id;
+                                                                                                    $studentTuitionTotal =
+                                                                                                        (float) ($student->tuition_total ??
+                                                                                                            0);
+                                                                                                    $studentPaidTotal =
+                                                                                                        (float) ($studentPaidTotalSet[
+                                                                                                            (string) $student->id
+                                                                                                        ] ?? 0);
+                                                                                                    $studentRemainingTotal = max(
+                                                                                                        $studentTuitionTotal -
+                                                                                                            $studentPaidTotal,
+                                                                                                        0,
+                                                                                                    );
+
+                                                                                                    $studentPaidInFull =
+                                                                                                        $studentPaidTotal >
+                                                                                                            0 &&
+                                                                                                        ($studentTuitionTotal <=
+                                                                                                            0 ||
+                                                                                                            $studentRemainingTotal <=
+                                                                                                                0.009);
+                                                                                                @endphp
+
+                                                                                                <option
+                                                                                                    value="{{ $student->id }}"
+                                                                                                    @disabled($studentPaidInFull && !$isCurrentPaymentStudent)
+                                                                                                    {{ $isCurrentPaymentStudent ? 'selected' : '' }}>
+                                                                                                    {{ $student->name }} -
+                                                                                                    {{ $student->email }}
+
+                                                                                                    @if ($studentTuitionTotal > 0)
+                                                                                                        - Due
+                                                                                                        ${{ number_format($studentRemainingTotal, 2) }}
+                                                                                                    @endif
+
+                                                                                                    {{ $studentPaidInFull && !$isCurrentPaymentStudent ? ' (Paid in full)' : '' }}
+                                                                                                </option>
+                                                                                            @endforeach
+                                                                                        </select>
+
+                                                                                        <div
+                                                                                            class="{{ $summaryBoxClass }}">
+                                                                                            <div
+                                                                                                class="flex items-center justify-between gap-3">
+                                                                                                <span
+                                                                                                    class="font-semibold text-slate-600 dark:text-slate-300">Tuition
+                                                                                                    from subjects</span>
+                                                                                                <span
+                                                                                                    class="font-black text-indigo-700 dark:text-indigo-300"
+                                                                                                    data-finance-tuition-total>$0.00</span>
+                                                                                            </div>
+
+                                                                                            <div
+                                                                                                class="mt-1 flex items-center justify-between gap-3">
+                                                                                                <span
+                                                                                                    class="font-semibold text-slate-500 dark:text-slate-400">Already
+                                                                                                    covered</span>
+                                                                                                <span
+                                                                                                    class="font-black text-emerald-700 dark:text-emerald-300"
+                                                                                                    data-finance-paid-total>$0.00</span>
+                                                                                            </div>
+
+                                                                                            <div
+                                                                                                class="mt-1 flex items-center justify-between gap-3">
+                                                                                                <span
+                                                                                                    class="font-semibold text-slate-500 dark:text-slate-400">Tuition
+                                                                                                    discount</span>
+                                                                                                <span
+                                                                                                    class="font-black text-sky-700 dark:text-sky-300"
+                                                                                                    data-finance-discount-total>$0.00</span>
+                                                                                            </div>
+
+                                                                                            <div
+                                                                                                class="mt-1 flex items-center justify-between gap-3">
+                                                                                                <span
+                                                                                                    class="font-semibold text-slate-500 dark:text-slate-400">Cash
+                                                                                                    to collect</span>
+                                                                                                <span
+                                                                                                    class="font-black text-slate-700 dark:text-slate-100"
+                                                                                                    data-finance-net-total>$0.00</span>
+                                                                                            </div>
+
+                                                                                            <div
+                                                                                                class="mt-1 flex items-center justify-between gap-3">
+                                                                                                <span
+                                                                                                    class="font-semibold text-slate-500 dark:text-slate-400">Additional
+                                                                                                    due</span>
+                                                                                                <span
+                                                                                                    class="font-black text-amber-700 dark:text-amber-300"
+                                                                                                    data-finance-remaining-total>$0.00</span>
+                                                                                            </div>
+
+                                                                                            <p class="mt-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400"
+                                                                                                data-finance-tuition-subjects>
+                                                                                                Select a student to load
+                                                                                                tuition
+                                                                                                fee.
+                                                                                            </p>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <label
+                                                                                            class="{{ $labelClass }}">Amount</label>
+
+                                                                                        <input name="amount"
+                                                                                            type="number" step="0.01"
+                                                                                            min="0"
+                                                                                            value="{{ $latestPayment->amount }}"
+                                                                                            data-auto-filled="0"
+                                                                                            class="js-finance-amount {{ $inputClass }}">
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <label
+                                                                                            class="{{ $labelClass }}">Discount</label>
+
+                                                                                        <input name="discount_amount"
+                                                                                            type="number" step="0.01"
+                                                                                            min="0"
+                                                                                            value="{{ $latestPayment->discount_amount }}"
+                                                                                            class="js-finance-discount {{ $inputClass }}">
+
+                                                                                        <p
+                                                                                            class="mt-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                                                                                            Cannot be greater than amount.
+                                                                                        </p>
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <label
+                                                                                            class="{{ $labelClass }}">Payment
+                                                                                            Date</label>
+
+                                                                                        <input name="payment_date"
+                                                                                            type="date"
+                                                                                            value="{{ optional($latestPayment->payment_date)->toDateString() }}"
+                                                                                            class="{{ $inputClass }}">
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <label
+                                                                                            class="{{ $labelClass }}">Due
+                                                                                            Date</label>
+
+                                                                                        <input name="due_date"
+                                                                                            type="date"
+                                                                                            value="{{ optional($latestPayment->due_date)->toDateString() }}"
+                                                                                            class="{{ $inputClass }}">
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <label
+                                                                                            class="{{ $labelClass }}">Status</label>
+
+                                                                                        <div
+                                                                                            class="flex min-h-[43px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                                                                            Automatic after save
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <div>
+                                                                                        <label
+                                                                                            class="{{ $labelClass }}">Method</label>
+
+                                                                                        <select name="payment_method"
+                                                                                            class="{{ $inputClass }}">
+                                                                                            <option value="">Select
+                                                                                                method</option>
+
+                                                                                            @foreach ($paymentMethods as $methodOption)
+                                                                                                <option
+                                                                                                    value="{{ $methodOption }}"
+                                                                                                    {{ $latestPayment->payment_method === $methodOption ? 'selected' : '' }}>
+                                                                                                    {{ \App\Models\StudentPayment::methodLabel($methodOption) }}
+                                                                                                </option>
+                                                                                            @endforeach
+                                                                                        </select>
+                                                                                    </div>
+
+                                                                                    <div class="sm:col-span-2">
+                                                                                        <label
+                                                                                            class="{{ $labelClass }}">Note</label>
+
+                                                                                        <textarea name="note" rows="3" class="{{ $textareaClass }}">{{ $latestPayment->note }}</textarea>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div
+                                                                                class="flex justify-end gap-2 border-t border-slate-100 px-5 py-4 dark:border-slate-700">
+                                                                                <button type="button"
+                                                                                    @click="editOpen = false"
+                                                                                    class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                                                    Cancel
+                                                                                </button>
+
+                                                                                <button type="submit"
+                                                                                    class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400">
+                                                                                    Save Changes
+                                                                                </button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            </template>
                                                         @endif
                                                     </div>
                                                 </td>
@@ -1062,7 +1060,8 @@
                             </div>
 
                             @if ($payments instanceof \Illuminate\Contracts\Pagination\Paginator)
-                                <div class="finance-pagination p-5 text-slate-700 dark:text-slate-300">
+                                <div
+                                    class="finance-pagination border-t border-slate-100 bg-slate-50/70 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                                     {{ $payments->links() }}
                                 </div>
                             @endif
@@ -1262,7 +1261,7 @@
                 });
             });
 
-            document.querySelectorAll('.finance-payment-table .js-edit-form').forEach((form) => {
+            document.querySelectorAll('.js-edit-form').forEach((form) => {
                 form.addEventListener('submit', (event) => {
                     if (form.dataset.confirmed === '1') {
                         return;

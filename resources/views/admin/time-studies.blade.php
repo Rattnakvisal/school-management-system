@@ -11,48 +11,10 @@
         $scheduleClassTotal = max(0, (int) ($stats['classes'] ?? 0));
         $scheduleSubjectTotal = max(0, (int) ($stats['subjects'] ?? 0));
 
-        $scheduleStatCards = [
-            [
-                'label' => 'Class Slots',
-                'activeLabel' => 'Slots',
-                'active' => $classSlotTotal,
-                'total' => $scheduleSlotTotal,
-                'icon' => 'time',
-                'tone' =>
-                    'from-indigo-100 to-white text-indigo-600 dark:from-indigo-500/20 dark:to-slate-900 dark:text-indigo-300',
-            ],
-            [
-                'label' => 'Subject Slots',
-                'activeLabel' => 'Slots',
-                'active' => $subjectSlotTotal,
-                'total' => $scheduleSlotTotal,
-                'icon' => 'subjects',
-                'tone' => 'from-sky-100 to-white text-sky-600 dark:from-sky-500/20 dark:to-slate-900 dark:text-sky-300',
-            ],
-            [
-                'label' => 'Classes With Slots',
-                'activeLabel' => 'Scheduled',
-                'active' => $classesWithSlots,
-                'total' => $scheduleClassTotal,
-                'icon' => 'assigned',
-                'tone' =>
-                    'from-emerald-100 to-white text-emerald-600 dark:from-emerald-500/20 dark:to-slate-900 dark:text-emerald-300',
-            ],
-            [
-                'label' => 'Subjects With Slots',
-                'activeLabel' => 'Scheduled',
-                'active' => $subjectsWithSlots,
-                'total' => $scheduleSubjectTotal,
-                'icon' => 'study',
-                'tone' =>
-                    'from-amber-100 to-white text-amber-600 dark:from-amber-500/20 dark:to-slate-900 dark:text-amber-300',
-            ],
-        ];
-
         $showCreateFormOnLoad = in_array(old('_form'), ['create_class_time', 'create_subject_time'], true);
 
         $panelClass =
-            'study-time-reveal study-time-float rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_24px_55px_-42px_rgba(15,23,42,0.75)] ring-1 ring-slate-200/70 dark:border-slate-700/80 dark:bg-slate-900/95 dark:ring-slate-700/80 dark:shadow-[0_24px_70px_-42px_rgba(0,0,0,0.9)]';
+            'study-time-reveal rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-800';
 
         $labelClass = 'mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300';
 
@@ -77,12 +39,29 @@
     @endphp
 
     <div
-        class="study-time-stage admin-management-page admin-study-time-page admin-table-dark-scope mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
-        <x-admin.page-header reveal-class="study-time-reveal" delay="1" icon="time" title="Time Studies"
-            subtitle="Manage class and subject study schedules in one place." />
+        class="study-time-stage admin-management-page admin-study-time-page admin-table-dark-scope mx-auto max-w-[1500px] space-y-5 pb-8 text-slate-900 dark:text-slate-100">
+        <section class="study-time-reveal flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between" style="--sd: 1;">
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-950 dark:text-white">Schedule</h1>
+                <p class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 7v5l3 2" />
+                    </svg>
+                    Total: {{ number_format($scheduleSlotTotal) }}
+                </p>
+            </div>
 
-        <x-admin.stat-cards :cards="$scheduleStatCards" reveal-class="study-time-reveal" float-class="study-time-float"
-            grid-class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4" />
+            <button type="button" onclick="window.dispatchEvent(new CustomEvent('open-time-study-create'))"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Add schedule
+            </button>
+        </section>
 
         @if (session('success'))
             <div class="study-time-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300"
@@ -151,294 +130,295 @@
                         </button>
                     </div>
 
-                @php
-                    $classFormDayOfWeek = old('day_of_week', 'all');
+                    @php
+                        $classFormDayOfWeek = old('day_of_week', 'all');
 
-                    $classSlotRows = old('class_slots');
+                        $classSlotRows = old('class_slots');
 
-                    if (!is_array($classSlotRows) || count($classSlotRows) === 0) {
-                        $classSlotRows = [
-                            [
-                                'day_of_week' => $classFormDayOfWeek,
-                                'period' => old('period', 'custom'),
-                                'start_time' => old('start_time', ''),
-                                'end_time' => old('end_time', ''),
-                            ],
-                        ];
-                    }
+                        if (!is_array($classSlotRows) || count($classSlotRows) === 0) {
+                            $classSlotRows = [
+                                [
+                                    'day_of_week' => $classFormDayOfWeek,
+                                    'period' => old('period', 'custom'),
+                                    'start_time' => old('start_time', ''),
+                                    'end_time' => old('end_time', ''),
+                                ],
+                            ];
+                        }
 
-                    $subjectFormClassId = old('subject_class_id', (string) ($classes->first()?->id ?? ''));
+                        $subjectFormClassId = old('subject_class_id', (string) ($classes->first()?->id ?? ''));
 
-                    $subjectFormSlotRows = old('subject_slots');
+                        $subjectFormSlotRows = old('subject_slots');
 
-                    if (!is_array($subjectFormSlotRows) || count($subjectFormSlotRows) === 0) {
-                        $subjectFormSlotRows = [
-                            [
-                                'subject_id' => old('subject_id', ''),
-                                'teacher_id' => old('teacher_id', ''),
-                                'class_time_id' => old('class_time_id', ''),
-                            ],
-                        ];
-                    }
-                @endphp
+                        if (!is_array($subjectFormSlotRows) || count($subjectFormSlotRows) === 0) {
+                            $subjectFormSlotRows = [
+                                [
+                                    'subject_id' => old('subject_id', ''),
+                                    'teacher_id' => old('teacher_id', ''),
+                                    'class_time_id' => old('class_time_id', ''),
+                                ],
+                            ];
+                        }
+                    @endphp
 
-                <div id="time-study-create-panel" tabindex="-1"
-                    class="max-h-[calc(100vh-10rem)] overflow-y-auto px-6 py-5">
+                    <div id="time-study-create-panel" tabindex="-1"
+                        class="max-h-[calc(100vh-10rem)] overflow-y-auto px-6 py-5">
 
-                    {{-- CLASS STUDY TIME --}}
-                    <form method="POST" action="{{ route('admin.time-studies.classes.store') }}"
-                        id="class_time_create_form" class="js-create-form mt-5 space-y-4">
-                        @csrf
+                        {{-- CLASS STUDY TIME --}}
+                        <form method="POST" action="{{ route('admin.time-studies.classes.store') }}"
+                            id="class_time_create_form" class="js-create-form mt-5 space-y-4">
+                            @csrf
 
-                        <input type="hidden" name="_form" value="create_class_time">
+                            <input type="hidden" name="_form" value="create_class_time">
 
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-black text-slate-950 dark:text-white">Class Study Time</h3>
-                            <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                                For all classes
-                            </span>
-                        </div>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-black text-slate-950 dark:text-white">Class Study Time</h3>
+                                <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                                    For all classes
+                                </span>
+                            </div>
 
-                        <p class="{{ $softBoxClass }}">
-                            This creates the selected date/time for every class.
-                        </p>
+                            <p class="{{ $softBoxClass }}">
+                                This creates the selected date/time for every class.
+                            </p>
 
-                        @error('class_slots')
-                            <p class="text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-
-                        <div id="class_slot_rows" class="space-y-3" data-next-index="{{ count($classSlotRows) }}">
-                            @foreach ($classSlotRows as $slotIndex => $slotRow)
-                                @php
-                                    $rowDay = strtolower((string) ($slotRow['day_of_week'] ?? 'all'));
-                                    $rowPeriod = strtolower((string) ($slotRow['period'] ?? 'morning'));
-                                    $rowStart = (string) ($slotRow['start_time'] ?? '');
-                                    $rowEnd = (string) ($slotRow['end_time'] ?? '');
-                                @endphp
-
-                                <div class="js-class-slot-row {{ $slotBoxClass }}">
-                                    <div class="grid gap-3 sm:grid-cols-12">
-                                        <div class="sm:col-span-3">
-                                            <label class="{{ $labelClass }}">Day</label>
-
-                                            <select name="class_slots[{{ $slotIndex }}][day_of_week]"
-                                                class="{{ $inputClass }}">
-                                                @foreach ($dayOptions as $dayKey => $dayLabel)
-                                                    <option value="{{ $dayKey }}"
-                                                        {{ $rowDay === $dayKey ? 'selected' : '' }}>
-                                                        {{ $dayLabel }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-
-                                            @error('class_slots.' . $slotIndex . '.day_of_week')
-                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                    {{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <div class="sm:col-span-3">
-                                            <label class="{{ $labelClass }}">Period</label>
-
-                                            <select name="class_slots[{{ $slotIndex }}][period]"
-                                                class="js-class-period-select {{ $inputClass }}">
-                                                @foreach ($periodOptions as $periodKey => $periodLabel)
-                                                    <option value="{{ $periodKey }}"
-                                                        {{ $rowPeriod === $periodKey ? 'selected' : '' }}>
-                                                        {{ $periodLabel }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-
-                                            @error('class_slots.' . $slotIndex . '.period')
-                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                    {{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <div class="sm:col-span-3">
-                                            <label class="{{ $labelClass }}">Start</label>
-
-                                            <input type="text" name="class_slots[{{ $slotIndex }}][start_time]"
-                                                value="{{ $rowStart }}" required placeholder="07:30 AM or 19:30"
-                                                class="js-class-time-input js-class-start-input {{ $inputClass }}">
-
-                                            <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                                                AM/PM or 24H
-                                            </p>
-
-                                            @error('class_slots.' . $slotIndex . '.start_time')
-                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                    {{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <div class="sm:col-span-3">
-                                            <label class="{{ $labelClass }}">End</label>
-
-                                            <input type="text" name="class_slots[{{ $slotIndex }}][end_time]"
-                                                value="{{ $rowEnd }}" required placeholder="09:00 AM or 21:00"
-                                                class="js-class-time-input js-class-end-input {{ $inputClass }}">
-
-                                            <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                                                AM/PM or 24H
-                                            </p>
-
-                                            @error('class_slots.' . $slotIndex . '.end_time')
-                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                    {{ $message }}</p>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-2 flex justify-end">
-                                        <button type="button"
-                                            class="js-remove-class-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                            Remove
-                                        </button>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <button id="add_class_slot_btn" type="button"
-                            class="w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-400/20 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25">
-                            + Add More Date Time
-                        </button>
-
-                        <button type="submit"
-                            class="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400">
-                            Add Class Time
-                        </button>
-                    </form>
-
-                    {{-- SUBJECT STUDY TIME --}}
-                    <form method="POST" action="{{ route('admin.time-studies.subjects.store') }}"
-                        id="subject_time_create_form"
-                        class="js-create-form mt-6 space-y-4 border-t border-slate-200 pt-6 dark:border-slate-700">
-                        @csrf
-
-                        <input type="hidden" name="_form" value="create_subject_time">
-
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-black text-slate-950 dark:text-white">Subject Study Time</h3>
-                            <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                                Uses class time
-                            </span>
-                        </div>
-
-                        <div>
-                            <label class="{{ $labelClass }}">Class</label>
-
-                            <select id="subject_form_class_id" name="subject_class_id" class="{{ $inputClass }}">
-                                @foreach ($classes as $classOption)
-                                    <option value="{{ $classOption->id }}"
-                                        {{ $subjectFormClassId === (string) $classOption->id ? 'selected' : '' }}>
-                                        {{ $classOption->display_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            @error('subject_class_id')
-                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
+                            @error('class_slots')
+                                <p class="text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
                             @enderror
-                        </div>
 
-                        @error('subject_slots')
-                            <p class="text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
+                            <div id="class_slot_rows" class="space-y-3" data-next-index="{{ count($classSlotRows) }}">
+                                @foreach ($classSlotRows as $slotIndex => $slotRow)
+                                    @php
+                                        $rowDay = strtolower((string) ($slotRow['day_of_week'] ?? 'all'));
+                                        $rowPeriod = strtolower((string) ($slotRow['period'] ?? 'morning'));
+                                        $rowStart = (string) ($slotRow['start_time'] ?? '');
+                                        $rowEnd = (string) ($slotRow['end_time'] ?? '');
+                                    @endphp
 
-                        <div id="subject_slot_rows" class="space-y-3"
-                            data-next-index="{{ count($subjectFormSlotRows) }}">
-                            @foreach ($subjectFormSlotRows as $slotIndex => $subjectSlotRow)
-                                @php
-                                    $rowSubjectId = (string) ($subjectSlotRow['subject_id'] ?? '');
-                                    $rowTeacherId = (string) ($subjectSlotRow['teacher_id'] ?? '');
-                                    $rowClassTimeId = (string) ($subjectSlotRow['class_time_id'] ?? '');
-                                @endphp
+                                    <div class="js-class-slot-row {{ $slotBoxClass }}">
+                                        <div class="grid gap-3 sm:grid-cols-12">
+                                            <div class="sm:col-span-3">
+                                                <label class="{{ $labelClass }}">Day</label>
 
-                                <div class="js-subject-slot-row {{ $slotBoxClass }}">
-                                    <div class="grid gap-3">
-                                        <div>
-                                            <label class="{{ $labelClass }}">Subject</label>
+                                                <select name="class_slots[{{ $slotIndex }}][day_of_week]"
+                                                    class="{{ $inputClass }}">
+                                                    @foreach ($dayOptions as $dayKey => $dayLabel)
+                                                        <option value="{{ $dayKey }}"
+                                                            {{ $rowDay === $dayKey ? 'selected' : '' }}>
+                                                            {{ $dayLabel }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
 
-                                            <select name="subject_slots[{{ $slotIndex }}][subject_id]"
-                                                data-selected="{{ $rowSubjectId }}"
-                                                class="js-subject-form-subject {{ $inputClass }}">
-                                                <option value="">Select a subject</option>
-                                            </select>
+                                                @error('class_slots.' . $slotIndex . '.day_of_week')
+                                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                        {{ $message }}</p>
+                                                @enderror
+                                            </div>
 
-                                            @error('subject_slots.' . $slotIndex . '.subject_id')
-                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                    {{ $message }}</p>
-                                            @enderror
+                                            <div class="sm:col-span-3">
+                                                <label class="{{ $labelClass }}">Period</label>
+
+                                                <select name="class_slots[{{ $slotIndex }}][period]"
+                                                    class="js-class-period-select {{ $inputClass }}">
+                                                    @foreach ($periodOptions as $periodKey => $periodLabel)
+                                                        <option value="{{ $periodKey }}"
+                                                            {{ $rowPeriod === $periodKey ? 'selected' : '' }}>
+                                                            {{ $periodLabel }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+
+                                                @error('class_slots.' . $slotIndex . '.period')
+                                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                        {{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div class="sm:col-span-3">
+                                                <label class="{{ $labelClass }}">Start</label>
+
+                                                <input type="text" name="class_slots[{{ $slotIndex }}][start_time]"
+                                                    value="{{ $rowStart }}" required placeholder="07:30 AM or 19:30"
+                                                    class="js-class-time-input js-class-start-input {{ $inputClass }}">
+
+                                                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                                    AM/PM or 24H
+                                                </p>
+
+                                                @error('class_slots.' . $slotIndex . '.start_time')
+                                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                        {{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div class="sm:col-span-3">
+                                                <label class="{{ $labelClass }}">End</label>
+
+                                                <input type="text" name="class_slots[{{ $slotIndex }}][end_time]"
+                                                    value="{{ $rowEnd }}" required placeholder="09:00 AM or 21:00"
+                                                    class="js-class-time-input js-class-end-input {{ $inputClass }}">
+
+                                                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                                    AM/PM or 24H
+                                                </p>
+
+                                                @error('class_slots.' . $slotIndex . '.end_time')
+                                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                        {{ $message }}</p>
+                                                @enderror
+                                            </div>
                                         </div>
 
-                                        <div>
-                                            <label class="{{ $labelClass }}">Class Time</label>
-
-                                            <select name="subject_slots[{{ $slotIndex }}][class_time_id]"
-                                                data-selected="{{ $rowClassTimeId }}"
-                                                class="js-subject-form-class-time {{ $inputClass }}">
-                                                <option value="">Select class time</option>
-                                            </select>
-
-                                            @error('subject_slots.' . $slotIndex . '.class_time_id')
-                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                    {{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <div>
-                                            <label class="{{ $labelClass }}">Teacher</label>
-
-                                            <select name="subject_slots[{{ $slotIndex }}][teacher_id]"
-                                                data-selected="{{ $rowTeacherId }}"
-                                                class="js-subject-form-teacher {{ $inputClass }}">
-                                                <option value="">Select teacher</option>
-
-                                                @foreach ($teachers as $teacherOption)
-                                                    <option value="{{ $teacherOption->id }}"
-                                                        {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
-                                                        {{ $teacherOption->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-
-                                            @error('subject_slots.' . $slotIndex . '.teacher_id')
-                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                    {{ $message }}</p>
-                                            @enderror
+                                        <div class="mt-2 flex justify-end">
+                                            <button type="button"
+                                                class="js-remove-class-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
+                                                Remove
+                                            </button>
                                         </div>
                                     </div>
+                                @endforeach
+                            </div>
 
-                                    <div class="mt-2 flex justify-end">
-                                        <button type="button"
-                                            class="js-remove-subject-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                            Remove
-                                        </button>
+                            <button id="add_class_slot_btn" type="button"
+                                class="w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-400/20 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25">
+                                + Add More Date Time
+                            </button>
+
+                            <button type="submit"
+                                class="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400">
+                                Add Class Time
+                            </button>
+                        </form>
+
+                        {{-- SUBJECT STUDY TIME --}}
+                        <form method="POST" action="{{ route('admin.time-studies.subjects.store') }}"
+                            id="subject_time_create_form"
+                            class="js-create-form mt-6 space-y-4 border-t border-slate-200 pt-6 dark:border-slate-700">
+                            @csrf
+
+                            <input type="hidden" name="_form" value="create_subject_time">
+
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-black text-slate-950 dark:text-white">Subject Study Time</h3>
+                                <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                                    Uses class time
+                                </span>
+                            </div>
+
+                            <div>
+                                <label class="{{ $labelClass }}">Class</label>
+
+                                <select id="subject_form_class_id" name="subject_class_id" class="{{ $inputClass }}">
+                                    @foreach ($classes as $classOption)
+                                        <option value="{{ $classOption->id }}"
+                                            {{ $subjectFormClassId === (string) $classOption->id ? 'selected' : '' }}>
+                                            {{ $classOption->display_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                @error('subject_class_id')
+                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            @error('subject_slots')
+                                <p class="text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
+                            @enderror
+
+                            <div id="subject_slot_rows" class="space-y-3"
+                                data-next-index="{{ count($subjectFormSlotRows) }}">
+                                @foreach ($subjectFormSlotRows as $slotIndex => $subjectSlotRow)
+                                    @php
+                                        $rowSubjectId = (string) ($subjectSlotRow['subject_id'] ?? '');
+                                        $rowTeacherId = (string) ($subjectSlotRow['teacher_id'] ?? '');
+                                        $rowClassTimeId = (string) ($subjectSlotRow['class_time_id'] ?? '');
+                                    @endphp
+
+                                    <div class="js-subject-slot-row {{ $slotBoxClass }}">
+                                        <div class="grid gap-3">
+                                            <div>
+                                                <label class="{{ $labelClass }}">Subject</label>
+
+                                                <select name="subject_slots[{{ $slotIndex }}][subject_id]"
+                                                    data-selected="{{ $rowSubjectId }}"
+                                                    class="js-subject-form-subject {{ $inputClass }}">
+                                                    <option value="">Select a subject</option>
+                                                </select>
+
+                                                @error('subject_slots.' . $slotIndex . '.subject_id')
+                                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                        {{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label class="{{ $labelClass }}">Class Time</label>
+
+                                                <select name="subject_slots[{{ $slotIndex }}][class_time_id]"
+                                                    data-selected="{{ $rowClassTimeId }}"
+                                                    class="js-subject-form-class-time {{ $inputClass }}">
+                                                    <option value="">Select class time</option>
+                                                </select>
+
+                                                @error('subject_slots.' . $slotIndex . '.class_time_id')
+                                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                        {{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label class="{{ $labelClass }}">Teacher</label>
+
+                                                <select name="subject_slots[{{ $slotIndex }}][teacher_id]"
+                                                    data-selected="{{ $rowTeacherId }}"
+                                                    class="js-subject-form-teacher {{ $inputClass }}">
+                                                    <option value="">Select teacher</option>
+
+                                                    @foreach ($teachers as $teacherOption)
+                                                        <option value="{{ $teacherOption->id }}"
+                                                            {{ $rowTeacherId === (string) $teacherOption->id ? 'selected' : '' }}>
+                                                            {{ $teacherOption->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+
+                                                @error('subject_slots.' . $slotIndex . '.teacher_id')
+                                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                        {{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-2 flex justify-end">
+                                            <button type="button"
+                                                class="js-remove-subject-slot rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
+                                                Remove
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            @endforeach
-                        </div>
+                                @endforeach
+                            </div>
 
-                        <button id="add_subject_slot_btn" type="button"
-                            class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                            + Add More Subject Time
-                        </button>
+                            <button id="add_subject_slot_btn" type="button"
+                                class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                + Add More Subject Time
+                            </button>
 
-                        <button type="submit"
-                            class="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500">
-                            Add Subject Times From Class
-                        </button>
-                    </form>
-                </div>
+                            <button type="submit"
+                                class="w-full rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500">
+                                Add Subject Times From Class
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </section>
 
             {{-- LIST --}}
             <section class="{{ $panelClass }} xl:col-span-12" style="--sd: 4;">
-                <div x-data="{
+                <div class="p-5" x-data="{
                     filterOpen: false,
                     activeTab: @js(in_array($tab, ['class', 'subject', 'teacher'], true) ? $tab : 'class'),
                     switchTab(tab) {
@@ -447,59 +427,92 @@
                         url.searchParams.set('tab', tab);
                         window.history.replaceState({}, '', url);
                     }
-                }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                }" @open-filter-panel.window="filterOpen = true"
+                    class="space-y-4">
+                    <form method="GET" action="{{ route('admin.time-studies.index') }}"
+                        class="flex flex-wrap items-center gap-3">
+                        <input type="hidden" name="tab" :value="activeTab">
+                        <input type="hidden" name="per_page" value="{{ $perPage }}">
 
-                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                        <h2 class="text-lg font-black text-slate-950 dark:text-white">
-                            <span x-show="activeTab === 'class'" x-cloak>Class List</span>
-                            <span x-show="activeTab === 'subject'" x-cloak>Subject List</span>
-                            <span x-show="activeTab === 'teacher'" x-cloak>Teacher Study List</span>
-                        </h2>
+                        <select name="class_id"
+                            class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>Classes</option>
+                            @foreach ($classes as $classOption)
+                                <option value="{{ $classOption->id }}"
+                                    {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                    {{ $classOption->display_name }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                        <div class="flex w-full flex-wrap items-center justify-end gap-2 lg:w-auto">
-                            <button type="button"
-                                @click="window.dispatchEvent(new CustomEvent('open-time-study-create'))"
-                                class="inline-flex min-w-[130px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                                <i class="fa-solid fa-plus text-xs"></i>
-                                Create
-                            </button>
+                        <select name="period"
+                            class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                            <option value="all" {{ $period === 'all' ? 'selected' : '' }}>Periods</option>
+                            @foreach ($periodOptions as $periodKey => $periodLabel)
+                                <option value="{{ $periodKey }}" {{ $period === $periodKey ? 'selected' : '' }}>
+                                    {{ $periodLabel }}
+                                </option>
+                            @endforeach
+                        </select>
 
-                            <div
-                                class="max-w-full overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800">
-                                <div class="inline-flex min-w-max">
-                                    <button type="button" @click="switchTab('class')" class="{{ $tabButtonBase }}"
-                                        :class="activeTab === 'class'
-                                            ?
-                                            'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' :
-                                            'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
-                                        Class Times
-                                    </button>
+                        <input name="q" type="search" value="{{ $search }}" placeholder="Search schedules"
+                            class="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 sm:max-w-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500">
 
-                                    <button type="button" @click="switchTab('subject')" class="{{ $tabButtonBase }}"
-                                        :class="activeTab === 'subject'
-                                            ?
-                                            'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' :
-                                            'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
-                                        Subject Times
-                                    </button>
+                        <button type="submit"
+                            class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            Apply
+                        </button>
 
-                                    <button type="button" @click="switchTab('teacher')" class="{{ $tabButtonBase }}"
-                                        :class="activeTab === 'teacher'
-                                            ?
-                                            'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' :
-                                            'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
-                                        Teacher Times
-                                    </button>
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 6h16M7 12h10M10 18h4" />
+                            </svg>
+                            All filters
+                        </button>
+                        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                            <div class="flex w-full flex-wrap items-center justify-end gap-2 lg:w-auto">
+                                <button type="button"
+                                    @click="window.dispatchEvent(new CustomEvent('open-time-study-create'))"
+                                    class="hidden min-w-[130px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                                    <i class="fa-solid fa-plus text-xs"></i>
+                                    Create
+                                </button>
+
+                                <div
+                                    class="max-w-full overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800">
+                                    <div class="inline-flex min-w-max">
+                                        <button type="button" @click="switchTab('class')" class="{{ $tabButtonBase }}"
+                                            :class="activeTab === 'class'
+                                                ?
+                                                'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' :
+                                                'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                                            Class Times
+                                        </button>
+
+                                        <button type="button" @click="switchTab('subject')"
+                                            class="{{ $tabButtonBase }}"
+                                            :class="activeTab === 'subject'
+                                                ?
+                                                'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' :
+                                                'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                                            Subject Times
+                                        </button>
+
+                                        <button type="button" @click="switchTab('teacher')"
+                                            class="{{ $tabButtonBase }}"
+                                            :class="activeTab === 'teacher'
+                                                ?
+                                                'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' :
+                                                'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'">
+                                            Teacher Times
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-
-                            <button type="button" @click="filterOpen = true"
-                                class="inline-flex min-w-[130px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                                <i class="fa-solid fa-filter text-xs"></i>
-                                Filters
-                            </button>
                         </div>
-                    </div>
+                    </form>
 
                     {{-- FILTER OVERLAY --}}
                     <div x-show="filterOpen" x-cloak x-transition.opacity
@@ -644,10 +657,10 @@
                     {{-- TABLES --}}
                     <div class="min-w-0">
                         <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div class="study-time-table-scroller max-h-[800px] overflow-auto">
+                            <div class="study-time-table-scroller min-h-[520px] max-h-[720px] overflow-auto">
                                 {{-- CLASS TABLE --}}
                                 <div x-show="activeTab === 'class'" x-cloak>
-                                    <table class="admin-table study-time-table w-full min-w-[1280px] text-left text-sm">
+                                    <table class="admin-table study-time-table w-full min-w-[1040px] text-left text-sm">
                                         <thead class="{{ $tableHeadClass }}">
                                             <tr>
                                                 <th class="px-3 py-3 font-semibold">Class</th>
@@ -663,7 +676,7 @@
                                         <tbody class="{{ $tableBodyClass }}">
                                             @forelse ($classTimes as $slot)
                                                 <tr class="align-top transition hover:bg-slate-50/80 dark:hover:bg-slate-800/70"
-                                                    x-data="{ openClassEdit: false }">
+                                                    x-data="{ openClassEdit: false, menuOpen: false }">
                                                     <td class="px-3 py-3 align-top">
                                                         <div
                                                             class="whitespace-nowrap font-semibold text-slate-800 dark:text-slate-100">
@@ -710,25 +723,48 @@
                                                     </td>
 
                                                     <td class="whitespace-nowrap px-3 py-3 align-top">
-                                                        <div
-                                                            class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
-                                                            <button type="button" @click="openClassEdit = true"
-                                                                class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                                Edit
+                                                        <div class="relative flex items-center justify-end gap-2"
+                                                            @click.outside="menuOpen = false">
+                                                            <button type="button" @click="menuOpen = !menuOpen"
+                                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                                aria-label="Open class time actions">
+                                                                <svg class="h-5 w-5" viewBox="0 0 24 24"
+                                                                    fill="currentColor" aria-hidden="true">
+                                                                    <path
+                                                                        d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                                                                </svg>
                                                             </button>
 
-                                                            <form method="POST"
-                                                                action="{{ route('admin.time-studies.classes.destroy', $slot) }}"
-                                                                class="js-delete-time-form"
-                                                                data-label="{{ $slot->schoolClass?->display_name ?? 'class slot' }}">
-                                                                @csrf
-                                                                @method('DELETE')
-
-                                                                <button type="submit"
-                                                                    class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                                                    Delete
+                                                            <div x-show="menuOpen" x-cloak
+                                                                x-transition.opacity.scale.origin.top.right
+                                                                class="absolute right-0 top-9 z-30 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-left shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
+                                                                <button type="button"
+                                                                    @click="openClassEdit = true; menuOpen = false"
+                                                                    class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-300">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                        fill="none" stroke="currentColor"
+                                                                        stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                        <path d="M12 20h9" />
+                                                                        <path
+                                                                            d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                                                    </svg>
+                                                                    Edit
                                                                 </button>
-                                                            </form>
+
+                                                                <form method="POST"
+                                                                    action="{{ route('admin.time-studies.classes.destroy', $slot) }}"
+                                                                    class="js-delete-time-form"
+                                                                    data-label="{{ $slot->schoolClass?->display_name ?? 'class slot' }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+
+                                                                    <button type="submit"
+                                                                        class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/15">
+                                                                        Delete
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         </div>
 
                                                         {{-- CLASS EDIT MODAL --}}
@@ -923,7 +959,7 @@
                                                 @endphp
 
                                                 <tr class="align-top transition hover:bg-slate-50/80 dark:hover:bg-slate-800/70"
-                                                    x-data="{ openSubjectEdit: false }">
+                                                    x-data="{ openSubjectEdit: false, menuOpen: false }">
                                                     <td class="px-3 py-3 align-top">
                                                         <div
                                                             class="whitespace-nowrap font-semibold text-slate-800 dark:text-slate-100">
@@ -965,25 +1001,40 @@
                                                     </td>
 
                                                     <td class="whitespace-nowrap px-3 py-3 align-top">
-                                                        <div
-                                                            class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
-                                                            <button type="button" @click="openSubjectEdit = true"
-                                                                class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                                Edit
+                                                        <div class="relative flex items-center justify-end gap-2"
+                                                            @click.outside="menuOpen = false">
+                                                            <button type="button" @click="menuOpen = !menuOpen"
+                                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                                aria-label="Open subject time actions">
+                                                                <svg class="h-5 w-5" viewBox="0 0 24 24"
+                                                                    fill="currentColor" aria-hidden="true">
+                                                                    <path
+                                                                        d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                                                                </svg>
                                                             </button>
 
-                                                            <form method="POST"
-                                                                action="{{ route('admin.time-studies.subjects.destroy', $slot) }}"
-                                                                class="js-delete-time-form"
-                                                                data-label="{{ $slot->subject?->name ?? 'subject slot' }}">
-                                                                @csrf
-                                                                @method('DELETE')
-
-                                                                <button type="submit"
-                                                                    class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                                                    Delete
+                                                            <div x-show="menuOpen" x-cloak
+                                                                x-transition.opacity.scale.origin.top.right
+                                                                class="absolute right-0 top-9 z-30 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-left shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
+                                                                <button type="button"
+                                                                    @click="openSubjectEdit = true; menuOpen = false"
+                                                                    class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-300">
+                                                                    Edit
                                                                 </button>
-                                                            </form>
+
+                                                                <form method="POST"
+                                                                    action="{{ route('admin.time-studies.subjects.destroy', $slot) }}"
+                                                                    class="js-delete-time-form"
+                                                                    data-label="{{ $slot->subject?->name ?? 'subject slot' }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+
+                                                                    <button type="submit"
+                                                                        class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/15">
+                                                                        Delete
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         </div>
 
                                                         {{-- SUBJECT EDIT MODAL --}}
@@ -1199,7 +1250,8 @@
                             </div>
                         </div>
 
-                        <div class="study-time-pagination mt-5 text-slate-700 dark:text-slate-300">
+                        <div
+                            class="study-time-pagination -mx-5 -mb-5 border-t border-slate-100 bg-slate-50/70 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                             <div x-show="activeTab === 'class'" x-cloak>
                                 {{ $classTimes->links() }}
                             </div>

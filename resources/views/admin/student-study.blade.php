@@ -4,55 +4,6 @@
     @php
         $studyStudentTotal = max(0, (int) ($stats['students'] ?? 0));
 
-        $studyStatCards = [
-            [
-                'label' => 'Students',
-                'activeLabel' => 'Students',
-                'active' => $studyStudentTotal,
-                'total' => $studyStudentTotal,
-                'icon' => 'students',
-                'tone' => 'from-indigo-100 to-white text-indigo-600 dark:from-indigo-500/20 dark:to-slate-900 dark:text-indigo-300',
-            ],
-            [
-                'label' => 'Subjects',
-                'activeLabel' => 'Subjects',
-                'active' => (int) ($stats['subjects'] ?? 0),
-                'total' => max(0, (int) ($stats['subjects'] ?? 0)),
-                'icon' => 'subjects',
-                'tone' => 'from-emerald-100 to-white text-emerald-600 dark:from-emerald-500/20 dark:to-slate-900 dark:text-emerald-300',
-            ],
-            [
-                'label' => 'Teachers',
-                'activeLabel' => 'Teachers',
-                'active' => (int) ($stats['teachers'] ?? 0),
-                'total' => max(0, (int) ($stats['teachers'] ?? 0)),
-                'icon' => 'teachers',
-                'tone' => 'from-sky-100 to-white text-sky-600 dark:from-sky-500/20 dark:to-slate-900 dark:text-sky-300',
-            ],
-        ];
-
-        if ($hasMajorSubjectColumn ?? false) {
-            $studyStatCards[] = [
-                'label' => 'With Major',
-                'activeLabel' => 'Students',
-                'active' => (int) ($stats['withMajorSubject'] ?? 0),
-                'total' => $studyStudentTotal,
-                'icon' => 'assigned',
-                'tone' => 'from-amber-100 to-white text-amber-600 dark:from-amber-500/20 dark:to-slate-900 dark:text-amber-300',
-            ];
-        }
-
-        if ($hasClassStudyTimeColumn ?? false) {
-            $studyStatCards[] = [
-                'label' => 'With Study Time',
-                'activeLabel' => 'Students',
-                'active' => (int) ($stats['withStudyTime'] ?? 0),
-                'total' => $studyStudentTotal,
-                'icon' => 'time',
-                'tone' => 'from-cyan-100 to-white text-cyan-600 dark:from-cyan-500/20 dark:to-slate-900 dark:text-cyan-300',
-            ];
-        }
-
         $panelClass =
             'study-reveal study-float rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_24px_55px_-42px_rgba(15,23,42,0.75)] ring-1 ring-slate-200/70 dark:border-slate-700/80 dark:bg-slate-900/95 dark:ring-slate-700/80 dark:shadow-[0_24px_70px_-42px_rgba(0,0,0,0.9)]';
 
@@ -72,12 +23,6 @@
             icon="study"
             title="Student Study"
             subtitle="Students with selected class time, major subject, teacher, and created dates."
-        />
-
-        <x-admin.stat-cards
-            :cards="$studyStatCards"
-            reveal-class="study-reveal"
-            float-class="study-float"
         />
 
         <section class="{{ $panelClass }}" style="--sd: 2;">

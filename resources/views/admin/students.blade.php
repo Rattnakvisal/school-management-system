@@ -3,36 +3,14 @@
 @section('page')
     @php
         $studentTotal = max(0, (int) ($stats['total'] ?? 0));
-
-        $studentStatCards = [
+        $studentExportQuery = array_filter(
             [
-                'label' => 'Students',
-                'activeLabel' => 'Total',
-                'active' => $studentTotal,
-                'total' => $studentTotal,
-                'icon' => 'students',
-                'tone' =>
-                    'from-indigo-100 to-white text-indigo-600 dark:from-indigo-500/20 dark:to-slate-900 dark:text-indigo-300',
+                'q' => $search,
+                'status' => $status !== 'all' ? $status : null,
+                'class_id' => $classId !== 'all' ? $classId : null,
             ],
-            [
-                'label' => 'Active',
-                'activeLabel' => 'Active',
-                'active' => (int) ($stats['active'] ?? 0),
-                'total' => $studentTotal,
-                'icon' => 'active',
-                'tone' =>
-                    'from-emerald-100 to-white text-emerald-600 dark:from-emerald-500/20 dark:to-slate-900 dark:text-emerald-300',
-            ],
-            [
-                'label' => 'Inactive',
-                'activeLabel' => 'Inactive',
-                'active' => (int) ($stats['inactive'] ?? 0),
-                'total' => $studentTotal,
-                'icon' => 'inactive',
-                'tone' =>
-                    'from-rose-100 to-white text-rose-600 dark:from-rose-500/20 dark:to-slate-900 dark:text-rose-300',
-            ],
-        ];
+            fn($value) => $value !== null && $value !== '',
+        );
 
         if ($hasClassColumn) {
             $studentStatCards[] = [
@@ -56,7 +34,7 @@
         }
 
         $panelClass =
-            'student-reveal student-float rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_24px_55px_-42px_rgba(15,23,42,0.75)] ring-1 ring-slate-200/70 dark:border-slate-700/80 dark:bg-slate-900/95 dark:ring-slate-700/80 dark:shadow-[0_24px_70px_-42px_rgba(0,0,0,0.9)]';
+            'student-reveal rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-800';
 
         $labelClass = 'mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300';
 
@@ -75,11 +53,43 @@
         $mutedTextClass = 'text-slate-500 dark:text-slate-400';
     @endphp
 
-    <div class="student-stage admin-management-page student-page mx-auto max-w-[1500px] space-y-6 pb-8 text-slate-900 dark:text-slate-100">
-        <x-admin.page-header reveal-class="student-reveal" delay="1" icon="students" title="Student Management"
-            subtitle="Create, edit, activate, deactivate, and remove student accounts." />
+    <div
+        class="student-stage admin-management-page student-page mx-auto max-w-[1500px] space-y-5 pb-8 text-slate-900 dark:text-slate-100">
+        <section class="student-reveal flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between" style="--sd: 1;">
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-950 dark:text-white">Students</h1>
+                <p class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-8 0v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Total: {{ number_format($studentTotal) }}
+                </p>
+            </div>
 
-        <x-admin.stat-cards :cards="$studentStatCards" reveal-class="student-reveal" float-class="student-float" />
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('admin.students.export.excel', $studentExportQuery) }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <path d="M7 10l5 5 5-5" />
+                        <path d="M12 15V3" />
+                    </svg>
+                    Export data
+                </a>
+
+                <button type="button" onclick="window.dispatchEvent(new CustomEvent('open-student-create'))"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Add student
+                </button>
+            </div>
+        </section>
 
         @if (session('success'))
             <div class="student-reveal rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300"
@@ -139,392 +149,396 @@
                             </p>
                         </div>
 
-                        <button type="button" @click="createOpen = false"
-                            aria-controls="create-student-form-panel"
+                        <button type="button" @click="createOpen = false" aria-controls="create-student-form-panel"
                             class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-600 text-lg font-black leading-none text-white shadow-sm transition hover:bg-red-500 focus:outline-none focus:ring-4 focus:ring-red-200 dark:focus:ring-red-500/25"
                             aria-label="Close create student form">
                             &times;
                         </button>
                     </div>
 
-                <form id="create-student-form-panel" method="POST" action="{{ route('admin.students.store') }}"
-                    enctype="multipart/form-data" class="js-create-form">
-                    @csrf
+                    <form id="create-student-form-panel" method="POST" action="{{ route('admin.students.store') }}"
+                        enctype="multipart/form-data" class="js-create-form">
+                        @csrf
 
-                    <input type="hidden" name="_form" value="create_student">
-                    <input type="hidden" name="role" value="student">
+                        <input type="hidden" name="_form" value="create_student">
+                        <input type="hidden" name="role" value="student">
 
-                    <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
-                        <div class="grid gap-5 lg:grid-cols-2">
+                        <div class="max-h-[calc(100vh-15rem)] overflow-y-auto px-6 py-5">
+                            <div class="grid gap-5 lg:grid-cols-2">
 
-                    <div>
-                        <label for="name" class="{{ $labelClass }}">Full Name</label>
-                        <input id="name" name="name" type="text" value="{{ old('name') }}"
-                            class="{{ $inputClass }}" placeholder="Student full name">
+                                <div>
+                                    <label for="name" class="{{ $labelClass }}">Full Name</label>
+                                    <input id="name" name="name" type="text" value="{{ old('name') }}"
+                                        class="{{ $inputClass }}" placeholder="Student full name">
 
-                        @error('name')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="email" class="{{ $labelClass }}">Email</label>
-                        <input id="email" name="email" type="email" value="{{ old('email') }}"
-                            class="{{ $inputClass }}" placeholder="student@example.com">
-
-                        @error('email')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    @if ($hasPhoneColumn ?? false)
-                        <div>
-                            <label for="phone_number" class="{{ $labelClass }}">Phone Number</label>
-                            <input id="phone_number" name="phone_number" type="text" value="{{ old('phone_number') }}"
-                                class="{{ $inputClass }}" placeholder="+855 12 345 678">
-
-                            @error('phone_number')
-                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    @endif
-
-                    @if ($hasClassColumn)
-                        <div>
-                            <label for="school_class_id" class="{{ $labelClass }}">Home Class Optional</label>
-                            <select id="school_class_id" name="school_class_id" class="{{ $inputClass }}">
-                                <option value="">Select class</option>
-                                @foreach ($classes as $classOption)
-                                    <option value="{{ $classOption->id }}"
-                                        {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
-                                        {{ $classOption->display_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            @error('school_class_id')
-                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        @if ($hasMajorSubjectColumn)
-                            <div class="js-major-subject-field">
-                                @php
-                                    $createSelectedMajorSubjectIds = old('major_subject_ids');
-
-                                    if (
-                                        !is_array($createSelectedMajorSubjectIds) ||
-                                        count($createSelectedMajorSubjectIds) === 0
-                                    ) {
-                                        $legacyMajorId = old('major_subject_id');
-                                        $createSelectedMajorSubjectIds = $legacyMajorId ? [$legacyMajorId] : [];
-                                    }
-
-                                    $createSelectedMajorSubjectIds = collect($createSelectedMajorSubjectIds)
-                                        ->map(fn($value) => (string) $value)
-                                        ->filter(fn($value) => $value !== '')
-                                        ->values()
-                                        ->all();
-                                @endphp
-
-                                <label for="major_subject_id" class="{{ $labelClass }}">Major Subjects</label>
-
-                                <select id="major_subject_id" name="major_subject_ids[]"
-                                    data-selected-list='@json($createSelectedMajorSubjectIds)'
-                                    data-checkbox-target="major_subject_checkbox_list" multiple size="5"
-                                    class="hidden">
-                                    <option value="">Select major subjects</option>
-                                </select>
-
-                                <div id="major_subject_checkbox_list" class="min-h-[132px] space-y-2 {{ $softBoxClass }}">
+                                    @error('name')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                        </p>
+                                    @enderror
                                 </div>
 
-                                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                                    Select a major to auto-fill the grade and show matching study times.
-                                </p>
+                                <div>
+                                    <label for="email" class="{{ $labelClass }}">Email</label>
+                                    <input id="email" name="email" type="email" value="{{ old('email') }}"
+                                        class="{{ $inputClass }}" placeholder="student@example.com">
 
-                                @error('major_subject_ids')
-                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                    @error('email')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                @if ($hasPhoneColumn ?? false)
+                                    <div>
+                                        <label for="phone_number" class="{{ $labelClass }}">Phone Number</label>
+                                        <input id="phone_number" name="phone_number" type="text"
+                                            value="{{ old('phone_number') }}" class="{{ $inputClass }}"
+                                            placeholder="+855 12 345 678">
+
+                                        @error('phone_number')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endif
+
+                                @if ($hasGenderColumn ?? false)
+                                    <div>
+                                        <label for="gender" class="{{ $labelClass }}">Gender</label>
+                                        <select id="gender" name="gender" class="{{ $inputClass }}">
+                                            <option value="">Select gender</option>
+                                            <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>
+                                                Female</option>
+                                            <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Male
+                                            </option>
+                                        </select>
+
+                                        @error('gender')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endif
+
+                                @if ($hasAgeColumn ?? false)
+                                    <div>
+                                        <label for="age" class="{{ $labelClass }}">Age</label>
+                                        <input id="age" name="age" type="number" min="1"
+                                            max="120" value="{{ old('age') }}" class="{{ $inputClass }}"
+                                            placeholder="Student age">
+
+                                        @error('age')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endif
+
+                                @if ($hasClassColumn)
+                                    <div>
+                                        <label for="school_class_id" class="{{ $labelClass }}">Home Class
+                                            Optional</label>
+                                        <select id="school_class_id" name="school_class_id" class="{{ $inputClass }}">
+                                            <option value="">Select class</option>
+                                            @foreach ($classes as $classOption)
+                                                <option value="{{ $classOption->id }}"
+                                                    {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
+                                                    {{ $classOption->display_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                        @error('school_class_id')
+                                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                {{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    @if ($hasMajorSubjectColumn)
+                                        <div class="js-major-subject-field">
+                                            @php
+                                                $createSelectedMajorSubjectIds = old('major_subject_ids');
+
+                                                if (
+                                                    !is_array($createSelectedMajorSubjectIds) ||
+                                                    count($createSelectedMajorSubjectIds) === 0
+                                                ) {
+                                                    $legacyMajorId = old('major_subject_id');
+                                                    $createSelectedMajorSubjectIds = $legacyMajorId
+                                                        ? [$legacyMajorId]
+                                                        : [];
+                                                }
+
+                                                $createSelectedMajorSubjectIds = collect($createSelectedMajorSubjectIds)
+                                                    ->map(fn($value) => (string) $value)
+                                                    ->filter(fn($value) => $value !== '')
+                                                    ->values()
+                                                    ->all();
+                                            @endphp
+
+                                            <label for="major_subject_id" class="{{ $labelClass }}">Major
+                                                Subjects</label>
+
+                                            <select id="major_subject_id" name="major_subject_ids[]"
+                                                data-selected-list='@json($createSelectedMajorSubjectIds)'
+                                                data-checkbox-target="major_subject_checkbox_list" multiple size="5"
+                                                class="hidden">
+                                                <option value="">Select major subjects</option>
+                                            </select>
+
+                                            <div id="major_subject_checkbox_list"
+                                                class="min-h-[132px] space-y-2 {{ $softBoxClass }}">
+                                            </div>
+
+                                            <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                                Select a major to auto-fill the grade and show matching study times.
+                                            </p>
+
+                                            @error('major_subject_ids')
+                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+
+                                            @error('major_subject_ids.*')
+                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+
+                                            @error('major_subject_id')
+                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+                                        </div>
+                                    @endif
+
+                                    @if ($hasClassStudyTimeColumn)
+                                        <div>
+                                            @php
+                                                $createSelectedStudyTimeIds = old('class_study_time_ids');
+
+                                                if (
+                                                    !is_array($createSelectedStudyTimeIds) ||
+                                                    count($createSelectedStudyTimeIds) === 0
+                                                ) {
+                                                    $legacySelectedId = old('class_study_time_id');
+                                                    $createSelectedStudyTimeIds = $legacySelectedId
+                                                        ? [$legacySelectedId]
+                                                        : [];
+                                                }
+
+                                                $createSelectedStudyTimeIds = collect($createSelectedStudyTimeIds)
+                                                    ->map(fn($value) => (string) $value)
+                                                    ->filter(fn($value) => $value !== '')
+                                                    ->values()
+                                                    ->all();
+                                            @endphp
+
+                                            <div class="mb-1 flex items-center justify-between gap-2">
+                                                <label for="class_study_time_id"
+                                                    class="block text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                                    Study Time
+                                                </label>
+
+                                                <a id="manage_study_time_inline"
+                                                    href="{{ route('admin.time-studies.index', ['tab' => 'class']) }}"
+                                                    data-base-url="{{ route('admin.time-studies.index') }}"
+                                                    target="_blank" rel="noopener"
+                                                    class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-400/20 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25">
+                                                    + Add More
+                                                </a>
+                                            </div>
+
+                                            <select id="class_study_time_id" name="class_study_time_ids[]"
+                                                data-selected-list='@json($createSelectedStudyTimeIds)'
+                                                data-checkbox-target="study_time_checkbox_list" multiple size="4"
+                                                class="hidden">
+                                                <option value="">Select class first</option>
+                                            </select>
+
+                                            <div id="study_time_checkbox_list"
+                                                class="min-h-[132px] space-y-2 {{ $softBoxClass }}">
+                                            </div>
+
+                                            <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                                You can select multiple study times.
+                                            </p>
+
+                                            @error('class_study_time_ids')
+                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+
+                                            @error('class_study_time_ids.*')
+                                                <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+                                        </div>
+                                    @endif
+                                @endif
+
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label for="password" class="{{ $labelClass }}">Password</label>
+
+                                        <div class="relative">
+                                            <input id="password" name="password" type="password"
+                                                class="{{ $inputClass }} pr-10" placeholder="Minimum 8 characters">
+
+                                            <button type="button" onclick="toggleStudentPassword('password', this)"
+                                                class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
+                                                aria-label="Show password">
+                                                <svg class="student-eye-icon h-4 w-4" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
+                                                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+
+                                                <svg class="student-eye-off-icon hidden h-4 w-4" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.77 9.77 0 0112 4c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-3.13 4.44M6.61 6.61A11.72 11.72 0 001 11.5C2.73 15.89 7 19 12 19a9.8 9.8 0 004.39-1.03" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="password_confirmation" class="{{ $labelClass }}">Confirm</label>
+
+                                        <div class="relative">
+                                            <input id="password_confirmation" name="password_confirmation"
+                                                type="password" class="{{ $inputClass }} pr-10"
+                                                placeholder="Re-enter password">
+
+                                            <button type="button"
+                                                onclick="toggleStudentPassword('password_confirmation', this)"
+                                                class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
+                                                aria-label="Show password confirmation">
+                                                <svg class="student-eye-icon h-4 w-4" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
+                                                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+
+                                                <svg class="student-eye-off-icon hidden h-4 w-4" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.77 9.77 0 0112 4c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-3.13 4.44M6.61 6.61A11.72 11.72 0 001 11.5C2.73 15.89 7 19 12 19a9.8 9.8 0 004.39-1.03" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @error('password')
+                                    <p class="-mt-2 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
                                     </p>
                                 @enderror
 
-                                @error('major_subject_ids.*')
-                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
+                                <div>
+                                    <label for="avatar_image" class="{{ $labelClass }}">Avatar Image Optional</label>
+                                    <input id="avatar_image" name="avatar_image" type="file" accept="image/*"
+                                        class="{{ $fileInputClass }}">
+
+                                    <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                        Allowed: JPG, PNG, WEBP max 2MB.
                                     </p>
-                                @enderror
 
-                                @error('major_subject_id')
-                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
-                        @endif
+                                    @error('avatar_image')
+                                        <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
+                                            {{ $message }}</p>
+                                    @enderror
+                                </div>
 
-                        @if ($hasClassStudyTimeColumn)
-                            <div>
-                                @php
-                                    $createSelectedStudyTimeIds = old('class_study_time_ids');
+                                @if ($hasStatusColumn)
+                                    <label
+                                        class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+                                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initial
+                                            Status</span>
 
-                                    if (
-                                        !is_array($createSelectedStudyTimeIds) ||
-                                        count($createSelectedStudyTimeIds) === 0
-                                    ) {
-                                        $legacySelectedId = old('class_study_time_id');
-                                        $createSelectedStudyTimeIds = $legacySelectedId ? [$legacySelectedId] : [];
-                                    }
-
-                                    $createSelectedStudyTimeIds = collect($createSelectedStudyTimeIds)
-                                        ->map(fn($value) => (string) $value)
-                                        ->filter(fn($value) => $value !== '')
-                                        ->values()
-                                        ->all();
-                                @endphp
-
-                                <div class="mb-1 flex items-center justify-between gap-2">
-                                    <label for="class_study_time_id"
-                                        class="block text-xs font-semibold text-slate-600 dark:text-slate-300">
-                                        Study Time
+                                        <span
+                                            class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
+                                                {{ old('is_active', '1') ? 'checked' : '' }}>
+                                            Active
+                                        </span>
                                     </label>
+                                @endif
 
-                                    <a id="manage_study_time_inline"
-                                        href="{{ route('admin.time-studies.index', ['tab' => 'class']) }}"
-                                        data-base-url="{{ route('admin.time-studies.index') }}" target="_blank"
-                                        rel="noopener"
-                                        class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-400/20 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25">
-                                        + Add More
-                                    </a>
-                                </div>
-
-                                <select id="class_study_time_id" name="class_study_time_ids[]"
-                                    data-selected-list='@json($createSelectedStudyTimeIds)'
-                                    data-checkbox-target="study_time_checkbox_list" multiple size="4"
-                                    class="hidden">
-                                    <option value="">Select class first</option>
-                                </select>
-
-                                <div id="study_time_checkbox_list" class="min-h-[132px] space-y-2 {{ $softBoxClass }}">
-                                </div>
-
-                                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                                    You can select multiple study times.
-                                </p>
-
-                                @error('class_study_time_ids')
-                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
-                                    </p>
-                                @enderror
-
-                                @error('class_study_time_ids.*')
-                                    <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}
-                                    </p>
-                                @enderror
-                            </div>
-                        @endif
-                    @endif
-
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="password" class="{{ $labelClass }}">Password</label>
-
-                            <div class="relative">
-                                <input id="password" name="password" type="password" class="{{ $inputClass }} pr-10"
-                                    placeholder="Minimum 8 characters">
-
-                                <button type="button" onclick="toggleStudentPassword('password', this)"
-                                    class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
-                                    aria-label="Show password">
-                                    <svg class="student-eye-icon h-4 w-4" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
-                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-
-                                    <svg class="student-eye-off-icon hidden h-4 w-4" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.77 9.77 0 0112 4c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-3.13 4.44M6.61 6.61A11.72 11.72 0 001 11.5C2.73 15.89 7 19 12 19a9.8 9.8 0 004.39-1.03" />
-                                    </svg>
-                                </button>
                             </div>
                         </div>
 
-                        <div>
-                            <label for="password_confirmation" class="{{ $labelClass }}">Confirm</label>
+                        <div
+                            class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
+                            <button type="button" @click="createOpen = false"
+                                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                Cancel
+                            </button>
 
-                            <div class="relative">
-                                <input id="password_confirmation" name="password_confirmation" type="password"
-                                    class="{{ $inputClass }} pr-10" placeholder="Re-enter password">
-
-                                <button type="button" onclick="toggleStudentPassword('password_confirmation', this)"
-                                    class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
-                                    aria-label="Show password confirmation">
-                                    <svg class="student-eye-icon h-4 w-4" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
-                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-
-                                    <svg class="student-eye-off-icon hidden h-4 w-4" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                            d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.88 4.24A9.77 9.77 0 0112 4c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-3.13 4.44M6.61 6.61A11.72 11.72 0 001 11.5C2.73 15.89 7 19 12 19a9.8 9.8 0 004.39-1.03" />
-                                    </svg>
-                                </button>
-                            </div>
+                            <button type="submit"
+                                class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
+                                Create Student
+                            </button>
                         </div>
-                    </div>
-
-                    @error('password')
-                        <p class="-mt-2 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                    @enderror
-
-                    <div>
-                        <label for="avatar_image" class="{{ $labelClass }}">Avatar Image Optional</label>
-                        <input id="avatar_image" name="avatar_image" type="file" accept="image/*"
-                            class="{{ $fileInputClass }}">
-
-                        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                            Allowed: JPG, PNG, WEBP max 2MB.
-                        </p>
-
-                        @error('avatar_image')
-                            <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    @if ($hasStatusColumn)
-                        <label
-                            class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
-                            <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Initial Status</span>
-
-                            <span
-                                class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                <input type="checkbox" name="is_active" value="1"
-                                    class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
-                                    {{ old('is_active', '1') ? 'checked' : '' }}>
-                                Active
-                            </span>
-                        </label>
-                    @endif
-
-                        </div>
-                    </div>
-
-                    <div
-                        class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-950/40">
-                        <button type="button" @click="createOpen = false"
-                            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                            Cancel
-                        </button>
-
-                        <button type="submit"
-                            class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm shadow-indigo-500/20 transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                            Create Student
-                        </button>
-                    </div>
-                </form>
+                    </form>
                 </div>
             </section>
 
             {{-- STUDENT LIST --}}
             <section class="{{ $panelClass }} xl:col-span-12" style="--sd: 4;">
-                @php
-                    $studentExportQuery = array_filter(
-                        [
-                            'q' => $search,
-                            'status' => $status !== 'all' ? $status : null,
-                            'class_id' => $classId !== 'all' ? $classId : null,
-                        ],
-                        fn($value) => $value !== null && $value !== '',
-                    );
-                @endphp
+                <div x-data="{ filterOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4 p-5">
+                    <form method="GET" action="{{ route('admin.students.index') }}"
+                        class="flex flex-wrap items-center gap-3">
+                        @if ($hasClassColumn)
+                            <select name="class_id"
+                                class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>Classes</option>
 
-                <div x-data="{ filterOpen: false, exportOpen: false }" @open-filter-panel.window="filterOpen = true" class="space-y-4">
+                                @foreach ($classes as $classOption)
+                                    <option value="{{ $classOption->id }}"
+                                        {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                        {{ $classOption->display_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @endif
 
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 class="text-lg font-black text-slate-950 dark:text-white">Student List</h2>
+                        @if ($hasStatusColumn)
+                            <select name="status"
+                                class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                <option value="all" {{ $status === 'all' ? 'selected' : '' }}>Status</option>
+                                <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        @endif
 
-                        <div class="flex flex-wrap items-center gap-3">
-                            <button type="button" @click="window.dispatchEvent(new CustomEvent('open-student-create'))"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-500/20 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-indigo-500/25">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M12 5v14M5 12h14"></path>
-                                </svg>
-                                Create
-                            </button>
+                        <input name="q" type="search" value="{{ $search }}" placeholder="Search students"
+                            class="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:bg-slate-50 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 sm:max-w-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:placeholder:text-slate-500">
 
-                            {{-- EXPORT --}}
-                            <div class="relative" @keydown.escape.window="exportOpen = false">
-                                <button type="button" @click="exportOpen = !exportOpen"
-                                    :aria-expanded="exportOpen.toString()" aria-haspopup="menu"
-                                    class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100 dark:border-rose-400/20 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25">
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                        aria-hidden="true">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                        <path d="M14 2v6h6"></path>
-                                        <path d="M9 15h6"></path>
-                                        <path d="M9 11h2"></path>
-                                        <path d="M9 19h6"></path>
-                                    </svg>
-                                    Export
-                                    <svg class="h-4 w-4 transition-transform duration-200"
-                                        :class="{ 'rotate-180': exportOpen }" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" aria-hidden="true">
-                                        <path d="m6 9 6 6 6-6"></path>
-                                    </svg>
-                                </button>
+                        <button type="submit"
+                            class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            Apply
+                        </button>
 
-                                <div x-show="exportOpen" x-cloak x-transition.opacity.scale.origin.top.right
-                                    @click.outside="exportOpen = false"
-                                    class="absolute right-0 z-20 mt-3 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
-                                    <a href="{{ route('admin.students.export.pdf', $studentExportQuery) }}"
-                                        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-500/15">
-                                        <span
-                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">
-                                            <i class="fa-solid fa-file-pdf"></i>
-                                        </span>
-                                        <span>
-                                            <span class="block">PDF Report</span>
-                                            <span
-                                                class="block text-xs font-medium text-slate-500 dark:text-slate-400">Download
-                                                as PDF</span>
-                                        </span>
-                                    </a>
-
-                                    <a href="{{ route('admin.students.export.excel', $studentExportQuery) }}"
-                                        class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-500/15">
-                                        <span
-                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                            <i class="fa-solid fa-file-excel"></i>
-                                        </span>
-                                        <span>
-                                            <span class="block">Excel Report</span>
-                                            <span
-                                                class="block text-xs font-medium text-slate-500 dark:text-slate-400">Download
-                                                as workbook</span>
-                                        </span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            {{-- FILTER BUTTON --}}
-                            <button type="button" @click="filterOpen = true"
-                                class="inline-flex min-w-[150px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"></path>
-                                </svg>
-                                Filters
-                            </button>
-                        </div>
-                    </div>
+                        <button type="button" @click="filterOpen = true"
+                            class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 6h16M7 12h10M10 18h4" />
+                            </svg>
+                            All filters
+                        </button>
+                    </form>
 
                     {{-- FILTER OVERLAY --}}
                     <div x-show="filterOpen" x-cloak x-transition.opacity
@@ -654,216 +668,98 @@
 
                     {{-- TABLE --}}
                     <div class="min-w-0">
-                        <div class="mt-1 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div class="student-table-scroller max-h-[720px] overflow-auto">
-                                <table class="admin-table student-table w-full min-w-[1280px] text-left text-sm">
+                        <div
+                            class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+                            <div class="student-table-scroller min-h-[520px] max-h-[720px] overflow-auto">
+                                <table class="student-roster-table w-full min-w-[1040px] text-left text-sm">
                                     <thead
-                                        class="admin-table-head sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                                        class="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-500">
                                         <tr>
-                                            <th class="student-col-student px-3 py-3 font-semibold">Student</th>
-                                            <th class="student-col-email px-3 py-3 font-semibold">Email</th>
-
-                                            @if ($hasPhoneColumn ?? false)
-                                                <th class="student-col-phone whitespace-nowrap px-3 py-3 font-semibold">
-                                                    Phone Number</th>
-                                            @endif
-
-                                            <th class="student-col-class px-3 py-3 font-semibold">Class</th>
-
-                                            @if ($hasMajorSubjectColumn)
-                                                <th class="student-col-major px-3 py-3 font-semibold">Major Subjects</th>
-                                            @endif
-
-                                            @if ($hasClassStudyTimeColumn)
-                                                <th class="student-col-study px-3 py-3 font-semibold">Study Time</th>
-                                            @endif
-
-                                            <th class="student-col-status px-3 py-3 font-semibold">Status</th>
-                                            <th class="student-col-created whitespace-nowrap px-3 py-3 font-semibold">
-                                                Created</th>
-                                            <th
-                                                class="student-col-actions whitespace-nowrap px-3 py-3 text-right font-semibold">
+                                            <th class="w-20 whitespace-nowrap px-3 py-3 font-bold">ID</th>
+                                            <th class="min-w-[220px] px-3 py-3 font-bold">Student</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Gender</th>
+                                            <th class="w-20 whitespace-nowrap px-3 py-3 font-bold">Age</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Class</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Avg. Grade</th>
+                                            <th class="w-32 whitespace-nowrap px-3 py-3 font-bold">Status</th>
+                                            <th class="w-32 whitespace-nowrap pz-3 py-3 font-bold">Create At</th>
+                                            <th class="w-36 whitespace-nowrap px-4 py-3 text-right font-bold">
                                                 Actions</th>
                                         </tr>
                                     </thead>
 
                                     <tbody
-                                        class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
+                                        class="divide-y divide-slate-100 bg-white text-slate-700 dark:divide-slate-700 dark:bg-slate-900 dark:text-slate-300">
                                         @forelse ($students as $student)
-                                            <tr class="align-top transition hover:bg-slate-50/80 dark:hover:bg-slate-800/70"
-                                                x-data="{ open: false }">
-                                                <td class="student-col-student px-3 py-3 align-top">
-                                                    <div class="flex items-center gap-3">
+                                            @php
+                                                $genderLabel = match ((string) ($student->gender ?? '')) {
+                                                    'female' => 'Female',
+                                                    'male' => 'Male',
+                                                    default => '-',
+                                                };
+                                                $gradeAverage = \Illuminate\Support\Facades\Schema::hasTable('grades')
+                                                    ? $student->receivedGrades()->avg('score')
+                                                    : null;
+                                                $gradeLabel =
+                                                    $gradeAverage !== null
+                                                        ? rtrim(
+                                                            rtrim(number_format((float) $gradeAverage, 1), '0'),
+                                                            '.',
+                                                        )
+                                                        : '-';
+                                                $missingDays = \Illuminate\Support\Facades\Schema::hasTable(
+                                                    'student_attendances',
+                                                )
+                                                    ? $student->attendanceRecords()->where('status', 'absent')->count()
+                                                    : 0;
+                                            @endphp
+
+                                            <tr class="align-middle transition hover:bg-indigo-50/40 dark:hover:bg-slate-800/70"
+                                                x-data="{ open: false, menuOpen: false }">
+                                                <td
+                                                    class="whitespace-nowrap px-3 py-3 text-xs font-bold tabular-nums text-slate-500 dark:text-slate-400">
+                                                    {{ $student->id }}
+                                                </td>
+
+                                                <td class="px-3 py-3">
+                                                    <div class="flex min-w-0 items-center gap-3">
                                                         <img src="{{ $student->avatar_url }}" alt="{{ $student->name }}"
                                                             class="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700">
 
                                                         <div class="min-w-0">
                                                             <div
-                                                                class="student-name font-semibold text-slate-800 dark:text-slate-100">
+                                                                class="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
                                                                 {{ $student->name }}
                                                             </div>
-
                                                             <div
-                                                                class="truncate text-xs text-slate-400 dark:text-slate-500">
-                                                                ID #{{ $student->formatted_id }}
+                                                                class="truncate text-xs font-medium text-slate-400 dark:text-slate-500">
+                                                                {{ $student->email }}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
 
                                                 <td
-                                                    class="student-col-email px-3 py-3 align-top text-slate-600 dark:text-slate-300">
-                                                    <div
-                                                        class="student-email max-w-[360px] truncate text-slate-600 dark:text-slate-300">
-                                                        {{ $student->email }}
-                                                    </div>
+                                                    class="whitespace-nowrap px-3 py-3 text-sm font-medium text-slate-600 dark:text-slate-300">
+                                                    {{ $genderLabel }}
                                                 </td>
-
-                                                @if ($hasPhoneColumn ?? false)
-                                                    <td
-                                                        class="student-col-phone whitespace-nowrap px-3 py-3 align-top tabular-nums text-slate-600 dark:text-slate-300">
-                                                        {{ $student->phone_number ?: '-' }}
-                                                    </td>
-                                                @endif
 
                                                 <td
-                                                    class="student-col-class px-3 py-3 align-top text-slate-600 dark:text-slate-300">
-                                                    @if ($hasClassColumn)
-                                                        @if ($student->schoolClass)
-                                                            <span
-                                                                class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                                                {{ $student->schoolClass->display_name }}
-                                                            </span>
-                                                        @else
-                                                            <span class="text-slate-400 dark:text-slate-500">-</span>
-                                                        @endif
-                                                    @else
-                                                        -
-                                                    @endif
+                                                    class="whitespace-nowrap px-3 py-3 text-sm font-medium tabular-nums text-slate-600 dark:text-slate-300">
+                                                    {{ ($hasAgeColumn ?? false) && filled($student->age) ? $student->age : '-' }}
                                                 </td>
 
-                                                @if ($hasMajorSubjectColumn)
-                                                    <td
-                                                        class="student-col-major px-3 py-3 align-top text-slate-600 dark:text-slate-300">
-                                                        @php
-                                                            $majorSubjects = collect();
+                                                <td
+                                                    class="whitespace-nowrap px-3 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                                    {{ $hasClassColumn && $student->schoolClass ? $student->schoolClass->display_name : '-' }}
+                                                </td>
 
-                                                            if (
-                                                                ($hasStudentMajorSubjectsTable ?? false) &&
-                                                                $student->relationLoaded('majorSubjects') &&
-                                                                $student->majorSubjects->isNotEmpty()
-                                                            ) {
-                                                                $majorSubjects = $student->majorSubjects;
-                                                            } elseif ($student->majorSubject) {
-                                                                $majorSubjects = collect([$student->majorSubject]);
-                                                            }
-                                                        @endphp
+                                                <td
+                                                    class="whitespace-nowrap px-3 py-3 text-sm font-medium tabular-nums text-slate-600 dark:text-slate-300">
+                                                    {{ $gradeLabel }}
+                                                </td>
 
-                                                        @if ($majorSubjects->isNotEmpty())
-                                                            <div class="flex max-w-full flex-col gap-1">
-                                                                @foreach ($majorSubjects->take(3) as $majorSubject)
-                                                                    <div
-                                                                        class="student-study-chip inline-flex max-w-full items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px] dark:border-indigo-400/20 dark:bg-indigo-500/15">
-                                                                        <span
-                                                                            class="font-semibold text-indigo-700 dark:text-indigo-300">
-                                                                            {{ $majorSubject->name }}
-                                                                        </span>
-
-                                                                        @if ((float) ($majorSubject->tuition_fee ?? 0) > 0)
-                                                                            <span
-                                                                                class="font-bold text-indigo-500 dark:text-indigo-200">
-                                                                                ${{ number_format((float) $majorSubject->tuition_fee, 2) }}
-                                                                            </span>
-                                                                        @endif
-                                                                    </div>
-                                                                @endforeach
-
-                                                                @if ($majorSubjects->count() > 3)
-                                                                    <span
-                                                                        class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                                                                        +{{ $majorSubjects->count() - 3 }} more majors
-                                                                    </span>
-                                                                @endif
-                                                            </div>
-                                                        @else
-                                                            <span class="text-slate-400 dark:text-slate-500">-</span>
-                                                        @endif
-                                                    </td>
-                                                @endif
-
-                                                @if ($hasClassStudyTimeColumn)
-                                                    <td
-                                                        class="student-col-study px-3 py-3 align-top text-slate-600 dark:text-slate-300">
-                                                        @php
-                                                            $studySlots = collect();
-
-                                                            if (
-                                                                $student->relationLoaded('studyTimes') &&
-                                                                $student->studyTimes->isNotEmpty()
-                                                            ) {
-                                                                $studySlots = $student->studyTimes;
-                                                            } elseif ($student->classStudyTime) {
-                                                                $studySlots = collect([$student->classStudyTime]);
-                                                            }
-                                                        @endphp
-
-                                                        @if ($studySlots->isNotEmpty())
-                                                            <div class="flex max-w-full flex-col gap-1">
-                                                                @foreach ($studySlots->take(3) as $slot)
-                                                                    @php
-                                                                        $periodKey = strtolower((string) $slot->period);
-                                                                        $periodLabel =
-                                                                            $periodLabels[$periodKey] ??
-                                                                            ucfirst($periodKey);
-                                                                        $dayKey = strtolower(
-                                                                            (string) ($slot->day_of_week ?? 'all'),
-                                                                        );
-
-                                                                        $dayLabel = match ($dayKey) {
-                                                                            'monday' => 'Monday',
-                                                                            'tuesday' => 'Tuesday',
-                                                                            'wednesday' => 'Wednesday',
-                                                                            'thursday' => 'Thursday',
-                                                                            'friday' => 'Friday',
-                                                                            'saturday' => 'Saturday',
-                                                                            'sunday' => 'Sunday',
-                                                                            default => 'All Days',
-                                                                        };
-                                                                    @endphp
-
-                                                                    <div
-                                                                        class="student-study-chip inline-flex max-w-full items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/90 px-2 py-1 text-[11px] dark:border-indigo-400/20 dark:bg-indigo-500/15">
-                                                                        <span
-                                                                            class="font-bold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-                                                                            {{ $dayLabel }} | {{ $periodLabel }}
-                                                                        </span>
-
-                                                                        <span
-                                                                            class="text-indigo-300 dark:text-indigo-400">|</span>
-
-                                                                        <span
-                                                                            class="study-time-label whitespace-nowrap font-semibold text-slate-700 dark:text-slate-300">
-                                                                            {{ \Carbon\Carbon::parse($slot->start_time)->format('h:i A') }}
-                                                                            ->
-                                                                            {{ \Carbon\Carbon::parse($slot->end_time)->format('h:i A') }}
-                                                                        </span>
-                                                                    </div>
-                                                                @endforeach
-
-                                                                @if ($studySlots->count() > 3)
-                                                                    <span
-                                                                        class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                                                                        +{{ $studySlots->count() - 3 }} more times
-                                                                    </span>
-                                                                @endif
-                                                            </div>
-                                                        @else
-                                                            <span class="text-slate-400 dark:text-slate-500">-</span>
-                                                        @endif
-                                                    </td>
-                                                @endif
-
-                                                <td class="student-col-status px-3 py-3 align-top">
+                                                <td class="px-3 py-3">
                                                     @if ($hasStatusColumn && $student->is_active)
                                                         <span
                                                             class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
@@ -879,57 +775,116 @@
                                                         </span>
                                                     @else
                                                         <span
-                                                            class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                                            class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                                                             N/A
                                                         </span>
                                                     @endif
                                                 </td>
 
                                                 <td
-                                                    class="student-col-created px-3 py-3 align-top text-slate-500 dark:text-slate-400">
-                                                    <span class="whitespace-nowrap">
-                                                        {{ $student->created_at->format('M d, Y') }}
-                                                    </span>
+                                                    class="whitespace-nowrap px-3 py-3 text-sm font-medium text-slate-600 dark:text-slate-300">
+                                                    {{ $student->created_at->format('M d, Y') }}
                                                 </td>
 
-                                                <td class="student-col-actions whitespace-nowrap px-3 py-3 align-top">
-                                                    <div
-                                                        class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
-                                                        <button @click="open = true" type="button"
-                                                            class="whitespace-nowrap rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                            Edit
-                                                        </button>
-
-                                                        @if ($hasStatusColumn)
-                                                            <form method="POST"
-                                                                action="{{ route('admin.students.status', $student) }}"
-                                                                class="js-status-form"
-                                                                data-student="{{ $student->name }}"
-                                                                data-action="{{ $student->is_active ? 'set inactive' : 'set active' }}">
-                                                                @csrf
-                                                                @method('PATCH')
-
-                                                                <button type="submit"
-                                                                    class="whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold transition
-                                                                    {{ $student->is_active
-                                                                        ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25'
-                                                                        : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25' }}">
-                                                                    {{ $student->is_active ? 'Set Inactive' : 'Set Active' }}
-                                                                </button>
-                                                            </form>
+                                                <td class="whitespace-nowrap px-4 py-3 text-right">
+                                                    <div class="relative flex items-center justify-end gap-2"
+                                                        @click.outside="menuOpen = false">
+                                                        @if ($hasPhoneColumn ?? false)
+                                                            <a href="{{ $student->phone_number ? 'tel:' . $student->phone_number : '#' }}"
+                                                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                                aria-label="Call {{ $student->name }}">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    aria-hidden="true">
+                                                                    <path
+                                                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L8.09 9.64a16 16 0 0 0 6.27 6.27l1.21-1.21a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z" />
+                                                                </svg>
+                                                            </a>
                                                         @endif
 
-                                                        <form method="POST"
-                                                            action="{{ route('admin.students.destroy', $student) }}"
-                                                            class="js-delete-form" data-student="{{ $student->name }}">
-                                                            @csrf
-                                                            @method('DELETE')
+                                                        <a href="mailto:{{ $student->email }}"
+                                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                            aria-label="Email {{ $student->name }}">
+                                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round"
+                                                                aria-hidden="true">
+                                                                <rect x="3" y="5" width="18" height="14"
+                                                                    rx="2" />
+                                                                <path d="m3 7 9 6 9-6" />
+                                                            </svg>
+                                                        </a>
 
-                                                            <button type="submit"
-                                                                class="whitespace-nowrap rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25">
-                                                                Delete
+                                                        <button type="button" @click="menuOpen = !menuOpen"
+                                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
+                                                            aria-label="Open student actions">
+                                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"
+                                                                aria-hidden="true">
+                                                                <path
+                                                                    d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                                                            </svg>
+                                                        </button>
+
+                                                        <div x-show="menuOpen" x-cloak
+                                                            x-transition.opacity.scale.origin.top.right
+                                                            class="absolute right-0 top-9 z-30 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-left shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
+                                                            <button type="button" @click="open = true; menuOpen = false"
+                                                                class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700 dark:text-slate-200 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-300">
+                                                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    aria-hidden="true">
+                                                                    <path d="M12 20h9" />
+                                                                    <path
+                                                                        d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                                                </svg>
+                                                                Edit
                                                             </button>
-                                                        </form>
+
+                                                            @if ($hasStatusColumn)
+                                                                <form method="POST"
+                                                                    action="{{ route('admin.students.status', $student) }}"
+                                                                    class="js-status-form"
+                                                                    data-student="{{ $student->name }}"
+                                                                    data-action="{{ $student->is_active ? 'set inactive' : 'set active' }}">
+                                                                    @csrf
+                                                                    @method('PATCH')
+
+                                                                    <button type="submit"
+                                                                        class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                                                        <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2" stroke-linecap="round"
+                                                                            stroke-linejoin="round" aria-hidden="true">
+                                                                            <path d="M20 6 9 17l-5-5" />
+                                                                        </svg>
+                                                                        {{ $student->is_active ? 'Set inactive' : 'Set active' }}
+                                                                    </button>
+                                                                </form>
+                                                            @endif
+
+                                                            <form method="POST"
+                                                                action="{{ route('admin.students.destroy', $student) }}"
+                                                                class="js-delete-form"
+                                                                data-student="{{ $student->name }}">
+                                                                @csrf
+                                                                @method('DELETE')
+
+                                                                <button type="submit"
+                                                                    class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/15">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
+                                                                        fill="none" stroke="currentColor"
+                                                                        stroke-width="2" stroke-linecap="round"
+                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                        <path d="M3 6h18" />
+                                                                        <path d="M8 6V4h8v2" />
+                                                                        <path d="M19 6l-1 14H6L5 6" />
+                                                                    </svg>
+                                                                    Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
 
                                                     {{-- EDIT MODAL --}}
@@ -1019,6 +974,40 @@
                                                                                 value="{{ $student->phone_number }}"
                                                                                 class="{{ $inputClass }}"
                                                                                 placeholder="+855 12 345 678">
+                                                                        </div>
+                                                                    @endif
+
+                                                                    @if ($hasGenderColumn ?? false)
+                                                                        <div>
+                                                                            <label for="edit_gender_{{ $student->id }}"
+                                                                                class="{{ $labelClass }}">Gender</label>
+                                                                            <select id="edit_gender_{{ $student->id }}"
+                                                                                name="gender"
+                                                                                class="{{ $inputClass }}">
+                                                                                <option value="">Select gender
+                                                                                </option>
+                                                                                <option value="female"
+                                                                                    {{ (string) $student->gender === 'female' ? 'selected' : '' }}>
+                                                                                    Female
+                                                                                </option>
+                                                                                <option value="male"
+                                                                                    {{ (string) $student->gender === 'male' ? 'selected' : '' }}>
+                                                                                    Male
+                                                                                </option>
+                                                                            </select>
+                                                                        </div>
+                                                                    @endif
+
+                                                                    @if ($hasAgeColumn ?? false)
+                                                                        <div>
+                                                                            <label for="edit_age_{{ $student->id }}"
+                                                                                class="{{ $labelClass }}">Age</label>
+                                                                            <input id="edit_age_{{ $student->id }}"
+                                                                                name="age" type="number"
+                                                                                min="1" max="120"
+                                                                                value="{{ $student->age }}"
+                                                                                class="{{ $inputClass }}"
+                                                                                placeholder="Student age">
                                                                         </div>
                                                                     @endif
 
@@ -1311,7 +1300,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="{{ 6 + ($hasPhoneColumn ?? false ? 1 : 0) + ($hasMajorSubjectColumn ? 1 : 0) + ($hasClassStudyTimeColumn ? 1 : 0) }}"
+                                                <td colspan="9"
                                                     class="px-3 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
                                                     No students found.
                                                 </td>
@@ -1322,7 +1311,8 @@
                             </div>
                         </div>
 
-                        <div class="student-pagination mt-5 text-slate-700 dark:text-slate-300">
+                        <div
+                            class="student-pagination border-t border-slate-100 bg-slate-50/70 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                             {{ $students->links() }}
                         </div>
                     </div>
