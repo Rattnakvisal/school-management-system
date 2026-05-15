@@ -20,21 +20,21 @@ class DatabaseSeeder extends Seeder
         $users = [
             [
                 'name' => 'Chun Rattnakvisal',
-                'email' => 'rattnakvisalchun@gmail.com',
+                'email' => 'visal.admin@example.com',
                 'phone_number' => '078841050',
                 'password' => 'Wq_76wZtR2aPRmq',
                 'role' => 'admin',
             ],
             [
-                'name' => 'Chun Rattnakvisal',
-                'email' => 'visalchunrathanak@gmail.com',
+                'name' => 'Sokha Kim',
+                'email' => 'sokha.staff@example.com',
                 'phone_number' => '095300551',
                 'password' => 'Wq_76wZtR2aPRmq',
                 'role' => 'staff',
             ],
             [
-                'name' => 'Chun Rattnakvisal',
-                'email' => 'chunrattnakvisal246@gmail.com',
+                'name' => 'Dara Chan',
+                'email' => 'dara.teacher@example.com',
                 'phone_number' => '0762223238',
                 'password' => 'Wq_76wZtR2aPRmq',
                 'role' => 'teacher',

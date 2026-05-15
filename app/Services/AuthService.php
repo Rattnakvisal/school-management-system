@@ -84,10 +84,6 @@ class AuthService
 
         // Security best practice after login
         request()->session()->regenerate();
-
-
-
-
         return $user;
     }
 
