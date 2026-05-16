@@ -1,10 +1,8 @@
 const activeSectionIds = [
     "#home",
     "#about",
-    "#features",
     "#programs",
-    "#facilities",
-    "#admission",
+    "#course",
     "#faq",
     "#contact",
 ];

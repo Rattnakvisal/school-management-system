@@ -28,8 +28,9 @@ class StudentController extends Controller
         $filters = $this->studentFilters($request);
         $students = $this->filteredStudentQuery($filters)
             ->latest()
-            ->paginate(10)
+            ->paginate(15)
             ->withQueryString();
+        $this->attachAdminGpaToStudents($students);
 
         $hasStatusColumn = $filters['hasStatusColumn'];
         $hasClassColumn = $filters['hasClassColumn'];
@@ -430,6 +431,51 @@ class StudentController extends Controller
         return $studentQuery;
     }
 
+    private function attachAdminGpaToStudents($students): void
+    {
+        if (!method_exists($students, 'getCollection')) {
+            return;
+        }
+
+        $studentRows = $students->getCollection();
+
+        if (!$this->hasGradesTable()) {
+            $studentRows->each(fn(User $student) => $student->setAttribute('admin_cumulative_gpa', null));
+            return;
+        }
+
+        $studentRows->load('receivedGrades:id,student_id,score,max_score');
+
+        $studentRows->each(function (User $student): void {
+            $grades = $student->getRelation('receivedGrades');
+            $creditsAttempted = 0;
+            $totalPoints = 0.0;
+
+            foreach ($grades as $grade) {
+                $creditsAttempted += 3;
+                $totalPoints += 3 * $this->gradePoint((float) ($grade->score ?? 0), (float) ($grade->max_score ?? 0));
+            }
+
+            $student->setAttribute(
+                'admin_cumulative_gpa',
+                $creditsAttempted > 0 ? $totalPoints / $creditsAttempted : null
+            );
+        });
+    }
+
+    private function gradePoint(float $score, float $maxScore): float
+    {
+        $percentage = $maxScore > 0 ? ($score / $maxScore) * 100 : 0;
+
+        return round(match (true) {
+            $percentage >= 90 => 4.0,
+            $percentage >= 80 => 3.0 + (($percentage - 80) / 10),
+            $percentage >= 70 => 2.0 + (($percentage - 70) / 10),
+            $percentage >= 60 => 1.0 + (($percentage - 60) / 10),
+            default => 0.0,
+        }, 2);
+    }
+
     private function hasStatusColumn(): bool
     {
         return Schema::hasColumn('users', 'is_active');
@@ -453,6 +499,11 @@ class StudentController extends Controller
     private function hasAgeColumn(): bool
     {
         return Schema::hasColumn('users', 'age');
+    }
+
+    private function hasGradesTable(): bool
+    {
+        return Schema::hasTable('grades');
     }
 
     private function hasMajorSubjectColumn(): bool

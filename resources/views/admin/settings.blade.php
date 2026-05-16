@@ -11,10 +11,8 @@
         $homePageErrors = $errors->homePageUpdate;
         $navbarPageErrors = $errors->navbarPageUpdate;
         $aboutPageErrors = $errors->aboutPageUpdate;
-        $featurePageErrors = $errors->featurePageUpdate;
         $programPageErrors = $errors->programPageUpdate;
-        $facilityPageErrors = $errors->facilityPageUpdate;
-        $admissionPageErrors = $errors->admissionPageUpdate;
+        $coursePageErrors = $errors->coursePageUpdate;
         $faqPageErrors = $errors->faqPageUpdate;
         $contactPageErrors = $errors->contactPageUpdate;
         $footerPageErrors = $errors->footerPageUpdate;
@@ -25,11 +23,9 @@
                     'footer-page' => $footerPageErrors,
                     'contact-page' => $contactPageErrors,
                     'faq-page' => $faqPageErrors,
-                    'admission-page' => $admissionPageErrors,
-                    'facility-page' => $facilityPageErrors,
+                    'course-page' => $coursePageErrors,
                     'program-page' => $programPageErrors,
                     'navbar-page' => $navbarPageErrors,
-                    'feature-page' => $featurePageErrors,
                     'about-page' => $aboutPageErrors,
                     'home-page' => $homePageErrors,
                 ]
@@ -58,11 +54,15 @@
         $platformFeatureCards = $homePageItems->get('platform_feature_cards', collect())->values();
         $programSection = $homePageItems->get('programs', collect())->firstWhere('key', 'main');
         $programCards = $homePageItems->get('program_cards', collect())->values();
-        $facilitySection = $homePageItems->get('facilities', collect())->firstWhere('key', 'main');
-        $facilityCards = $homePageItems->get('facility_cards', collect())->values();
-        $admissionSection = $homePageItems->get('admission', collect())->firstWhere('key', 'main');
-        $admissionIntake = $homePageItems->get('admission_intake', collect())->firstWhere('key', 'main');
-        $admissionSteps = $homePageItems->get('admission_steps', collect())->values();
+        $courseSection =
+            $homePageItems->get('course', collect())->firstWhere('key', 'main') ?:
+            $homePageItems->get('admission', collect())->firstWhere('key', 'main');
+        $courseFeatured =
+            $homePageItems->get('course_featured', collect())->firstWhere('key', 'main') ?:
+            $homePageItems->get('admission_intake', collect())->firstWhere('key', 'main');
+        $courseCards = $homePageItems->get('course_cards', collect())->isNotEmpty()
+            ? $homePageItems->get('course_cards', collect())->values()
+            : $homePageItems->get('admission_steps', collect())->values();
         $faqSection = $homePageItems->get('faq', collect())->firstWhere('key', 'main');
         $faqHelp = $homePageItems->get('faq_help', collect())->firstWhere('key', 'main');
         $dynamicFaqItems = $homePageItems->get('faq_items', collect())->values();
@@ -79,13 +79,12 @@
         $aboutCardLimit = 8;
         $platformFeatureLimit = 8;
         $programLimit = 8;
-        $facilityLimit = 8;
-        $admissionStepLimit = 8;
+        $courseCardLimit = 8;
         $faqLimit = 10;
         $contactCardLimit = 8;
         $footerLinkLimit = 8;
         $footerContactLimit = 8;
-        $navbarLinkLimit = 10;
+        $navbarLinkLimit = 6;
         $settingsTabs = [
             'profile',
             'password',
@@ -93,10 +92,8 @@
             'navbar-page',
             'home-page',
             'about-page',
-            'feature-page',
             'program-page',
-            'facility-page',
-            'admission-page',
+            'course-page',
             'faq-page',
             'contact-page',
             'footer-page',
@@ -110,10 +107,8 @@
             'navbar-page',
             'home-page',
             'about-page',
-            'feature-page',
             'program-page',
-            'facility-page',
-            'admission-page',
+            'course-page',
             'faq-page',
             'contact-page',
             'footer-page',
@@ -134,26 +129,24 @@
         $heroFeatureColorDefaults = ['#2563eb', '#0d9488', '#7c3aed', '#d97706'];
         $featureCardColorDefaults = ['#d97706', '#0d9488', '#0891b2', '#e11d48', '#7c3aed', '#65a30d'];
         $programCardColorDefaults = ['#2563eb', '#059669', '#d97706', '#c026d3'];
-        $admissionStepColorDefaults = ['#22d3ee', '#f59e0b', '#34d399', '#fb7185'];
+        $courseCardColorDefaults = ['#22d3ee', '#f59e0b', '#34d399', '#fb7185'];
         $navbarPageOptions = [
             '#home' => 'Home',
             '#about' => 'About',
-            '#features' => 'Features',
             '#programs' => 'Academic Programs',
-            '#facilities' => 'Campus and Facilities',
-            '#admission' => 'Admissions',
+            '#course' => 'Courses',
             '#faq' => 'FAQ',
             '#contact' => 'Contact',
         ];
         $homePageImage = $homeHero?->image_path
             ? route('public.storage', ['path' => $homeHero->image_path])
-            : asset('images/school.jpg');
+            : asset('images/3D.png');
+        $aboutImage = $homeAbout?->image_path
+            ? route('public.storage', ['path' => $homeAbout->image_path])
+            : asset('images/8865364.png');
         $homeBrandLogo = $homeBrand?->image_path
             ? route('public.storage', ['path' => $homeBrand->image_path])
             : asset('images/techbridge-logo-mark.svg');
-        $facilityImage = $facilitySection?->image_path
-            ? route('public.storage', ['path' => $facilitySection->image_path])
-            : asset('images/study.jpg');
         $footerLogo = $homeBrandLogo;
     @endphp
 
@@ -174,10 +167,8 @@
                         @include('admin.homepage-ui.panels.navbar-page')
                         @include('admin.homepage-ui.panels.home-page')
                         @include('admin.homepage-ui.panels.about-page')
-                        @include('admin.homepage-ui.panels.feature-page')
                         @include('admin.homepage-ui.panels.program-page')
-                        @include('admin.homepage-ui.panels.facility-page')
-                        @include('admin.homepage-ui.panels.admission-page')
+                        @include('admin.homepage-ui.panels.course-page')
                         @include('admin.homepage-ui.panels.faq-page')
                         @include('admin.homepage-ui.panels.contact-page')
                         @include('admin.homepage-ui.panels.footer-page')

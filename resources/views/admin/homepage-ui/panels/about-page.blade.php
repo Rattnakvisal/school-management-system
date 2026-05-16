@@ -1,9 +1,11 @@
 <section data-settings-panel="about-page" class="hidden space-y-7">
     @if ($homePageReady ?? false)
-        <form method="POST" action="{{ route('admin.settings.about-page.update') }}" class="space-y-7">
+        <form method="POST" action="{{ route('admin.settings.about-page.update') }}" enctype="multipart/form-data"
+            class="space-y-7">
             @csrf
             @method('PUT')
             <input type="hidden" name="_settings_tab" value="about-page">
+            <input type="hidden" id="remove_about_image" name="about[remove_image]" value="0">
 
             {{-- ── About Content ── --}}
             <div
@@ -24,7 +26,7 @@
                             </div>
                             <h3 class="text-xl font-black tracking-tight text-slate-900">About Content</h3>
                             <p class="text-[13px] leading-relaxed text-slate-500">
-                                Main About text, highlights, mission, vision, culture, and operations cards.
+                                Main introduction text, image, highlight cards, checklist items, and the green bottom strip.
                             </p>
                         </div>
                         <span
@@ -46,6 +48,7 @@
                                 Badge
                             </label>
                             <input id="home_about_badge" name="about[badge]" type="text"
+                                data-home-preview-target="about_preview_badge"
                                 value="{{ old('about.badge', $homeAbout?->subtitle ?? 'About TechBridge') }}"
                                 class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 outline-none transition-all duration-200 placeholder:text-slate-300 hover:border-slate-300 focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-50">
                         </div>
@@ -55,6 +58,7 @@
                                 Headline
                             </label>
                             <input id="home_about_title" name="about[title]" type="text"
+                                data-home-preview-target="about_preview_title"
                                 value="{{ old('about.title', $homeAbout?->title ?? \App\Support\HomePageContent::text('about.title')) }}"
                                 class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition-all duration-200 placeholder:text-slate-300 hover:border-slate-300 focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-50">
                         </div>
@@ -64,7 +68,49 @@
                                 Description
                             </label>
                             <textarea id="home_about_description" name="about[description]" rows="4"
+                                data-home-preview-target="about_preview_description"
                                 class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm leading-relaxed text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-300 hover:border-slate-300 focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-50">{{ old('about.description', $homeAbout?->description ?? \App\Support\HomePageContent::text('about.description')) }}</textarea>
+                        </div>
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="block text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                                About Image
+                            </label>
+                            <input id="about_image_input" type="file" name="about[image]" accept="image/*"
+                                class="hidden">
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" id="upload_about_image_btn"
+                                    class="rounded-xl bg-slate-900 px-4 py-3 text-[12px] font-bold text-white transition-all duration-150 hover:bg-slate-800 active:scale-95">
+                                    Upload Image
+                                </button>
+                                <button type="button" id="delete_about_image_btn"
+                                    class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[12px] font-bold text-slate-700 transition-all duration-150 hover:bg-slate-50 active:scale-95">
+                                    Use Default
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 overflow-hidden rounded-2xl border border-emerald-100 bg-[#effff9]">
+                        <div class="grid gap-0 lg:grid-cols-[180px_minmax(0,1fr)]">
+                            <div class="relative min-h-44 overflow-hidden bg-emerald-50">
+                                <div class="absolute bottom-0 left-0 right-0 h-12 bg-emerald-400/15"></div>
+                                <img id="about_image_preview" src="{{ $aboutImage }}" alt="About preview"
+                                    class="relative z-10 h-48 w-full object-contain object-bottom p-2">
+                            </div>
+                            <div class="p-5">
+                                <p id="about_preview_badge"
+                                    class="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600">
+                                    {{ old('about.badge', $homeAbout?->subtitle ?? 'About TechBridge') }}
+                                </p>
+                                <h4 id="about_preview_title"
+                                    class="mt-2 text-xl font-black leading-tight tracking-tight text-[#10221e]">
+                                    {{ old('about.title', $homeAbout?->title ?? \App\Support\HomePageContent::text('about.title')) }}
+                                </h4>
+                                <p id="about_preview_description"
+                                    class="mt-3 line-clamp-4 text-[12px] leading-5 text-slate-600">
+                                    {{ old('about.description', $homeAbout?->description ?? \App\Support\HomePageContent::text('about.description')) }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -84,8 +130,8 @@
                         <div class="flex items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <h3 class="text-base font-black tracking-tight text-slate-900">About Highlights</h3>
-                                <p class="text-[12px] leading-relaxed text-slate-500">Small cards inside the dark About
-                                    panel.</p>
+                                <p class="text-[12px] leading-relaxed text-slate-500">Highlight cards shown below the
+                                    About introduction text.</p>
                             </div>
                             <button type="button" data-add-home-card="about-highlights"
                                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-cyan-600 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm shadow-cyan-200 transition-all duration-150 hover:bg-cyan-500 hover:shadow-cyan-300 active:scale-95">
@@ -203,8 +249,8 @@
                         <div class="flex items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <h3 class="text-base font-black tracking-tight text-slate-900">About Cards</h3>
-                                <p class="text-[12px] leading-relaxed text-slate-500">Cards shown on the right side of
-                                    the About section.</p>
+                                <p class="text-[12px] leading-relaxed text-slate-500">Checklist items and bottom strip
+                                    labels in the About section.</p>
                             </div>
                             <button type="button" data-add-home-card="about-cards"
                                 class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm shadow-emerald-200 transition-all duration-150 hover:bg-emerald-500 hover:shadow-emerald-300 active:scale-95">

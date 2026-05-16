@@ -38,18 +38,6 @@
                 </span>
             </button>
 
-            <!-- Feature Section -->
-            <button type="button" data-settings-nav="feature-page"
-                class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
-                <span class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4v4h4V7H7Zm6 0v4h4V7h-4ZM7 13v4h4v-4H7Zm6 0v4h4v-4h-4Z" />
-                    </svg>
-                    Feature
-                </span>
-            </button>
-
             <!-- Program Section -->
             <button type="button" data-settings-nav="program-page"
                 class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
@@ -62,25 +50,15 @@
                 </span>
             </button>
 
-            <!-- Facility Section -->
-            <button type="button" data-settings-nav="facility-page"
+            <!-- Course Section -->
+            <button type="button" data-settings-nav="course-page"
                 class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
                 <span class="inline-flex items-center gap-2">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M4 21V7l8-4 8 4v14h-5v-6H9v6H4Zm5-11h2V8H9v2Zm4 0h2V8h-2v2Z" />
+                        <path
+                            d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13a1 1 0 0 1-1.45.89L12 15.62l-6.55 3.27A1 1 0 0 1 4 18V5Zm4 3v2h8V8H8Zm0 4v2h5v-2H8Z" />
                     </svg>
-                    Facility
-                </span>
-            </button>
-
-            <!-- Admission Section -->
-            <button type="button" data-settings-nav="admission-page"
-                class="settings-nav-item w-full rounded-xl border border-transparent px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
-                <span class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M4 4h16v4H4V4Zm0 6h16v10H4V10Zm3 3v2h7v-2H7Zm0 4h10v-2H7v2Z" />
-                    </svg>
-                    Admission
+                    Courses
                 </span>
             </button>
 

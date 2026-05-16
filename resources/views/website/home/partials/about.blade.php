@@ -1,14 +1,9 @@
 {{-- =========================
     About Section
 ========================= --}}
-<section id="about" class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+<section id="about" class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
     @php
-        /*
-        |--------------------------------------------------------------------------
-        | About Icon Generator
-        |--------------------------------------------------------------------------
-        */
-        $aboutIconSvg = function ($icon, $index) {
+        $aboutIconSvg = function ($icon, $index = 0) {
             $rawIcon = strtolower(trim((string) $icon));
 
             if (str_starts_with(trim((string) $icon), '<')) {
@@ -20,181 +15,126 @@
 
             return match (true) {
                 str_contains($rawIcon, 'vision') || str_contains($rawIcon, 'target')
-                    => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="9" />
-                        <circle cx="12" cy="12" r="3" />
-                        <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
-                    </svg>',
-
+                    => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3" /></svg>',
                 str_contains($rawIcon, 'star') || str_contains($rawIcon, 'culture')
-                    => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2l3.5 7 7.5 1-5.5 5 1.5 8-7-4-7 4 1.5-8-5.5-5 7.5-1z" />
-                    </svg>',
-
-                str_contains($rawIcon, 'card') || str_contains($rawIcon, 'operation')
-                    => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="16" rx="3" />
-                        <path d="M8 9h8M8 13h5" />
-                    </svg>',
-
+                    => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.5 7 7.5 1-5.5 5 1.5 8-7-4-7 4 1.5-8-5.5-5 7.5-1Z" /></svg>',
+                str_contains($rawIcon, 'leader') || str_contains($rawIcon, 'user')
+                    => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="m17 11 2 2 4-4" /></svg>',
                 str_contains($rawIcon, 'shield') || str_contains($rawIcon, 'trust')
-                    => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2l8 4v6c0 5-3.5 9.5-8 10-4.5-.5-8-5-8-10V6l8-4z" />
-                        <path d="m9 12 2 2 4-4" />
-                    </svg>',
-
-                default => match ($index) {
-                    1 => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="9" />
-                            <path d="M12 8v4l3 2" />
-                        </svg>',
-
-                    2 => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 2l3.5 7 7.5 1-5.5 5 1.5 8-7-4-7 4 1.5-8-5.5-5 7.5-1z" />
-                        </svg>',
-
-                    3 => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 12h18M12 3v18" />
-                        </svg>',
-
-                    default
-                        => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 12l5 5L20 7" />
-                        </svg>',
+                    => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9.5-8 10-4.5-.5-8-5-8-10V6l8-4Z" /><path d="m9 12 2 2 4-4" /></svg>',
+                default => match ($index % 4) {
+                    1 => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.5 7 7.5 1-5.5 5 1.5 8-7-4-7 4 1.5-8-5.5-5 7.5-1Z" /></svg>',
+                    2 => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z" /></svg>',
+                    3 => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18" /></svg>',
+                    default => '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7" /></svg>',
                 },
             };
         };
 
-        $aboutHighlightIconTones = [
-            'bg-amber-300/15 text-amber-200 ring-1 ring-amber-200/20',
-            'bg-emerald-300/15 text-emerald-200 ring-1 ring-emerald-200/20',
-            'bg-sky-300/15 text-sky-200 ring-1 ring-sky-200/20',
-            'bg-fuchsia-300/15 text-fuchsia-200 ring-1 ring-fuchsia-200/20',
-        ];
-
-        $aboutCardIconTones = [
-            'bg-rose-50 text-rose-600 ring-1 ring-rose-100',
-            'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100',
-            'bg-sky-50 text-sky-600 ring-1 ring-sky-100',
-            'bg-violet-50 text-violet-600 ring-1 ring-violet-100',
-        ];
-
-        $aboutIconToneStyle = function ($color) {
+        $aboutToneStyle = function ($color, string $fallback = '#10b981') {
             $color = trim((string) $color);
+            $color = preg_match('/^#[0-9A-Fa-f]{6}$/', $color) ? $color : $fallback;
 
-            return preg_match('/^#[0-9A-Fa-f]{6}$/', $color)
-                ? "color: {$color}; background-color: {$color}1A; border: 1px solid {$color}33;"
-                : null;
+            return "color: {$color}; background-color: {$color}14; border-color: {$color}24;";
         };
+
+        $aboutFeatureCards = array_slice($aboutCards ?? [], 0, 4);
+        $aboutStats = array_slice($aboutHighlights ?? [], 0, 2);
+        $aboutStrip = array_slice($aboutCards ?? [], 0, 4);
     @endphp
 
-    <div class="grid gap-8 lg:grid-cols-12">
+    <div class="relative overflow-hidden bg-[#effff9]">
+        <div class="grid items-center gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1fr)]">
+            <div data-reveal class="relative min-h-[24rem] overflow-hidden">
+                <div class="absolute bottom-0 left-0 right-0 h-24 bg-emerald-400/15"></div>
+                <div class="absolute left-8 top-12 h-44 w-44 rounded-full border border-emerald-300/50"></div>
+                <div class="absolute left-20 top-20 h-64 w-64 rounded-full border border-emerald-200/70"></div>
 
-        {{-- =========================
-            LEFT SIDE
-        ========================= --}}
-        <div data-reveal
-            class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-blue-900 p-8 text-white shadow-xl lg:col-span-5">
-            {{-- Glow Effects --}}
-            <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-500/30 blur-3xl"></div>
-            <div class="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-cyan-400/20 blur-3xl"></div>
+                <img src="{{ $aboutImage ?? asset('images/8865364.png') }}" alt="{{ $aboutTitle }}"
+                    class="relative z-10 mx-auto h-[27rem] w-full max-w-[32rem] object-contain object-bottom drop-shadow-[0_28px_38px_rgba(15,118,110,0.16)]" />
 
-            {{-- Badge --}}
-            <span
-                class="relative inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-blue-200">
-                <span class="h-2 w-2 rounded-full bg-blue-300"></span>
-                {{ $aboutBadge }}
-            </span>
-
-            {{-- Title --}}
-            <h2 class="relative mt-5 text-3xl font-bold sm:text-4xl">
-                {{ $aboutTitle }}
-            </h2>
-
-            {{-- Description --}}
-            <p class="relative mt-4 text-sm leading-7 text-slate-200 sm:text-base">
-                {{ $aboutDescription }}
-            </p>
-
-            {{-- Highlights --}}
-            @if (count($aboutHighlights))
-                <div class="relative mt-8 grid gap-4 sm:grid-cols-2">
-                    @foreach ($aboutHighlights as $highlight)
-                        @php
-                            $iconStyle = $aboutIconToneStyle($highlight['color'] ?? null);
-                            $iconTone = $iconStyle
-                                ? ''
-                                : ($highlight['color'] ?? null ?:
-                                $aboutHighlightIconTones[$loop->index % count($aboutHighlightIconTones)]);
-                        @endphp
-
-                        <div
-                            class="group relative overflow-hidden rounded-2xl bg-white/10 p-4 backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/20">
-                            {{-- Card Glow --}}
-                            <div
-                                class="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-indigo-400/20 blur-2xl opacity-0 transition duration-300 group-hover:opacity-100">
-                            </div>
-
-                            {{-- Icon same style as Academic Programs --}}
-                            <div class="relative mb-3 flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconTone }} shadow-md transition duration-300 group-hover:scale-110 [&_svg]:h-5 [&_svg]:w-5"
-                                @if ($iconStyle) style="{{ $iconStyle }}" @endif>
-                                {!! $aboutIconSvg($highlight['icon'] ?? null, $loop->index) !!}
-                            </div>
-
-                            <p class="relative text-xs font-bold uppercase tracking-wider text-blue-300">
-                                {{ $highlight['title'] }}
-                            </p>
-
-                            <p class="relative mt-2 text-sm leading-6 text-slate-200">
-                                {{ $highlight['description'] }}
-                            </p>
-
-                        </div>
-                    @endforeach
+                <div class="absolute right-8 top-8 hidden grid-cols-6 gap-1.5 text-emerald-300 sm:grid">
+                    @for ($i = 0; $i < 30; $i++)
+                        <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                    @endfor
                 </div>
-            @endif
+            </div>
+
+            <div data-reveal class="px-5 pb-10 pt-2 sm:px-8 lg:px-10 lg:py-12">
+                <span class="text-[10px] font-extrabold uppercase tracking-[0.22em] text-emerald-600">
+                    {{ $aboutBadge }}
+                </span>
+
+                <h2
+                    class="[font-family:Outfit,_sans-serif] mt-3 max-w-2xl text-3xl font-extrabold leading-tight tracking-tight text-[#10221e] sm:text-4xl">
+                    {{ $aboutTitle }}
+                </h2>
+
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
+                    {{ $aboutDescription }}
+                </p>
+
+                @if (!empty($aboutFeatureCards))
+                    <div class="mt-5 grid gap-2 sm:grid-cols-2">
+                        @foreach (array_slice($aboutFeatureCards, 0, 2) as $card)
+                            <div class="flex items-center gap-2 text-sm font-bold text-[#10221e]">
+                                <span
+                                    class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-emerald-600 [&_i]:text-xs [&_svg]:h-3.5 [&_svg]:w-3.5"
+                                    style="{{ $aboutToneStyle($card['color'] ?? null, ['#10b981', '#0ea5e9'][$loop->index % 2]) }}">
+                                    {!! $aboutIconSvg($card['icon'] ?? null, $loop->index) !!}
+                                </span>
+                                {{ $card['title'] ?? '' }}
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if (!empty($aboutStats))
+                    <div class="mt-8 grid max-w-2xl gap-4 sm:grid-cols-2">
+                        @foreach ($aboutStats as $stat)
+                            <article
+                                class="group border border-emerald-900/5 bg-white/75 p-4 shadow-[0_16px_36px_-32px_rgba(15,118,110,0.55)] backdrop-blur transition hover:-translate-y-1 hover:bg-white">
+                                <div class="flex items-start gap-3">
+                                    <span
+                                        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-emerald-600 [&_i]:text-sm [&_svg]:h-4 [&_svg]:w-4"
+                                        style="{{ $aboutToneStyle($stat['color'] ?? null, ['#10b981', '#0ea5e9'][$loop->index % 2]) }}">
+                                        {!! $aboutIconSvg($stat['icon'] ?? null, $loop->index) !!}
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block text-2xl font-extrabold tracking-tight text-emerald-500">
+                                            {{ $stat['title'] ?? '' }}
+                                        </span>
+                                        <span class="mt-1 block text-[12px] font-bold leading-5 text-slate-500">
+                                            {{ $stat['description'] ?? '' }}
+                                        </span>
+                                    </span>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="mt-8">
+                    <a href="#programs"
+                        class="inline-flex items-center justify-center rounded-full bg-emerald-500 px-5 py-3 text-xs font-extrabold uppercase tracking-wide text-white shadow-[0_16px_30px_-18px_rgba(16,185,129,0.95)] transition hover:-translate-y-0.5 hover:bg-emerald-600">
+                        More About
+                    </a>
+                </div>
+            </div>
         </div>
 
-        {{-- =========================
-            RIGHT CARDS
-        ========================= --}}
-        @if (count($aboutCards))
-            <div class="grid gap-5 sm:grid-cols-2 lg:col-span-7">
-                @foreach ($aboutCards as $card)
-                    @php
-                        $iconStyle = $aboutIconToneStyle($card['color'] ?? null);
-                        $legacyTone = $card['color'] ?? ($card['tone'] ?? null);
-                        $iconTone = $iconStyle
-                            ? ''
-                            : ($legacyTone ?:
-                            $aboutCardIconTones[$loop->index % count($aboutCardIconTones)]);
-                    @endphp
-
-                    <article data-reveal style="--d:{{ number_format(0.06 * $loop->iteration, 2) }}s"
-                        class="group relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-2 hover:border-indigo-200 hover:shadow-xl">
-                        {{-- Glow --}}
-                        <div
-                            class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-indigo-400/20 blur-3xl opacity-0 transition duration-300 group-hover:opacity-100">
-                        </div>
-
-                        {{-- Icon same style as Academic Programs --}}
-                        <div class="relative flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconTone }} shadow-md transition duration-300 group-hover:scale-110 [&_svg]:h-5 [&_svg]:w-5"
-                            @if ($iconStyle) style="{{ $iconStyle }}" @endif>
-                            {!! $aboutIconSvg($card['icon'] ?? null, $loop->index) !!}
-                        </div>
-
-                        <p class="relative mt-5 text-xs font-bold uppercase tracking-widest text-slate-400">
-                            {{ $card['title'] }}
-                        </p>
-
-                        <p class="relative mt-2 text-base font-semibold leading-7 text-slate-900">
-                            {{ $card['description'] }}
-                        </p>
-
-                    </article>
+        @if (!empty($aboutStrip))
+            <div
+                class="grid gap-px bg-emerald-500 text-white sm:grid-cols-2 lg:grid-cols-4">
+                @foreach ($aboutStrip as $item)
+                    <div class="flex items-center justify-center gap-2 bg-emerald-500 px-4 py-3 text-center text-[11px] font-extrabold uppercase tracking-[0.16em]">
+                        <span class="[&_i]:text-sm [&_svg]:h-4 [&_svg]:w-4">
+                            {!! $aboutIconSvg($item['icon'] ?? null, $loop->index) !!}
+                        </span>
+                        {{ $item['title'] ?? '' }}
+                    </div>
                 @endforeach
             </div>
         @endif
-
     </div>
 </section>

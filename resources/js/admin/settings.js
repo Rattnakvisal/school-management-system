@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         removeHomeImageField
     ) {
         let currentHomeObjectUrl = null;
-        const defaultHomeImage = '/images/school.jpg';
+        const defaultHomeImage = '/images/3D.png';
 
         const revokeCurrentHomeObjectUrl = () => {
             if (!currentHomeObjectUrl) {
@@ -137,6 +137,54 @@ document.addEventListener('DOMContentLoaded', () => {
             homeImageInput.value = '';
             homeImagePreview.src = defaultHomeImage;
             removeHomeImageField.value = '1';
+        });
+    }
+
+    const aboutImageInput = page.querySelector('#about_image_input');
+    const aboutImagePreview = page.querySelector('#about_image_preview');
+    const uploadAboutImageBtn = page.querySelector('#upload_about_image_btn');
+    const deleteAboutImageBtn = page.querySelector('#delete_about_image_btn');
+    const removeAboutImageField = page.querySelector('#remove_about_image');
+
+    if (
+        aboutImageInput &&
+        aboutImagePreview &&
+        uploadAboutImageBtn &&
+        deleteAboutImageBtn &&
+        removeAboutImageField
+    ) {
+        let currentAboutObjectUrl = null;
+        const defaultAboutImage = '/images/8865364.png';
+
+        const revokeCurrentAboutObjectUrl = () => {
+            if (!currentAboutObjectUrl) {
+                return;
+            }
+
+            URL.revokeObjectURL(currentAboutObjectUrl);
+            currentAboutObjectUrl = null;
+        };
+
+        uploadAboutImageBtn.addEventListener('click', () => aboutImageInput.click());
+        aboutImagePreview.addEventListener('click', () => aboutImageInput.click());
+
+        aboutImageInput.addEventListener('change', () => {
+            const file = aboutImageInput.files && aboutImageInput.files[0] ? aboutImageInput.files[0] : null;
+            if (!file) {
+                return;
+            }
+
+            revokeCurrentAboutObjectUrl();
+            currentAboutObjectUrl = URL.createObjectURL(file);
+            aboutImagePreview.src = currentAboutObjectUrl;
+            removeAboutImageField.value = '0';
+        });
+
+        deleteAboutImageBtn.addEventListener('click', () => {
+            revokeCurrentAboutObjectUrl();
+            aboutImageInput.value = '';
+            aboutImagePreview.src = defaultAboutImage;
+            removeAboutImageField.value = '1';
         });
     }
 
@@ -437,10 +485,51 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const hasHiddenCard = Boolean(page.querySelector(`[data-addable-card="${group}"].hidden`));
+        const hasHiddenCard = Boolean(page.querySelector(`[data-addable-card="${group}"].hidden, [data-addable-card="${group}"][data-navbar-card-empty="1"]`));
         button.disabled = !hasHiddenCard;
         button.classList.toggle('opacity-50', !hasHiddenCard);
         button.classList.toggle('cursor-not-allowed', !hasHiddenCard);
+    };
+
+    const revealAddableCard = (group) => {
+        const cards = Array.from(page.querySelectorAll(`[data-addable-card="${group}"]`));
+        const card = cards.find((candidate) => (
+            candidate.classList.contains('hidden') ||
+            candidate.dataset.navbarCardEmpty === '1' ||
+            candidate.hidden
+        ));
+
+        if (!card) {
+            syncAddButtonState(group);
+            return null;
+        }
+
+        card.hidden = false;
+        card.dataset.navbarCardEmpty = '0';
+        card.classList.remove('hidden', 'opacity-50', 'ring-2', 'ring-red-100');
+
+        const deleteField = card.querySelector('[data-home-delete-field]');
+        if (deleteField) {
+            deleteField.value = '0';
+        }
+
+        card.querySelectorAll('input, textarea, select').forEach((field) => {
+            field.disabled = false;
+        });
+
+        const activeToggle = card.querySelector('[data-home-active-toggle]');
+        if (activeToggle) {
+            activeToggle.checked = true;
+            syncActiveCardState(activeToggle);
+        }
+
+        const removeButton = card.querySelector('[data-home-remove-card]');
+        if (removeButton) {
+            removeButton.textContent = 'Remove';
+            removeButton.disabled = false;
+        }
+
+        return card;
     };
 
     page.querySelectorAll('[data-add-home-card]').forEach((button) => {
@@ -449,28 +538,11 @@ document.addEventListener('DOMContentLoaded', () => {
         syncAddButtonState(group);
 
         button.addEventListener('click', () => {
-            const card = page.querySelector(`[data-addable-card="${group}"].hidden`);
+            const card = revealAddableCard(group);
 
             if (!card) {
                 syncAddButtonState(group);
                 return;
-            }
-
-            card.classList.remove('hidden', 'opacity-50', 'ring-2', 'ring-red-100');
-
-            const deleteField = card.querySelector('[data-home-delete-field]');
-            if (deleteField) {
-                deleteField.value = '0';
-            }
-
-            card.querySelectorAll('input, textarea, select').forEach((field) => {
-                field.disabled = false;
-            });
-
-            const activeToggle = card.querySelector('[data-home-active-toggle]');
-            if (activeToggle) {
-                activeToggle.checked = true;
-                syncActiveCardState(activeToggle);
             }
 
             if (group === 'hero-stats') {
@@ -496,12 +568,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            const removeButton = card.querySelector('[data-home-remove-card]');
-            if (removeButton) {
-                removeButton.textContent = 'Remove';
-                removeButton.disabled = false;
-            }
-
             const editable = card.querySelector('input[type="text"], textarea, select');
             editable?.focus();
             syncAddButtonState(group);
@@ -518,7 +584,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             deleteField.value = '1';
+            card.dataset.navbarCardEmpty = '1';
             card.classList.add('opacity-50', 'ring-2', 'ring-red-100');
+            card.classList.add('hidden');
             card.querySelectorAll('input[type="text"], textarea, select, input[type="checkbox"]').forEach((field) => {
                 field.disabled = true;
             });

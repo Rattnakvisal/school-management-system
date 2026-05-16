@@ -139,11 +139,11 @@
                             </h3>
 
                             <p class="mt-1 text-xs text-slate-500">
-                                Links shown in the home page header dropdown.
+                                Links shown in the home page header dropdown. You can add up to 6 links.
                             </p>
                         </div>
 
-                        <button type="button" data-add-home-card="navbar-links"
+                        <button type="button" data-add-home-card="navbar-links" data-navbar-add-link
                             class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm shadow-emerald-200 transition-all duration-150 hover:bg-emerald-500 hover:shadow-emerald-300 active:scale-95">
                             <svg class="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor"
                                 stroke-width="2.5" stroke-linecap="round">
@@ -163,10 +163,11 @@
 
                                 $navbarHref = old('navbar_links.' . $i . '.href', $navbarLink?->value ?? '');
 
-                                $showNavbarLink = filled($navbarLabel) || filled($navbarHref) || $i < 4;
+                                $showNavbarLink = true;
                             @endphp
 
-                            <div data-home-editor-card data-addable-card="navbar-links"
+                            <div data-home-editor-card data-addable-card="navbar-links" data-navbar-link-card
+                                data-navbar-card-empty="0"
                                 class="{{ $showNavbarLink ? '' : 'hidden' }} rounded-2xl border border-slate-200 bg-white p-3">
                                 <input type="hidden" name="navbar_links[{{ $i }}][id]"
                                     value="{{ old('navbar_links.' . $i . '.id', $navbarLink?->id) }}">
@@ -256,7 +257,8 @@
             </div>
         </form>
     @else
-        <div class="rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20 dark:border-amber-900/50 dark:bg-amber-900/20 p-6 text-sm text-amber-800">
+        <div
+            class="rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/20 dark:border-amber-900/50 dark:bg-amber-900/20 p-6 text-sm text-amber-800">
             Home page tables are not available yet. Run migrations, then refresh this page.
         </div>
     @endif

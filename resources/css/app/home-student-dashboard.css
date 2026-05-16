@@ -643,7 +643,7 @@
         }
 
         .website-home
-            :is(#about, #features, #programs, #facilities, #faq)
+            :is(#about, #programs, #facilities, #faq)
             :is(article[class*="group"], details.group):is(
                 :hover,
                 :focus-within
@@ -657,7 +657,7 @@
         }
 
         .website-home
-            :is(.home-hero-strip, #admission, #contact)
+            :is(.home-hero-strip, #course, #contact)
             article[class*="group"]:is(:hover, :focus-within) {
             border-color: rgba(147, 197, 253, 0.48);
             background-color: rgba(255, 255, 255, 0.16);
@@ -797,9 +797,9 @@
 
     .contact-input {
         width: 100%;
-        border-radius: 1rem;
+        border-radius: 0;
         border: 1px solid #e2e8f0;
-        background: #f8fafc;
+        background: rgba(255, 255, 255, 0.82);
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
         outline: none;
@@ -807,9 +807,9 @@
     }
 
     .contact-input:focus {
-        border-color: #818cf8;
+        border-color: #10b981;
         background: #ffffff;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14);
     }
 
     .contact-error {

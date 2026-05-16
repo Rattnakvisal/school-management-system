@@ -18,10 +18,14 @@ class HomePageViewData
         $links = self::configArray('links');
         $features = self::configArray('features.items');
         $programs = self::configArray('programs.items');
-        $steps = self::configArray('admission.steps');
+        $defaultCourseItems = self::configArray('course.items') ?: self::configArray('admission.steps');
+        $courseCards = array_values(array_map(
+            fn($item, $index) => self::courseCardData($item, $index),
+            array_values($defaultCourseItems),
+            array_keys(array_values($defaultCourseItems))
+        ));
         $aboutCards = self::configArray('about.cards');
         $aboutHighlights = self::configArray('about.highlights');
-        $facilityCards = self::configArray('facilities.items');
         $faqItems = self::configArray('faq.items');
         $footerLinks = self::configArray('footer_links');
         $contactCards = self::configArray('contact.cards');
@@ -56,11 +60,20 @@ class HomePageViewData
             $links = $dynamicNavbarLinks;
         }
 
+        $links = array_values(array_filter(
+            $links,
+            fn($link) => ($link['href'] ?? null) !== '#facilities'
+        ));
+        $links = array_map(fn($link) => array_merge($link, [
+            'href' => ($link['href'] ?? null) === '#admission' ? '#course' : ($link['href'] ?? '#'),
+        ]), $links);
+        $links = array_slice($links, 0, 6);
+
         $homeHeroItem = $homePageItems->get('hero', collect())->firstWhere('key', 'main');
         $heroBadge = $homeHeroItem?->subtitle ?: HomePageContent::text('hero.badge');
         $heroTitle = $homeHeroItem?->title ?: HomePageContent::text('hero.title');
         $heroDescription = $homeHeroItem?->description ?: HomePageContent::text('hero.description', ['schoolName' => $schoolName]);
-        $heroImage = self::imageUrl($homeHeroItem?->image_path, 'images/school.jpg');
+        $heroImage = self::imageUrl($homeHeroItem?->image_path, 'images/3D.png');
 
         $dynamicHeroPoints = $homePageItems
             ->get('hero_points', collect())
@@ -111,6 +124,7 @@ class HomePageViewData
         $aboutBadge = $aboutItem?->subtitle ?: HomePageContent::text('about.badge', ['schoolName' => $schoolName]);
         $aboutTitle = $aboutItem?->title ?: HomePageContent::text('about.title');
         $aboutDescription = $aboutItem?->description ?: HomePageContent::text('about.description');
+        $aboutImage = self::imageUrl($aboutItem?->image_path, 'images/8865364.png');
 
         $dynamicAboutHighlights = $homePageItems
             ->get('about_highlights', collect())
@@ -190,51 +204,57 @@ class HomePageViewData
             $programs = $dynamicPrograms;
         }
 
-        $facilityItem = $homePageItems->get('facilities', collect())->firstWhere('key', 'main');
-        $facilityBadge = $facilityItem?->subtitle ?: HomePageContent::text('facilities.badge');
-        $facilityTitle = $facilityItem?->title ?: HomePageContent::text('facilities.title');
-        $facilityDescription = $facilityItem?->description ?: HomePageContent::text('facilities.description');
-        $facilityImage = self::imageUrl($facilityItem?->image_path, 'images/study.jpg');
+        $courseItem = $homePageItems->get('course', collect())->firstWhere('key', 'main')
+            ?: $homePageItems->get('admission', collect())->firstWhere('key', 'main');
+        $courseBadge = $courseItem?->subtitle ?: HomePageContent::text('course.badge', [], HomePageContent::text('admission.badge'));
+        $courseTitle = $courseItem?->title ?: HomePageContent::text('course.title', [], HomePageContent::text('admission.title'));
+        $courseDescription = $courseItem?->description ?: HomePageContent::text('course.description', [], HomePageContent::text('admission.description'));
 
-        $dynamicFacilityCards = $homePageItems
-            ->get('facility_cards', collect())
-            ->map(fn($item) => [
-                'title' => $item->title,
-                'description' => $item->description,
-                'icon' => $item->icon,
-            ])
+        $courseFeaturedItem = $homePageItems->get('course_featured', collect())->firstWhere('key', 'main')
+            ?: $homePageItems->get('admission_intake', collect())->firstWhere('key', 'main');
+        $courseFeaturedLabel = $courseFeaturedItem?->subtitle ?: HomePageContent::text('course.featured_label', [], HomePageContent::text('admission.open_intake_label'));
+        $courseFeaturedTitle = $courseFeaturedItem?->title ?: HomePageContent::text('course.featured_title', [], HomePageContent::text('admission.open_intake_title'));
+        $courseFeaturedDescription = $courseFeaturedItem?->description ?: HomePageContent::text('course.featured_description', [], HomePageContent::text('admission.open_intake_description'));
+
+        $dynamicCourseCards = ($homePageItems->get('course_cards', collect())->isNotEmpty()
+                ? $homePageItems->get('course_cards', collect())
+                : $homePageItems->get('admission_steps', collect()))
+            ->values()
+            ->map(function ($item, $index) use ($defaultCourseItems) {
+                $fallback = array_values($defaultCourseItems)[$index] ?? [];
+                $meta = is_array($item->meta) ? $item->meta : [];
+
+                return self::courseCardData([
+                    'category' => $meta['category'] ?? ($item->subtitle ?: ($fallback['category'] ?? 'Course')),
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'image_url' => self::imageUrl($item->image_path, $fallback['image'] ?? 'images/study.jpg'),
+                    'instructor_name' => $meta['instructor_name'] ?? ($fallback['instructor_name'] ?? ''),
+                    'instructor_role' => $meta['instructor_role'] ?? ($fallback['instructor_role'] ?? ''),
+                    'lessons' => $meta['lessons'] ?? ($fallback['lessons'] ?? ''),
+                    'duration' => $meta['duration'] ?? ($fallback['duration'] ?? ''),
+                    'rating' => $meta['rating'] ?? ($fallback['rating'] ?? ''),
+                    'review_count' => $meta['review_count'] ?? ($fallback['review_count'] ?? ''),
+                    'price' => $meta['price'] ?? ($fallback['price'] ?? ''),
+                    'button_label' => $meta['button_label'] ?? ($fallback['button_label'] ?? ''),
+                    'color' => $item->color ?: ($fallback['color'] ?? '#10b981'),
+                ], $index);
+            })
             ->filter(fn($item) => filled($item['title']) && filled($item['description']))
             ->values()
             ->all();
 
-        if (count($dynamicFacilityCards) > 0) {
-            $facilityCards = $dynamicFacilityCards;
+        if (count($dynamicCourseCards) > 0) {
+            $courseCards = $dynamicCourseCards;
         }
 
-        $admissionItem = $homePageItems->get('admission', collect())->firstWhere('key', 'main');
-        $admissionBadge = $admissionItem?->subtitle ?: HomePageContent::text('admission.badge');
-        $admissionTitle = $admissionItem?->title ?: HomePageContent::text('admission.title');
-        $admissionDescription = $admissionItem?->description ?: HomePageContent::text('admission.description');
-
-        $admissionIntakeItem = $homePageItems->get('admission_intake', collect())->firstWhere('key', 'main');
-        $admissionIntakeLabel = $admissionIntakeItem?->subtitle ?: HomePageContent::text('admission.open_intake_label');
-        $admissionIntakeTitle = $admissionIntakeItem?->title ?: HomePageContent::text('admission.open_intake_title');
-        $admissionIntakeDescription = $admissionIntakeItem?->description ?: HomePageContent::text('admission.open_intake_description');
-
-        $dynamicSteps = $homePageItems
-            ->get('admission_steps', collect())
-            ->map(fn($item) => [
-                'title' => $item->title,
-                'description' => $item->description,
-                'color' => $item->color,
-            ])
-            ->filter(fn($item) => filled($item['title']) && filled($item['description']))
-            ->values()
-            ->all();
-
-        if (count($dynamicSteps) > 0) {
-            $steps = $dynamicSteps;
-        }
+        $steps = $courseCards;
+        $admissionBadge = $courseBadge;
+        $admissionTitle = $courseTitle;
+        $admissionDescription = $courseDescription;
+        $admissionIntakeLabel = $courseFeaturedLabel;
+        $admissionIntakeTitle = $courseFeaturedTitle;
+        $admissionIntakeDescription = $courseFeaturedDescription;
 
         $faqItem = $homePageItems->get('faq', collect())->firstWhere('key', 'main');
         $faqBadge = $faqItem?->subtitle ?: HomePageContent::text('faq.badge');
@@ -296,6 +316,14 @@ class HomePageViewData
             $footerLinks = $dynamicFooterLinks;
         }
 
+        $footerLinks = array_values(array_filter(
+            $footerLinks,
+            fn($link) => ($link['href'] ?? null) !== '#facilities'
+        ));
+        $footerLinks = array_map(fn($link) => array_merge($link, [
+            'href' => ($link['href'] ?? null) === '#admission' ? '#course' : ($link['href'] ?? '#'),
+        ]), $footerLinks);
+
         $footerContacts = $homePageItems
             ->get('footer_contacts', collect())
             ->map(fn($item) => ['label' => $item->title, 'value' => $item->value])
@@ -319,11 +347,11 @@ class HomePageViewData
             'links',
             'features',
             'programs',
+            'courseCards',
             'steps',
             'heroPoints',
             'aboutCards',
             'aboutHighlights',
-            'facilityCards',
             'faqItems',
             'footerLinks',
             'contactCards',
@@ -339,16 +367,19 @@ class HomePageViewData
             'aboutBadge',
             'aboutTitle',
             'aboutDescription',
+            'aboutImage',
             'featureBadge',
             'featureTitle',
             'featureTag',
             'programBadge',
             'programTitle',
             'programDescription',
-            'facilityBadge',
-            'facilityTitle',
-            'facilityDescription',
-            'facilityImage',
+            'courseBadge',
+            'courseTitle',
+            'courseDescription',
+            'courseFeaturedLabel',
+            'courseFeaturedTitle',
+            'courseFeaturedDescription',
             'admissionBadge',
             'admissionTitle',
             'admissionDescription',
@@ -386,6 +417,28 @@ class HomePageViewData
     private static function imageUrl(?string $path, string $fallback): string
     {
         return $path ? route('public.storage', ['path' => $path]) : asset($fallback);
+    }
+
+    private static function courseCardData(array $item, int $index): array
+    {
+        $imageUrl = $item['image_url'] ?? null;
+        $image = $item['image'] ?? null;
+
+        return [
+            'category' => $item['category'] ?? $item['level'] ?? 'Course',
+            'title' => $item['title'] ?? '',
+            'description' => $item['description'] ?? '',
+            'image_url' => $imageUrl ?: asset($image ?: ['images/study.jpg', 'images/AI.png', 'images/school.jpg'][$index % 3]),
+            'instructor_name' => $item['instructor_name'] ?? '',
+            'instructor_role' => $item['instructor_role'] ?? '',
+            'lessons' => $item['lessons'] ?? '',
+            'duration' => $item['duration'] ?? '',
+            'rating' => $item['rating'] ?? '',
+            'review_count' => $item['review_count'] ?? '',
+            'price' => $item['price'] ?? '',
+            'button_label' => $item['button_label'] ?? '',
+            'color' => $item['color'] ?? '#10b981',
+        ];
     }
 
     private static function resolveStatValue(mixed $value, int $studentsTotal, int $teachersTotal): string

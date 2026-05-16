@@ -12,7 +12,7 @@
 </head>
 
 <body
-    class="website-home [font-family:Manrope,_sans-serif] min-h-screen overflow-x-hidden overflow-y-auto bg-slate-100 text-slate-900 antialiased"
+    class="website-home [font-family:Manrope,_sans-serif] min-h-screen overflow-x-hidden overflow-y-auto bg-white text-slate-900 antialiased"
     x-data="websiteHomePage()" @keydown.escape.window="if (showBanner) closeBanner()">
     <div class="relative isolate overflow-x-hidden">
         @include('website.home.partials.header')

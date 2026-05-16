@@ -164,7 +164,7 @@ class SettingsController extends Controller
             'brand.description' => ['required', 'string', 'max:220'],
             'brand.logo' => ['nullable', 'file', 'image', 'max:4096'],
             'brand.remove_logo' => ['nullable', 'boolean'],
-            'navbar_links' => ['nullable', 'array', 'max:10'],
+            'navbar_links' => ['nullable', 'array', 'max:8'],
             'navbar_links.*.id' => ['nullable', 'integer'],
             'navbar_links.*.label' => ['nullable', 'string', 'max:120'],
             'navbar_links.*.href' => ['nullable', 'string', 'max:180'],
@@ -205,10 +205,21 @@ class SettingsController extends Controller
 
         $this->syncFooterBrandFromBrand($brand);
 
+        $navbarPageLabels = [
+            '#home' => 'Home',
+            '#about' => 'About',
+            '#programs' => 'Academic Programs',
+            '#course' => 'Courses',
+            '#faq' => 'FAQ',
+            '#contact' => 'Contact',
+        ];
+
         foreach (($validated['navbar_links'] ?? []) as $index => $link) {
             $key = 'link_' . ($index + 1);
             $label = trim((string) ($link['label'] ?? ''));
             $href = trim((string) ($link['href'] ?? ''));
+            $href = $href === '#admission' ? '#course' : $href;
+            $label = $label !== '' ? $label : ($navbarPageLabels[$href] ?? '');
 
             if (!empty($link['delete']) || ($label === '' && $href === '')) {
                 $this->deleteHomePageItem('navbar_links', $link['id'] ?? null, $key);
@@ -395,6 +406,8 @@ class SettingsController extends Controller
             'about.badge' => ['required', 'string', 'max:160'],
             'about.title' => ['required', 'string', 'max:240'],
             'about.description' => ['required', 'string', 'max:900'],
+            'about.image' => ['nullable', 'file', 'image', 'max:4096'],
+            'about.remove_image' => ['nullable', 'boolean'],
             'about_highlights' => ['nullable', 'array', 'max:4'],
             'about_highlights.*.id' => ['nullable', 'integer'],
             'about_highlights.*.title' => ['nullable', 'string', 'max:120'],
@@ -416,6 +429,26 @@ class SettingsController extends Controller
         $this->ensureDefaultHomePageItems();
 
         $about = HomePageItem::query()->where('section', 'about')->where('key', 'main')->firstOrFail();
+        $currentImage = $about->image_path;
+
+        if ($request->boolean('about.remove_image')) {
+            $this->deleteStoredHomeImage($currentImage);
+            $about->image_path = null;
+            $currentImage = null;
+        }
+
+        if ($request->hasFile('about.image')) {
+            $path = $request->file('about.image')->store('home-page', 'public');
+
+            if ($path !== false) {
+                if ($currentImage && $currentImage !== $path) {
+                    $this->deleteStoredHomeImage($currentImage);
+                }
+
+                $about->image_path = $path;
+            }
+        }
+
         $about->fill([
             'title' => $validated['about']['title'],
             'subtitle' => $validated['about']['badge'],
@@ -478,75 +511,6 @@ class SettingsController extends Controller
             ->route('admin.homepage.index')
             ->with('success', 'About page content updated successfully.')
             ->with('settings_tab', 'about-page');
-    }
-
-    public function updateFeaturePage(Request $request)
-    {
-        if (!Schema::hasTable('home_page_items')) {
-            return redirect()
-                ->route('admin.homepage.index')
-                ->with('error', 'Please run migrations before editing the feature page.');
-        }
-
-        $validated = $request->validateWithBag('featurePageUpdate', [
-            '_settings_tab' => ['nullable', 'string'],
-            'feature.badge' => ['required', 'string', 'max:160'],
-            'feature.title' => ['required', 'string', 'max:240'],
-            'feature.tag' => ['required', 'string', 'max:160'],
-            'feature_cards' => ['nullable', 'array', 'max:8'],
-            'feature_cards.*.id' => ['nullable', 'integer'],
-            'feature_cards.*.title' => ['nullable', 'string', 'max:140'],
-            'feature_cards.*.description' => ['nullable', 'string', 'max:320'],
-            'feature_cards.*.icon' => ['nullable', 'string', 'max:4000'],
-            'feature_cards.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'feature_cards.*.active' => ['nullable', 'boolean'],
-            'feature_cards.*.delete' => ['nullable', 'boolean'],
-        ]);
-
-        $this->ensureDefaultHomePageItems();
-
-        HomePageItem::query()->updateOrCreate(
-            ['section' => 'platform_features', 'key' => 'main'],
-            [
-                'type' => 'content',
-                'title' => $validated['feature']['title'],
-                'subtitle' => $validated['feature']['badge'],
-                'value' => $validated['feature']['tag'],
-                'sort_order' => 1,
-                'is_active' => true,
-            ]
-        );
-
-        foreach (($validated['feature_cards'] ?? []) as $index => $card) {
-            $key = 'card_' . ($index + 1);
-            $title = trim((string) ($card['title'] ?? ''));
-            $description = trim((string) ($card['description'] ?? ''));
-
-            if (!empty($card['delete']) || ($title === '' && $description === '')) {
-                $this->deleteHomePageItem('platform_feature_cards', $card['id'] ?? null, $key);
-                continue;
-            }
-
-            $this->updateOrCreateHomePageItem(
-                'platform_feature_cards',
-                $card['id'] ?? null,
-                $key,
-                [
-                    'type' => 'card',
-                    'title' => $title,
-                    'description' => $description,
-                    'icon' => $card['icon'] ?? null,
-                    'color' => $card['color'] ?? null,
-                    'sort_order' => $index + 1,
-                    'is_active' => !empty($card['active']),
-                ]
-            );
-        }
-
-        return redirect()
-            ->route('admin.homepage.index')
-            ->with('success', 'Feature page content updated successfully.')
-            ->with('settings_tab', 'feature-page');
     }
 
     public function updateProgramPage(Request $request)
@@ -621,163 +585,124 @@ class SettingsController extends Controller
             ->with('settings_tab', 'program-page');
     }
 
-    public function updateFacilityPage(Request $request)
+    public function updateCoursePage(Request $request)
     {
         if (!Schema::hasTable('home_page_items')) {
-            return redirect()
-                ->route('admin.homepage.index')
-                ->with('error', 'Please run migrations before editing the facility page.');
+            return redirect()->route('admin.homepage.index')->with('error', 'Please run migrations before editing the course page.');
         }
 
-        $validated = $request->validateWithBag('facilityPageUpdate', [
+        $validated = $request->validateWithBag('coursePageUpdate', [
             '_settings_tab' => ['nullable', 'string'],
-            'facility.badge' => ['required', 'string', 'max:160'],
-            'facility.title' => ['required', 'string', 'max:240'],
-            'facility.description' => ['required', 'string', 'max:900'],
-            'facility.image' => ['nullable', 'file', 'image', 'max:4096'],
-            'facility.remove_image' => ['nullable', 'boolean'],
-            'facility_cards' => ['nullable', 'array', 'max:8'],
-            'facility_cards.*.id' => ['nullable', 'integer'],
-            'facility_cards.*.title' => ['nullable', 'string', 'max:140'],
-            'facility_cards.*.description' => ['nullable', 'string', 'max:320'],
-            'facility_cards.*.icon' => ['nullable', 'string', 'max:4000'],
-            'facility_cards.*.active' => ['nullable', 'boolean'],
-            'facility_cards.*.delete' => ['nullable', 'boolean'],
+            'course.badge' => ['required', 'string', 'max:160'],
+            'course.title' => ['required', 'string', 'max:240'],
+            'course.description' => ['required', 'string', 'max:900'],
+            'featured.label' => ['required', 'string', 'max:160'],
+            'featured.title' => ['required', 'string', 'max:180'],
+            'featured.description' => ['required', 'string', 'max:500'],
+            'course_cards' => ['nullable', 'array', 'max:8'],
+            'course_cards.*.id' => ['nullable', 'integer'],
+            'course_cards.*.category' => ['nullable', 'string', 'max:120'],
+            'course_cards.*.title' => ['nullable', 'string', 'max:140'],
+            'course_cards.*.description' => ['nullable', 'string', 'max:320'],
+            'course_cards.*.image' => ['nullable', 'file', 'image', 'max:4096'],
+            'course_cards.*.remove_image' => ['nullable', 'boolean'],
+            'course_cards.*.instructor_name' => ['nullable', 'string', 'max:120'],
+            'course_cards.*.instructor_role' => ['nullable', 'string', 'max:160'],
+            'course_cards.*.lessons' => ['nullable', 'string', 'max:60'],
+            'course_cards.*.duration' => ['nullable', 'string', 'max:60'],
+            'course_cards.*.rating' => ['nullable', 'string', 'max:20'],
+            'course_cards.*.review_count' => ['nullable', 'string', 'max:40'],
+            'course_cards.*.price' => ['nullable', 'string', 'max:40'],
+            'course_cards.*.button_label' => ['nullable', 'string', 'max:80'],
+            'course_cards.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'course_cards.*.active' => ['nullable', 'boolean'],
+            'course_cards.*.delete' => ['nullable', 'boolean'],
         ]);
 
         $this->ensureDefaultHomePageItems();
 
-        $facility = HomePageItem::query()->where('section', 'facilities')->where('key', 'main')->firstOrFail();
-        $currentImage = $facility->image_path;
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'course', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['course']['title'],
+                'subtitle' => $validated['course']['badge'],
+                'description' => $validated['course']['description'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
 
-        if ($request->boolean('facility.remove_image')) {
-            $this->deleteStoredHomeImage($currentImage);
-            $facility->image_path = null;
-            $currentImage = null;
-        }
+        HomePageItem::query()->updateOrCreate(
+            ['section' => 'course_featured', 'key' => 'main'],
+            [
+                'type' => 'content',
+                'title' => $validated['featured']['title'],
+                'subtitle' => $validated['featured']['label'],
+                'description' => $validated['featured']['description'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
 
-        if ($request->hasFile('facility.image')) {
-            $path = $request->file('facility.image')->store('home-page', 'public');
-
-            if ($path !== false) {
-                if ($currentImage && $currentImage !== $path) {
-                    $this->deleteStoredHomeImage($currentImage);
-                }
-
-                $facility->image_path = $path;
-            }
-        }
-
-        $facility->fill([
-            'type' => 'content',
-            'title' => $validated['facility']['title'],
-            'subtitle' => $validated['facility']['badge'],
-            'description' => $validated['facility']['description'],
-            'sort_order' => 1,
-            'is_active' => true,
-        ])->save();
-
-        foreach (($validated['facility_cards'] ?? []) as $index => $card) {
+        foreach (($validated['course_cards'] ?? []) as $index => $step) {
             $key = 'card_' . ($index + 1);
-            $title = trim((string) ($card['title'] ?? ''));
-            $description = trim((string) ($card['description'] ?? ''));
-
-            if (!empty($card['delete']) || ($title === '' && $description === '')) {
-                $this->deleteHomePageItem('facility_cards', $card['id'] ?? null, $key);
-                continue;
-            }
-
-            $this->updateOrCreateHomePageItem(
-                'facility_cards',
-                $card['id'] ?? null,
-                $key,
-                [
-                    'type' => 'card',
-                    'title' => $title,
-                    'description' => $description,
-                    'icon' => $card['icon'] ?? null,
-                    'sort_order' => $index + 1,
-                    'is_active' => !empty($card['active']),
-                ]
-            );
-        }
-
-        return redirect()
-            ->route('admin.homepage.index')
-            ->with('success', 'Facility page content updated successfully.')
-            ->with('settings_tab', 'facility-page');
-    }
-
-    public function updateAdmissionPage(Request $request)
-    {
-        if (!Schema::hasTable('home_page_items')) {
-            return redirect()->route('admin.homepage.index')->with('error', 'Please run migrations before editing the admission page.');
-        }
-
-        $validated = $request->validateWithBag('admissionPageUpdate', [
-            '_settings_tab' => ['nullable', 'string'],
-            'admission.badge' => ['required', 'string', 'max:160'],
-            'admission.title' => ['required', 'string', 'max:240'],
-            'admission.description' => ['required', 'string', 'max:900'],
-            'intake.label' => ['required', 'string', 'max:160'],
-            'intake.title' => ['required', 'string', 'max:180'],
-            'intake.description' => ['required', 'string', 'max:500'],
-            'admission_steps' => ['nullable', 'array', 'max:8'],
-            'admission_steps.*.id' => ['nullable', 'integer'],
-            'admission_steps.*.title' => ['nullable', 'string', 'max:140'],
-            'admission_steps.*.description' => ['nullable', 'string', 'max:320'],
-            'admission_steps.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'admission_steps.*.active' => ['nullable', 'boolean'],
-            'admission_steps.*.delete' => ['nullable', 'boolean'],
-        ]);
-
-        $this->ensureDefaultHomePageItems();
-
-        HomePageItem::query()->updateOrCreate(
-            ['section' => 'admission', 'key' => 'main'],
-            [
-                'type' => 'content',
-                'title' => $validated['admission']['title'],
-                'subtitle' => $validated['admission']['badge'],
-                'description' => $validated['admission']['description'],
-                'sort_order' => 1,
-                'is_active' => true,
-            ]
-        );
-
-        HomePageItem::query()->updateOrCreate(
-            ['section' => 'admission_intake', 'key' => 'main'],
-            [
-                'type' => 'content',
-                'title' => $validated['intake']['title'],
-                'subtitle' => $validated['intake']['label'],
-                'description' => $validated['intake']['description'],
-                'sort_order' => 1,
-                'is_active' => true,
-            ]
-        );
-
-        foreach (($validated['admission_steps'] ?? []) as $index => $step) {
-            $key = 'step_' . ($index + 1);
+            $category = trim((string) ($step['category'] ?? ''));
             $title = trim((string) ($step['title'] ?? ''));
             $description = trim((string) ($step['description'] ?? ''));
+            $existingStep = $this->findHomePageItem('course_cards', $step['id'] ?? null, $key)
+                ?: $this->findHomePageItem('admission_steps', $step['id'] ?? null, 'step_' . ($index + 1));
 
             if (!empty($step['delete']) || ($title === '' && $description === '')) {
-                $this->deleteHomePageItem('admission_steps', $step['id'] ?? null, $key);
+                $this->deleteStoredHomeImage($existingStep?->image_path);
+                $this->deleteHomePageItem('course_cards', $step['id'] ?? null, $key);
+                $this->deleteHomePageItem('admission_steps', $step['id'] ?? null, 'step_' . ($index + 1));
                 continue;
             }
 
-            $this->updateOrCreateHomePageItem('admission_steps', $step['id'] ?? null, $key, [
-                'type' => 'step',
+            $imagePath = $existingStep?->image_path;
+
+            if (!empty($step['remove_image'])) {
+                $this->deleteStoredHomeImage($imagePath);
+                $imagePath = null;
+            }
+
+            if ($request->hasFile("course_cards.{$index}.image")) {
+                $path = $request->file("course_cards.{$index}.image")->store('home-page/courses', 'public');
+
+                if ($path !== false) {
+                    if ($imagePath && $imagePath !== $path) {
+                        $this->deleteStoredHomeImage($imagePath);
+                    }
+
+                    $imagePath = $path;
+                }
+            }
+
+            $this->updateOrCreateHomePageItem('course_cards', $step['id'] ?? null, $key, [
+                'type' => 'course',
                 'title' => $title,
+                'subtitle' => $category,
                 'description' => $description,
                 'color' => $step['color'] ?? null,
+                'image_path' => $imagePath,
+                'meta' => [
+                    'category' => $category,
+                    'instructor_name' => trim((string) ($step['instructor_name'] ?? '')),
+                    'instructor_role' => trim((string) ($step['instructor_role'] ?? '')),
+                    'lessons' => trim((string) ($step['lessons'] ?? '')),
+                    'duration' => trim((string) ($step['duration'] ?? '')),
+                    'rating' => trim((string) ($step['rating'] ?? '')),
+                    'review_count' => trim((string) ($step['review_count'] ?? '')),
+                    'price' => trim((string) ($step['price'] ?? '')),
+                    'button_label' => trim((string) ($step['button_label'] ?? '')),
+                ],
                 'sort_order' => $index + 1,
                 'is_active' => !empty($step['active']),
             ]);
         }
 
-        return redirect()->route('admin.homepage.index')->with('success', 'Admission page content updated successfully.')->with('settings_tab', 'admission-page');
+        return redirect()->route('admin.homepage.index')->with('success', 'Course page content updated successfully.')->with('settings_tab', 'course-page');
     }
 
     public function updateFaqPage(Request $request)
@@ -1046,8 +971,7 @@ class SettingsController extends Controller
         $hasExistingItems = HomePageItem::query()->exists();
         $featureItems = $this->homeContentArray('features.items');
         $programItems = $this->homeContentArray('programs.items');
-        $facilityItems = $this->homeContentArray('facilities.items');
-        $admissionSteps = $this->homeContentArray('admission.steps');
+        $courseItems = $this->homeContentArray('course.items') ?: $this->homeContentArray('admission.steps');
         $faqItems = $this->homeContentArray('faq.items');
         $contactCards = $this->homeContentArray('contact.cards');
         $footerLinks = $this->homeContentArray('footer_links');
@@ -1074,9 +998,8 @@ class SettingsController extends Controller
             ['about_cards', 'card_4', 'card', 'Operations', null, 'Well-structured systems help families and staff receive timely support and clear information.', 'bg-emerald-100 text-emerald-700', 4],
             ['platform_features', 'main', 'content', \App\Support\HomePageContent::text('features.title'), \App\Support\HomePageContent::text('features.badge'), null, \App\Support\HomePageContent::text('features.tag'), 1],
             ['programs', 'main', 'content', \App\Support\HomePageContent::text('programs.title'), \App\Support\HomePageContent::text('programs.badge'), \App\Support\HomePageContent::text('programs.description'), null, 1],
-            ['facilities', 'main', 'content', \App\Support\HomePageContent::text('facilities.title'), \App\Support\HomePageContent::text('facilities.badge'), \App\Support\HomePageContent::text('facilities.description'), null, 1],
-            ['admission', 'main', 'content', \App\Support\HomePageContent::text('admission.title'), \App\Support\HomePageContent::text('admission.badge'), \App\Support\HomePageContent::text('admission.description'), null, 1],
-            ['admission_intake', 'main', 'content', \App\Support\HomePageContent::text('admission.open_intake_title'), \App\Support\HomePageContent::text('admission.open_intake_label'), \App\Support\HomePageContent::text('admission.open_intake_description'), null, 1],
+            ['course', 'main', 'content', \App\Support\HomePageContent::text('course.title'), \App\Support\HomePageContent::text('course.badge'), \App\Support\HomePageContent::text('course.description'), null, 1],
+            ['course_featured', 'main', 'content', \App\Support\HomePageContent::text('course.featured_title'), \App\Support\HomePageContent::text('course.featured_label'), \App\Support\HomePageContent::text('course.featured_description'), null, 1],
             ['faq', 'main', 'content', \App\Support\HomePageContent::text('faq.title'), \App\Support\HomePageContent::text('faq.badge'), null, null, 1],
             ['faq_help', 'main', 'content', \App\Support\HomePageContent::text('faq.more_help_title'), \App\Support\HomePageContent::text('faq.more_help_label'), \App\Support\HomePageContent::text('faq.more_help_text'), null, 1],
             ['contact', 'main', 'content', \App\Support\HomePageContent::text('contact.title'), \App\Support\HomePageContent::text('contact.badge'), \App\Support\HomePageContent::text('contact.description'), null, 1],
@@ -1123,26 +1046,13 @@ class SettingsController extends Controller
             ];
         }
 
-        foreach ($facilityItems as $index => $item) {
+        foreach ($courseItems as $index => $item) {
             $defaults[] = [
-                'facility_cards',
+                'course_cards',
                 'card_' . ($index + 1),
-                'card',
+                'course',
                 $item['title'] ?? '',
-                null,
-                $item['description'] ?? '',
-                null,
-                $index + 1,
-            ];
-        }
-
-        foreach ($admissionSteps as $index => $item) {
-            $defaults[] = [
-                'admission_steps',
-                'step_' . ($index + 1),
-                'step',
-                $item['title'] ?? '',
-                null,
+                $item['category'] ?? null,
                 $item['description'] ?? '',
                 null,
                 $index + 1,
@@ -1249,6 +1159,17 @@ class SettingsController extends Controller
         }
 
         $query->delete();
+    }
+
+    private function findHomePageItem(string $section, mixed $id, string $fallbackKey): ?HomePageItem
+    {
+        $query = HomePageItem::query()->where('section', $section);
+
+        if ($id) {
+            return $query->whereKey((int) $id)->first();
+        }
+
+        return $query->where('key', $fallbackKey)->first();
     }
 
     private function updateOrCreateHomePageItem(string $section, mixed $id, string $fallbackKey, array $attributes): void

@@ -25,7 +25,7 @@
                             </h3>
 
                             <p class="mt-1 text-xs text-slate-500">
-                                Badge, headline, and description shown above the program cards.
+                                Badge, headline, and description shown above the feature and benefit cards.
                             </p>
                         </div>
 
@@ -42,6 +42,7 @@
                             </label>
 
                             <input id="program_badge" name="program[badge]" type="text"
+                                data-home-preview-target="program_preview_badge"
                                 value="{{ old('program.badge', $programSection?->subtitle ?? \App\Support\HomePageContent::text('programs.badge')) }}"
                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                         </div>
@@ -53,6 +54,7 @@
                             </label>
 
                             <textarea id="program_title" name="program[title]" rows="2"
+                                data-home-preview-target="program_preview_title"
                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('program.title', $programSection?->title ?? \App\Support\HomePageContent::text('programs.title')) }}</textarea>
                         </div>
 
@@ -63,8 +65,24 @@
                             </label>
 
                             <textarea id="program_description" name="program[description]" rows="3"
+                                data-home-preview-target="program_preview_description"
                                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">{{ old('program.description', $programSection?->description ?? \App\Support\HomePageContent::text('programs.description')) }}</textarea>
                         </div>
+                    </div>
+
+                    <div class="mt-5 rounded-2xl border border-emerald-100 bg-white p-5">
+                        <p id="program_preview_badge"
+                            class="text-center text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600">
+                            {{ old('program.badge', $programSection?->subtitle ?? \App\Support\HomePageContent::text('programs.badge')) }}
+                        </p>
+                        <h4 id="program_preview_title"
+                            class="mx-auto mt-2 max-w-lg text-center text-xl font-black leading-tight tracking-tight text-[#10221e]">
+                            {{ old('program.title', $programSection?->title ?? \App\Support\HomePageContent::text('programs.title')) }}
+                        </h4>
+                        <p id="program_preview_description"
+                            class="mx-auto mt-2 max-w-xl text-center text-[12px] leading-5 text-slate-500">
+                            {{ old('program.description', $programSection?->description ?? \App\Support\HomePageContent::text('programs.description')) }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -84,7 +102,7 @@
                             </h3>
 
                             <p class="mt-1 text-xs text-slate-500">
-                                Academic programs displayed in the homepage Academic Programs section.
+                                Cards displayed in the homepage feature and benefit row.
                             </p>
                         </div>
 
@@ -221,7 +239,7 @@
                             <path d="M13.5 4.5L6 12 2.5 8.5" />
                         </svg>
 
-                        Save Navbar Page
+                        Save Program Page
                     </button>
                 </div>
             </div>

@@ -92,20 +92,30 @@
                         <div class="sticky top-24">
                             <p class="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-slate-500">Live
                                 Preview</p>
-                            <div class="overflow-hidden rounded-2xl bg-white shadow-2xl shadow-black/30">
-                                <img id="home_hero_image_preview" src="{{ $homePageImage }}"
-                                    class="h-52 w-full object-cover" alt="home hero preview">
+                            <div class="overflow-hidden rounded-2xl bg-[#eafff7] shadow-2xl shadow-black/30">
+                                <div class="relative min-h-52 overflow-hidden">
+                                    <div class="absolute right-5 top-8 h-36 w-36 rounded-[2rem] bg-emerald-400"></div>
+                                    <div class="absolute right-4 top-4 grid grid-cols-4 gap-1 text-emerald-300">
+                                        @for ($i = 0; $i < 12; $i++)
+                                            <span class="h-1 w-1 rounded-full bg-current"></span>
+                                        @endfor
+                                    </div>
+                                    <img id="home_hero_image_preview" src="{{ $homePageImage }}"
+                                        class="relative z-10 mx-auto h-56 w-full object-contain p-4 drop-shadow-xl"
+                                        alt="home hero preview">
+                                </div>
                                 <div class="p-5">
                                     <p id="home_preview_badge"
-                                        class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">
+                                        class="inline-flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-emerald-100">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                         {{ old('hero.badge', $homeHero?->subtitle ?? 'Future-ready school platform') }}
                                     </p>
                                     <h3 id="home_preview_title"
-                                        class="mt-2 text-xl font-black leading-tight tracking-tight text-slate-950">
+                                        class="mt-3 text-xl font-black leading-tight tracking-tight text-[#10221e]">
                                         {{ old('hero.title', $homeHero?->title ?? 'A Smarter school experience for Every Students, Every Day.') }}
                                     </h3>
                                     <p id="home_preview_description"
-                                        class="mt-3 line-clamp-4 text-[12px] leading-5 text-slate-500">
+                                        class="mt-3 line-clamp-4 text-[12px] leading-5 text-slate-600">
                                         {{ old('hero.description', $homeHero?->description ?? 'TechBridge brings academics, admissions, attendance, communication, and daily school operations together in one seamless platform for students, parents, teachers, and school leaders.') }}
                                     </p>
                                 </div>

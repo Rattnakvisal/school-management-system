@@ -17,6 +17,8 @@ test('admin homepage ui renders from separated homepage ui partials', function (
     $response
         ->assertOk()
         ->assertSeeText('Navbar Page')
+        ->assertSeeText('Navbar link 6')
+        ->assertSeeText('Courses')
         ->assertSeeText('Footer Page');
 });
 

@@ -123,16 +123,14 @@
             $showCreateFormOnLoad = old('_form') === 'create_student';
         @endphp
 
-        <div x-data="{ createOpen: @js($showCreateFormOnLoad) }"
-            @open-student-create.window="
-                createOpen = true;
-                $nextTick(() => document.getElementById('name')?.focus());
-            "
-            class="grid gap-6 xl:grid-cols-12">
+        <div x-data="{ createOpen: @js($showCreateFormOnLoad) }" @open-student-create.window="
+                            createOpen = true;
+                            $nextTick(() => document.getElementById('name')?.focus());
+                        " class="grid gap-6 xl:grid-cols-12">
             {{-- CREATE STUDENT --}}
             <section x-show="createOpen" x-cloak x-transition.opacity.duration.150ms
-                @keydown.escape.window="createOpen = false" @click.self="createOpen = false" role="dialog"
-                aria-modal="true" aria-labelledby="create-student-title"
+                @keydown.escape.window="createOpen = false" @click.self="createOpen = false" role="dialog" aria-modal="true"
+                aria-labelledby="create-student-title"
                 class="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-slate-950/65 px-4 py-6 backdrop-blur-sm sm:py-10"
                 style="--sd: 3;">
                 <div
@@ -184,7 +182,8 @@
 
                                     @error('email')
                                         <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                            {{ $message }}</p>
+                                            {{ $message }}
+                                        </p>
                                     @enderror
                                 </div>
 
@@ -197,7 +196,8 @@
 
                                         @error('phone_number')
                                             <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                {{ $message }}</p>
+                                                {{ $message }}
+                                            </p>
                                         @enderror
                                     </div>
                                 @endif
@@ -215,7 +215,8 @@
 
                                         @error('gender')
                                             <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                {{ $message }}</p>
+                                                {{ $message }}
+                                            </p>
                                         @enderror
                                     </div>
                                 @endif
@@ -223,13 +224,13 @@
                                 @if ($hasAgeColumn ?? false)
                                     <div>
                                         <label for="age" class="{{ $labelClass }}">Age</label>
-                                        <input id="age" name="age" type="number" min="1"
-                                            max="120" value="{{ old('age') }}" class="{{ $inputClass }}"
-                                            placeholder="Student age">
+                                        <input id="age" name="age" type="number" min="1" max="120" value="{{ old('age') }}"
+                                            class="{{ $inputClass }}" placeholder="Student age">
 
                                         @error('age')
                                             <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                {{ $message }}</p>
+                                                {{ $message }}
+                                            </p>
                                         @enderror
                                     </div>
                                 @endif
@@ -241,8 +242,7 @@
                                         <select id="school_class_id" name="school_class_id" class="{{ $inputClass }}">
                                             <option value="">Select class</option>
                                             @foreach ($classes as $classOption)
-                                                <option value="{{ $classOption->id }}"
-                                                    {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
+                                                <option value="{{ $classOption->id }}" {{ (string) old('school_class_id') === (string) $classOption->id ? 'selected' : '' }}>
                                                     {{ $classOption->display_name }}
                                                 </option>
                                             @endforeach
@@ -250,7 +250,8 @@
 
                                         @error('school_class_id')
                                             <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                                {{ $message }}</p>
+                                                {{ $message }}
+                                            </p>
                                         @enderror
                                     </div>
 
@@ -281,8 +282,7 @@
 
                                             <select id="major_subject_id" name="major_subject_ids[]"
                                                 data-selected-list='@json($createSelectedMajorSubjectIds)'
-                                                data-checkbox-target="major_subject_checkbox_list" multiple size="5"
-                                                class="hidden">
+                                                data-checkbox-target="major_subject_checkbox_list" multiple size="5" class="hidden">
                                                 <option value="">Select major subjects</option>
                                             </select>
 
@@ -344,8 +344,8 @@
 
                                                 <a id="manage_study_time_inline"
                                                     href="{{ route('admin.time-studies.index', ['tab' => 'class']) }}"
-                                                    data-base-url="{{ route('admin.time-studies.index') }}"
-                                                    target="_blank" rel="noopener"
+                                                    data-base-url="{{ route('admin.time-studies.index') }}" target="_blank"
+                                                    rel="noopener"
                                                     class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-400/20 dark:bg-indigo-500/15 dark:text-indigo-300 dark:hover:bg-indigo-500/25">
                                                     + Add More
                                                 </a>
@@ -353,13 +353,11 @@
 
                                             <select id="class_study_time_id" name="class_study_time_ids[]"
                                                 data-selected-list='@json($createSelectedStudyTimeIds)'
-                                                data-checkbox-target="study_time_checkbox_list" multiple size="4"
-                                                class="hidden">
+                                                data-checkbox-target="study_time_checkbox_list" multiple size="4" class="hidden">
                                                 <option value="">Select class first</option>
                                             </select>
 
-                                            <div id="study_time_checkbox_list"
-                                                class="min-h-[132px] space-y-2 {{ $softBoxClass }}">
+                                            <div id="study_time_checkbox_list" class="min-h-[132px] space-y-2 {{ $softBoxClass }}">
                                             </div>
 
                                             <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
@@ -392,8 +390,8 @@
                                             <button type="button" onclick="toggleStudentPassword('password', this)"
                                                 class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
                                                 aria-label="Show password">
-                                                <svg class="student-eye-icon h-4 w-4" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <svg class="student-eye-icon h-4 w-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24" aria-hidden="true">
                                                     <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
                                                     <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -413,16 +411,15 @@
                                         <label for="password_confirmation" class="{{ $labelClass }}">Confirm</label>
 
                                         <div class="relative">
-                                            <input id="password_confirmation" name="password_confirmation"
-                                                type="password" class="{{ $inputClass }} pr-10"
-                                                placeholder="Re-enter password">
+                                            <input id="password_confirmation" name="password_confirmation" type="password"
+                                                class="{{ $inputClass }} pr-10" placeholder="Re-enter password">
 
                                             <button type="button"
                                                 onclick="toggleStudentPassword('password_confirmation', this)"
                                                 class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
                                                 aria-label="Show password confirmation">
-                                                <svg class="student-eye-icon h-4 w-4" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <svg class="student-eye-icon h-4 w-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24" aria-hidden="true">
                                                     <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
                                                     <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -455,7 +452,8 @@
 
                                     @error('avatar_image')
                                         <p class="mt-1 text-xs font-semibold text-red-600 dark:text-red-300">
-                                            {{ $message }}</p>
+                                            {{ $message }}
+                                        </p>
                                     @enderror
                                 </div>
 
@@ -505,8 +503,7 @@
                                 <option value="all" {{ $classId === 'all' ? 'selected' : '' }}>Classes</option>
 
                                 @foreach ($classes as $classOption)
-                                    <option value="{{ $classOption->id }}"
-                                        {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                    <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
                                         {{ $classOption->display_name }}
                                     </option>
                                 @endforeach
@@ -532,8 +529,8 @@
 
                         <button type="button" @click="filterOpen = true"
                             class="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M4 6h16M7 12h10M10 18h4" />
                             </svg>
                             All filters
@@ -576,8 +573,7 @@
                                     <section class="space-y-2">
                                         <h4 class="text-xl font-bold text-slate-950 dark:text-white">Search</h4>
                                         <input id="q" name="q" type="text" value="{{ $search }}"
-                                            placeholder="Search by name, email, phone, or class"
-                                            class="{{ $inputClass }}">
+                                            placeholder="Search by name, email, phone, or class" class="{{ $inputClass }}">
                                     </section>
 
                                     @if ($hasClassColumn)
@@ -589,8 +585,7 @@
                                                 </option>
 
                                                 @foreach ($classes as $classOption)
-                                                    <option value="{{ $classOption->id }}"
-                                                        {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
+                                                    <option value="{{ $classOption->id }}" {{ $classId === (string) $classOption->id ? 'selected' : '' }}>
                                                         {{ $classOption->display_name }}
                                                     </option>
                                                 @endforeach
@@ -680,7 +675,7 @@
                                             <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Gender</th>
                                             <th class="w-20 whitespace-nowrap px-3 py-3 font-bold">Age</th>
                                             <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Class</th>
-                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">Avg. Grade</th>
+                                            <th class="w-28 whitespace-nowrap px-3 py-3 font-bold">GPA</th>
                                             <th class="w-32 whitespace-nowrap px-3 py-3 font-bold">Status</th>
                                             <th class="w-32 whitespace-nowrap pz-3 py-3 font-bold">Create At</th>
                                             <th class="w-36 whitespace-nowrap px-4 py-3 text-right font-bold">
@@ -697,21 +692,7 @@
                                                     'male' => 'Male',
                                                     default => '-',
                                                 };
-                                                $gradeAverage = \Illuminate\Support\Facades\Schema::hasTable('grades')
-                                                    ? $student->receivedGrades()->avg('score')
-                                                    : null;
-                                                $gradeLabel =
-                                                    $gradeAverage !== null
-                                                        ? rtrim(
-                                                            rtrim(number_format((float) $gradeAverage, 1), '0'),
-                                                            '.',
-                                                        )
-                                                        : '-';
-                                                $missingDays = \Illuminate\Support\Facades\Schema::hasTable(
-                                                    'student_attendances',
-                                                )
-                                                    ? $student->attendanceRecords()->where('status', 'absent')->count()
-                                                    : 0;
+                                                $studentGpa = $student->admin_cumulative_gpa;
                                             @endphp
 
                                             <tr class="align-middle transition hover:bg-indigo-50/40 dark:hover:bg-slate-800/70"
@@ -756,15 +737,14 @@
 
                                                 <td
                                                     class="whitespace-nowrap px-3 py-3 text-sm font-medium tabular-nums text-slate-600 dark:text-slate-300">
-                                                    {{ $gradeLabel }}
+                                                    {{ $studentGpa !== null ? number_format((float) $studentGpa, 2) : 'N/A' }}
                                                 </td>
 
                                                 <td class="px-3 py-3">
                                                     @if ($hasStatusColumn && $student->is_active)
                                                         <span
                                                             class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                                            <span
-                                                                class="status-dot h-2 w-2 rounded-full bg-emerald-500"></span>
+                                                            <span class="status-dot h-2 w-2 rounded-full bg-emerald-500"></span>
                                                             Active
                                                         </span>
                                                     @elseif($hasStatusColumn)
@@ -794,9 +774,8 @@
                                                                 class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
                                                                 aria-label="Call {{ $student->name }}">
                                                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
-                                                                    stroke="currentColor" stroke-width="2"
-                                                                    stroke-linecap="round" stroke-linejoin="round"
-                                                                    aria-hidden="true">
+                                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                                    stroke-linejoin="round" aria-hidden="true">
                                                                     <path
                                                                         d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.6a2 2 0 0 1-.45 2.11L8.09 9.64a16 16 0 0 0 6.27 6.27l1.21-1.21a2 2 0 0 1 2.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0 1 22 16.92Z" />
                                                                 </svg>
@@ -807,11 +786,9 @@
                                                             class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300"
                                                             aria-label="Email {{ $student->name }}">
                                                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round"
-                                                                aria-hidden="true">
-                                                                <rect x="3" y="5" width="18" height="14"
-                                                                    rx="2" />
+                                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round" aria-hidden="true">
+                                                                <rect x="3" y="5" width="18" height="14" rx="2" />
                                                                 <path d="m3 7 9 6 9-6" />
                                                             </svg>
                                                         </a>
@@ -845,18 +822,17 @@
                                                             @if ($hasStatusColumn)
                                                                 <form method="POST"
                                                                     action="{{ route('admin.students.status', $student) }}"
-                                                                    class="js-status-form"
-                                                                    data-student="{{ $student->name }}"
+                                                                    class="js-status-form" data-student="{{ $student->name }}"
                                                                     data-action="{{ $student->is_active ? 'set inactive' : 'set active' }}">
                                                                     @csrf
                                                                     @method('PATCH')
 
                                                                     <button type="submit"
                                                                         class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
-                                                                        <svg class="h-4 w-4" viewBox="0 0 24 24"
-                                                                            fill="none" stroke="currentColor"
-                                                                            stroke-width="2" stroke-linecap="round"
-                                                                            stroke-linejoin="round" aria-hidden="true">
+                                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2"
+                                                                            stroke-linecap="round" stroke-linejoin="round"
+                                                                            aria-hidden="true">
                                                                             <path d="M20 6 9 17l-5-5" />
                                                                         </svg>
                                                                         {{ $student->is_active ? 'Set inactive' : 'Set active' }}
@@ -866,17 +842,16 @@
 
                                                             <form method="POST"
                                                                 action="{{ route('admin.students.destroy', $student) }}"
-                                                                class="js-delete-form"
-                                                                data-student="{{ $student->name }}">
+                                                                class="js-delete-form" data-student="{{ $student->name }}">
                                                                 @csrf
                                                                 @method('DELETE')
 
                                                                 <button type="submit"
                                                                     class="flex w-full items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/15">
-                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24"
-                                                                        fill="none" stroke="currentColor"
-                                                                        stroke-width="2" stroke-linecap="round"
-                                                                        stroke-linejoin="round" aria-hidden="true">
+                                                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2"
+                                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                                        aria-hidden="true">
                                                                         <path d="M3 6h18" />
                                                                         <path d="M8 6V4h8v2" />
                                                                         <path d="M19 6l-1 14H6L5 6" />
@@ -898,8 +873,7 @@
                                                             class="relative z-10 flex max-h-[calc(100vh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
                                                             <div
                                                                 class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-700">
-                                                                <h3
-                                                                    class="text-lg font-black text-slate-950 dark:text-white">
+                                                                <h3 class="text-lg font-black text-slate-950 dark:text-white">
                                                                     Edit Student
                                                                 </h3>
 
@@ -926,12 +900,10 @@
                                                                     <div>
                                                                         <label for="edit_role_{{ $student->id }}"
                                                                             class="{{ $labelClass }}">Role</label>
-                                                                        <select id="edit_role_{{ $student->id }}"
-                                                                            name="role"
+                                                                        <select id="edit_role_{{ $student->id }}" name="role"
                                                                             class="{{ $inputClass }} capitalize">
                                                                             @foreach (['student', 'teacher', 'admin', 'staff'] as $roleOption)
-                                                                                <option value="{{ $roleOption }}"
-                                                                                    {{ $student->role === $roleOption ? 'selected' : '' }}>
+                                                                                <option value="{{ $roleOption }}" {{ $student->role === $roleOption ? 'selected' : '' }}>
                                                                                     {{ ucfirst($roleOption) }}
                                                                                 </option>
                                                                             @endforeach
@@ -947,29 +919,25 @@
                                                                     <div>
                                                                         <label for="edit_name_{{ $student->id }}"
                                                                             class="{{ $labelClass }}">Full Name</label>
-                                                                        <input id="edit_name_{{ $student->id }}"
-                                                                            name="name" type="text"
-                                                                            value="{{ $student->name }}"
+                                                                        <input id="edit_name_{{ $student->id }}" name="name"
+                                                                            type="text" value="{{ $student->name }}"
                                                                             class="{{ $inputClass }}">
                                                                     </div>
 
                                                                     <div>
                                                                         <label for="edit_email_{{ $student->id }}"
                                                                             class="{{ $labelClass }}">Email</label>
-                                                                        <input id="edit_email_{{ $student->id }}"
-                                                                            name="email" type="email"
-                                                                            value="{{ $student->email }}"
+                                                                        <input id="edit_email_{{ $student->id }}" name="email"
+                                                                            type="email" value="{{ $student->email }}"
                                                                             class="{{ $inputClass }}">
                                                                     </div>
 
                                                                     @if ($hasPhoneColumn ?? false)
                                                                         <div>
-                                                                            <label
-                                                                                for="edit_phone_number_{{ $student->id }}"
+                                                                            <label for="edit_phone_number_{{ $student->id }}"
                                                                                 class="{{ $labelClass }}">Phone
                                                                                 Number</label>
-                                                                            <input
-                                                                                id="edit_phone_number_{{ $student->id }}"
+                                                                            <input id="edit_phone_number_{{ $student->id }}"
                                                                                 name="phone_number" type="text"
                                                                                 value="{{ $student->phone_number }}"
                                                                                 class="{{ $inputClass }}"
@@ -982,16 +950,13 @@
                                                                             <label for="edit_gender_{{ $student->id }}"
                                                                                 class="{{ $labelClass }}">Gender</label>
                                                                             <select id="edit_gender_{{ $student->id }}"
-                                                                                name="gender"
-                                                                                class="{{ $inputClass }}">
+                                                                                name="gender" class="{{ $inputClass }}">
                                                                                 <option value="">Select gender
                                                                                 </option>
-                                                                                <option value="female"
-                                                                                    {{ (string) $student->gender === 'female' ? 'selected' : '' }}>
+                                                                                <option value="female" {{ (string) $student->gender === 'female' ? 'selected' : '' }}>
                                                                                     Female
                                                                                 </option>
-                                                                                <option value="male"
-                                                                                    {{ (string) $student->gender === 'male' ? 'selected' : '' }}>
+                                                                                <option value="male" {{ (string) $student->gender === 'male' ? 'selected' : '' }}>
                                                                                     Male
                                                                                 </option>
                                                                             </select>
@@ -1002,32 +967,25 @@
                                                                         <div>
                                                                             <label for="edit_age_{{ $student->id }}"
                                                                                 class="{{ $labelClass }}">Age</label>
-                                                                            <input id="edit_age_{{ $student->id }}"
-                                                                                name="age" type="number"
-                                                                                min="1" max="120"
+                                                                            <input id="edit_age_{{ $student->id }}" name="age"
+                                                                                type="number" min="1" max="120"
                                                                                 value="{{ $student->age }}"
-                                                                                class="{{ $inputClass }}"
-                                                                                placeholder="Student age">
+                                                                                class="{{ $inputClass }}" placeholder="Student age">
                                                                         </div>
                                                                     @endif
 
                                                                     @if ($hasClassColumn)
                                                                         <div>
-                                                                            <label
-                                                                                for="edit_school_class_id_{{ $student->id }}"
+                                                                            <label for="edit_school_class_id_{{ $student->id }}"
                                                                                 class="{{ $labelClass }}">Home Class
                                                                                 Optional</label>
-                                                                            <select
-                                                                                id="edit_school_class_id_{{ $student->id }}"
-                                                                                name="school_class_id"
-                                                                                class="{{ $inputClass }}">
+                                                                            <select id="edit_school_class_id_{{ $student->id }}"
+                                                                                name="school_class_id" class="{{ $inputClass }}">
                                                                                 <option value="">Select class
                                                                                 </option>
 
                                                                                 @foreach ($classes as $classOption)
-                                                                                    <option
-                                                                                        value="{{ $classOption->id }}"
-                                                                                        {{ (string) $student->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
+                                                                                    <option value="{{ $classOption->id }}" {{ (string) $student->school_class_id === (string) $classOption->id ? 'selected' : '' }}>
                                                                                         {{ $classOption->display_name }}
                                                                                     </option>
                                                                                 @endforeach
@@ -1051,8 +1009,8 @@
                                                                                             ->pluck('id')
                                                                                             ->map(
                                                                                                 fn(
-                                                                                                    $value,
-                                                                                                ) => (string) $value,
+                                                                                                $value,
+                                                                                            ) => (string) $value,
                                                                                             )
                                                                                             ->values()
                                                                                             ->all();
@@ -1065,18 +1023,15 @@
                                                                                     }
                                                                                 @endphp
 
-                                                                                <label
-                                                                                    for="edit_major_subject_id_{{ $student->id }}"
+                                                                                <label for="edit_major_subject_id_{{ $student->id }}"
                                                                                     class="{{ $labelClass }}">Major
                                                                                     Subjects</label>
 
-                                                                                <select
-                                                                                    id="edit_major_subject_id_{{ $student->id }}"
+                                                                                <select id="edit_major_subject_id_{{ $student->id }}"
                                                                                     name="major_subject_ids[]"
                                                                                     data-selected-list='@json($editSelectedMajorSubjectIds)'
                                                                                     data-checkbox-target="edit_major_subject_checkbox_list_{{ $student->id }}"
-                                                                                    multiple size="5"
-                                                                                    class="hidden">
+                                                                                    multiple size="5" class="hidden">
                                                                                     <option value="">Select major
                                                                                         subjects</option>
                                                                                 </select>
@@ -1108,8 +1063,8 @@
                                                                                             ->pluck('id')
                                                                                             ->map(
                                                                                                 fn(
-                                                                                                    $value,
-                                                                                                ) => (string) $value,
+                                                                                                $value,
+                                                                                            ) => (string) $value,
                                                                                             )
                                                                                             ->values()
                                                                                             ->all();
@@ -1122,18 +1077,15 @@
                                                                                     }
                                                                                 @endphp
 
-                                                                                <label
-                                                                                    for="edit_class_study_time_id_{{ $student->id }}"
+                                                                                <label for="edit_class_study_time_id_{{ $student->id }}"
                                                                                     class="{{ $labelClass }}">Study
                                                                                     Time</label>
 
-                                                                                <select
-                                                                                    id="edit_class_study_time_id_{{ $student->id }}"
+                                                                                <select id="edit_class_study_time_id_{{ $student->id }}"
                                                                                     name="class_study_time_ids[]"
                                                                                     data-selected-list='@json($editSelectedStudyTimeIds)'
                                                                                     data-checkbox-target="edit_study_time_checkbox_list_{{ $student->id }}"
-                                                                                    multiple size="4"
-                                                                                    class="hidden">
+                                                                                    multiple size="4" class="hidden">
                                                                                     <option value="">Select class
                                                                                         first</option>
                                                                                 </select>
@@ -1151,13 +1103,11 @@
                                                                     @endif
 
                                                                     <div>
-                                                                        <label
-                                                                            for="edit_avatar_image_{{ $student->id }}"
+                                                                        <label for="edit_avatar_image_{{ $student->id }}"
                                                                             class="{{ $labelClass }}">Avatar
                                                                             Image</label>
                                                                         <input id="edit_avatar_image_{{ $student->id }}"
-                                                                            name="avatar_image" type="file"
-                                                                            accept="image/*"
+                                                                            name="avatar_image" type="file" accept="image/*"
                                                                             class="{{ $fileInputClass }}">
 
                                                                         <p
@@ -1168,14 +1118,12 @@
 
                                                                     <div class="grid gap-4 sm:grid-cols-2">
                                                                         <div>
-                                                                            <label
-                                                                                for="edit_password_{{ $student->id }}"
+                                                                            <label for="edit_password_{{ $student->id }}"
                                                                                 class="{{ $labelClass }}">New
                                                                                 Password</label>
 
                                                                             <div class="relative">
-                                                                                <input
-                                                                                    id="edit_password_{{ $student->id }}"
+                                                                                <input id="edit_password_{{ $student->id }}"
                                                                                     name="password" type="password"
                                                                                     class="{{ $inputClass }} pr-10"
                                                                                     placeholder="Leave blank to keep current">
@@ -1185,10 +1133,8 @@
                                                                                     class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
                                                                                     aria-label="Show new password">
                                                                                     <svg class="student-eye-icon h-4 w-4"
-                                                                                        fill="none"
-                                                                                        stroke="currentColor"
-                                                                                        viewBox="0 0 24 24"
-                                                                                        aria-hidden="true">
+                                                                                        fill="none" stroke="currentColor"
+                                                                                        viewBox="0 0 24 24" aria-hidden="true">
                                                                                         <path stroke-width="2"
                                                                                             stroke-linecap="round"
                                                                                             stroke-linejoin="round"
@@ -1200,10 +1146,8 @@
                                                                                     </svg>
 
                                                                                     <svg class="student-eye-off-icon hidden h-4 w-4"
-                                                                                        fill="none"
-                                                                                        stroke="currentColor"
-                                                                                        viewBox="0 0 24 24"
-                                                                                        aria-hidden="true">
+                                                                                        fill="none" stroke="currentColor"
+                                                                                        viewBox="0 0 24 24" aria-hidden="true">
                                                                                         <path stroke-width="2"
                                                                                             stroke-linecap="round"
                                                                                             stroke-linejoin="round"
@@ -1223,8 +1167,7 @@
                                                                             <div class="relative">
                                                                                 <input
                                                                                     id="edit_password_confirmation_{{ $student->id }}"
-                                                                                    name="password_confirmation"
-                                                                                    type="password"
+                                                                                    name="password_confirmation" type="password"
                                                                                     class="{{ $inputClass }} pr-10">
 
                                                                                 <button type="button"
@@ -1232,10 +1175,8 @@
                                                                                     class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200"
                                                                                     aria-label="Show password confirmation">
                                                                                     <svg class="student-eye-icon h-4 w-4"
-                                                                                        fill="none"
-                                                                                        stroke="currentColor"
-                                                                                        viewBox="0 0 24 24"
-                                                                                        aria-hidden="true">
+                                                                                        fill="none" stroke="currentColor"
+                                                                                        viewBox="0 0 24 24" aria-hidden="true">
                                                                                         <path stroke-width="2"
                                                                                             stroke-linecap="round"
                                                                                             stroke-linejoin="round"
@@ -1247,10 +1188,8 @@
                                                                                     </svg>
 
                                                                                     <svg class="student-eye-off-icon hidden h-4 w-4"
-                                                                                        fill="none"
-                                                                                        stroke="currentColor"
-                                                                                        viewBox="0 0 24 24"
-                                                                                        aria-hidden="true">
+                                                                                        fill="none" stroke="currentColor"
+                                                                                        viewBox="0 0 24 24" aria-hidden="true">
                                                                                         <path stroke-width="2"
                                                                                             stroke-linecap="round"
                                                                                             stroke-linejoin="round"
@@ -1271,8 +1210,7 @@
 
                                                                             <span
                                                                                 class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                                                                <input type="checkbox" name="is_active"
-                                                                                    value="1"
+                                                                                <input type="checkbox" name="is_active" value="1"
                                                                                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-900"
                                                                                     {{ $student->is_active ? 'checked' : '' }}>
                                                                                 Active
@@ -1341,7 +1279,8 @@
         ];
     @endphp
 
-    <script id="admin-students-data" type="application/json">{!! json_encode($studentPageData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+    <script id="admin-students-data"
+        type="application/json">{!! json_encode($studentPageData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
 
     <script>
         function toggleStudentPassword(id, button) {

@@ -160,3 +160,127 @@ test('navbar settings update syncs footer brand fields', function () {
     expect($footer?->title)->toBe('After brand description');
     expect($footer?->image_path)->toBe('home-page/before-logo.png');
 });
+
+test('navbar settings can add a homepage course link from selected page', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+
+    $this
+        ->actingAs($admin)
+        ->put(route('admin.settings.navbar-page.update'), [
+            'brand' => [
+                'name' => 'Course Link Academy',
+                'description' => 'Course link description',
+                'remove_logo' => 0,
+            ],
+            'navbar_links' => [
+                [
+                    'label' => '',
+                    'href' => '#course',
+                    'active' => 1,
+                    'delete' => 0,
+                ],
+            ],
+        ])
+        ->assertRedirect(route('admin.homepage.index'));
+
+    $link = HomePageItem::query()
+        ->where('section', 'navbar_links')
+        ->where('key', 'link_1')
+        ->first();
+
+    expect($link?->title)->toBe('Courses');
+    expect($link?->value)->toBe('#course');
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Courses', false)
+        ->assertSee('#course', false);
+});
+
+test('navbar settings can save six homepage links', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+
+    $links = collect(range(1, 6))
+        ->map(fn($number) => [
+            'label' => 'Link ' . $number,
+            'href' => '#section-' . $number,
+            'active' => 1,
+            'delete' => 0,
+        ])
+        ->all();
+
+    $this
+        ->actingAs($admin)
+        ->put(route('admin.settings.navbar-page.update'), [
+            'brand' => [
+                'name' => 'Six Link Academy',
+                'description' => 'Six link description',
+                'remove_logo' => 0,
+            ],
+            'navbar_links' => $links,
+        ])
+        ->assertRedirect(route('admin.homepage.index'));
+
+    expect(HomePageItem::query()->where('section', 'navbar_links')->count())->toBe(6);
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Link 1', false)
+        ->assertSee('Link 6', false)
+        ->assertSee('#section-6', false);
+});
+
+test('admin course page updates dynamic homepage courses', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+
+    $this
+        ->actingAs($admin)
+        ->put(route('admin.settings.course-page.update'), [
+            'course' => [
+                'badge' => 'Learn. Grow. Succeed',
+                'title' => 'Our Courses',
+                'description' => 'Course cards managed from Homepage UI.',
+            ],
+            'featured' => [
+                'label' => 'Featured',
+                'title' => 'Start today',
+                'description' => 'Choose a course and begin learning.',
+            ],
+            'course_cards' => [
+                [
+                    'title' => 'Laravel for School Platforms',
+                    'description' => 'Build practical school management features.',
+                    'category' => 'Development',
+                    'instructor_name' => 'Nora Kim',
+                    'instructor_role' => 'Senior Engineer',
+                    'lessons' => '18 Lessons',
+                    'duration' => '9h 30m',
+                    'rating' => '4.9',
+                    'review_count' => '320',
+                    'price' => '$49',
+                    'button_label' => '',
+                    'color' => '#10b981',
+                    'active' => 1,
+                    'delete' => 0,
+                    'remove_image' => 0,
+                ],
+            ],
+        ])
+        ->assertRedirect(route('admin.homepage.index'));
+
+    $response = $this->get(route('home'));
+
+    $response
+        ->assertOk()
+        ->assertSee('Our Courses', false)
+        ->assertSee('Laravel for School Platforms', false)
+        ->assertSee('Development', false)
+        ->assertSee('Nora Kim', false)
+        ->assertSee('$49', false);
+});

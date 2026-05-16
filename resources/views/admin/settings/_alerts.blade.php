@@ -47,31 +47,10 @@
             </div>
         @endif
 
-        @if ($featurePageErrors->any())
-            <div class="reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300"
-                style="--sd: 2;">
-                {{ $featurePageErrors->first() }}
-            </div>
-        @endif
-
         @if ($programPageErrors->any())
             <div class="reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300"
                 style="--sd: 2;">
                 {{ $programPageErrors->first() }}
-            </div>
-        @endif
-
-        @if ($facilityPageErrors->any())
-            <div class="reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300"
-                style="--sd: 2;">
-                {{ $facilityPageErrors->first() }}
-            </div>
-        @endif
-
-        @if ($admissionPageErrors->any())
-            <div class="reveal rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300"
-                style="--sd: 2;">
-                {{ $admissionPageErrors->first() }}
             </div>
         @endif
 

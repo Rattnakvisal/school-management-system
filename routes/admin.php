@@ -87,10 +87,8 @@ Route::middleware(['auth', 'admin'])
         Route::put('/settings/navbar-page', [SettingsController::class, 'updateNavbarPage'])->name('settings.navbar-page.update');
         Route::put('/settings/home-page', [SettingsController::class, 'updateHomePage'])->name('settings.home-page.update');
         Route::put('/settings/about-page', [SettingsController::class, 'updateAboutPage'])->name('settings.about-page.update');
-        Route::put('/settings/feature-page', [SettingsController::class, 'updateFeaturePage'])->name('settings.feature-page.update');
         Route::put('/settings/program-page', [SettingsController::class, 'updateProgramPage'])->name('settings.program-page.update');
-        Route::put('/settings/facility-page', [SettingsController::class, 'updateFacilityPage'])->name('settings.facility-page.update');
-        Route::put('/settings/admission-page', [SettingsController::class, 'updateAdmissionPage'])->name('settings.admission-page.update');
+        Route::put('/settings/course-page', [SettingsController::class, 'updateCoursePage'])->name('settings.course-page.update');
         Route::put('/settings/faq-page', [SettingsController::class, 'updateFaqPage'])->name('settings.faq-page.update');
         Route::put('/settings/contact-page', [SettingsController::class, 'updateContactPage'])->name('settings.contact-page.update');
         Route::put('/settings/footer-page', [SettingsController::class, 'updateFooterPage'])->name('settings.footer-page.update');
